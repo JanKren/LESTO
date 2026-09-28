@@ -1,4 +1,4 @@
-/*-NEW--------------------------------------------------------------------------
+/*------------------------------------------------------------------------------
 
 rhoFixedFlowFoam -- fixed carrier flow, transient species transport, OF v2606.
 
@@ -85,6 +85,9 @@ locations, following common OpenFOAM solver practice.
 #include "PbI2HeDiffusivity.H"
 #include "evaluateThermochemistry.H"
 
+#include <xGEMS/ChemicalEngine.hpp>   /* xGEMS engine */
+#include <eigen3/Eigen/Dense>         /* library for vectors and matrices */
+
 int main(int argc, char *argv[]) {
 
   argList::addNote (
@@ -94,6 +97,29 @@ int main(int argc, char *argv[]) {
   #include "setRootCaseLists.H"
   #include "createTime.H"
   #include "createMesh.H"
+
+  /* Call xGEMS */
+  {
+    xGEMS::ChemicalEngine gems;
+    Info<< "xGEMS ChemicalEngine constructed successfully" << nl;
+
+    gems.initialize(
+      "/home/niceno/Development/GEMS-Related/xgems/demos/resources/"
+      "CemGEMS-keyvalue/CemHyds-dat.lst"
+    );
+
+    const Eigen::VectorXd bulk = gems.elementAmounts();
+
+    const int status = gems.equilibrate(
+      gems.temperature() + 1.0,
+      gems.pressure(),
+      bulk
+    );
+
+    Info<< "xGEMS status: " << status
+        << ", converged: " << gems.converged()
+        << ", iterations: " << gems.numIterations() << nl;
+  }
 
   /*--------------------------------------------------------------------------
   fluidThermo is OpenFOAM's thermodynamic model object.  The New(mesh) factory
