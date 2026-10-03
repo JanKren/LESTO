@@ -1,0 +1,4 @@
+{
+  global: gemsb_*;
+  local: *;
+};

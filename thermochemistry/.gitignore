@@ -1,0 +1,5 @@
+# build products and GEMS3K run logs
+*.so
+ipmlog.txt
+**/Make/linux64*/
+nasa_thermo.inp

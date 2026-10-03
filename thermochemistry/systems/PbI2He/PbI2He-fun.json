@@ -1,0 +1,1381 @@
+{
+ "date": "2026-09-23",
+ "datasources": [
+  "make_gems3k_input.py"
+ ],
+ "thermodataset": [
+  "user"
+ ],
+ "elements": [
+  {
+   "symbol": "He",
+   "class_": {
+    "0": "ELEMENT"
+   },
+   "atomic_mass": {
+    "values": [
+     4.002602000000001
+    ]
+   },
+   "entropy": {
+    "values": [
+     0.0
+    ]
+   },
+   "datasources": [
+    "user"
+   ]
+  },
+  {
+   "symbol": "I",
+   "class_": {
+    "0": "ELEMENT"
+   },
+   "atomic_mass": {
+    "values": [
+     126.90447000000002
+    ]
+   },
+   "entropy": {
+    "values": [
+     0.0
+    ]
+   },
+   "datasources": [
+    "user"
+   ]
+  },
+  {
+   "symbol": "Pb",
+   "class_": {
+    "0": "ELEMENT"
+   },
+   "atomic_mass": {
+    "values": [
+     207.2
+    ]
+   },
+   "entropy": {
+    "values": [
+     0.0
+    ]
+   },
+   "datasources": [
+    "user"
+   ]
+  }
+ ],
+ "substances": [
+  {
+   "symbol": "He(g)",
+   "name": "He(g)",
+   "formula": "He",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000.0,
+   "mass_per_mole": {
+    "values": [
+     4.002602000000001
+    ],
+    "units": [
+     "g/mol"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     -37612.5103979632
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_enthalpy": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     126.15297802436088
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     20.786156545
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "nasa_thermo.inp (line 5897)"
+   ],
+   "TPMethods": [
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 200.0,
+      "upperT": 1000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       20.786156545,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 1000.0,
+      "upperT": 6000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       20.786156545,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "m_phase_trans_props": {
+      "values": [
+       1000.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 6000.0,
+      "upperT": 20000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       25.61047280440294,
+       -0.0006708904591570387,
+       28242944.26371451,
+       0.0,
+       5.198854639258949e-08,
+       -2.1409658653792816e-12,
+       3.683273863178813e-17,
+       0.0,
+       -18242.244040038495,
+       0.0,
+       0.0
+      ]
+     },
+     "m_phase_trans_props": {
+      "values": [
+       6000.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "I(g)",
+   "name": "I(g)",
+   "formula": "I",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000.0,
+   "mass_per_mole": {
+    "values": [
+     126.90447000000002
+    ],
+    "units": [
+     "g/mol"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     52857.58195893139
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_enthalpy": {
+    "values": [
+     106759.39158740232
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     180.78755535291273
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     20.786156545787293
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "nasa_thermo.inp (line 5949)"
+   ],
+   "TPMethods": [
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 200.0,
+      "upperT": 1000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       20.930708108769608,
+       -0.0004764762499128404,
+       1411.9617715687248,
+       0.0,
+       8.57816564425361e-07,
+       -8.040619081904838e-10,
+       3.0817319986916245e-13,
+       0.0,
+       -22.58571582792186,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 1000.0,
+      "upperT": 6000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       0.024001243593520048,
+       0.009818369837014798,
+       -6473524.665822518,
+       0.0,
+       -1.882456583771036e-06,
+       1.6325541628134626e-10,
+       -5.191156304095778e-15,
+       0.0,
+       19150.53186693919,
+       0.0,
+       0.0
+      ]
+     },
+     "m_phase_trans_props": {
+      "values": [
+       1000.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 6000.0,
+      "upperT": 20000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       328.4725753082456,
+       -0.054160935383412594,
+       394739986.4437618,
+       0.0,
+       4.47375902632768e-06,
+       -1.6372383040676144e-10,
+       2.1976597714514796e-15,
+       0.0,
+       -721787.744719565,
+       0.0,
+       0.0
+      ]
+     },
+     "m_phase_trans_props": {
+      "values": [
+       6000.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "I2(g)",
+   "name": "I2(g)",
+   "formula": "I2",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000.0,
+   "mass_per_mole": {
+    "values": [
+     253.80894000000004
+    ],
+    "units": [
+     "g/mol"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     -15303.782178504289
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_enthalpy": {
+    "values": [
+     62419.64432870068
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     260.68564986484984
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     36.887233493552046
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "nasa_thermo.inp (line 5998)"
+   ],
+   "TPMethods": [
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 200.0,
+      "upperT": 1000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       37.45016124708698,
+       0.001139881673130709,
+       -42303.72613971645,
+       0.0,
+       -1.1561451619371692e-06,
+       9.767945863877048e-10,
+       -1.943539762006423e-13,
+       0.0,
+       -103.8962951655068,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 1000.0,
+      "upperT": 6000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       -143.2627779140217,
+       0.10344971456949262,
+       -46831993.58568511,
+       0.0,
+       -2.7710179772854945e-05,
+       3.430113211351365e-09,
+       -1.6300185626758746e-13,
+       0.0,
+       149158.26328748965,
+       0.0,
+       0.0
+      ]
+     },
+     "m_phase_trans_props": {
+      "values": [
+       1000.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "Pb(g)",
+   "name": "Pb(g)",
+   "formula": "Pb",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000.0,
+   "mass_per_mole": {
+    "values": [
+     207.2
+    ],
+    "units": [
+     "g/mol"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     142910.67941999855
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_enthalpy": {
+    "values": [
+     195198.88759580106
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     175.3755095616385
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     20.78615654558693
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "nasa_thermo.inp (line 8474)"
+   ],
+   "TPMethods": [
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 200.0,
+      "upperT": 1000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       21.778068160561375,
+       -0.0031840397642242937,
+       10088.621649975921,
+       0.0,
+       5.560862633396342e-06,
+       -5.039587923371977e-09,
+       1.862458274940206e-12,
+       0.0,
+       -158.48330385546478,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 1000.0,
+      "upperT": 6000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       -218.35807888010834,
+       0.11293387449613375,
+       -75531181.43072382,
+       0.0,
+       -2.232868529926506e-05,
+       1.955921457695707e-09,
+       -6.089607648626458e-14,
+       0.0,
+       222218.41245241187,
+       0.0,
+       0.0
+      ]
+     },
+     "m_phase_trans_props": {
+      "values": [
+       1000.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 6000.0,
+      "upperT": 20000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       524.063233620454,
+       -0.05665202728801564,
+       4427846256.115968,
+       0.0,
+       3.69784861062884e-06,
+       -1.2632675874952753e-10,
+       1.6990402027435192e-15,
+       0.0,
+       -2287657.168575326,
+       0.0,
+       0.0
+      ]
+     },
+     "m_phase_trans_props": {
+      "values": [
+       6000.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "PbI(g)",
+   "name": "PbI(g)",
+   "formula": "PbI",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000.0,
+   "mass_per_mole": {
+    "values": [
+     334.10447
+    ],
+    "units": [
+     "g/mol"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     25298.933174145033
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_enthalpy": {
+    "values": [
+     108903.70371856888
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     280.4117744236923
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     37.15223504444772
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "nasa_thermo.inp (line 8603)"
+   ],
+   "TPMethods": [
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 200.0,
+      "upperT": 1000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       37.95824816346244,
+       -0.0008823439248391293,
+       -22593.17246248817,
+       0.0,
+       2.0078108066459957e-06,
+       -1.559851638640451e-09,
+       5.371653583723237e-13,
+       0.0,
+       -128.25407762437106,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 1000.0,
+      "upperT": 6000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       -67.97995280748262,
+       0.05423902024336641,
+       -32435302.763816915,
+       0.0,
+       -1.2659697911719104e-05,
+       1.3525071504521105e-09,
+       -5.4487407996219807e-14,
+       0.0,
+       95448.09508145328,
+       0.0,
+       0.0
+      ]
+     },
+     "m_phase_trans_props": {
+      "values": [
+       1000.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "PbI2(g)",
+   "name": "PbI2(g)",
+   "formula": "PbI2",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000.0,
+   "mass_per_mole": {
+    "values": [
+     461.00894000000005
+    ],
+    "units": [
+     "g/mol"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     -115383.44543679804
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_enthalpy": {
+    "values": [
+     -10252.571552358673
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     352.61067880073574
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     57.182139860295926
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "nasa_thermo.inp (line 8611)"
+   ],
+   "TPMethods": [
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 200.0,
+      "upperT": 1000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       59.826200520570566,
+       -0.0035740549758036437,
+       -49096.79134322643,
+       0.0,
+       4.3995247852449005e-06,
+       -2.8405553534919787e-09,
+       7.475817627949634e-13,
+       0.0,
+       -401.8635062225161,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 1000.0,
+      "upperT": 6000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       58.20703600078353,
+       -2.5607520214010346e-06,
+       -90489.57897210172,
+       0.0,
+       6.095929640074249e-10,
+       -7.399201484559438e-14,
+       3.5841257938195325e-18,
+       0.0,
+       -6.788275133507749,
+       0.0,
+       0.0
+      ]
+     },
+     "m_phase_trans_props": {
+      "values": [
+       1000.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "PbI2(cr)",
+   "name": "PbI2(cr)",
+   "formula": "PbI2",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "3": "AS_CRYSTAL"
+   },
+   "class_": {
+    "0": "SC_COMPONENT"
+   },
+   "Tst": 298.15,
+   "Pst": 100000.0,
+   "mass_per_mole": {
+    "values": [
+     461.00894000000005
+    ],
+    "units": [
+     "g/mol"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     -228130.22747099318
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_enthalpy": {
+    "values": [
+     -175998.99704123902
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     174.8490036215132
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     77.56955795886704
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     7.483999999999999
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "nasa_thermo.inp (line 14082)"
+   ],
+   "TPMethods": [
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 100.0,
+      "upperT": 298.15
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       73.82959023860384,
+       0.014619380424894525,
+       -55007.29903831868,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 298.15,
+      "upperT": 683.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       64.27963368731824,
+       0.0306808251540524,
+       368197.9016994569,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "m_phase_trans_props": {
+      "values": [
+       298.15,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "34": "mv_constant"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "PbI2(l)",
+   "name": "PbI2(l)",
+   "formula": "PbI2",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "1": "AS_LIQUID"
+   },
+   "class_": {
+    "0": "SC_COMPONENT"
+   },
+   "Tst": 298.15,
+   "Pst": 100000.0,
+   "mass_per_mole": {
+    "values": [
+     461.00894000000005
+    ],
+    "units": [
+     "g/mol"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     -218635.53346265684
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_enthalpy": {
+    "values": [
+     -163321.19968750427
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     185.52518455526612
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     108.99937882733958
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     7.483999999999999
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "nasa_thermo.inp (line 14090)"
+   ],
+   "TPMethods": [
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 200.0,
+      "upperT": 6000.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       108.99937882733958,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "34": "mv_constant"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "Pb(cr)",
+   "name": "Pb(cr)",
+   "formula": "Pb",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "3": "AS_CRYSTAL"
+   },
+   "class_": {
+    "0": "SC_COMPONENT"
+   },
+   "Tst": 298.15,
+   "Pst": 100000.0,
+   "mass_per_mole": {
+    "values": [
+     207.2
+    ],
+    "units": [
+     "g/mol"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     -19320.010267037345
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_enthalpy": {
+    "values": [
+     -0.0003461661884798767
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     64.79963079279275
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     26.650009307843174
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     1.827
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "nasa_thermo.inp (line 14031)"
+   ],
+   "TPMethods": [
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 200.0,
+      "upperT": 600.65
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       -592.8127820674782,
+       2.2186367773399667,
+       -5113120.249206083,
+       0.0,
+       -0.004308568929296855,
+       4.355668505902661e-06,
+       -1.7889777041415583e-09,
+       0.0,
+       88608.72971197481,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "34": "mv_constant"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "Pb(l)",
+   "name": "Pb(l)",
+   "formula": "Pb",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "1": "AS_LIQUID"
+   },
+   "class_": {
+    "0": "SC_COMPONENT"
+   },
+   "Tst": 298.15,
+   "Pst": 100000.0,
+   "mass_per_mole": {
+    "values": [
+     207.2
+    ],
+    "units": [
+     "g/mol"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     -17095.388921326426
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_enthalpy": {
+    "values": [
+     4067.329356278318
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     70.98010490560036
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     30.02336768497598
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     1.827
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "nasa_thermo.inp (line 14036)"
+   ],
+   "TPMethods": [
+    {
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "limitsTP": {
+      "range": true,
+      "lowerT": 200.0,
+      "upperT": 3600.0
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "values": [
+       36.28679320671132,
+       -0.010279941417443697,
+       -315798.200308019,
+       0.0,
+       4.112976561531132e-06,
+       -4.3499752108828355e-10,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    {
+     "method": {
+      "34": "mv_constant"
+     }
+    }
+   ]
+  }
+ ],
+ "reactions": []
+}

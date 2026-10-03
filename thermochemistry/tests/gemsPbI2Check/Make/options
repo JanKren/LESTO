@@ -1,0 +1,12 @@
+GEMSBRIDGE := $(realpath ../../gemsbridge)
+
+EXE_INC = \
+    -I$(GEMSBRIDGE) \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude
+
+EXE_LIBS = \
+    -lfiniteVolume \
+    -lmeshTools \
+    -L$(GEMSBRIDGE) -lgemsbridge \
+    -Wl,-rpath,$(GEMSBRIDGE)

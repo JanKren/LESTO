@@ -1,0 +1,2279 @@
+{
+ "thermodataset": [
+  "pbi-he-gurvich1991-nasa"
+ ],
+ "date": "2026-09-23",
+ "datasources": [
+  "NASA Glenn thermo.inp; Gurvich et al. (1989, 1991)"
+ ],
+ "elements": [
+  {
+   "symbol": "He",
+   "class_": {
+    "0": "ELEMENT"
+   },
+   "atomic_mass": {
+    "name": "M0i",
+    "values": [
+     4.002602
+    ]
+   },
+   "entropy": {
+    "name": "S0i",
+    "values": [
+     126.153
+    ]
+   },
+   "datasources": [
+    "CODATA Key Values (Cox et al. 1989)"
+   ]
+  },
+  {
+   "symbol": "I",
+   "class_": {
+    "0": "ELEMENT"
+   },
+   "atomic_mass": {
+    "name": "M0i",
+    "values": [
+     126.90447
+    ]
+   },
+   "entropy": {
+    "name": "S0i",
+    "values": [
+     58.07
+    ]
+   },
+   "datasources": [
+    "CODATA Key Values (Cox et al. 1989)"
+   ]
+  },
+  {
+   "symbol": "Pb",
+   "class_": {
+    "0": "ELEMENT"
+   },
+   "atomic_mass": {
+    "name": "M0i",
+    "values": [
+     207.2
+    ]
+   },
+   "entropy": {
+    "name": "S0i",
+    "values": [
+     64.8
+    ]
+   },
+   "datasources": [
+    "CODATA Key Values (Cox et al. 1989)"
+   ]
+  }
+ ],
+ "substances": [
+  {
+   "symbol": "He(g)",
+   "name": "He(g)",
+   "formula": "He",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     126.15297802436088
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     0.006552036806272098
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     20.786156545
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     2478.97
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Ref-Elm. Moore,1971. Moore,1970a. Gordon,1999."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 1000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       20.786156545,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "m_phase_trans_props": {
+      "names": [
+       "Temperature",
+       "dS",
+       "dH",
+       "dV",
+       "dT/dP"
+      ],
+      "units": [
+       "K",
+       "J/(mol*K)",
+       "J/mol",
+       "J/bar",
+       "K/bar"
+      ],
+      "values": [
+       1000.0,
+       0,
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    {
+     "limitsTP": {
+      "lowerT": 1000.0,
+      "upperT": 6000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       20.786156545,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "I(g)",
+   "name": "I(g)",
+   "formula": "I",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     106759.39158740235
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     180.78755535291273
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     70171.15245893142
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     20.786156545787293
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     2478.97
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Hf:Cox,1989. Moore,1971. Moore,1970a. Gordon,1999."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 1000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       20.930708108769608,
+       -0.0004764762499128404,
+       1411.9617715687248,
+       0.0,
+       8.57816564425361e-07,
+       -8.040619081904838e-10,
+       3.0817319986916245e-13,
+       0.0,
+       -22.58571582792186,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "m_phase_trans_props": {
+      "names": [
+       "Temperature",
+       "dS",
+       "dH",
+       "dV",
+       "dT/dP"
+      ],
+      "units": [
+       "K",
+       "J/(mol*K)",
+       "J/mol",
+       "J/bar",
+       "K/bar"
+      ],
+      "values": [
+       1000.0,
+       0,
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    {
+     "limitsTP": {
+      "lowerT": 1000.0,
+      "upperT": 6000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       0.024001243593520048,
+       0.009818369837014798,
+       -6473524.665822518,
+       0.0,
+       -1.882456583771036e-06,
+       1.6325541628134626e-10,
+       -5.191156304095778e-15,
+       0.0,
+       19150.53186693919,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "I2(g)",
+   "name": "I2(g)",
+   "formula": "I2",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     62419.64432870069
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     260.68564986484984
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     19323.358821495713
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     36.887233493552046
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     2478.97
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Gurvich,1989 pt1 p220 pt2 p117."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 1000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       37.45016124708698,
+       0.001139881673130709,
+       -42303.72613971645,
+       0.0,
+       -1.1561451619371692e-06,
+       9.767945863877048e-10,
+       -1.943539762006423e-13,
+       0.0,
+       -103.8962951655068,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "m_phase_trans_props": {
+      "names": [
+       "Temperature",
+       "dS",
+       "dH",
+       "dV",
+       "dT/dP"
+      ],
+      "units": [
+       "K",
+       "J/(mol*K)",
+       "J/mol",
+       "J/bar",
+       "K/bar"
+      ],
+      "values": [
+       1000.0,
+       0,
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    {
+     "limitsTP": {
+      "lowerT": 1000.0,
+      "upperT": 6000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       -143.2627779140217,
+       0.10344971456949262,
+       -46831993.58568511,
+       0.0,
+       -2.7710179772854945e-05,
+       3.430113211351365e-09,
+       -1.6300185626758746e-13,
+       0.0,
+       149158.26328748965,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "Pb(g)",
+   "name": "Pb(g)",
+   "formula": "Pb",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     195198.88759580106
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     175.3755095616385
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     162230.79941999854
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     20.78615654558693
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     2478.97
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Hf:Gurvich,1991. Moore,1971. Moore,1970a. Gordon,1999."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 1000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       21.778068160561375,
+       -0.0031840397642242937,
+       10088.621649975921,
+       0.0,
+       5.560862633396342e-06,
+       -5.039587923371977e-09,
+       1.862458274940206e-12,
+       0.0,
+       -158.48330385546478,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "m_phase_trans_props": {
+      "names": [
+       "Temperature",
+       "dS",
+       "dH",
+       "dV",
+       "dT/dP"
+      ],
+      "units": [
+       "K",
+       "J/(mol*K)",
+       "J/mol",
+       "J/bar",
+       "K/bar"
+      ],
+      "values": [
+       1000.0,
+       0,
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    {
+     "limitsTP": {
+      "lowerT": 1000.0,
+      "upperT": 6000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       -218.35807888010834,
+       0.11293387449613375,
+       -75531181.43072382,
+       0.0,
+       -2.232868529926506e-05,
+       1.955921457695707e-09,
+       -6.089607648626458e-14,
+       0.0,
+       222218.41245241187,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "PbI(g)",
+   "name": "PbI(g)",
+   "formula": "PbI",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     108903.7037185689
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     280.4117744236923
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     61932.62367414504
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     37.15223504444772
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     2478.97
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Gurvich,1991 pt1 p440 pt2 p365."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 1000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       37.95824816346244,
+       -0.0008823439248391293,
+       -22593.17246248817,
+       0.0,
+       2.0078108066459957e-06,
+       -1.559851638640451e-09,
+       5.371653583723237e-13,
+       0.0,
+       -128.25407762437106,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "m_phase_trans_props": {
+      "names": [
+       "Temperature",
+       "dS",
+       "dH",
+       "dV",
+       "dT/dP"
+      ],
+      "units": [
+       "K",
+       "J/(mol*K)",
+       "J/mol",
+       "J/bar",
+       "K/bar"
+      ],
+      "values": [
+       1000.0,
+       0,
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    {
+     "limitsTP": {
+      "lowerT": 1000.0,
+      "upperT": 6000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       -67.97995280748262,
+       0.05423902024336641,
+       -32435302.763816915,
+       0.0,
+       -1.2659697911719104e-05,
+       1.3525071504521105e-09,
+       -5.4487407996219807e-14,
+       0.0,
+       95448.09508145328,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "PbI2(g)",
+   "name": "PbI2(g)",
+   "formula": "PbI2",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     -10252.571552358679
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     352.61067880073574
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     -61436.18443679804
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     57.182139860295926
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     2478.97
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Gurvich,1991 pt1 p443 pt2 p367."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 1000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       59.826200520570566,
+       -0.0035740549758036437,
+       -49096.79134322643,
+       0.0,
+       4.3995247852449005e-06,
+       -2.8405553534919787e-09,
+       7.475817627949634e-13,
+       0.0,
+       -401.8635062225161,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "m_phase_trans_props": {
+      "names": [
+       "Temperature",
+       "dS",
+       "dH",
+       "dV",
+       "dT/dP"
+      ],
+      "units": [
+       "K",
+       "J/(mol*K)",
+       "J/mol",
+       "J/bar",
+       "K/bar"
+      ],
+      "values": [
+       1000.0,
+       0,
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    {
+     "limitsTP": {
+      "lowerT": 1000.0,
+      "upperT": 6000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       58.20703600078353,
+       -2.5607520214010346e-06,
+       -90489.57897210172,
+       0.0,
+       6.095929640074249e-10,
+       -7.399201484559438e-14,
+       3.5841257938195325e-18,
+       0.0,
+       -6.788275133507749,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "PbI3(g)",
+   "name": "PbI3(g)",
+   "formula": "PbI3",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     21755.288142287875
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     411.5301340499793
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     -29681.589824713457
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     81.62338362150695
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     2478.97
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Gurvich,1991 pt1 p444 pt2 p368."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 1000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       85.14623311544284,
+       -0.004410568436959408,
+       -84391.49051506654,
+       0.0,
+       5.4365136756128894e-06,
+       -3.51360519915062e-09,
+       9.254244814480345e-13,
+       0.0,
+       -493.7192921666073,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "m_phase_trans_props": {
+      "names": [
+       "Temperature",
+       "dS",
+       "dH",
+       "dV",
+       "dT/dP"
+      ],
+      "units": [
+       "K",
+       "J/(mol*K)",
+       "J/mol",
+       "J/bar",
+       "K/bar"
+      ],
+      "values": [
+       1000.0,
+       0,
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    {
+     "limitsTP": {
+      "lowerT": 1000.0,
+      "upperT": 6000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       83.15176323156666,
+       -3.156735177074796e-06,
+       -135045.96067758603,
+       0.0,
+       7.52188789902672e-10,
+       -9.136264552144102e-14,
+       4.4277741863539945e-18,
+       0.0,
+       -8.338953566056178,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "PbI4(g)",
+   "name": "PbI4(g)",
+   "formula": "PbI4",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "0": "AS_GAS"
+   },
+   "class_": {
+    "1": "SC_GASFLUID"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     -41226.22388749141
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     463.8033250236684
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     -90934.78324329814
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     106.25361439034944
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     2478.97
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Gurvich,1991 pt1 p445 pt2 p369."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 1000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       110.52366967482067,
+       -0.005366703676491624,
+       -101195.07276174992,
+       0.0,
+       6.614788449953552e-06,
+       -4.274991396051655e-09,
+       1.1259345761492526e-12,
+       0.0,
+       -600.8294622068146,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     },
+     "m_phase_trans_props": {
+      "names": [
+       "Temperature",
+       "dS",
+       "dH",
+       "dV",
+       "dT/dP"
+      ],
+      "units": [
+       "K",
+       "J/(mol*K)",
+       "J/mol",
+       "J/bar",
+       "K/bar"
+      ],
+      "values": [
+       1000.0,
+       0,
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    {
+     "limitsTP": {
+      "lowerT": 1000.0,
+      "upperT": 6000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       108.09672193698908,
+       -3.852336381264551e-06,
+       -162836.89990672976,
+       0.0,
+       9.180945842354075e-10,
+       -1.1153001622848025e-13,
+       5.40581924048172e-18,
+       0.0,
+       -10.171790338210739,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "40": "mv_pvnrt"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "PbI2(cr)",
+   "name": "PbI2(cr)",
+   "formula": "PbI2",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "3": "AS_CRYSTAL"
+   },
+   "class_": {
+    "0": "SC_COMPONENT"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     -175998.99704123902
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     174.8490036215132
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     -174182.96647099318
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     77.56955795886704
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Hexagonal Crystal. Gurvich,1991 pt1 p441 pt2 p366."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 683.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       64.27963368731824,
+       0.0306808251540524,
+       368197.9016994569,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "34": "mv_constant"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "PbI2(l)",
+   "name": "PbI2(l)",
+   "formula": "PbI2",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "1": "AS_LIQUID"
+   },
+   "class_": {
+    "0": "SC_COMPONENT"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     -163321.19968750427
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     185.52518455526612
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     -164688.27246265687
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     108.99937882733958
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Liquid. Gurvich,1991 pt1 p441 pt2 p366."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 6000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       108.99937882733958,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "34": "mv_constant"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "Pb(cr)",
+   "name": "Pb(cr)",
+   "formula": "Pb",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "3": "AS_CRYSTAL"
+   },
+   "class_": {
+    "0": "SC_COMPONENT"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     -0.00034616608863837753
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     64.79963079279275
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     0.1097329627507246
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     26.650009307843174
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Cubic. Ref-Elm. Gurvich,1991 pt1 p400 pt2 p337."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 600.65,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       -592.8127820674782,
+       2.2186367773399667,
+       -5113120.249206083,
+       0.0,
+       -0.004308568929296855,
+       4.355668505902661e-06,
+       -1.7889777041415583e-09,
+       0.0,
+       88608.72971197481,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "34": "mv_constant"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "Pb(l)",
+   "name": "Pb(l)",
+   "formula": "Pb",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "1": "AS_LIQUID"
+   },
+   "class_": {
+    "0": "SC_COMPONENT"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     4067.3293562783165
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     70.98010490560036
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     2224.7310786735698
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     30.02336768497598
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Liquid. Ref-Elm. Gurvich,1991 pt1 p400 pt2 p337."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 3600.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       36.28679320671132,
+       -0.010279941417443697,
+       -315798.200308019,
+       0.0,
+       4.112976561531132e-06,
+       -4.3499752108828355e-10,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "34": "mv_constant"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "I2(cr)",
+   "name": "I2(cr)",
+   "formula": "I2",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "3": "AS_CRYSTAL"
+   },
+   "class_": {
+    "0": "SC_COMPONENT"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     0.0026914796849482675
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     116.13833662761714
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     0.4986259556360693
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     54.439687329795845
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Rhombic. Ref-Elm. Gurvich,1989 pt1 p219 pt2 p315."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 386.75,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       -7400.252116684774,
+       38.83910112389888,
+       -32436956.427287012,
+       0.0,
+       -0.1128407136031271,
+       0.00017243757754847476,
+       -1.074981187918765e-07,
+       0.0,
+       760208.1398159551,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "34": "mv_constant"
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "I2(l)",
+   "name": "I2(l)",
+   "formula": "I2",
+   "formula_charge": 0,
+   "aggregate_state": {
+    "1": "AS_LIQUID"
+   },
+   "class_": {
+    "0": "SC_COMPONENT"
+   },
+   "Tst": 298.15,
+   "Pst": 100000,
+   "sm_enthalpy": {
+    "values": [
+     13704.801944120232
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_entropy_abs": {
+    "values": [
+     150.84560576665982
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_gibbs_energy": {
+    "values": [
+     3357.3255847906094
+    ],
+    "units": [
+     "J/mol"
+    ]
+   },
+   "sm_heat_capacity_p": {
+    "values": [
+     79.55454664061914
+    ],
+    "units": [
+     "J/(mol*K)"
+    ]
+   },
+   "sm_volume": {
+    "values": [
+     0.0
+    ],
+    "units": [
+     "J/bar"
+    ]
+   },
+   "datasources": [
+    "NASA-GRC thermo.inp (github.com/nasa/cea, Apache-2.0); Liquid. Ref-Elm. Gurvich,1989 pt1 p219 pt2 p315."
+   ],
+   "TPMethods": [
+    {
+     "limitsTP": {
+      "lowerT": 298.15,
+      "upperT": 6000.0,
+      "range": true
+     },
+     "m_heat_capacity_ft_coeffs": {
+      "names": [
+       "a0",
+       "a1",
+       "a2",
+       "a3",
+       "a4",
+       "a5",
+       "a6",
+       "a7",
+       "a8",
+       "a9",
+       "a10"
+      ],
+      "units": [
+       "J/(mol*K)",
+       "J/(mol*K^2)",
+       "(J*K)/mol",
+       "J/(mol*K^0.5)",
+       "J/(mol*K^3)",
+       "J/(mol*K^4)",
+       "J/(mol*K^5)",
+       "(J*K^2)/mol",
+       "J/mol",
+       "J/(mol*K^1.5)",
+       "J/(mol*K)"
+      ],
+      "values": [
+       79.55454664061914,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "method": {
+      "0": "cp_ft_equation"
+     }
+    },
+    {
+     "method": {
+      "34": "mv_constant"
+     }
+    }
+   ]
+  }
+ ],
+ "reactions": []
+}
