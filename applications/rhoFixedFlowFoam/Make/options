@@ -1,17 +1,79 @@
+/*
+Optional GEMS3K bridge.
+
+Set LESTO_GEMSBRIDGE to a directory that holds gemsbridge.h and
+libgemsbridge.so to compile the bridge in; there is no default path.
+Make/gemsConfig.sh checks it on every wmake, prints the bridge directory
+(nothing without the bridge) and rewrites the generated header
+$(OBJECTS_DIR)/gemsConfig.H only when the state or the content of
+gemsbridge.h changes, so that a plain wmake recompiles the dependent objects
+after a toggle or a bridge-header edit.  Allwmake additionally keeps stamps
+and runs wclean when the bridge state or the OpenFOAM installation changes.
+*/
+LESTO_GEMS_DIR := $(shell sh $(MAKE_DIR)/gemsConfig.sh $(OBJECTS_DIR))
+
+ifeq (LESTO_GEMSBRIDGE_RELATIVE,$(LESTO_GEMS_DIR))
+    $(error LESTO_GEMSBRIDGE=$(LESTO_GEMSBRIDGE) is a relative path.  Give an absolute path, or build with Allwmake, which resolves it against the directory Allwmake is called from)
+endif
+
+/*
+GEMS_INC and GEMS_LIBS are always assigned here, also without the bridge,
+so that variables of the same name in the environment never reach the
+compile or link line.
+*/
+GEMS_INC  :=
+GEMS_LIBS :=
+
+ifneq (,$(LESTO_GEMS_DIR))
+    GEMS_INC  := -I$(LESTO_GEMS_DIR)
+    GEMS_LIBS := -L$(LESTO_GEMS_DIR) -lgemsbridge -Wl,-rpath,$(LESTO_GEMS_DIR)
+endif
+
+/*
+Optional xGEMS start-up call of the main branch (71bf192).
+
+Set LESTO_XGEMS to an xGEMS installation prefix that holds
+include/xGEMS/ChemicalEngine.hpp and lib/libxGEMS.so, e.g.
+$(HOME)/Development/GEMS-Related/install, to compile the call in; there is
+no default path.  The flags are those the main branch added unconditionally
+(077ca12), with that prefix replaced by LESTO_XGEMS.  Make/xgemsConfig.sh
+checks it on every wmake, prints the prefix (nothing without xGEMS) and
+rewrites the generated header $(OBJECTS_DIR)/xgemsConfig.H, which defines
+LESTO_HAVE_XGEMS, only when the state or ChemicalEngine.hpp changes, so
+that a plain wmake recompiles rhoFixedFlowFoam.C after a toggle.  Allwmake
+keeps a stamp and runs wclean when the state changes, as for the bridge.
+XGEMS_INC and XGEMS_LIBS are always assigned, as GEMS_INC and GEMS_LIBS.
+*/
+LESTO_XGEMS_DIR := $(shell sh $(MAKE_DIR)/xgemsConfig.sh $(OBJECTS_DIR))
+
+ifeq (LESTO_XGEMS_RELATIVE,$(LESTO_XGEMS_DIR))
+    $(error LESTO_XGEMS=$(LESTO_XGEMS) is a relative path.  Give an absolute path, or build with Allwmake, which resolves it against the directory Allwmake is called from)
+endif
+
+XGEMS_INC  :=
+XGEMS_LIBS :=
+
+ifneq (,$(LESTO_XGEMS_DIR))
+    XGEMS_INC  := -I$(LESTO_XGEMS_DIR)/include
+    XGEMS_LIBS := -L$(LESTO_XGEMS_DIR)/lib -lxGEMS \
+                  -Wl,-rpath,$(LESTO_XGEMS_DIR)/lib
+endif
+
 EXE_INC = \
+    -I$(OBJECTS_DIR) \
+    $(GEMS_INC) \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
     -I$(LIB_SRC)/transportModels/compressible/lnInclude \
-    -I$(HOME)/Development/GEMS-Related/install/include
+    $(XGEMS_INC)
 
 EXE_LIBS = \
+    $(GEMS_LIBS) \
     -lfiniteVolume \
     -lmeshTools \
     -lfluidThermophysicalModels \
     -lspecie \
     -lcompressibleTransportModels \
-    -L$(HOME)/Development/GEMS-Related/install/lib \
-    -lxGEMS \
-    -Wl,-rpath,$(HOME)/Development/GEMS-Related/install/lib
+    $(XGEMS_LIBS)

@@ -3,3 +3,7 @@
 **/[1-9][0-9]*/
 **/dynamicCode/
 **/__pycache__
+# rhoFixedFlowFoam: build products and the test work area
+applications/rhoFixedFlowFoam/Make/*/
+applications/rhoFixedFlowFoam/utilities/*/Make/*/
+applications/rhoFixedFlowFoam/tests/work/

@@ -1,12 +1,182 @@
 #!/bin/bash
+#------------------------------------------------------------------------------
+#
+# Allwmake
+#
+# PURPOSE
+#
+# Builds rhoFixedFlowFoam into $FOAM_USER_APPBIN with wmake, and the
+# utility utilities/setFrozenCarrier (the paper-mode carrier, milestone M4;
+# no solver logic) into the same directory.
+#
+#   - Accepts OpenCFD OpenFOAM v2412 and v2606 (WM_PROJECT_VERSION 2412,
+#     v2412, 2606 or v2606) and stops for anything else.
+#   - Optional GEMS3K bridge: export LESTO_GEMSBRIDGE=<directory holding
+#     gemsbridge.h and libgemsbridge.so> to compile it in.  Unset, empty or
+#     incomplete: the solver is built without GEMS3K.
+#   - Three stamps in Make/$WM_OPTIONS record the last successful build:
+#       gems.state      the bridge state (its directory, or "none");
+#       xgems.state     the xGEMS state (its prefix, or "none"; below);
+#       openfoam.state  the OpenFOAM installation ($WM_PROJECT_DIR).
+#     When one of them differs from the current one (or is unknown although
+#     objects exist, of the solver or of the utility) Allwmake runs wclean
+#     first, so no object of the other bridge or xGEMS state, and no object or
+#     dependency file of another OpenFOAM installation with the same
+#     WM_OPTIONS (e.g. v2412 and v2606), survives (the utility is cleaned
+#     with the solver; it does not use the bridge).  The stamps live in the
+#     solver's Make/$WM_OPTIONS, which a wclean of the solver alone removes:
+#     objects of the utility left without them count as unknown, so they are
+#     never relinked for another installation (review of M4, round 1).
+#     A plain wmake is safe for a bridge toggle too: the generated
+#     gemsConfig.H (Make/gemsConfig.sh) recompiles the dependent objects.
+#
+#   A relative LESTO_GEMSBRIDGE is resolved against the directory Allwmake
+#   is called from (before it changes to the solver directory) and exported
+#   as an absolute path.  A plain wmake refuses a relative path.
+#   - Optional xGEMS start-up call of the main branch (71bf192): export
+#     LESTO_XGEMS=<xGEMS installation prefix holding
+#     include/xGEMS/ChemicalEngine.hpp and lib/libxGEMS.so>, e.g.
+#     $HOME/Development/GEMS-Related/install, to compile it in.  Unset,
+#     empty or incomplete: the solver is built without it.  It is handled
+#     exactly as the bridge: a third stamp, xgems.state (the prefix, or
+#     "none"), wclean when it changes, a relative path resolved here, and
+#     the generated xgemsConfig.H (Make/xgemsConfig.sh) for a plain wmake.
+#     The separate application applications/xgemsFoamProbe of the main
+#     branch is not built here (see readme.md, Building).
+#
+# Arguments are passed on to wmake.
+#
+#------------------------------------------------------------------------------
 set -euo pipefail
+
+case "${LESTO_GEMSBRIDGE:-}" in
+    ""|/*)
+        ;;
+    *)
+        LESTO_GEMSBRIDGE="$PWD/$LESTO_GEMSBRIDGE"
+        export LESTO_GEMSBRIDGE
+        echo "Relative LESTO_GEMSBRIDGE resolved against $PWD:" \
+             "$LESTO_GEMSBRIDGE"
+        ;;
+esac
+
+case "${LESTO_XGEMS:-}" in
+    ""|/*)
+        ;;
+    *)
+        LESTO_XGEMS="$PWD/$LESTO_XGEMS"
+        export LESTO_XGEMS
+        echo "Relative LESTO_XGEMS resolved against $PWD: $LESTO_XGEMS"
+        ;;
+esac
+
 cd -- "$(dirname -- "$0")"
+
 if ! command -v wmake >/dev/null 2>&1; then
-    echo 'Load your OpenFOAM v2606 environment before building.' >&2
+    echo 'Load your OpenFOAM v2412 or v2606 environment before building.' >&2
     exit 1
 fi
+
 case "${WM_PROJECT_VERSION:-}" in
-    2606|v2606) ;;
-    *) echo 'This prototype targets OpenCFD OpenFOAM v2606.' >&2; exit 1 ;;
+    2412|v2412|2606|v2606) ;;
+    *)
+        echo "rhoFixedFlowFoam supports OpenCFD OpenFOAM v2412 and v2606," \
+             "not '${WM_PROJECT_VERSION:-unknown}'." >&2
+        exit 1
+        ;;
 esac
-wmake
+
+#------------------------------------------------------------------------------
+# GEMS3K bridge state: its directory, or "none"
+#------------------------------------------------------------------------------
+state=$(sh Make/gemsConfig.sh -state)
+
+if [ "$state" = none ] && [ -n "${LESTO_GEMSBRIDGE:-}" ]; then
+    echo "Warning: LESTO_GEMSBRIDGE=$LESTO_GEMSBRIDGE does not hold both" \
+         "gemsbridge.h and libgemsbridge.so." >&2
+fi
+
+#------------------------------------------------------------------------------
+# xGEMS start-up call state: its prefix, or "none"
+#------------------------------------------------------------------------------
+xgemsState=$(sh Make/xgemsConfig.sh -state)
+
+if [ "$xgemsState" = none ] && [ -n "${LESTO_XGEMS:-}" ]; then
+    echo "Warning: LESTO_XGEMS=$LESTO_XGEMS does not hold both" \
+         "include/xGEMS/ChemicalEngine.hpp and lib/libxGEMS.so." >&2
+fi
+
+#------------------------------------------------------------------------------
+# Stamps of the last successful build
+#------------------------------------------------------------------------------
+objectsDir="Make/$WM_OPTIONS"
+gemsStamp="$objectsDir/gems.state"
+xgemsStamp="$objectsDir/xgems.state"
+foamStamp="$objectsDir/openfoam.state"
+foam=${WM_PROJECT_DIR:-unknown}
+
+utilityObjectsDir="utilities/setFrozenCarrier/Make/$WM_OPTIONS"
+
+haveObjects=false
+if ls "$objectsDir"/*.o >/dev/null 2>&1 \
+    || ls "$utilityObjectsDir"/*.o >/dev/null 2>&1; then
+    haveObjects=true
+fi
+
+# previousState <stamp> <current>: the recorded state; "unknown" when
+# objects exist without the stamp; <current> for a clean tree
+previousState() {
+    if [ -f "$1" ]; then
+        cat "$1"
+    elif $haveObjects; then
+        echo unknown
+    else
+        echo "$2"
+    fi
+}
+
+previousGems=$(previousState "$gemsStamp" "$state")
+previousXgems=$(previousState "$xgemsStamp" "$xgemsState")
+previousFoam=$(previousState "$foamStamp" "$foam")
+
+clean=false
+if [ "$previousGems" != "$state" ]; then
+    echo "GEMS3K bridge state changed ($previousGems -> $state): wclean"
+    clean=true
+fi
+if [ "$previousXgems" != "$xgemsState" ]; then
+    echo "xGEMS state changed ($previousXgems -> $xgemsState): wclean"
+    clean=true
+fi
+if [ "$previousFoam" != "$foam" ]; then
+    echo "OpenFOAM installation changed ($previousFoam -> $foam): wclean"
+    clean=true
+fi
+if $clean; then
+    wclean
+    wclean utilities/setFrozenCarrier
+fi
+
+if [ "$state" = none ]; then
+    echo "Building rhoFixedFlowFoam without the GEMS3K bridge"
+else
+    echo "Building rhoFixedFlowFoam with the GEMS3K bridge from $state"
+fi
+if [ "$xgemsState" = none ]; then
+    echo "Building rhoFixedFlowFoam without the xGEMS start-up call"
+else
+    echo "Building rhoFixedFlowFoam with the xGEMS start-up call, xGEMS" \
+         "from $xgemsState"
+fi
+
+wmake "$@"
+
+echo "Building the utility setFrozenCarrier"
+wmake "$@" utilities/setFrozenCarrier
+
+mkdir -p "$objectsDir"
+echo "$state" > "$gemsStamp"
+echo "$xgemsState" > "$xgemsStamp"
+echo "$foam" > "$foamStamp"
+
+#------------------------------------------------------------------------------

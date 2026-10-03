@@ -22,6 +22,12 @@ only a transient diagonal term, so it is solved once per physical time step
 with OpenFOAM's diagonal linear solver.  No nCorr loop or under-relaxation is
 required.
 
+This file is used by model mock only (the default, also without
+constant/thermochemistryProperties).  With a phase-change model the
+condensate of a pair is a deposit per interface element and
+Y_<condensate> is derived output (interfaceExchange.H); no solid equation
+is solved.
+
 ------------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------

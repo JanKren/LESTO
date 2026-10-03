@@ -21,6 +21,8 @@ change the PbI2 transport equation or its diffusivity values.
 
 Because the carrier flow is fixed, these diffusivity fields are calculated
 only once at solver start and remain unchanged during the transient run.
+Like the carrier they are written with the write policy frozenWrite:
+at every write time for writeFrozenFields yes, never for no.
 
 OPENFOAM OBJECTS USED HERE
 
@@ -69,7 +71,7 @@ molecularD.set (
              runTime.timeName(),
              mesh,
              IOobject::NO_READ,
-             IOobject::AUTO_WRITE),
+             frozenWrite),
     T*dimensionedScalar("zeroDPerK", dimViscosity/dimTemperature, 0)
   )
 );
@@ -156,7 +158,7 @@ rhoD.set (
              runTime.timeName(),
              mesh,
              IOobject::NO_READ,
-             IOobject::AUTO_WRITE),
+             frozenWrite),
     rho*molecularD[speciesi]
   )
 );
