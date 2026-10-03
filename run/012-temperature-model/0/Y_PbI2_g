@@ -1,0 +1,21 @@
+FoamFile{format ascii;  class volScalarField;  object Y_PbI2_g;}
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField {
+
+    INLET {
+        type            fixedValue;
+        value           uniform 0;
+    }
+
+    OUTLET {
+        type            zeroGradient;
+    }
+
+    WALL {
+        type            zeroGradient;    /* required for a paired species */
+    }
+}

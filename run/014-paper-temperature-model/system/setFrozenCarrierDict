@@ -1,0 +1,73 @@
+/*------------------------------------------------------------------------------
+
+system/setFrozenCarrierDict
+
+  - the paper-mode carrier of the T-Flows code-to-code case (setFrozenCarrier,
+    applications/rhoFixedFlowFoam/utilities/setFrozenCarrier): constant rho,
+    the exact flux of the non-expanding parabola, uniform p, and the steady
+    temperature of the frozen flow with the measured wall table
+  - every value is pinned in readme.md (plan section 11) with its source
+
+------------------------------------------------------------------------------*/
+FoamFile{version 2.0;  format ascii;  class dictionary; object setFrozenCarrierDict;}
+/*----------------------------------------------------------------------------*/
+
+axis             (1 0 0);
+origin           (0 0 0);
+radius           2.4e-3;          /* m, T-Flows R_pipe */
+
+flowRate         1.67e-6;         /* m3/s, T-Flows FLOW_RATE (100 mL/min; the
+                                     reference case of Figs. 8-10); Table 2:
+                                     flowRateMLPerMin 106, 5 or 540 */
+rescaleToFacets  no;              /* T-Flows: u_max = 2 FLOW_RATE/(pi R^2) */
+
+inlet            INLET;
+walls            (WALL);
+
+density          1;               /* kg/m3, T-Flows Flow % density = 1 */
+pressure         1e5;             /* Pa: D at p_ref = 1 bar (pressureUnit bar) */
+
+temperature {
+
+  mode             solved;        /* T-Flows solves the energy equation with
+                                     the wall table as a wall condition */
+  table {
+    file           "<constant>/wall_x_profile_complete.dat";
+    format         TFlows;
+    rows           all;           /* all 70 rows; T-Flows reads 66 (readme) */
+    xColumn        0;
+    TColumn        4;
+    xScale         1;             /* the header says cm, the values are m */
+    outOfRange     fatal;
+  }
+
+  inletTemperature 900;           /* K, LESTO_HKS control: inlet t 9.0e2 */
+  heatCapacity     5193;          /* J/(kg K), HEAT_CAPACITY 5.193e3 */
+
+  /* NIST helium, T-Flows User_Mod/Types.f90 k_he at t_values_k, W/(m K),
+     interpolated linearly as Beginning_Of_Iteration does */
+  conductivity (
+    (250 0.13754) (270 0.14503) (290 0.15236) (310 0.15955) (330 0.16660)
+    (350 0.17353) (370 0.18034) (390 0.18705) (410 0.19366) (430 0.20017)
+    (450 0.20659) (470 0.21293) (490 0.21920) (510 0.22538) (530 0.23150)
+    (550 0.23755) (570 0.24354) (590 0.24946) (610 0.25532) (630 0.26113)
+    (650 0.26689) (670 0.27259) (690 0.27824) (710 0.28385) (730 0.28940)
+    (750 0.29492) (770 0.30039) (790 0.30582) (810 0.31121) (830 0.31656)
+    (850 0.32187) (870 0.32714) (890 0.33238) (910 0.33759) (930 0.34276)
+    (950 0.34789) (970 0.35300) (990 0.35808) (1010 0.36312) (1030 0.36814)
+    (1050 0.37312) (1070 0.37808) (1090 0.38302) (1110 0.38792) (1130 0.39280)
+    (1150 0.39765) (1170 0.40248) (1190 0.40729) (1210 0.41207) (1230 0.41683)
+    (1250 0.42156)
+  );
+
+  /* the paper (Section 2.2) pins SuperBee for the temperature too; the
+     steady Picard iteration does not converge with it (200 iterations,
+     a change of 29 K left), so linearUpwind; upwind, linearUpwind and
+     central differ by at most 0.023 K in the layer cells at x = 0.38-
+     0.52 m (readme, plan section 26) */
+  convection       "Gauss linearUpwind grad(T)";  /* linear: Picard on k(T) only */
+  laplacian        "Gauss linear corrected";
+  solver           { solver PBiCGStab; preconditioner DILU; tolerance 1e-14; relTol 0; }
+  tolerance        1e-9;          /* K, Picard */
+  maxIter          200;
+}

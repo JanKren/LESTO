@@ -1,0 +1,41 @@
+/*------------------------------------------------------------------------------
+
+system/fvSolution
+
+  - select linear solvers
+  - solver tolerances
+  - under-relaxation factors (none: a paired species is never relaxed)
+
+  Loose outer correctors (GAMG, relTol 0.1) plus one tight final solve
+  (Y_PbI2_gFinal, relTol 0), as cases 012 and 013.  The final solve uses
+  PBiCGStab with DILU: on this convection-dominated pipe it reaches 1e-12
+  in about 16-19 iterations from the residual left by the correctors, where
+  GAMG with the GaussSeidel smoother needs about 51 V-cycles (16 ranks:
+  0.26 instead of 0.40 s per step).
+
+------------------------------------------------------------------------------*/
+FoamFile{version 2.0;  format ascii; class dictionary; object fvSolution;}
+/*----------------------------------------------------------------------------*/
+
+solvers {
+
+  Y_PbI2_g {
+    solver          GAMG;
+    tolerance       1e-8;
+    relTol          0.1;
+    smoother        GaussSeidel;
+
+    directSolveCoarsest   yes;
+  }
+
+  Y_PbI2_gFinal {
+    solver          PBiCGStab;
+    preconditioner  DILU;
+    tolerance       1e-12;
+    relTol          0;
+  }
+
+  Y_PbI2_s {
+    solver          diagonal;
+  }
+}

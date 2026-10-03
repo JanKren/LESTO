@@ -1,0 +1,138 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2412                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _8dbc61e11c-20241220 OPENFOAM=2412 version=v2412
+Arch   : "LSB;label=32;scalar=64"
+Exec   : /home/jan/OpenFOAM/jan-v2412/platforms/linux64GccDPInt32Opt/bin/rhoFixedFlowFoam
+Date   : Oct 02 2026
+Time   : 20:15:37
+Host   : mpc2642
+PID    : 37509
+I/O    : uncollated
+Case   : /home/jan/LESTO/applications/rhoFixedFlowFoam/tests/work/v2412-linux64GccDPInt32Opt/hks/run013
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Using dynamicCode for patch WALL on field T at line 42 in "/home/jan/LESTO/applications/rhoFixedFlowFoam/tests/work/v2412-linux64GccDPInt32Opt/hks/run013/0/T/boundaryField/WALL"
+Frozen carrier read from 0 and not written (writeFrozenFields no)
+Reading frozen thermophysical state
+Selecting thermodynamics package 
+{
+    type            hePsiThermo;
+    mixture         pureMixture;
+    transport       sutherland;
+    thermo          hConst;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleInternalEnergy;
+}
+
+Using dynamicCode for patch INLET on field U at line 33 in "/home/jan/LESTO/applications/rhoFixedFlowFoam/tests/work/v2412-linux64GccDPInt32Opt/hks/run013/0/U/boundaryField/INLET"
+Species PbI2_g: diffusivityModel = PbI2He; evaluated once using local T and absolute p.
+Correlation pressure unit: atm (101325 Pa)
+D_PbI2_g internal min/max [m2/s]: 3.089e-05 0.000253574
+Phase change: model HKS (constant/thermochemistryProperties)
+Interface (layer faceCells): patches (WALL), 15264 elements in 15264 cells; A_I = 0.0103918 m2, V_I = 5.87706e-07 m3, A_I/V_I = 17681.9 1/m
+  areaPerVolume cell, areaMultiplier 1, interfaceTemperature cell, wallResistance none
+HKS model: accommodation sigma = 1, Ce = 1, kineticScale = 1 (SI); G = kineticScale Ce 2 sigma/(2 - sigma) sqrt(M/(2 pi R T_e)), p_eq from the table of every pair
+Pair PbI2_g: p_eq from "<constant>/pv_PbI2_phases.csv", phases 2(PbI2(cr) PbI2(l)) (the minimum), 198 nodes 270-1250 K; units log10Pa, interpolation logInverseT, outOfRange extrapolate; stable phase PbI2(cr) -> PbI2(l) at 683 K
+Sample boat (pair PbI2_g): 144 cells, V_Z = 8.11776e-09 m3; inventory of 4.84e-06 mol (Cs = n0 M/V_Z = 274.864 kg/m3 on a fresh start), areaPerVolume 4000 1/m, kineticScale 1, Ce 1, removed at the step starting at t >= removeTime - deltaT/2, removeTime 6 s
+Pair PbI2_g -> PbI2_s: M = 0.461009 kg/mol; at most 11 outer correctors to the initial residual 1e-05; final solve with Y_PbI2_gFinal
+Pair PbI2_g, HKS on the interface: T_e 300.825-999.175 K, p_eq 3.20486e-15-23177.6 Pa, Y_eq = p_eq/beta_c 3.64327e-18-26.3458; G_e beta_c/rho_c 58.7706-107.108 m/s; lambda = sum_e g_e/(rho_c V_c) 1.03917e+06-1.89388e+06 1/s, layer mean 1.42348e+06 1/s; 0 elements outside the table (none); 0 elements with p_eq > p (the condensate would boil; not capped)
+Sample boat, HKS: lambda_s = sum g_e/(rho V) 418584 1/s (mean over its cells), Y_eq 12.5209-14.2658
+Carrier: max |T - p W/(R rho)|/T = 0.0030285 (frozen T vs perfect gas)
+Fresh start of sample boat: reservoir Cs = n0 M/V_Z = 274.864 kg/m3 of PbI2_s in its 144 cells (4.84e-06 mol)
+Fresh start of pair PbI2_g: initial inventory 2.23128e-06 kg (4.84e-06 mol)
+Frozen fields: U, p, e, T, rho, phi, mu, kappa
+Configured species: 2(PbI2_g PbI2_s)
+No SIMPLE/PIMPLE, pressure, momentum or energy solve.
+Species controls are read at startup; restart to change them.
+Starting physical time loop
+Time = 0.001
+
+GAMG:  Solving for Y_PbI2_g, Initial residual = 1, Final residual = 0.0140764, No Iterations 1
+GAMG:  Solving for Y_PbI2_g, Initial residual = 0.00735608, Final residual = 0.000498763, No Iterations 2
+GAMG:  Solving for Y_PbI2_g, Initial residual = 0.0010546, Final residual = 9.38482e-05, No Iterations 2
+GAMG:  Solving for Y_PbI2_g, Initial residual = 0.000230422, Final residual = 1.50533e-05, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 5.60273e-05, Final residual = 3.64523e-06, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 1.34982e-05, Final residual = 9.83656e-07, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 3.65506e-06, Final residual = 2.63004e-07, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 9.10228e-07, Final residual = 6.81835e-13, No Iterations 32
+Y_PbI2_g exchange: implicit 0, capped 0, none 15264 elements (sample: implicit 144, capped 0, none 0); outer iterations 7, converged (initial residual 3.65506e-06, tolerance 1e-05; regime changes 0, 0 kg, 0 significant); final predictor: regime changes 0, 0 kg, 0 significant; guard passes 0 (0 elements); projected 0 (0 kg, 0 significant); complementarity 0 (0 kg, 0 significant)
+Y_PbI2_g transport [kg/s]: INLET -1.5939e-18 OUTLET 1.81725e-60 WALL 0; solver defect 2.37714e-17 kg/s
+Y_PbI2_g monitors: min Y -6.17567e-07, negative mass -2.28238e-16 kg, max mole fraction 0.109914 (279 cells above 0.05, 1.80125e-08 kg entered there)
+Y_PbI2_g min/max = -6.17567e-07 14.2252
+Balance PbI2_g [mol]: gas 3.90719e-08 wall 0 sample 4.80093e-06 released 0 transport -3.45742e-21 removed 0 clamped -3.96565e-23 restart 0 solverDefect 5.15638e-20 (relative 1.06537e-14) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 2.37 s  ClockTime = 3 s
+
+Time = 0.002
+
+GAMG:  Solving for Y_PbI2_g, Initial residual = 0.00381238, Final residual = 0.000358217, No Iterations 2
+GAMG:  Solving for Y_PbI2_g, Initial residual = 0.000668653, Final residual = 4.93564e-05, No Iterations 2
+GAMG:  Solving for Y_PbI2_g, Initial residual = 0.000127159, Final residual = 7.4655e-06, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 3.40612e-05, Final residual = 2.98024e-06, No Iterations 2
+GAMG:  Solving for Y_PbI2_g, Initial residual = 9.12851e-06, Final residual = 7.20849e-07, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 2.65856e-06, Final residual = 8.86785e-13, No Iterations 34
+Y_PbI2_g exchange: implicit 0, capped 0, none 15264 elements (sample: implicit 144, capped 0, none 0); outer iterations 5, converged (initial residual 9.12851e-06, tolerance 1e-05; regime changes 0, 0 kg, 0 significant); final predictor: regime changes 0, 0 kg, 0 significant; guard passes 0 (0 elements); projected 0 (0 kg, 0 significant); complementarity 0 (0 kg, 0 significant)
+Y_PbI2_g transport [kg/s]: INLET -1.73843e-18 OUTLET 1.13265e-61 WALL 0; solver defect 1.62453e-17 kg/s
+Y_PbI2_g monitors: min Y -3.09621e-08, negative mass -2.87883e-17 kg, max mole fraction 0.110149 (420 cells above 0.05, 9.02907e-09 kg entered there)
+Y_PbI2_g min/max = -3.09621e-08 14.2593
+Balance PbI2_g [mol]: gas 5.86574e-08 wall 0 sample 4.78134e-06 released 0 transport -7.22834e-21 removed 0 clamped -3.79139e-24 restart 0 solverDefect 8.68024e-20 (relative 1.79344e-14) closure 0 (relative 0)
+ExecutionTime = 4.05 s  ClockTime = 4 s
+
+Time = 0.003
+
+GAMG:  Solving for Y_PbI2_g, Initial residual = 0.001894, Final residual = 7.9809e-05, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 0.000269253, Final residual = 2.17017e-05, No Iterations 2
+GAMG:  Solving for Y_PbI2_g, Initial residual = 5.91224e-05, Final residual = 4.39807e-06, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 1.40662e-05, Final residual = 1.0696e-06, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 3.56116e-06, Final residual = 3.25968e-07, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 1.03073e-06, Final residual = 8.74769e-13, No Iterations 32
+Y_PbI2_g exchange: implicit 0, capped 0, none 15264 elements (sample: implicit 141, capped 0, none 3); outer iterations 5, converged (initial residual 3.56116e-06, tolerance 1e-05; regime changes 0, 0 kg, 0 significant); final predictor: regime changes 0, 0 kg, 0 significant; guard passes 0 (0 elements); projected 0 (0 kg, 0 significant); complementarity 0 (0 kg, 0 significant)
+Y_PbI2_g transport [kg/s]: INLET -1.80437e-18 OUTLET -5.44181e-61 WALL 0; solver defect 1.04003e-17 kg/s
+Y_PbI2_g monitors: min Y -4.92955e-09, negative mass -9.78192e-18 kg, max mole fraction 0.110151 (489 cells above 0.05, 7.74551e-09 kg entered there)
+Y_PbI2_g min/max = -4.92955e-09 14.2596
+Balance PbI2_g [mol]: gas 7.54586e-08 wall 0 sample 4.76454e-06 released 0 transport -1.11423e-20 removed 0 clamped -4.32261e-23 restart 0 solverDefect 1.09362e-19 (relative 2.25955e-14) closure 0 (relative 0)
+ExecutionTime = 5.74 s  ClockTime = 6 s
+
+Time = 0.004
+
+GAMG:  Solving for Y_PbI2_g, Initial residual = 0.00164773, Final residual = 0.000152769, No Iterations 2
+GAMG:  Solving for Y_PbI2_g, Initial residual = 0.000240125, Final residual = 1.59517e-05, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 4.59955e-05, Final residual = 3.68786e-06, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 9.83991e-06, Final residual = 9.69162e-07, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 2.60726e-06, Final residual = 7.9534e-13, No Iterations 35
+Y_PbI2_g exchange: implicit 0, capped 0, none 15264 elements (sample: implicit 141, capped 0, none 3); outer iterations 4, converged (initial residual 9.83991e-06, tolerance 1e-05; regime changes 0, 0 kg, 0 significant); final predictor: regime changes 0, 0 kg, 0 significant; guard passes 0 (0 elements); projected 0 (0 kg, 0 significant); complementarity 0 (0 kg, 0 significant)
+Y_PbI2_g transport [kg/s]: INLET -1.07855e-18 OUTLET 8.46251e-61 WALL 0; solver defect 9.78968e-18 kg/s
+Y_PbI2_g monitors: min Y -6.45705e-08, negative mass -3.29663e-17 kg, max mole fraction 0.110152 (600 cells above 0.05, 7.01823e-09 kg entered there)
+Y_PbI2_g min/max = -6.45705e-08 14.2598
+Balance PbI2_g [mol]: gas 9.06822e-08 wall 0 sample 4.74932e-06 released 0 transport -1.34819e-20 removed 0 clamped -2.45808e-23 restart 0 solverDefect 1.30598e-19 (relative 2.6983e-14) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 7.35 s  ClockTime = 7 s
+
+Time = 0.005
+
+GAMG:  Solving for Y_PbI2_g, Initial residual = 0.00148301, Final residual = 0.000131184, No Iterations 2
+GAMG:  Solving for Y_PbI2_g, Initial residual = 0.000211449, Final residual = 1.43413e-05, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 4.11036e-05, Final residual = 3.40223e-06, No Iterations 3
+GAMG:  Solving for Y_PbI2_g, Initial residual = 8.35208e-06, Final residual = 5.78077e-07, No Iterations 4
+GAMG:  Solving for Y_PbI2_g, Initial residual = 1.9825e-06, Final residual = 7.25842e-13, No Iterations 34
+Y_PbI2_g exchange: implicit 0, capped 0, none 15264 elements (sample: implicit 132, capped 0, none 12); outer iterations 4, converged (initial residual 8.35208e-06, tolerance 1e-05; regime changes 0, 0 kg, 0 significant); final predictor: regime changes 0, 0 kg, 0 significant; guard passes 0 (0 elements); projected 0 (0 kg, 0 significant); complementarity 0 (0 kg, 0 significant)
+Y_PbI2_g transport [kg/s]: INLET -5.3166e-19 OUTLET 3.33896e-60 WALL 0; solver defect 7.00298e-18 kg/s
+Y_PbI2_g monitors: min Y -7.5998e-08, negative mass -3.30356e-17 kg, max mole fraction 0.110153 (684 cells above 0.05, 6.49056e-09 kg entered there)
+Y_PbI2_g min/max = -7.5998e-08 14.2599
+Balance PbI2_g [mol]: gas 1.04761e-07 wall 0 sample 4.73524e-06 released 0 transport -1.46351e-20 removed 0 clamped -7.18691e-23 restart 0 solverDefect 1.45788e-19 (relative 3.01215e-14) closure 0 (relative 0)
+ExecutionTime = 8.98 s  ClockTime = 9 s
+
+Phase change summary Y_PbI2_g: 0 steps without outer convergence, 0 guard passes, 0 projected elements (0 significant), 0 complementarity violations (0 significant), 0 significant regime changes in final predictors
+End

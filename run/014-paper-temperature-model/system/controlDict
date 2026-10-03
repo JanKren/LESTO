@@ -1,0 +1,50 @@
+/*------------------------------------------------------------------------------
+
+system/controlDict
+
+  - select solver
+  - start and stop of calculation
+  - time step size
+  - saving frequency
+  - output format, precision, compression and time naming
+  - allows run-time changes
+  - species-transport numerical controls
+
+  As distributed: the configuration of Figs. 8-10 of the paper (t_ev =
+  15 s; Fig. 8 at 16 s, Fig. 9 at t_ev + 1 and 2 t_ev, Fig. 10 at 30 s), to
+  2 t_ev = 30 s.  The other runs of readme.md change endTime (and deltaT at
+  540 mL/min).
+
+------------------------------------------------------------------------------*/
+FoamFile{version 2.0;  format ascii;  class dictionary; object controlDict;}
+/*----------------------------------------------------------------------------*/
+
+application       rhoFixedFlowFoam;
+
+startFrom         latestTime;
+startTime         0;
+
+stopAt            endTime;
+endTime           30;              /* s: 2 t_ev (t_ev 15 s, Figs. 8-10) */
+
+deltaT            0.001;           /* s, the paper's 1 ms (Courant 0.11) */
+
+writeControl      timeStep;
+writeInterval     1000;            /* every simulated second */
+
+purgeWrite        0;
+
+writeFormat       binary;          /* exact restarts of the mass ledger */
+writeCompression  off;
+
+timeFormat        general;
+timePrecision     6;
+
+runTimeModifiable true;
+
+speciesTransport {
+
+  tolerance          1.0e-5;       /* outer loop: residual and settled regimes */
+  nCorr              10;           /* loose correctors, then Y_PbI2_gFinal */
+  writeFrozenFields  no;           /* carrier read from 0, never written */
+}

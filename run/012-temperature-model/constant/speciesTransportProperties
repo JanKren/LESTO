@@ -1,0 +1,30 @@
+/*------------------------------------------------------------------------------
+
+constant/speciesTransportProperties
+
+  - list of transported species and their state
+  - diffusivity model for gases
+  - pressure unit used by the PbI2-He diffusivity correlation
+
+------------------------------------------------------------------------------*/
+FoamFile{version 2.0;  format ascii;  class dictionary; object speciesTransportProperties;}
+/*----------------------------------------------------------------------------*/
+
+pressureUnit atm;  /* this is just for diffusivity calculation */
+
+species
+(
+  PbI2_g
+  PbI2_s
+);
+
+PbI2_g {
+  state             gas;
+  diffusivityModel  PbI2He;
+  molarMass         0.46100894;  /* kg/mol; required for a paired gas */
+}
+
+PbI2_s {
+  state             solid;       /* condensate of PbI2_g, derived output */
+  molarMass         0.46100894;  /* kg/mol; enables c_PbI2_s output */
+}

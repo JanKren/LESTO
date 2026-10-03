@@ -1,0 +1,68 @@
+/*------------------------------------------------------------------------------
+
+constant/thermochemistryProperties
+
+  - gas/condensate exchange model (mock | temperature | HKS)
+  - pairs: gas species and their condensate
+  - interaction layer and wall law options
+  - temperature-model coefficients (Lobresco et al. 2026, Eq. 5)
+  - samples (release of PbI2 from the boat)
+  - mass-balance controls
+
+------------------------------------------------------------------------------*/
+FoamFile{version 2.0;  format ascii;  class dictionary; object thermochemistryProperties;}
+/*----------------------------------------------------------------------------*/
+
+model temperature;
+
+pairs {
+
+  PbI2_g {
+    condensed  PbI2_s;
+  }
+}
+
+interface {
+
+  patches               (WALL);
+  layer                 faceCells;  /* one layer: the cells at the wall */
+  areaPerVolume         cell;       /* A_e = |S_f| (flux form) */
+  areaMultiplier        1;
+  interfaceTemperature  cell;       /* T_e = T of the wall cell */
+  wallResistance        none;
+}
+
+temperatureCoeffs {
+
+  A     220;       /* 1/s; v_d = A V_I/A_I = 0.0124421 m/s on this layer */
+  k     8e-3;      /* 1/K */
+  Tdep  680;       /* K */
+}
+
+samples {
+
+  boat {
+    pair       PbI2_g;
+    selection {                     /* in memory: 144 cells */
+      boat {
+        action  use;
+        source  cylinder;
+        point1  (0.04 0 0);
+        point2  (0.05 0 0);
+        radius  5e-4;
+      }
+    }
+    mode       release;
+    amount     3.16e-5;             /* mol (paper, Figs. 8-11) */
+    startTime  0;                   /* s */
+    duration   6;                   /* s, t_ev */
+  }
+}
+
+balance {
+
+  nGuard               3;
+  guardTolerance       1e-12;      /* relative to the pair inventory */
+  moleFractionWarning  0.05;       /* passive-carrier validity monitor */
+  writeFile            yes;        /* postProcessing/phaseChangeBalance */
+}

@@ -1,0 +1,107 @@
+/*------------------------------------------------------------------------------
+
+constant/thermochemistryProperties
+
+  - gas/condensate exchange model: the temperature-based model of Lobresco
+    et al. (2026), Eq. 5
+  - pairs: gas species and their condensate
+  - interaction layer (both rules of the paper and T-Flows, switchable) and
+    wall law options
+  - temperature-model coefficients
+  - samples (release of PbI2 from the boat)
+  - mass-balance controls
+  - axial profiles and T_dep
+
+  As distributed: the configuration of Figs. 8-10 of the paper (A, k,
+  Tdep 680 K, 14.6 mg, t_ev = 15 s).  It does not reproduce the deposit
+  position of those figures (its onset lies 2.6 cm, 25.9 mm, upstream;
+  readme).  readme.md lists
+  the values of the other runs (t_ev 6 s; the Table 2 cases; the T-Flows
+  parameter set as a sensitivity variant).
+
+------------------------------------------------------------------------------*/
+FoamFile{version 2.0;  format ascii;  class dictionary; object thermochemistryProperties;}
+/*----------------------------------------------------------------------------*/
+
+model temperature;
+
+pairs {
+
+  PbI2_g {
+    condensed  PbI2_s;
+  }
+}
+
+interface {
+
+  patches               (WALL);
+  layer                 distance;   /* T-Flows: cell centres within 0.1 mm
+                                       (2 layers, A_I/V_I = 8533.7 1/m);
+                                       faceCells: the cells of the wall
+                                       faces (1 layer, 17681.9 1/m) */
+                                    /* areaPerVolume: the default of the
+                                       rule, layer for distance, cell
+                                       (A_e = |S_f|) for faceCells */
+  distance              1e-4;       /* m, T-Flows DELTA */
+  centreDistance {                  /* printed comparison with the T-Flows
+                                       test R - r <= DELTA */
+    axis    (1 0 0);
+    origin  (0 0 0);
+    radius  2.4e-3;
+  }
+  areaMultiplier        1;          /* plan section 15, item 3 */
+  interfaceTemperature  cell;       /* T-Flows: the cell temperature */
+  wallResistance        none;
+}
+
+temperatureCoeffs {
+
+  A     220;       /* 1/s, the paper's reference set (Section 3.1) */
+  k     8e-3;      /* 1/K */
+  Tdep  680;       /* K, the reference experiment (Section 3.1); Table 2:
+                      the case's T_dep^calc of Table 1 */
+}
+
+samples {
+
+  boat {
+    pair       PbI2_g;
+    selection {                     /* in memory: 144 cells */
+      boat {
+        action  use;
+        source  cylinder;
+        point1  (0.04 0 0);
+        point2  (0.05 0 0);
+        radius  4.8e-4;             /* between the rings of cell centres
+                                       at 0.458 and 0.5 mm (readme) */
+      }
+    }
+    mode       release;
+    amount     3.16e-5;             /* mol, 14.6 mg (Figs. 8-10) */
+    startTime  0;                   /* s */
+    duration   15;                  /* s, t_ev (Figs. 8-10) */
+  }
+}
+
+balance {
+
+  nGuard               3;
+  guardTolerance       1e-12;      /* relative to the pair inventory */
+  moleFractionWarning  0.05;       /* passive-carrier validity monitor */
+  writeFile            yes;        /* postProcessing/phaseChangeBalance */
+}
+
+profiles {
+
+  bins {
+    native { min 0; max 0.69; nBins 424; }   /* the axial cells */
+    gamma  { min 0; max 0.69; width 0.01; }  /* the 1 cm gamma-scan bins */
+  }
+  times      (16 30);               /* s: t_ev + 1 (gas) and 2 t_ev (solid) */
+  onset {
+    fraction  0.01;                 /* the paper's 1 % of the peak */
+    search    (fromInlet fromPeak); /* the paper: the first position from
+                                       the inlet */
+  }
+  observable wall;                  /* the condensed phase (Section 3.3) */
+}

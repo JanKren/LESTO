@@ -1,0 +1,53 @@
+/*------------------------------------------------------------------------------
+
+0/Y_PbI2_g
+
+  The INLET is closed to the species, as in T-Flows (readme): the inlet
+  value of the scalar given as a flux (q_01 0) stays 0 in the convective
+  term and the diffusive flux is 0, so nothing enters or leaves through
+  x = 0.  A mixed condition with refValue 0 and the valueFraction
+  Pe/(1 + Pe), Pe = -phi/(rhoD |S| deltaCoeff) of every inflow face, has
+  exactly this zero total flux (Danckwerts); phi and rhoD are frozen.
+
+------------------------------------------------------------------------------*/
+FoamFile{format ascii;  class volScalarField;  object Y_PbI2_g;}
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField {
+
+    INLET {
+        type            codedMixed;
+        name            zeroTotalFluxInlet;
+        refValue        uniform 0;
+        refGradient     uniform 0;
+        valueFraction   uniform 1;
+        value           uniform 0;
+
+        code
+        #{
+            /* zero total (convective + diffusive) flux through the inlet */
+            const fvsPatchScalarField& phip =
+                patch().lookupPatchField<surfaceScalarField, scalar>("phi");
+            const fvPatchScalarField& rhoDp =
+                patch().lookupPatchField<volScalarField, scalar>
+                ("rhoD_PbI2_g");
+            const scalarField Pe
+            (
+                max(-phip, scalar(0))
+               /(rhoDp*patch().magSf()*patch().deltaCoeffs())
+            );
+            valueFraction() = Pe/(1 + Pe);
+        #};
+    }
+
+    OUTLET {
+        type            zeroGradient;
+    }
+
+    WALL {
+        type            zeroGradient;    /* required for a paired species */
+    }
+}

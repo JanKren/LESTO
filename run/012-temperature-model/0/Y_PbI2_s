@@ -1,0 +1,22 @@
+FoamFile{format ascii;  class volScalarField;  object Y_PbI2_s;}
+
+/* derived output of model temperature: (deposit*area)/(rho*V) */
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField {
+
+    INLET {
+        type            zeroGradient;
+    }
+
+    OUTLET {
+        type            zeroGradient;
+    }
+
+    WALL {
+        type            zeroGradient;
+    }
+}

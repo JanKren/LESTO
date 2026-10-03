@@ -1,0 +1,57 @@
+/*------------------------------------------------------------------------------
+
+system/fvSchemes
+
+  - time discretization
+  - gradient schemes
+  - convection/divergence schemes
+  - diffusion/Laplacian schemes
+  - interpolation schemes
+  - face-normal gradient schemes
+
+  SuperBee for the species, as the paper states (Section 2.2: SuperBee for
+  the temperature and the scalars, central differencing of the
+  diffusion).  The T-Flows code behind the paper does not: its GPU solver
+  ignores ADVECTION_SCHEME_FOR_SCALARS and blends upwind, central and
+  linear-upwind (BLENDING_COEFFICIENTS_FOR_SCALARS, by default pure upwind
+  on the branches of LESTO_HKS, Lesto_Thesis and the Transport test, pure
+  central differencing on that of LESTO-project; 0.8 0.1 0.1 in
+  LESTO_HKS; readme and plan sections 26 and 27).  The
+  carrier temperature of setFrozenCarrier (mode solved) uses its own
+  schemes (setFrozenCarrierDict) and the gradient below.
+
+------------------------------------------------------------------------------*/
+FoamFile{version 2.0;  format ascii;  class dictionary;  object fvSchemes;}
+/*----------------------------------------------------------------------------*/
+
+ddtSchemes {
+
+  default         Euler;           /* required for a paired species */
+}
+
+gradSchemes {
+
+  default         Gauss linear;
+}
+
+divSchemes {
+
+  default             none;
+
+  div(phi,Y_PbI2_g)   Gauss SuperBee;
+}
+
+laplacianSchemes {
+
+  default         Gauss linear corrected;
+}
+
+interpolationSchemes {
+
+  default         linear;
+}
+
+snGradSchemes {
+
+  default         corrected;
+}

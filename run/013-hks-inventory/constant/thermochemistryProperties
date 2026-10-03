@@ -1,0 +1,82 @@
+/*------------------------------------------------------------------------------
+
+constant/thermochemistryProperties
+
+  - gas/condensate exchange model (mock | temperature | HKS)
+  - pairs: gas species, their condensate and the vapour-pressure table
+  - interaction layer and wall law options
+  - Hertz-Knudsen-Schrage coefficients (SI)
+  - samples (the boat: an inventory of solid PbI2 that evaporates)
+  - mass-balance controls
+
+------------------------------------------------------------------------------*/
+FoamFile{version 2.0;  format ascii;  class dictionary; object thermochemistryProperties;}
+/*----------------------------------------------------------------------------*/
+
+model HKS;
+
+pairs {
+
+  PbI2_g {
+    condensed  PbI2_s;
+
+    vapourPressure {                /* Gurvich (1991) via NASA-9, phase
+                                       resolved: p_eq = min(cr, l) */
+      file           "<constant>/pv_PbI2_phases.csv";
+      phases         ("PbI2(cr)" "PbI2(l)");
+      units          log10Pa;
+      interpolation  logInverseT;   /* log10 p linear in 1/T */
+      outOfRange     extrapolate;
+    }
+  }
+}
+
+interface {
+
+  patches               (WALL);
+  layer                 faceCells;  /* one layer: the cells at the wall */
+  areaPerVolume         cell;       /* A_e = |S_f| (flux form) */
+  areaMultiplier        1;
+  interfaceTemperature  cell;       /* T_e = T of the wall cell */
+  wallResistance        none;
+}
+
+HKSCoeffs {
+
+  accommodation  1;                 /* sigma */
+  Ce             1;
+  kineticScale   1;                 /* SI */
+  equilibrium    table;
+  speciation     none;
+}
+
+samples {
+
+  boat {
+    pair           PbI2_g;
+    selection {                     /* in memory: 144 cells */
+      boat {
+        action  use;
+        source  cylinder;
+        point1  (0.04 0 0);
+        point2  (0.05 0 0);
+        radius  4.8e-4;             /* between the rings of cell centres
+                                       at 0.458 and 0.5 mm (readme) */
+      }
+    }
+    mode           inventory;
+    amount         4.84e-6;         /* mol (T106_6: 2.23 mg) */
+    areaPerVolume  4000;            /* 1/m, 2/R_sample */
+    kineticScale   1;
+    Ce             1;
+    removeTime     6;               /* s: the boat is pulled out */
+  }
+}
+
+balance {
+
+  nGuard               3;
+  guardTolerance       1e-12;      /* relative to the pair inventory */
+  moleFractionWarning  0.05;       /* passive-carrier validity monitor */
+  writeFile            yes;        /* postProcessing/phaseChangeBalance */
+}
