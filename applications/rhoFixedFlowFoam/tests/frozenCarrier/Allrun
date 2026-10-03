@@ -1,0 +1,347 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#
+# tests/frozenCarrier/Allrun
+#
+# PURPOSE
+#
+# Tests the frozen-carrier input and output of writeFrozenFields (plan
+# section 6, M1).  All runs are case 010 (two gases, one solid, PbI2He
+# diffusivity, coded T and U boundary conditions) with writeInterval 3,
+# i.e. write times 0.012, 0.024, 0.036 (and 0.048).
+#
+#   yes    writeFrozenFields yes (default), to 0.036: the M0 gate case 010w,
+#          reused when it is newer than the solver, run here otherwise
+#   no     writeFrozenFields no, to 0.048
+#   serial restarts of "no" from a directory that holds only the Y_*
+#          fields, to 0.048: from 0.024, and from 0.036
+#   4 ranks, decompositions simple (4 1 1) and simple (2 2 1), to 0.036: a
+#          continuous "no" run, and a restart from processor*/0.024
+#          directories that hold only the Y_* fields
+#
+# Criteria (M1.1, the M0 gate with the default writeFrozenFields yes, is
+# tests/regression/Allrun)
+#
+#   M1.2a  "no": every write directory holds exactly Y_PbI2_g, Y_tracer,
+#          Y_PbI2_s, c_PbI2_g, the source fields source_PbI2_g,
+#          source_tracer and source_PbI2_s that the coupled mock of tag 0.1
+#          writes (AUTO_WRITE, model mock only; plan section 31), and
+#          uniform/ (time and functionObjects/).
+#   M1.2b  "no": at most 14 MB per write directory, and at most a third of
+#          "yes" (39.6 MB) where both exist.  The plan estimated 6 MB for the
+#          four Y_*/c_* fields (at least 7.33 MB as binary scalar fields on
+#          228960 cells, 7.5 MB written; 8 MB and a quarter of "yes" before
+#          tag 0.1); the source fields of the coupled mock add 3.7 MB
+#          (source_tracer, zero everywhere, is written as a uniform field):
+#          11.1 MB.
+#   M1.2c  "no" does not change the solution: every Y_*, c_* and source_*
+#          file of "no" is cmp-identical to "yes" (0.012, 0.024, 0.036).
+#   M1.3a  serial restart from 0.024 (Y_* only): every file written at 0.048
+#          is cmp-identical to the continuous run (see uniform/time below).
+#   M1.3b  the same on 4 ranks, simple (4 1 1), restart from 0.024, all
+#          processor*/0.036 files.
+#   M1.3c  the same on 4 ranks, simple (2 2 1).
+#   M1.3d  serial restart from 0.036 (Y_* only), cmp-identical at 0.048.
+#          Unlike 0.024, the continuous run's time value at 0.036 is not the
+#          double nearest to 0.036 (0.036000000000000004 after 9 additions
+#          of 0.004), while a restart takes its time from the directory name.
+#          This restart therefore proves that the results do not depend on
+#          the last bits of the time value.
+#   M1.4   the logs of every "no" run (continuous and restart, serial and
+#          parallel) print the frozen instance, "Frozen carrier read from 0",
+#          and the log of "yes" does not.
+#   M1.5   "no" with a carrier copy in a later time directory (written by a
+#          "yes" run, here 0.024 of "yes") and a restart from 0.036: the log
+#          warns that the carrier is read from 0.024 although the earlier
+#          directory 0 holds rho too; none of the ordinary "no" logs warns.
+#
+# uniform/time of a restart differs from the continuous run's in two
+# entries, which are therefore not compared; name, deltaT and deltaT0 are:
+#
+#   index  counts the time steps from the restart, because the restart
+#          directory deliberately holds no uniform/ directory;
+#   value  a restart takes the time from the directory name (0.036 read as
+#          the nearest double), a continuous run accumulates value + deltaT.
+#          The two can differ in the last bits (M1.3d).
+#
+# Usage: tests/frozenCarrier/Allrun
+#
+# Exit status: 0 when every criterion was tested (whatever the results),
+# 1 when the script stopped early (mesh, dynamicCode seed or case set-up
+# failed); Alltest reports that as a FAIL.
+#
+#------------------------------------------------------------------------------
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+
+FROZEN_DIR=$WORK_DIR/frozenCarrier
+CMPFIELDS=$TESTS_DIR/cmpFields.sh
+SERIAL_END=0.048
+PARALLEL_END=0.036
+YES_TIMES="0.012 0.024 0.036"
+NO_TIMES="0.012 0.024 0.036 0.048"
+FROZEN_LINE="Frozen carrier read from 0 and not written (writeFrozenFields no)"
+
+echo "== M1 frozen-carrier I/O (work directory $FROZEN_DIR)"
+mkdir -p "$FROZEN_DIR"
+
+makeMesh || exit 1
+seedDynamicCode "$SOLVER_EXE" || exit 1
+
+# prepare010 <case> yes|no <end time>: case 010, writeInterval 3
+prepare010() {
+  makeCase 010 "$1" \
+    && setControl "$1" endTime "$3" \
+    && setControl "$1" writeInterval 3 \
+    && setSpeciesControl "$1" writeFrozenFields "$2"
+}
+
+# restartFrom <continuous case> <restart case> <time>: the restart case
+# holds, at <time>, only the Y_* fields of the continuous run (in every
+# processor directory for a decomposed case)
+restartFrom() {
+  local src=$1 dst=$2 t=$3 d
+  setControl "$dst" startFrom latestTime || return 1
+  if [ -d "$src/processor0" ]
+  then
+    for d in "$src"/processor*
+    do
+      mkdir -p "$dst/$(basename "$d")/$t"
+      cp "$d/$t"/Y_* "$dst/$(basename "$d")/$t/" || return 1
+    done
+  else
+    mkdir -p "$dst/$t"
+    cp "$src/$t"/Y_* "$dst/$t/" || return 1
+  fi
+}
+
+# the compared entries of uniform/time (name, deltaT, deltaT0; not index and
+# value, see above) for every write directory given
+timeEntries() {
+  local c=$1 t f
+  shift
+  for t in "$@"
+  do
+    for f in "$c/$t/uniform/time" "$c"/processor*/"$t"/uniform/time
+    do
+      [ -f "$f" ] && echo "${f#$c/}" \
+        && sed -n '/^\(name\|deltaT\|deltaT0\) /p' "$f"
+    done
+  done
+}
+
+# the value entry of <case>/<time>/uniform/time
+timeValue() {
+  sed -n 's/^value *\([^;]*\);.*/\1/p' "$1/$2/uniform/time" 2>/dev/null
+}
+
+#------------------------------------------------------------------------------
+# Case set-up
+#------------------------------------------------------------------------------
+YES=$WORK_DIR/regression/new/010w
+if ! grep -q '^End$' "$YES/log" 2>/dev/null || [ "$YES/log" -ot "$SOLVER_EXE" ]
+then
+  YES=$FROZEN_DIR/yes
+  prepare010 "$YES" yes "$PARALLEL_END" || exit 1
+  runYes=true
+else
+  runYes=false
+fi
+
+NO=$FROZEN_DIR/no
+RS=$FROZEN_DIR/restartSerial
+RS36=$FROZEN_DIR/restartSerial036
+prepare010 "$NO" no "$SERIAL_END" \
+  && prepare010 "$RS" no "$SERIAL_END" \
+  && prepare010 "$RS36" no "$SERIAL_END" || exit 1
+
+for dec in 411 221
+do
+  c=$FROZEN_DIR/par$dec
+  prepare010 "$c" no "$PARALLEL_END" \
+    && decomposeCase "$c" ${dec:0:1} ${dec:1:1} ${dec:2:1} \
+    || { echo "decomposePar failed, see $c/log.decomposePar"; exit 1; }
+  rm -rf "$c-restart"
+  cp -a "$c" "$c-restart"
+done
+
+#------------------------------------------------------------------------------
+# Runs: at most 8 MPI ranks at a time
+#------------------------------------------------------------------------------
+echo "Running no, par411$($runYes && echo ', yes')"
+runSerial "$NO" "$SOLVER_EXE" &
+$runYes && runSerial "$YES" "$SOLVER_EXE" &
+runParallel "$FROZEN_DIR/par411" "$SOLVER_EXE" 4 &
+wait
+
+echo "Running the serial restarts from 0.024 and 0.036, and par221"
+restartFrom "$NO" "$RS" 0.024 && runSerial "$RS" "$SOLVER_EXE" &
+restartFrom "$NO" "$RS36" 0.036 && runSerial "$RS36" "$SOLVER_EXE" &
+runParallel "$FROZEN_DIR/par221" "$SOLVER_EXE" 4 &
+wait
+
+echo "Running the parallel restarts"
+for dec in 411 221
+do
+  c=$FROZEN_DIR/par$dec
+  restartFrom "$c" "$c-restart" 0.024 \
+    && runParallel "$c-restart" "$SOLVER_EXE" 4 &
+done
+wait
+
+for c in "$YES" "$NO" "$RS" "$RS36" "$FROZEN_DIR"/par{411,221}{,-restart}
+do
+  grep -q '^End$' "$c/log" || echo "Run failed: $c/log"
+done
+
+#------------------------------------------------------------------------------
+# M1.2: contents and size of the write directories of "no"
+#------------------------------------------------------------------------------
+expected="Y_PbI2_g Y_PbI2_s Y_tracer c_PbI2_g source_PbI2_g source_PbI2_s\
+ source_tracer uniform"
+contentsOk=true
+sizes=""
+sizesOk=true
+for t in $NO_TIMES
+do
+  if [ ! -d "$NO/$t" ]
+  then
+    echo "$NO/$t missing"
+    contentsOk=false
+    sizesOk=false
+    continue
+  fi
+  files=$(cd "$NO/$t" && ls -A | LC_ALL=C sort | tr '\n' ' ')
+  [ "$files" = "$expected " ] && [ -f "$NO/$t/uniform/time" ] \
+    || { echo "$t holds: $files"; contentsOk=false; }
+  sizeNo=$(du -sb "$NO/$t" | cut -f1)
+  [ "$sizeNo" -le 14000000 ] || sizesOk=false
+  if [[ " $YES_TIMES " == *" $t "* ]]
+  then
+    sizeYes=$(du -sb "$YES/$t" 2>/dev/null | cut -f1)
+    sizes="$sizes $t: $((sizeNo / 1000)) kB (yes $((${sizeYes:-0} / 1000)) kB);"
+    [ $((3 * sizeNo)) -le "${sizeYes:-0}" ] || sizesOk=false
+  else
+    sizes="$sizes $t: $((sizeNo / 1000)) kB;"
+  fi
+done
+
+check M1.2a "no: write directories $NO_TIMES hold only $expected/" \
+  $contentsOk
+check M1.2b "no: at most 14 MB per write directory and a third of yes\
+ (plan: 6 MB, below the 7.33 MB of the 4 binary Y_*/c_* fields on 228960\
+ cells; the source fields of the coupled mock add 3.7 MB):$sizes" \
+  $sizesOk
+
+# the files that both runs write
+cmpOk=true
+nSame=0
+for t in $YES_TIMES
+do
+  for f in Y_PbI2_g Y_PbI2_s Y_tracer c_PbI2_g source_PbI2_g source_PbI2_s \
+    source_tracer
+  do
+    if cmp -s "$NO/$t/$f" "$YES/$t/$f"
+    then
+      nSame=$((nSame + 1))
+    else
+      echo "no and yes differ: $t/$f"
+      cmpOk=false
+    fi
+  done
+done
+check M1.2c "no vs yes: $nSame Y_*/c_*/source_* files at $YES_TIMES\
+ cmp-identical" eval '$cmpOk && [ $nSame -eq 21 ]'
+
+#------------------------------------------------------------------------------
+# M1.3: restarts from Y_* only are cmp-identical at the final time
+#
+#   compareRestart <id> <continuous> <restart> <restart time> <end time> <text>
+#------------------------------------------------------------------------------
+compareRestart() {
+  local id=$1 cont=$2 rest=$3 tStart=$4 tEnd=$5 text=$6 out status note
+  out=$("$CMPFIELDS" -x uniform/time "$cont" "$rest" "$tEnd")
+  status=$?
+  echo "$out" | head -10
+
+  local valueCont valueRest
+  valueCont=$(timeValue "$cont" "$tEnd")
+  valueRest=$(timeValue "$rest" "$tEnd")
+  if [ -n "$valueCont" ] && [ "$valueCont" != "$valueRest" ]
+  then
+    note="; uniform/time value $valueRest vs continuous $valueCont"
+  fi
+
+  if [ $status -eq 0 ] \
+    && grep -q "^Create mesh for time = $tStart\$" "$rest/log" \
+    && [ -n "$(timeEntries "$cont" "$tEnd")" ] \
+    && [ "$(timeEntries "$cont" "$tEnd")" = "$(timeEntries "$rest" "$tEnd")" ] \
+    && grep -q '^End$' "$rest/log"
+  then
+    result "$id" PASS "$text: restart from $tStart (Y_* only)" \
+      "${out#IDENTICAL: } at $tEnd, uniform/time name/deltaT/deltaT0" \
+      "equal$note"
+  else
+    result "$id" FAIL "$text: restart from $tStart differs at $tEnd ($rest)"
+  fi
+}
+
+compareRestart M1.3a "$NO" "$RS" 0.024 "$SERIAL_END" "serial"
+compareRestart M1.3b "$FROZEN_DIR/par411" "$FROZEN_DIR/par411-restart" \
+  0.024 "$PARALLEL_END" "4 ranks simple (4 1 1)"
+compareRestart M1.3c "$FROZEN_DIR/par221" "$FROZEN_DIR/par221-restart" \
+  0.024 "$PARALLEL_END" "4 ranks simple (2 2 1)"
+compareRestart M1.3d "$NO" "$RS36" 0.036 "$SERIAL_END" \
+  "serial, time value of the restart not the accumulated one"
+
+#------------------------------------------------------------------------------
+# M1.4: the log prints the frozen instance
+#------------------------------------------------------------------------------
+linesOk=true
+nRuns=0
+for c in "$NO" "$RS" "$RS36" "$FROZEN_DIR"/par{411,221}{,-restart}
+do
+  nRuns=$((nRuns + 1))
+  grep -q -x -F "$FROZEN_LINE" "$c/log" \
+    || { echo "Missing frozen-instance line: $c/log"; linesOk=false; }
+done
+if grep -q "^Frozen carrier read from" "$YES/log"
+then
+  echo "Unexpected frozen-instance line with writeFrozenFields yes"
+  linesOk=false
+fi
+check M1.4 "logs print '$FROZEN_LINE' ($nRuns runs), yes does not" $linesOk
+
+#------------------------------------------------------------------------------
+# M1.5: a carrier copy shadows the original carrier
+#------------------------------------------------------------------------------
+SHADOW=$FROZEN_DIR/shadowedCarrier
+SHADOW_LINE="The frozen carrier is read from 0.024, but the earlier time\
+ directory 0 also holds rho."
+prepare010 "$SHADOW" no 0.04 || exit 1
+setControl "$SHADOW" startFrom latestTime || exit 1
+mkdir -p "$SHADOW/0.024" "$SHADOW/0.036"
+cp -r "$YES/0.024"/* "$SHADOW/0.024/"
+cp "$NO/0.036"/Y_* "$SHADOW/0.036/"
+runSerial "$SHADOW" "$SOLVER_EXE"
+
+shadowOk=true
+grep -q '^End' "$SHADOW/log" \
+  && grep -q "^Frozen carrier read from 0.024 and not written" "$SHADOW/log" \
+  && grep -q -F "$SHADOW_LINE" "$SHADOW/log" \
+  || { echo "no shadowing warning ($SHADOW/log)"; shadowOk=false; }
+for c in "$NO" "$RS" "$RS36" "$FROZEN_DIR"/par{411,221}{,-restart}
+do
+  if grep -q "also holds rho" "$c/log"
+  then
+    echo "Unexpected shadowing warning in $c/log"
+    shadowOk=false
+  fi
+done
+check M1.5 "carrier copy in 0.024 (from a yes run), restart from 0.036:\
+ the log warns '$SHADOW_LINE'; the ordinary no runs do not" $shadowOk
+
+# every criterion was tested; the results are in $RESULTS
+exit 0
+
+#------------------------------------------------------------------------------

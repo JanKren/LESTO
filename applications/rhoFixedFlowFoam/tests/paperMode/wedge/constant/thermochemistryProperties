@@ -1,0 +1,35 @@
+/*------------------------------------------------------------------------------
+
+constant/thermochemistryProperties of tests/paperMode/wedge
+
+  The temperature model on the paper-mode carrier of the wedge: a release
+  in the cells near the axis at x = 2-4 mm, deposition in the wall layer
+  (layer distance 2.5e-4 m: about two cell rows; the test switches it).
+
+------------------------------------------------------------------------------*/
+FoamFile {version 2.0; format ascii; class dictionary; object thermochemistryProperties;}
+
+model temperature;
+
+pairs { PbI2_g { condensed PbI2_s; } }
+
+interface {
+  patches (WALL);
+  layer   distance;
+  distance 2.5e-4;
+}
+
+temperatureCoeffs { A 220; k 8e-3; Tdep 800; }
+
+samples {
+  boat {
+    pair      PbI2_g;
+    selection { boat { action use; source box; box (0.002 -1 -1) (0.004 0.0008 1); } }
+    mode      release;
+    amount    1e-8;
+    startTime 0;
+    duration  0.01;
+  }
+}
+
+balance { nGuard 3; guardTolerance 1e-12; }

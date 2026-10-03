@@ -1,0 +1,428 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#
+# tests/Alltest
+#
+# PURPOSE
+#
+# Runs the acceptance tests of rhoFixedFlowFoam for one or more milestones of
+# doc/phase-change-plan.md and prints one PASS/FAIL/NOTRUN line per
+# criterion.  Every milestone re-runs the M0 regression gate.
+#
+# Usage
+#
+#   tests/Alltest [-fresh] <milestone> [<milestone> ...]
+#
+#   M0     standalone g++ test of the PbI2-He correlation; build plumbing
+#          (tests/build: Allwmake versions, GEMS3K bridge and xGEMS opt-in,
+#          stamps and wclean, generated gemsConfig.H and xgemsConfig.H,
+#          ldd, 0 warnings, v2606); the regression gate (tests/regression:
+#          008/009/010/011 logs and 010's written fields vs the pristine
+#          build of the tag 0.1 of the main branch, and the out_excerpts)
+#   M1     frozen-carrier I/O (tests/frozenCarrier: writeFrozenFields no,
+#          restarts from Y_* only in serial and on 4 ranks) and the gate
+#   M2     exchange core, temperature model, release, ledger (tests/
+#          phaseChange: closed boxes, channels incl. long release windows
+#          up to M8 scale, pipe in serial and on 4 ranks, restarts incl.
+#          re-decomposed, collated, single-WALL-face and function-object
+#          written ones, with writeFrozenFields yes and with a changed
+#          interface or release schedule, rounded boundary values of
+#          the gas and the carrier, start-up and per-step checks (incl.
+#          the conservative convection scheme), halfCell on ranks without
+#          WALL faces and its refusal with a scaled area, an interface
+#          patch not named WALL, model mock, run/012, an unpaired gas in
+#          a phase-change model; plan sections 12, 14, 15, 16, 17 and 31)
+#          and the gate
+#   M3     outputs and diagnostics (tests/profiles: g++ test of the
+#          binning and the onset search; axial profiles in mol/m with
+#          exact overlap binning integrating to the inventories, also for
+#          bins that do not cover the mesh; the pipe on 4 ranks, simple
+#          and hierarchical, equal to serial with a converged outer loop;
+#          T_dep of a synthetic ramp deposit against the analytic crossing
+#          in both search modes, with an upstream spike and searchFrom;
+#          bins that cut cells against the exact overlap of the native
+#          profile; profile times, restarts, writes of function objects
+#          between two steps and no partial time directories;
+#          mDep_ with areaMultiplier 2 and areaPerVolume layer; exch_;
+#          run/012 with profiles; the restart verdict with recomputed
+#          patch values; plan section 18; the uneven split of M3.2c is a
+#          carry-over of the M3 sign-off) and the gate
+#   M5     Hertz-Knudsen-Schrage with p_v tables, inventory samples and
+#          their removal (tests/hks: closed boxes at 700 K (bare wall,
+#          also over 50 steps near equilibrium, CAPPED, ample condensate,
+#          below Y_eq, halfCell), the channel with an inventory sample
+#          removed at 0.25 s (nCorr 3 and 0, binary restarts across the
+#          removal, 4 ranks simple and uneven, the removal on the exact
+#          clock, the removed sample dropped and re-added, a release
+#          sample added in front, the recommended loose solves), the pipe
+#          of run/013 (re-decomposed and reconstructed restarts; 25 steps
+#          at its own settings) and its out_excerpt, the tables
+#          (testVapourPressureTable.C, and make_pv_table.py from the
+#          sources: NOTRUN without them), start-up and restart refusals,
+#          the warning about inputs of the other model, the regime
+#          choice of a small reservoir (independent of nCorr, the guard
+#          in both directions, complementarity recomputed from the
+#          fields), an ascii re-decomposed restart, the guard acting on
+#          the total of the missed masses, collated restarts after
+#          reconstructPar and onto another number of ranks, the geometry
+#          record within the point rounding of both runs (an ascii mesh
+#          reconstructed, a sample far from the origin) but never beyond
+#          what a selection changed by one cell causes (a moved and a
+#          swapped selection refused on an ascii mesh of round
+#          coordinates), acceptance 2 as written, a sample next to a colder
+#          wall at several nCorr (the guard re-solving the matrix of the
+#          recorded solve; the bounded law of the wall elements recomputed
+#          from the fields), same-decomposition restarts under the
+#          masterUncollated handler and the collated one with two IO
+#          ranks, and the carry-overs of the M3 sign-off: wallPlusGas
+#          without the gas of the samples, the significance of T_dep, the
+#          profile times of a restart with another deltaT, and the uneven
+#          3-rank split M3.2c of tests/profiles (unless M3 runs it); plan
+#          sections 20 to 24) and the gate
+#   M4     paper-mode carrier, layer distance, code-to-code case run/014
+#          (tests/paperMode: setFrozenCarrier on the pipe and on a wedge,
+#          serial and decomposed (also a single inlet face on a rank), on
+#          a wedge not extruded along the axis and refused on one whose
+#          wall faces are tilted, on a reversed axis, an outlet named as
+#          the inlet and a radius below the wall, its continuity to 1e-15
+#          and its negative evidence, the T-Flows wall table and its count
+#          line, -check and the written instance of a case that has run;
+#          the layer counts of both rules on the pipe; layer distance on a
+#          channel in serial and on 4 ranks with the nearest wall faces on
+#          other ranks (closure, mDep_ = the wall inventory, serial =
+#          parallel; faces with the elements of two other ranks summed in
+#          the same order in two runs; maps that run both ways between two
+#          ranks, on the channel, the pipe and the tetrahedral pipe), the
+#          pipe of run/014 on four 4-rank splits, binary restarts (mw_ = the
+#          deposits), refusals,
+#          profiles, model HKS in serial and on 4 ranks (the temperature
+#          of the nearest faces pulled across ranks), several interface
+#          patches meeting at corners in both boundary orders, a layer cell
+#          touching the wall only by an edge whose wall faces lie on
+#          another rank, a tetrahedral pipe (gmsh) in serial and on 4
+#          ranks; the closure without drift on the pipe at large steps; the
+#          face-flux correction of the transport matrix in flux form (no
+#          explicit remainder on the pipe, both layer rules); the
+#          mole-fraction monitor from the carrier's p/(R T); the exactly
+#          rescaled inflow of a wedge with sectorAngle; run/014's
+#          out_excerpt; the provenance of its T-Flows inputs; the v2606
+#          compile of the solver and the utility; plan sections 25 to 27
+#          and 29; about 25-35 min) and the gate
+#   M4long the code-to-code runs of acceptance 3-5 (Fig. 9 identity, the
+#          solid profiles of t_ev 6 and 15 s, Table 2 for both layer
+#          rules with the gate restated by the researcher, max(2 K,
+#          dT_bin)), the closure of the runs made with the current
+#          sources without drift (M4.17; a revalidated run is not gated),
+#          the positions of Figs. 9-10 against run/014 and the T-Flows
+#          parameter set (not a gate), and the key of a run, which follows
+#          the mesh and the set-up functions (M4.20); hours on 16 cores:
+#          M4LONG_JOBS runs of M4LONG_RANKS ranks, default 2 x 8;
+#          M4LONG_RUNS selects runs, 'ended' only evaluates; a run that
+#          ended under older sources is run again, or revalidated by a probe
+#          only with M4LONG_REVALIDATE=yes (then named so in its criterion
+#          lines); a run that did not end is NOTRUN with its cost and is
+#          left prepared; tests/paperMode/longRuns) and the gate; not part
+#          of 'all'
+#   all    every milestone implemented so far: M0 M1 M2 M3 M4 M5 (not
+#          M4long)
+#
+#   -fresh re-run the cached pristine reference cases too
+#
+# Before the tests the solver is built from scratch (wclean, then
+# ./Allwmake), so that every source file is compiled and the 0-warnings
+# check (BUILD) is never vacuous.  All cases run in the git-ignored
+# tests/work/<version>-<WM_OPTIONS>/.
+#
+# Completeness.  Each test script records its own criteria.  A script that
+# stops early (e.g. the pristine build or decomposePar failed) is reported
+# as a FAIL, and every criterion id this invocation must produce is checked
+# at the end: a missing one is a FAIL too.  The criterion SELF tests exactly
+# this mechanism, with a gate whose pristine revision does not exist.
+#
+# Exit status: 0 when every expected criterion was recorded and none
+# failed, 1 otherwise, 2 on a usage or environment error.  A NOTRUN
+# criterion (M0.4, compile on v2606, under another OpenFOAM version; M5.4b,
+# the tables from their sources, on a machine without thermo.inp or the
+# pinned T-Flows revision; M4.6 without LESTO_OPENFOAM_V2606, M4.12
+# without the T-Flows revision; the M4long runs that did not end) does not
+# fail the run but is listed in the summary.
+#
+#------------------------------------------------------------------------------
+source "$(dirname "${BASH_SOURCE[0]}")/functions"
+
+usage() {
+  sed -n '/^# Usage/,/^# Before/p' "${BASH_SOURCE[0]}" | sed '$d; s/^# \{0,1\}//'
+  exit 2
+}
+
+fresh=
+milestones=()
+for arg in "$@"
+do
+  case "$arg" in
+    -fresh) fresh=-fresh ;;
+    M0|M1|M2|M3|M4|M4long|M5) milestones+=("$arg") ;;
+    all) milestones+=(M0 M1 M2 M3 M4 M5) ;;
+    -h|-help|--help) usage ;;
+    *) echo "Unknown milestone or option: $arg" >&2; usage ;;
+  esac
+done
+[ ${#milestones[@]} -gt 0 ] || usage
+
+want() {
+  local m
+  for m in "${milestones[@]}"
+  do
+    [ "$m" = "$1" ] && return 0
+  done
+  return 1
+}
+
+requireOpenFOAM
+: > "$RESULTS"
+start=$(date +%s)
+
+echo "rhoFixedFlowFoam acceptance tests: ${milestones[*]}" \
+     "(OpenFOAM $WM_PROJECT_VERSION, $(git -C "$REPO_DIR" rev-parse \
+     --abbrev-ref HEAD) $(git -C "$REPO_DIR" rev-parse --short HEAD);" \
+     "work directory $WORK_DIR)"
+
+#------------------------------------------------------------------------------
+# Criterion ids every invocation must record, with their number of lines
+#------------------------------------------------------------------------------
+expected=(BUILD:1 M0.1a:4 M0.1b:1 M0.1c:2 M0.1d:1 M0.2:1 SELF:1 CACHE:1)
+if want M0
+then
+  expected+=(M0.0:1 M0.3a:1 M0.3b:1 M0.3c:1 M0.3d:1 M0.3e:1 M0.3f:1 M0.3g:1
+             M0.3h:1 M0.3i:1 M0.3j:1 M0.3k:1 M0.3l:1 M0.4:1)
+fi
+if want M1
+then
+  expected+=(M1.2a:1 M1.2b:1 M1.2c:1 M1.3a:1 M1.3b:1 M1.3c:1 M1.3d:1 M1.4:1
+             M1.5:1)
+fi
+if want M2
+then
+  expected+=(M2.0:1 M2.1a:1 M2.1b:1 M2.1c:1 M2.1d:1 M2.1e:1 M2.1f:1
+             M2.1g:1 M2.1h:1 M2.1i:1 M2.1j:1 M2.1k:1 M2.1l:1 M2.1m:1
+             M2.1n:1 M2.1o:1
+             M2.2a:1 M2.2b:1 M2.2c:1 M2.2d:1 M2.2e:1 M2.2f:1 M2.2g:1
+             M2.2h:1 M2.2i:1 M2.2j:1
+             M2.3a:1 M2.3b:1
+             M2.4a:1 M2.4b:1 M2.4c:1 M2.4d:1 M2.4e:1 M2.4f:1 M2.4g:1
+             M2.4h:1
+             M2.5a:1 M2.5b:1 M2.5c:1 M2.5d:1 M2.5e:1 M2.5f:1 M2.5g:1
+             M2.5h:1 M2.5i:1 M2.5j:1 M2.5k:1 M2.5l:1 M2.5m:1 M2.5n:1
+             M2.5o:1 M2.5p:1 M2.5q:1 M2.5r:1 M2.5s:1 M2.5t:2 M2.5u:3
+             M2.5v:1 M2.5w:1 M2.5x:2 M2.5y:1
+             M2.6a:1 M2.6b:1 M2.6c:2 M2.6d:1 M2.6e:1 M2.6f:1 M2.6g:1
+             M2.6h:2 M2.6i:1 M2.6j:2 M2.6k:2 M2.6l:2 M2.6m:1
+             M2.7:1 M2.8:1 M2.9:1)
+fi
+if want M3
+then
+  expected+=(M3.0:1 M3.1a:1 M3.1b:1 M3.1c:1 M3.1d:1 M3.2a:1 M3.2b:1
+             M3.2c:1 M3.3a:1 M3.3b:1 M3.3c:1 M3.4a:1 M3.4b:1 M3.4c:1
+             M3.4d:1 M3.5a:1 M3.5b:1 M3.5c:1 M3.6:1 M3.7:1 M3.8:1)
+fi
+if want M4
+then
+  expected+=(M4.1a:1 M4.1b:1 M4.1c:1 M4.1d:1 M4.1e:1 M4.1f:1 M4.1g:1
+             M4.1h:1 M4.1i:1 M4.1j:1 M4.1k:1
+             M4.2:1 M4.6:1 M4.7a:1 M4.7b:1 M4.7c:1 M4.7d:1 M4.7e:1 M4.7f:1
+             M4.7g:1 M4.7h:2 M4.8:7 M4.9:1 M4.10:2 M4.11:1 M4.12:1 M4.13:2
+             M4.14:2 M4.15:1 M4.18:1 M4.19:1)
+fi
+if want M4long
+then
+  expected+=(M4.3:2 M4.4:1 M4.5:10 M4.5b:1 M4.16:2 M4.17:1 M4.20:1)
+fi
+if want M5
+then
+  expected+=(M5.0:1 M5.1a:1 M5.1b:1 M5.1c:1 M5.1d:1 M5.1e:1 M5.1f:1
+             M5.2a:1 M5.2b:1 M5.2c:1 M5.2d:1 M5.2e:1 M5.2f:1 M5.2g:1
+             M5.2h:1 M5.2i:1 M5.2j:1 M5.2k:1 M5.2l:1 M5.2m:1 M5.2n:1
+             M5.2o:1 M5.2p:1 M5.2q:1 M5.3a:1
+             M5.3b:1 M5.3c:1 M5.3d:1 M5.4a:1 M5.4b:1 M5.5:15 M5.6:1
+             M5.7:1 M5.8:1 M5.9:1)
+  # the carry-over (c) of the M3 sign-off belongs to M5 (plan section 20,
+  # item 15); tests/Alltest M3 runs it with the other M3 criteria
+  want M3 || expected+=(M3.2c:1)
+fi
+
+#------------------------------------------------------------------------------
+# The solver under test, built from scratch
+#------------------------------------------------------------------------------
+buildOk() {
+  local log=$WORK_DIR/log.Allwmake s n=0
+  for s in $(solverSources) $(utilitySources)
+  do
+    compiled "$s" "$log" || { echo "$s was not compiled ($log)"; return 1; }
+    n=$((n + 1))
+  done
+  [ $n -gt 1 ] && [ "$(countWarnings "$log")" -eq 0 ] && [ -x "$SOLVER_EXE" ] \
+    && [ -x "$FOAM_USER_APPBIN/setFrozenCarrier" ]
+}
+
+echo "Building the solver from scratch (wclean, ./Allwmake)"
+if buildSolver
+then
+  check BUILD "wclean + Allwmake of the solver and of the utility\
+ setFrozenCarrier: every source of their Make/files compiled, 0 warnings\
+ ($WORK_DIR/log.Allwmake)" buildOk
+else
+  result BUILD FAIL "Allwmake of the solver failed ($WORK_DIR/log.Allwmake)"
+  exit 1
+fi
+
+#------------------------------------------------------------------------------
+# M0 only: standalone test and build plumbing
+#------------------------------------------------------------------------------
+if want M0
+then
+  if g++ -std=c++17 -Wall -Wextra "$TESTS_DIR/testDiffusivity.C" \
+    -o "$WORK_DIR/testDiffusivity" > "$WORK_DIR/log.testDiffusivity" 2>&1 \
+    && "$WORK_DIR/testDiffusivity" >> "$WORK_DIR/log.testDiffusivity" 2>&1
+  then
+    check M0.0 "g++ testDiffusivity (PbI2-He reference values), 0 warnings" \
+      [ "$(countWarnings "$WORK_DIR/log.testDiffusivity")" -eq 0 ]
+  else
+    result M0.0 FAIL "testDiffusivity ($WORK_DIR/log.testDiffusivity)"
+  fi
+
+  runScript "$TESTS_DIR/build/Allrun"
+fi
+
+#------------------------------------------------------------------------------
+# Every milestone: the M0 regression gate
+#------------------------------------------------------------------------------
+runScript "$TESTS_DIR/regression/Allrun" $fresh
+
+if want M1
+then
+  runScript "$TESTS_DIR/frozenCarrier/Allrun"
+fi
+
+if want M2
+then
+  runScript "$TESTS_DIR/phaseChange/Allrun"
+fi
+
+if want M3
+then
+  runScript "$TESTS_DIR/profiles/Allrun"
+fi
+
+if want M4
+then
+  runScript "$TESTS_DIR/paperMode/Allrun"
+fi
+
+if want M4long
+then
+  runScript "$TESTS_DIR/paperMode/Allrun" long
+fi
+
+if want M5
+then
+  runScript "$TESTS_DIR/hks/Allrun"
+  want M3 || runScript "$TESTS_DIR/profiles/Allrun" M3.2c
+fi
+
+#------------------------------------------------------------------------------
+# Every milestone: self-test of the completeness check.  The gate is run
+# with a pristine revision that does not exist, into a separate results
+# file: it must stop early, runScript must record that as a FAIL, and
+# expectResults must record a FAIL for each of its 5 criterion ids and
+# report failure.  Nothing of the real gate's work directory is changed
+# (the gate stops at the pristine build, before any run).
+#------------------------------------------------------------------------------
+selfTest() {
+  local dir=$WORK_DIR/selftest
+  rm -rf "$dir"
+  mkdir -p "$dir"
+  (
+    RESULTS=$dir/results
+    : > "$RESULTS"
+    export LESTO_TEST_RESULTS=$RESULTS
+    export PRISTINE_REF=lesto-selftest-no-such-revision
+    runScript "$TESTS_DIR/regression/Allrun" && exit 1
+    expectResults M0.1a:4 M0.1b:1 M0.1c:2 M0.1d:1 M0.2:1 && exit 1
+    exit 0
+  ) > "$dir/log" 2>&1 || return 1
+
+  grep -q '^FAIL   regression .*stopped early' "$dir/results" \
+    && [ "$(grep -c '^FAIL' "$dir/results")" -eq 6 ] \
+    && ! grep -q '^PASS' "$dir/results"
+}
+
+check SELF "a test script that stops early fails Alltest (self-test:\
+ gate with a missing pristine revision, $WORK_DIR/selftest)" selfTest
+
+#------------------------------------------------------------------------------
+# Every milestone: the cache keys of the gate's pristine runs and of the
+# dynamicCode seed follow the run/ inputs (caseInputsSum).  It is evaluated
+# on a stand-in run/ directory of links to the real inputs (the same sum as
+# run/ itself), then after replacing one link by a changed copy: a
+# dictionary that makeCase copies, and the linked carrier field 0/T.  Only
+# the stand-in directory is changed, never run/.
+#------------------------------------------------------------------------------
+cacheTest() {
+  local dir=$WORK_DIR/cachetest n src dst f sumRun sumLinks sumDict sumCarrier
+  rm -rf "$dir"
+  for n in 008 009 010 011
+  do
+    src=$(runCaseDir "$n") || return 1
+    dst=$dir/run/$(basename "$src")
+    mkdir -p "$dst/system" "$dst/constant" "$dst/0"
+    for f in "$src"/system/* "$src"/constant/*Properties "$src"/0/*
+    do
+      ln -s "$(readlink -f "$f")" "$dst/${f#$src/}"
+    done
+  done
+
+  # changeCopy <link>: replace the link by a copy of its target, one line more
+  changeCopy() {
+    local target
+    target=$(readlink -f "$1")
+    rm -f "$1"
+    cp "$target" "$1" && echo "// changed" >> "$1"
+  }
+
+  sumRun=$(caseInputsSum 008 009 010 011)
+  sumLinks=$(RUN_DIR=$dir/run caseInputsSum 008 009 010 011)
+  dst=$(RUN_DIR=$dir/run runCaseDir 010)
+  changeCopy "$dst/system/controlDict" || return 1
+  sumDict=$(RUN_DIR=$dir/run caseInputsSum 008 009 010 011)
+  changeCopy "$dst/0/T" || return 1
+  sumCarrier=$(RUN_DIR=$dir/run caseInputsSum 008 009 010 011)
+  rm -rf "$dir"
+
+  echo "input sums: run/ $sumRun, links $sumLinks, changed controlDict" \
+       "$sumDict, changed 0/T $sumCarrier"
+  [ -n "$sumRun" ] && [ "$sumLinks" = "$sumRun" ] \
+    && [ "$sumDict" != "$sumRun" ] && [ "$sumCarrier" != "$sumDict" ] \
+    && [ "$sumCarrier" != "$sumRun" ]
+}
+
+check CACHE "the cache keys of the pristine runs and the dynamicCode seed\
+ change with a copied dictionary and with the linked carrier of run/008-011"\
+ cacheTest
+
+#------------------------------------------------------------------------------
+# Summary: every expected criterion recorded, none failed
+#------------------------------------------------------------------------------
+expectResults "${expected[@]}"
+
+echo
+echo "Summary ($(( ($(date +%s) - start) / 60 )) min; $RESULTS)"
+cat "$RESULTS"
+
+nFail=$(grep -c '^FAIL' "$RESULTS")
+nPass=$(grep -c '^PASS' "$RESULTS")
+nNotRun=$(grep -c '^NOTRUN' "$RESULTS")
+echo "$nPass passed, $nFail failed, $nNotRun not run"
+
+[ "$nFail" -eq 0 ] && [ "$nPass" -gt 0 ]
+
+#------------------------------------------------------------------------------

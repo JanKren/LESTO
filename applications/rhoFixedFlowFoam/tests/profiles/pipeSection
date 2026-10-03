@@ -1,0 +1,199 @@
+#------------------------------------------------------------------------------
+#
+# tests/profiles/pipeSection
+#
+# PURPOSE
+#
+# The pipe criteria of tests/profiles/Allrun (M3.1b, M3.2a-c, M3.4c, M3.5c;
+# see its header): the pipe of run/012 (background Y = 0.1, 4 ms steps, the
+# outer loop converged to the floor of the linear solver) in serial, on 4
+# ranks simple (4 1 1) and hierarchical (2 2 1), and on 3 ranks of an uneven
+# manual split along x, with run/012 for M3.7 alongside.  Sourced by
+# tests/profiles/Allrun, which defines the helpers, with
+#
+#   PIPE_SECTION=all     every pipe run and criterion (tests/Alltest M3)
+#   PIPE_SECTION=M3.2c   the serial pipe and the uneven 3-rank split only:
+#                        criterion M3.2c, the carry-over (c) of the M3
+#                        sign-off that belongs to milestone M5
+#                        (tests/profiles/Allrun M3.2c, run by
+#                        tests/Alltest M5 when M3 is not run)
+#
+#------------------------------------------------------------------------------
+all=true
+[ "$PIPE_SECTION" = M3.2c ] && all=false
+
+PIPE=$PR_DIR/pipe
+PIPE411=$PR_DIR/pipe-simple411
+PIPEH221=$PR_DIR/pipe-hierarchical221
+PIPEU3=$PR_DIR/pipe-manual3
+pipes=("$PIPE" "$PIPEU3")
+$all && pipes=("$PIPE" "$PIPE411" "$PIPEH221" "$PIPEU3")
+
+# the correctors and the final solve of Y_PbI2_g to 1e-13, relTol 0
+tightSolvers() {
+  python3 - "$1/system/fvSolution" <<'PYEOF'
+import re, sys
+p = sys.argv[1]
+s = open(p).read()
+for name in ('Y_PbI2_g', 'Y_PbI2_gFinal'):
+    s, n1 = re.subn(r'(\n  ' + name + r'\s*\{[^}]*?tolerance\s+)[^;]+;',
+                    r'\g<1>1e-13;', s, count=1)
+    s, n2 = re.subn(r'(\n  ' + name + r'\s*\{[^}]*?relTol\s+)[^;]+;',
+                    r'\g<1>0;', s, count=1)
+    if n1 != 1 or n2 != 1:
+        sys.exit(f'No solver {name} in {p}')
+open(p, 'w').write(s)
+PYEOF
+}
+
+preparePipe() {
+  makeCase 012 "$1" \
+    && setControl "$1" endTime 0.02 \
+    && setControl "$1" deltaT 0.004 \
+    && setControl "$1" writeInterval 5 \
+    && edit "$1/system/controlDict" \
+         's/^(  tolerance +)[^; ]+;/\11e-12;/; s/^(  nCorr +)[0-9]+;/\140;/' \
+         'nCorr +40;' \
+    && edit "$1/0/Y_PbI2_g" 's/^(internalField +)uniform 0;/\1uniform 0.1;/' \
+         'uniform 0.1;' \
+    && tightSolvers "$1" \
+    && addProfiles "$1" '  bins {
+    native { min 0; max 0.69; nBins 424; }
+    gamma  { min 0; max 0.69; width 0.01; }
+  }
+  times (0.012);'
+}
+
+for c in "${pipes[@]}"
+do
+  preparePipe "$c" || { echo "Setting up $c failed"; exit 1; }
+done
+if $all
+then
+  decomposeWith "$PIPE411" 4 "method simple; coeffs { n (4 1 1); }" \
+    || { echo "decomposePar failed ($PIPE411)"; exit 1; }
+  decomposeWith "$PIPEH221" 4 \
+    "method hierarchical; coeffs { n (2 2 1); order xyz; }" \
+    || { echo "decomposePar failed ($PIPEH221)"; exit 1; }
+fi
+# the uneven split: the cell centres (writeCellCentres, ascii, in a copy of
+# the case), 3 slabs along x
+CENTRES=$PR_DIR/pipeCellCentres
+makeCase 012 "$CENTRES" && setControl "$CENTRES" writeFormat ascii \
+  && (cd "$CENTRES" && postProcess -func writeCellCentres -time 0 \
+        > log.writeCellCentres 2>&1) \
+  && python3 - "$CENTRES/0/Cx" "$PIPEU3/constant/cellDecomposition" <<'EOF' \
+  || { echo "The manual decomposition of $PIPEU3 failed"; exit 1; }
+import re, sys
+text = open(sys.argv[1]).read()
+m = re.search(r'internalField\s+nonuniform\s+List<scalar>\s*(\d+)\s*\(([^)]*)\)',
+              text)
+x = [float(v) for v in m.group(2).split()]
+assert len(x) == int(m.group(1))
+ranks = [0 if v < 0.1 else 1 if v < 0.25 else 2 for v in x]
+with open(sys.argv[2], 'w') as f:
+    f.write('FoamFile {version 2.0; format ascii; class labelList; '
+            'object cellDecomposition;}\n\n')
+    f.write(f'{len(ranks)}\n(\n' + '\n'.join(map(str, ranks)) + '\n)\n')
+EOF
+decomposeWith "$PIPEU3" 3 \
+  'method manual; coeffs { dataFile "cellDecomposition"; }' \
+  || { echo "decomposePar failed ($PIPEU3)"; exit 1; }
+
+if $all
+then
+  C012=$PR_DIR/run012
+  makeCase 012 "$C012" && setControl "$C012" endTime 0.005 || exit 1
+  addProfiles "$C012" '  bins {
+    native { min 0; max 0.69; nBins 424; }
+    gamma  { min 0; max 0.69; width 0.01; }
+  }
+  times (0.002 0.004);'
+  echo "Running the pipe (serial, simple (4 1 1), hierarchical (2 2 1),\
+ manual 3) and run/012"
+else
+  echo "Running the pipe (serial, manual 3)"
+fi
+pids=()
+runSerial "$PIPE" "$SOLVER_EXE" &
+pids+=($!)
+runParallel "$PIPEU3" "$SOLVER_EXE" 3 &
+pids+=($!)
+if $all
+then
+  runParallel "$PIPE411" "$SOLVER_EXE" 4 &
+  pids+=($!)
+  runParallel "$PIPEH221" "$SOLVER_EXE" 4 &
+  pids+=($!)
+  runSerial "$C012" "$SOLVER_EXE" &
+  pids+=($!)
+fi
+wait "${pids[@]}"
+
+pipeOk=true
+for c in "${pipes[@]}"
+do
+  grep -q '^End' "$c/log" || pipeOk=false
+done
+
+if $pipeOk
+then
+  if $all
+  then
+    text=""
+    status=0
+    for c in "${pipes[@]}"
+    do
+      out=$($CHECKS integrals "$c" 1e-12 native gamma) || status=1
+      text="$text $(basename "$c"): ${out#*: };"
+    done
+    check M3.1b "pipe:$text" [ $status -eq 0 ]
+    specs=("a|$PIPE411" "b|$PIPEH221" "c|$PIPEU3")
+  else
+    specs=("c|$PIPEU3")
+  fi
+
+  nConverged=$(grep -c 'exchange: .*, converged (' "$PIPE/log")
+  for spec in "${specs[@]}"
+  do
+    IFS='|' read -r id c <<< "$spec"
+    out=$($CHECKS compareProfiles "$PIPE" "$c" 1e-12 1e-9 1e-12)
+    s1=$?
+    nPar=$(grep -c 'exchange: .*, converged (' "$c/log")
+    nRanks=$(ls -d "$c"/processor* | wc -l)
+    method=$(sed -n 's/^method *\([a-z]*\);.*n (\([0-9 ]*\)).*/\1 (\2)/p; s/^method *manual;.*/manual, uneven slabs along x/p' \
+      "$c/system/decomposeParDict")
+    cells=$(for d in "$c"/processor*
+      do
+        grep -a -m1 -o 'nCells: *[0-9]*' "$d/constant/polyMesh/owner" \
+          | sed 's/[^0-9]//g'
+      done | tr '\n' ' ')
+    check M3.2$id "pipe, $nRanks ranks $method (cells per rank $cells;\
+ processor patches per rank:\
+ $(for d in "$c"/processor*; do grep -c 'type *processor;' \
+   "$d/constant/polyMesh/boundary"; done | tr '\n' ' ')), steps converged\
+ $nPar and serial $nConverged of 5: ${out#*: }" \
+      eval '[ $s1 -eq 0 ] && [ $nPar -eq 5 ] && [ $nConverged -eq 5 ]'
+  done
+
+  if $all
+  then
+    out=$($CHECKS times "$PIPE411" 0.004 0.02 0.012)
+    check M3.4c "4-rank pipe, profile time 0.012: ${out#*: }" [ $? -eq 0 ]
+
+    factor=$($CHECKS mDepFactor "$BOXBASE" 1)
+    s1=$?
+    procOut=$($PCCHECKS processorPatches "$PIPEH221" 0.02 mDep_PbI2_s)
+    s2=$?
+    check M3.5c "box, areaMultiplier 1: ${factor#*: }; 4-rank pipe\
+ hierarchical (2 2 1) at 0.02: ${procOut#*: }" \
+      eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ]'
+  fi
+else
+  ids=(M3.2c)
+  $all && ids=(M3.1b M3.2a M3.2b M3.2c M3.4c M3.5c)
+  for id in "${ids[@]}"
+  do
+    result $id FAIL "pipe failed (${pipes[*]/%//log})"
+  done
+fi

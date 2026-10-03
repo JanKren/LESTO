@@ -1,0 +1,8 @@
+FoamFile {version 2.0; format ascii; class dictionary; object speciesTransportProperties;}
+
+pressureUnit atm;
+
+species (PbI2_g PbI2_s);
+
+PbI2_g {state gas; diffusivityModel PbI2He; molarMass 0.46100894;}
+PbI2_s {state solid;}

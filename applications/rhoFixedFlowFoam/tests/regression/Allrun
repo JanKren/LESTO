@@ -1,0 +1,258 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#
+# tests/regression/Allrun
+#
+# PURPOSE
+#
+# The M0 regression gate, re-run at the end of every milestone.  It proves
+# that the existing cases 008, 009, 010 and 011 (model mock: the coupled
+# mock of the main branch) are reproduced digit for digit by the current
+# build: their logs, and the fields written by 010.
+#
+# Reference: the pristine solver of the tag 0.1 of the main branch
+# (tests/functions, buildPristine, PRISTINE_REF; plan section 31), run on
+# the same cases in tests/work.  Its runs are cached and repeated only when
+# their key changes (or with -fresh).  The key holds the pristine commit and
+# OpenFOAM installation, the mesh checksum, the checksum of every input
+# taken from run/008-011 (including the linked carrier of run/007/261) and
+# the shell functions that set up and run the cases.
+#
+# Criteria (plan section 6, M0 acceptance 1 and 2, as restated in plan
+# section 31 for the pristine reference 0.1)
+#
+#   M0.1a  008, 009, 010, 011 (10 steps): the filtered logs of the current
+#          build are identical to those of the pristine build.  The filter
+#          of regress.sh normalises only the run-specific lines; the
+#          dynamicCode case-path lines are compared with the case directory
+#          replaced.
+#   M0.1b  011 (run/011-coupled-species-sources, recorded with the coupled
+#          mock of the main branch): the first block of its out_excerpt (10
+#          time steps) is reproduced identically, 519 filtered lines.
+#          (Before tag 0.1 this was 010's excerpt, 402 lines; see M0.1d.)
+#   M0.1c  008 and 009: their out_excerpts were recorded before tag 0.1
+#          added the per-step report of the coupled mock (Integrated
+#          source, Species balance).  Without that report (regress.sh
+#          -noMockReport) the excerpt differs from both builds in the same
+#          single line only, the banner renamed in e2ddbfa ("Transported
+#          gaseous species" -> "Configured species"): the gas solves, whose
+#          source is zero without a solid species, are unchanged.
+#   M0.1d  010: its out_excerpt was recorded with the mock before tag 0.1
+#          (a fixed source of the solid), and 0.1's coupled mock changes
+#          the lines of Y_PbI2_g and Y_PbI2_s (not re-recorded there).
+#          Without the report of the coupled mock and without those lines
+#          (regress.sh -noMockReport -ignore), the first block is reproduced
+#          identically by both builds: 150 lines, among them the start-up
+#          block and every line of the passive Y_tracer, whose source is
+#          zero in both mocks.
+#   M0.2   010 with writeInterval 3 (writes at 0.012, 0.024, 0.036): all 18
+#          written fields (the 15 of before tag 0.1 and the source fields
+#          source_PbI2_g, source_tracer and source_PbI2_s of the coupled
+#          mock) and the 2 files of uniform/ (time and
+#          functionObjects/functionObjectProperties) are cmp-identical to the
+#          pristine build, 60 files in all.
+#
+# Usage: tests/regression/Allrun [-fresh]
+#
+# Exit status: 0 when every criterion was tested (whatever the results),
+# 1 when the gate stopped early (mesh, pristine build or dynamicCode seed
+# failed) and recorded nothing; Alltest reports that as a FAIL.
+#
+#------------------------------------------------------------------------------
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+
+fresh=false
+[ "${1:-}" = "-fresh" ] && fresh=true
+
+GATE_DIR=$WORK_DIR/regression
+REGRESS=$TESTS_DIR/regress.sh
+CMPFIELDS=$TESTS_DIR/cmpFields.sh
+
+#------------------------------------------------------------------------------
+# Case set-up.  "010w" is 010 with writeInterval 3 and 9 steps; it is also
+# the writeFrozenFields-yes reference of the M1 tests.
+#------------------------------------------------------------------------------
+prepareGateCase() {
+  local name=$1 dst=$2
+  case "$name" in
+    008|009|010|011)
+      makeCase "$name" "$dst" && setControl "$dst" endTime 0.04
+      ;;
+    010w)
+      makeCase 010 "$dst" \
+        && setControl "$dst" endTime 0.036 \
+        && setControl "$dst" writeInterval 3
+      ;;
+  esac
+}
+
+runGateCase() {
+  local name=$1 dst=$2 exe=$3
+  prepareGateCase "$name" "$dst" && runSerial "$dst" "$exe"
+}
+
+# a pristine run records its cache key only when it completed
+runPristineCase() {
+  runGateCase "$1" "$2" "$PRISTINE_EXE" && echo "$3" > "$2/key"
+}
+
+mkdir -p "$GATE_DIR"
+echo "== M0 regression gate (work directory $GATE_DIR)"
+
+makeMesh || exit 1
+buildPristine || exit 1
+seedDynamicCode "$PRISTINE_EXE" || exit 1
+
+#------------------------------------------------------------------------------
+# Pristine reference runs, cached under a key of the pristine build, the
+# mesh, the run/ inputs and the shell functions that set up and run the cases
+#------------------------------------------------------------------------------
+key="$(cat "$PRISTINE_DIR/key") $(cat "$MESH_DIR/mesh.md5") $( \
+  caseInputsSum 008 009 010 011) $( \
+  declare -f prepareGateCase makeCase runCaseDir setControl runSerial \
+  | md5sum | cut -d' ' -f1)"
+
+for name in 008 009 010 011 010w
+do
+  dst=$GATE_DIR/pristine/$name
+  if ! $fresh && [ "$(cat "$dst/key" 2>/dev/null)" = "$key" ] \
+    && grep -q '^End$' "$dst/log" 2>/dev/null
+  then
+    continue
+  fi
+  echo "Running pristine $name"
+  startJob runPristineCase "$name" "$dst" "$key"
+done
+
+for name in 008 009 010 011 010w
+do
+  echo "Running current build $name"
+  startJob runGateCase "$name" "$GATE_DIR/new/$name" "$SOLVER_EXE"
+done
+
+waitJobs || echo "At least one solver run failed; see the logs below."
+
+#------------------------------------------------------------------------------
+# M0.1a: complete filtered logs, current build vs pristine build
+#------------------------------------------------------------------------------
+for name in 008 009 010 011
+do
+  out=$("$REGRESS" "$GATE_DIR/pristine/$name/log" "$GATE_DIR/new/$name/log")
+  status=$?
+  echo "$out" | head -20
+  if [ $status -eq 0 ] && grep -q '^End$' "$GATE_DIR/new/$name/log"
+  then
+    result M0.1a PASS "$name log identical to pristine build: ${out#IDENTICAL: }"
+  else
+    result M0.1a FAIL "$name log differs from pristine build" \
+      "($GATE_DIR/new/$name/log)"
+  fi
+done
+
+#------------------------------------------------------------------------------
+# M0.1b: 011 reproduces the first block of its out_excerpt
+#------------------------------------------------------------------------------
+excerpt011=$(runCaseDir 011)/out_excerpt
+out=$("$REGRESS" -excerpt "$excerpt011" "$GATE_DIR/new/011/log")
+status=$?
+echo "$out" | head -20
+nLines=$(echo "$out" | sed -n 's/^IDENTICAL: \([0-9]*\) lines.*/\1/p')
+if [ $status -eq 0 ] && [ "$nLines" = 519 ]
+then
+  result M0.1b PASS "011 out_excerpt identical: ${out#IDENTICAL: }" \
+    "(recorded with the coupled mock of the main branch)"
+else
+  result M0.1b FAIL "011 out_excerpt not reproduced (expected 519 lines)"
+fi
+
+#------------------------------------------------------------------------------
+# M0.1c: 008/009 differ from out_excerpt, without the report of the coupled
+# mock, only in the renamed banner line, identically for both builds
+#------------------------------------------------------------------------------
+expected=$(printf '%s\n' \
+  '< Transported gaseous species: 2(PbI2_g tracer)' \
+  '> Configured species: 2(PbI2_g tracer)')
+
+for name in 008 009
+do
+  excerpt=$(runCaseDir $name)/out_excerpt
+  diffNew=$("$REGRESS" -excerpt -noMockReport "$excerpt" \
+              "$GATE_DIR/new/$name/log")
+  diffOld=$("$REGRESS" -excerpt -noMockReport "$excerpt" \
+              "$GATE_DIR/pristine/$name/log")
+  changed=$(echo "$diffNew" | grep '^[<>]')
+  echo "$diffNew" | head -10
+  if [ "$diffNew" = "$diffOld" ] && [ "$changed" = "$expected" ]
+  then
+    result M0.1c PASS "$name out_excerpt, without the report of the" \
+      "coupled mock, differs from both builds only in the banner line of" \
+      "e2ddbfa"
+  else
+    result M0.1c FAIL "$name out_excerpt difference (without the report of" \
+      "the coupled mock) is not only the banner line (or differs between" \
+      "builds)"
+  fi
+done
+
+#------------------------------------------------------------------------------
+# M0.1d: 010 reproduces its out_excerpt but for the lines of the PbI2
+# species, which the coupled mock of tag 0.1 changed, in both builds
+#------------------------------------------------------------------------------
+excerpt010=$(runCaseDir 010)/out_excerpt
+ignorePbI2='Y_PbI2_[gs]'
+outNew=$("$REGRESS" -excerpt -noMockReport -ignore "$ignorePbI2" \
+           "$excerpt010" "$GATE_DIR/new/010/log")
+statusNew=$?
+outOld=$("$REGRESS" -excerpt -noMockReport -ignore "$ignorePbI2" \
+           "$excerpt010" "$GATE_DIR/pristine/010/log")
+statusOld=$?
+echo "$outNew" | head -20
+nLines=$(echo "$outNew" | sed -n 's/^IDENTICAL: \([0-9]*\) lines.*/\1/p')
+nTracer=$(sed '/^\.\.\.$/,$d' "$excerpt010" | grep -c 'Y_tracer')
+if [ $statusNew -eq 0 ] && [ $statusOld -eq 0 ] && [ "$nLines" = 150 ] \
+  && [ "$nTracer" -gt 0 ]
+then
+  result M0.1d PASS "010 out_excerpt (recorded before tag 0.1), without the" \
+    "report of the coupled mock and the lines of Y_PbI2_g and Y_PbI2_s," \
+    "identical for both builds: ${outNew#IDENTICAL: }; among them the" \
+    "start-up block and all $nTracer Y_tracer lines"
+else
+  result M0.1d FAIL "010 out_excerpt without the PbI2 lines not reproduced" \
+    "(expected 150 lines for both builds)"
+fi
+
+#------------------------------------------------------------------------------
+# M0.2: 010 with writeInterval 3, written files cmp-identical
+#------------------------------------------------------------------------------
+new=$GATE_DIR/new/010w
+old=$GATE_DIR/pristine/010w
+out=$("$CMPFIELDS" "$old" "$new")
+status=$?
+echo "$out" | head -20
+
+writeTimes=$(timeDirs "$new" | tr '\n' ' ')
+counts=""
+countsOk=true
+for t in $writeTimes
+do
+  nFields=$(find "$new/$t" -maxdepth 1 -type f | wc -l)
+  counts="$counts $t:$nFields"
+  [ "$nFields" -eq 18 ] && [ -f "$new/$t/uniform/time" ] \
+    && [ -f "$new/$t/source_PbI2_g" ] && [ -f "$new/$t/source_tracer" ] \
+    && [ -f "$new/$t/source_PbI2_s" ] || countsOk=false
+done
+
+if [ $status -eq 0 ] && $countsOk && [ "$writeTimes" = "0.012 0.024 0.036 " ]
+then
+  result M0.2 PASS "010 writeInterval 3: ${out#IDENTICAL: }" \
+    "(fields per write time:$counts, plus uniform/)"
+else
+  result M0.2 FAIL "010 writeInterval 3: written files differ or are" \
+    "incomplete (times: $writeTimes; fields:$counts)"
+fi
+
+# every criterion was tested; the results are in $RESULTS
+exit 0
+
+#------------------------------------------------------------------------------

@@ -1,0 +1,27 @@
+/*------------------------------------------------------------------------------
+
+system/blockMeshDict of tests/phaseChange/closedBox
+
+  Closed box of 10 cells along x (1 mm each), ONE cell of 57.46 um in y
+  above the WALL patch (y = 0), one cell in z (empty front and back).
+  Every cell is a layer cell with one wall face, A_e/V_c = 1/57.46e-6 1/m.
+
+------------------------------------------------------------------------------*/
+FoamFile {version 2.0; format ascii; class dictionary; object blockMeshDict;}
+
+scale 1;
+
+vertices (
+  (0    0        0) (0.01 0        0) (0.01 57.46e-6 0) (0    57.46e-6 0)
+  (0    0     1e-3) (0.01 0     1e-3) (0.01 57.46e-6 1e-3) (0 57.46e-6 1e-3)
+);
+
+blocks (hex (0 1 2 3 4 5 6 7) (10 1 1) simpleGrading (1 1 1));
+
+boundary (
+  INLET     {type patch; faces ((0 4 7 3));}
+  OUTLET    {type patch; faces ((1 2 6 5));}
+  WALL      {type patch; faces ((0 1 5 4));}
+  TOP       {type patch; faces ((3 7 6 2));}
+  FRONTBACK {type empty; faces ((0 3 2 1) (4 5 6 7));}
+);

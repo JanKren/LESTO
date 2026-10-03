@@ -1,0 +1,26 @@
+/*------------------------------------------------------------------------------
+
+system/setFrozenCarrierDict of tests/paperMode/wedge
+
+  The paper-mode carrier on the wedge: the sector (5 degrees) from the two
+  wedge patches, the discrete inflow rescaled to exactly Q 5/360, and the
+  wall table of constant/wallT.dat (format columns) on the whole cross-
+  section.
+
+------------------------------------------------------------------------------*/
+FoamFile {version 2.0; format ascii; class dictionary; object setFrozenCarrierDict;}
+
+axis             (1 0 0);
+origin           (0 0 0);
+radius           2.4e-3;
+flowRateMLPerMin 100;
+rescaleToFacets  yes;
+inlet            INLET;
+walls            (WALL);
+density          1;
+pressure         1e5;
+
+temperature {
+  mode   profile;
+  table  { file "<constant>/wallT.dat"; format columns; outOfRange fatal; }
+}

@@ -1,0 +1,9 @@
+/* frozen carrier of the corners: T = 700 K, at rest (phi = 0) */
+FoamFile {version 2.0; format ascii; class dictionary; object carrierDict;}
+
+Tin       700;
+Tout      700;
+L         0.002;
+p         101325;
+molarMass 4.0026e-3;
+massFlux  0;

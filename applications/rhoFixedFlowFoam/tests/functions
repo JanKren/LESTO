@@ -1,0 +1,523 @@
+#------------------------------------------------------------------------------
+#
+# tests/functions
+#
+# PURPOSE
+#
+# Bash functions shared by tests/Alltest and the milestone scripts
+# tests/*/Allrun.  Source this file; it
+#
+#   - defines the paths of the solver, the repository and the work area;
+#   - generates the pipe mesh once from run/001.../pipe.msh;
+#   - builds the pristine reference solver of the main branch (the tag
+#     0.1, PRISTINE_REF);
+#   - prepares test cases as copies of run/0NN cases;
+#   - runs the solver in serial and in parallel;
+#   - records PASS/FAIL/NOTRUN results for the summary of Alltest, and
+#     checks that every expected criterion recorded one.
+#
+# Everything is written below the git-ignored work area tests/work/.
+# Nothing is ever written below run/: a test case copies the small inputs of
+# a run/ case and links the large ones (the frozen carrier of run/007 at
+# time 261, the mesh in tests/work/mesh and a shared dynamicCode directory).
+#
+# Work area layout
+#
+#   tests/work/mesh/                  the mesh, shared by every OpenFOAM
+#   tests/work/<version>-<WM_OPTIONS>/ everything else: pristine build,
+#                                     dynamicCode, test cases, logs, results
+#
+# Keeping builds, compiled coded boundary conditions and cached reference
+# runs per OpenFOAM version means that running the tests under another
+# OpenFOAM (e.g. v2606 for M0.4) never reuses objects or logs of this one.
+#
+#------------------------------------------------------------------------------
+
+# The optional GEMS3K bridge and xGEMS are opted into through the
+# environment (LESTO_GEMSBRIDGE, LESTO_XGEMS).  The tests build and gate the
+# default solver, and the build tests set both explicitly where they test
+# them, so a value exported in the user's shell must not leak into them.
+unset LESTO_GEMSBRIDGE LESTO_XGEMS
+
+TESTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+SOLVER_DIR=$(dirname "$TESTS_DIR")
+REPO_DIR=$(git -C "$SOLVER_DIR" rev-parse --show-toplevel 2>/dev/null) || {
+  echo "tests/ must stay inside the LESTO git repository" \
+       "(applications/rhoFixedFlowFoam/tests)" >&2
+  exit 2
+}
+RUN_DIR=$REPO_DIR/run
+WORK_ROOT=$TESTS_DIR/work
+WORK_DIR=$WORK_ROOT/${WM_PROJECT_VERSION:-none}-${WM_OPTIONS:-none}
+
+# results of one Alltest invocation; LESTO_TEST_RESULTS redirects them (used
+# by the self-test of Alltest)
+RESULTS=${LESTO_TEST_RESULTS:-$WORK_DIR/results}
+
+MESH_SOURCE=$RUN_DIR/001-first-pipe-flow-simpleFoam
+MESH_DIR=$WORK_ROOT/mesh
+DYNAMIC_CODE_DIR=$WORK_DIR/dynamicCode
+PRISTINE_DIR=$WORK_DIR/pristine
+PRISTINE_EXE=$PRISTINE_DIR/bin/rhoFixedFlowFoam
+
+# The pristine reference is built from this git revision: the tag 0.1 of
+# the main branch, pinned (plan section 31).  The main branch's next
+# commits (71bf192) link xGEMS unconditionally from a local installation of
+# its author and cannot be built here; without xGEMS they equal 0.1 ('git
+# diff --stat 0.1 71bf192' touches only Make/options, the xGEMS start-up
+# block of rhoFixedFlowFoam.C and applications/xgemsFoamProbe).
+# PRISTINE_REF overrides it: a tag, a commit or a branch (a branch also as
+# origin/<branch> in a clone without a local one).
+PRISTINE_REF=${PRISTINE_REF:-0.1}
+
+# at most this many serial solver runs at the same time
+MAX_JOBS=${MAX_JOBS:-4}
+
+
+#------------------------------------------------------------------------------
+# Environment
+#------------------------------------------------------------------------------
+
+requireOpenFOAM() {
+  if ! command -v wmake >/dev/null 2>&1 || [ -z "${FOAM_USER_APPBIN:-}" ] \
+    || [ -z "${WM_PROJECT_VERSION:-}" ] || [ -z "${WM_OPTIONS:-}" ]
+  then
+    echo "Load OpenFOAM v2412 or v2606 first, e.g." >&2
+    echo "  set +u; source ~/OpenFOAM/OpenFOAM-v2412/etc/bashrc" >&2
+    exit 2
+  fi
+  SOLVER_EXE=$FOAM_USER_APPBIN/rhoFixedFlowFoam
+  mkdir -p "$WORK_DIR"
+}
+
+
+#------------------------------------------------------------------------------
+# Results: one line per criterion in $RESULTS, printed as it is recorded
+#
+#   result <id> PASS|FAIL|NOTRUN <text>
+#   check  <id> <text> <command ...>   PASS when the command succeeds
+#
+# Completeness: a test script that stops early records nothing for the
+# criteria it did not reach.  Alltest therefore runs every script with
+# runScript and finally checks with expectResults that each criterion id
+# was recorded exactly as often as expected.
+#
+#   runScript <script> [args]   runs a tests/*/Allrun script; a non-zero
+#                               exit status (the script stopped early) is
+#                               recorded as a FAIL named after its directory
+#   missingResults <file> <id>:<count> ...
+#                               prints every <id>:<count> that <file> does
+#                               not hold exactly <count> times
+#   expectResults <id>:<count> ...
+#                               records a FAIL for every such id in
+#                               $RESULTS; returns 1 if there was one
+#------------------------------------------------------------------------------
+
+result() {
+  local id=$1 status=$2
+  shift 2
+  printf '%-6s %-10s %s\n' "$status" "$id" "$*" | tee -a "$RESULTS"
+}
+
+check() {
+  local id=$1 text=$2
+  shift 2
+  if "$@"
+  then
+    result "$id" PASS "$text"
+  else
+    result "$id" FAIL "$text"
+  fi
+}
+
+runScript() {
+  local script=$1 status
+  shift
+  "$script" "$@"
+  status=$?
+  if [ $status -ne 0 ]
+  then
+    result "$(basename "$(dirname "$script")")" FAIL \
+      "${script#$TESTS_DIR/} stopped early (exit status $status);" \
+      "its remaining criteria were not tested"
+  fi
+  return $status
+}
+
+missingResults() {
+  local file=$1 spec id n found
+  shift
+  for spec in "$@"
+  do
+    id=${spec%%:*}
+    n=${spec#*:}
+    found=$(awk -v id="$id" '$2 == id' "$file" | wc -l)
+    [ "$found" -eq "$n" ] || echo "$spec"
+  done
+}
+
+expectResults() {
+  local spec id n found missing
+  missing=$(missingResults "$RESULTS" "$@")
+  for spec in $missing
+  do
+    id=${spec%%:*}
+    n=${spec#*:}
+    found=$(awk -v id="$id" '$2 == id' "$RESULTS" | wc -l)
+    result "$id" FAIL "expected $n result line(s), found $found" \
+      "(a test script stopped early or was not run)"
+  done
+  [ -z "$missing" ]
+}
+
+# number of lines in a file that mention a compiler or wmake warning
+countWarnings() {
+  grep -c -i -E 'warning|wmkdepend: (could not open|buffer full)' "$1"
+}
+
+# compiled <source> <log>: the wmake log shows that <source> was compiled
+# (verbose g++ line or WM_QUIET "Ctoo:" line)
+compiled() {
+  grep -q -E "(-c|Ctoo:) $1( |$)" "$2"
+}
+
+# the .C files listed in the solver's Make/files
+solverSources() {
+  sed -n 's/^[[:space:]]*\([^[:space:]$]*\.C\)[[:space:]]*$/\1/p' \
+    "$SOLVER_DIR/Make/files"
+}
+
+# the .C files of the utility setFrozenCarrier (milestone M4), built and
+# cleaned with the solver
+utilitySources() {
+  sed -n 's/^[[:space:]]*\([^[:space:]$]*\.C\)[[:space:]]*$/\1/p' \
+    "$SOLVER_DIR/utilities/setFrozenCarrier/Make/files"
+}
+
+
+#------------------------------------------------------------------------------
+# Jobs: run shell commands in the background, at most MAX_JOBS at a time
+#
+#   startJob <command ...>
+#   waitJobs          waits for the jobs started with startJob (not for
+#                     other background processes, e.g. a long run that a
+#                     script checks at its end); returns 1 if any failed
+#
+# Every running background process counts towards MAX_JOBS.
+#------------------------------------------------------------------------------
+
+JOB_FAILED=0
+JOB_PIDS=()
+
+startJob() {
+  while [ "$(jobs -rp | wc -l)" -ge "$MAX_JOBS" ]
+  do
+    wait -n
+  done
+  "$@" &
+  JOB_PIDS+=($!)
+}
+
+waitJobs() {
+  local pid
+  for pid in "${JOB_PIDS[@]}"
+  do
+    wait "$pid" || JOB_FAILED=1
+  done
+  JOB_PIDS=()
+  local failed=$JOB_FAILED
+  JOB_FAILED=0
+  return $failed
+}
+
+
+#------------------------------------------------------------------------------
+# Mesh: gmshToFoam of run/001.../pipe.msh, once, into tests/work/mesh.
+# The stamp holds the checksum of pipe.msh, so a changed mesh is converted
+# again.  The polyMesh format is the same for v2412 and v2606, so the mesh
+# is shared by all OpenFOAM versions; both builds of a comparison always
+# run on the same mesh.
+#------------------------------------------------------------------------------
+
+makeMesh() {
+  local stamp=$MESH_DIR/mesh.md5 sum
+  sum=$(md5sum < "$MESH_SOURCE/pipe.msh" | cut -d' ' -f1)
+
+  if [ -f "$MESH_DIR/constant/polyMesh/owner" ] \
+    && [ "$(cat "$stamp" 2>/dev/null)" = "$sum" ]
+  then
+    return 0
+  fi
+
+  echo "Converting $MESH_SOURCE/pipe.msh into $MESH_DIR"
+  rm -rf "$MESH_DIR"
+  mkdir -p "$MESH_DIR/constant" "$MESH_DIR/system"
+  cp "$MESH_SOURCE"/system/{controlDict,fvSchemes,fvSolution} \
+    "$MESH_DIR/system/"
+  gmshToFoam -case "$MESH_DIR" "$MESH_SOURCE/pipe.msh" \
+    > "$MESH_DIR/log.gmshToFoam" 2>&1 || {
+      echo "gmshToFoam failed, see $MESH_DIR/log.gmshToFoam" >&2
+      return 1
+    }
+  echo "$sum" > "$stamp"
+}
+
+
+#------------------------------------------------------------------------------
+# Cases
+#
+#   makeCase <run case number> <destination>
+#     copies system/, the constant/*Properties files and the non-linked 0/
+#     files of run/<number>-*; links the carrier fields and the tables
+#     constant/*.csv and constant/*.dat (absolute links to their targets,
+#     e.g. the p_v table of run/013, the wall table of run/014), the mesh
+#     and the shared dynamicCode directory.
+#
+#   caseInputsSum <run case number> ...
+#     checksum of everything makeCase takes from those run/ cases (the
+#     contents of system/*, constant/*Properties and 0/* with the links
+#     resolved, i.e. including the linked carrier of run/007).  Cached
+#     results keyed on it are recomputed when any input changes.
+#
+#   setControl <case> <keyword> <value>
+#     replaces the top-level controlDict entry <keyword> (it must exist).
+#
+#   setSpeciesControl <case> <keyword> <value>
+#     sets <keyword> in the speciesTransport dictionary of controlDict.
+#
+# controlDict is edited with sed, not foamDictionary: rewriting a dictionary
+# with foamDictionary rounds scalars to the default precision.
+#------------------------------------------------------------------------------
+
+runCaseDir() {
+  local dir
+  dir=$(ls -d "$RUN_DIR/$1"-* 2>/dev/null | head -1)
+  [ -n "$dir" ] || { echo "No case run/$1-*" >&2; return 1; }
+  echo "$dir"
+}
+
+makeCase() {
+  local src dst=$2 f
+  src=$(runCaseDir "$1") || return 1
+
+  rm -rf "$dst"
+  mkdir -p "$dst/0" "$dst/constant" "$dst/system"
+
+  cp "$src"/system/* "$dst/system/"
+  cp "$src"/constant/*Properties "$dst/constant/"
+  for f in "$src"/constant/*.csv "$src"/constant/*.dat
+  do
+    [ -e "$f" ] && ln -s "$(readlink -f "$f")" "$dst/constant/$(basename "$f")"
+  done
+  ln -s "$MESH_DIR/constant/polyMesh" "$dst/constant/polyMesh"
+  ln -s "$DYNAMIC_CODE_DIR" "$dst/dynamicCode"
+
+  for f in "$src"/0/*
+  do
+    if [ -L "$f" ]
+    then
+      ln -s "$(readlink -f "$f")" "$dst/0/$(basename "$f")"
+    else
+      cp "$f" "$dst/0/"
+    fi
+  done
+
+  touch "$dst/case.foam"
+}
+
+caseInputsSum() {
+  local n src f
+  for n in "$@"
+  do
+    src=$(runCaseDir "$n") || return 1
+    for f in "$src"/system/* "$src"/constant/*Properties "$src"/0/*
+    do
+      [ -f "$f" ] && echo "$n/${f#$src/} $(md5sum < "$f" | cut -d' ' -f1)"
+    done
+  done | md5sum | cut -d' ' -f1
+}
+
+setControl() {
+  local dict=$1/system/controlDict
+  grep -q -E "^$2[[:space:]]" "$dict" || {
+    echo "No entry $2 in $dict" >&2
+    return 1
+  }
+  sed -i -E "s|^$2[[:space:]].*$|$2 $3;|" "$dict"
+}
+
+setSpeciesControl() {
+  local dict=$1/system/controlDict
+  grep -q -E '^speciesTransport[[:space:]]*\{' "$dict" || {
+    echo "No speciesTransport dictionary in $dict" >&2
+    return 1
+  }
+  sed -i -E "/^[[:space:]]+$2[[:space:]]/d" "$dict"
+  sed -i -E "s|^(speciesTransport[[:space:]]*\{.*)$|\1\n  $2 $3;|" "$dict"
+}
+
+# decomposeCase <case> <nx> <ny> <nz>: simple decomposition, then decomposePar
+decomposeCase() {
+  local c=$1
+  local n=$(( $2 * $3 * $4 ))
+  requireCaseDir "$c" || return 1
+  cat > "$c/system/decomposeParDict" <<EOF
+FoamFile{version 2.0; format ascii; class dictionary; object decomposeParDict;}
+
+numberOfSubdomains $n;
+method             simple;
+coeffs             { n ($2 $3 $4); }
+EOF
+  (cd "$c" && decomposePar -force > log.decomposePar 2>&1)
+}
+
+# the time directories of a case (not 0), sorted numerically
+timeDirs() {
+  (cd "$1" && ls -d [0-9]* 2>/dev/null | grep -v -x '0' | sort -g)
+}
+
+
+#------------------------------------------------------------------------------
+# Running the solver
+#
+#   runSerial   <case> <executable> [log name]
+#   runParallel <case> <executable> <ranks> [log name [solver options]]
+#   requireCaseDir <case>
+#                  refuses (status 1, a message) a case that is not an
+#                  absolute path of an existing directory, so that no
+#                  helper that changes into a case can run or write in the
+#                  current directory, e.g. the source tree, when its case
+#                  variable is empty (runSerial, runParallel, decomposeCase
+#                  and decomposeWith of tests/hks call it; review of M5,
+#                  round 4: a stray log.decomposePar in tests/hks)
+#
+# The log goes to <case>/<log name> (default log).  Both return the exit
+# status of the solver.  Solver options of runParallel follow -parallel,
+# e.g. -fileHandler collated.
+#
+# runParallel stops mpirun after MPI_TIMEOUT seconds (default 1800): with
+# OpenMPI 1.10 a FatalError on some ranks can leave mpirun waiting forever,
+# which would hang Alltest instead of failing the criterion.
+#------------------------------------------------------------------------------
+
+requireCaseDir() {
+  case "$1" in
+    /*) [ -d "$1" ] && return 0 ;;
+  esac
+  echo "Not an absolute path of a case directory: '$1'" >&2
+  return 1
+}
+
+runSerial() {
+  local c=$1 exe=$2 log=${3:-log}
+  requireCaseDir "$c" || return 1
+  (cd "$c" && "$exe" > "$log" 2>&1)
+}
+
+runParallel() {
+  local c=$1 exe=$2 np=$3 log=${4:-log}
+  shift $(( $# < 4 ? $# : 4 ))
+  requireCaseDir "$c" || return 1
+  (cd "$c" && timeout "${MPI_TIMEOUT:-1800}" \
+    mpirun -np "$np" --bind-to none "$exe" -parallel "$@" > "$log" 2>&1 \
+      < /dev/null)
+}
+
+
+#------------------------------------------------------------------------------
+# Shared dynamicCode.  The carrier's T and U boundary conditions are coded;
+# their libraries are compiled once into tests/work/<platform>/dynamicCode by
+# a run with endTime 0, so concurrent test runs never compile them at the
+# same time.  Every test case links its dynamicCode directory there.
+#
+# The seed is keyed on the inputs of 008, 009, 010 and 011 (the coded
+# entries are part of their linked 0/T and 0/U) and on the OpenFOAM
+# installation, so a changed coded boundary condition is compiled once more
+# by the seed run instead of by several concurrent test runs.
+#------------------------------------------------------------------------------
+
+seedDynamicCode() {
+  local exe=$1 lib=$DYNAMIC_CODE_DIR/platforms/$WM_OPTIONS/lib key
+  key="$WM_PROJECT_DIR $(caseInputsSum 008 009 010 011)" || return 1
+  if [ "$(cat "$DYNAMIC_CODE_DIR/seed.key" 2>/dev/null)" = "$key" ] \
+    && ls "$lib"/lib*.so >/dev/null 2>&1
+  then
+    return 0
+  fi
+  mkdir -p "$DYNAMIC_CODE_DIR"
+  local c=$WORK_DIR/seedDynamicCode
+  makeCase 008 "$c" || return 1
+  setControl "$c" endTime 0 || return 1
+  echo "Compiling the coded boundary conditions into $DYNAMIC_CODE_DIR"
+  runSerial "$c" "$exe" || {
+    echo "Seeding dynamicCode failed, see $c/log" >&2
+    return 1
+  }
+  ls "$lib"/lib*.so >/dev/null 2>&1 || return 1
+  echo "$key" > "$DYNAMIC_CODE_DIR/seed.key"
+}
+
+
+#------------------------------------------------------------------------------
+# Builds
+#
+#   buildSolver      wclean of the solver and of utilities/setFrozenCarrier,
+#                    then ./Allwmake in the solver directory (which builds
+#                    both), so that every source file is compiled and its
+#                    warnings are counted; log in
+#                    tests/work/<platform>/log.Allwmake
+#   buildPristine    the solver of the revision $PRISTINE_REF (default
+#                    the tag 0.1), extracted with git archive into
+#                    tests/work/<platform>/pristine/src and built with
+#                    plain wmake into .../pristine/bin.  Rebuilt only when
+#                    the revision's commit or the OpenFOAM installation
+#                    differs; pristine/key records both.
+#------------------------------------------------------------------------------
+
+buildSolver() {
+  (cd "$SOLVER_DIR" && wclean && wclean utilities/setFrozenCarrier \
+    && ./Allwmake) > "$WORK_DIR/log.Allwmake" 2>&1
+}
+
+# the commit of $PRISTINE_REF, or of origin/$PRISTINE_REF
+pristineCommit() {
+  git -C "$REPO_DIR" rev-parse -q --verify "$PRISTINE_REF^{commit}" \
+    2>/dev/null \
+  || git -C "$REPO_DIR" rev-parse -q --verify \
+       "origin/$PRISTINE_REF^{commit}" 2>/dev/null \
+  || {
+    echo "No revision $PRISTINE_REF or origin/$PRISTINE_REF to build" \
+         "the pristine reference from" >&2
+    return 1
+  }
+}
+
+buildPristine() {
+  local commit key
+  commit=$(pristineCommit) || return 1
+  key="$commit $WM_PROJECT_DIR"
+
+  if [ -x "$PRISTINE_EXE" ] \
+    && [ "$(cat "$PRISTINE_DIR/key" 2>/dev/null)" = "$key" ]
+  then
+    return 0
+  fi
+
+  echo "Building the pristine reference solver ($PRISTINE_REF" \
+       "${commit:0:7}) into $PRISTINE_DIR"
+  rm -rf "$PRISTINE_DIR"
+  mkdir -p "$PRISTINE_DIR/src" "$PRISTINE_DIR/bin"
+  git -C "$REPO_DIR" archive "$commit" applications/rhoFixedFlowFoam \
+    | tar -x -C "$PRISTINE_DIR/src" --strip-components=2 || return 1
+
+  (
+    cd "$PRISTINE_DIR/src" \
+      && FOAM_USER_APPBIN=$PRISTINE_DIR/bin wmake
+  ) > "$PRISTINE_DIR/log.wmake" 2>&1 || {
+    echo "Pristine build failed, see $PRISTINE_DIR/log.wmake" >&2
+    return 1
+  }
+  echo "$key" > "$PRISTINE_DIR/key"
+}
+
+#------------------------------------------------------------------------------

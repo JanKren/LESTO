@@ -1,0 +1,822 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#
+# tests/profiles/Allrun
+#
+# PURPOSE
+#
+# Acceptance tests of milestone M3 of doc/phase-change-plan.md: outputs and
+# diagnostics of the exchange (plan E10, section 6 M3, sections 12 B1/B4,
+# 16.6, 16.7 and 18).  The axial profiles in mol/m with exact overlap
+# binning (axialProfiles.H, profileBinning.H), T_dep, the profile times,
+# mDep_<condensate>, the optional exch_<gas>, the Python reader
+# utilities/axialProfiles.py, and the carry-over of the final M2 pass (the
+# restart verdict with recomputed patch values).  Every numerical claim is
+# checked on the written output by tests/profiles/checks.py.
+#
+# Cases (all in tests/work/<platform>/profiles, never below run/)
+#
+#   channel    the channel of tests/phaseChange (100 x 24 cells of 1 mm x
+#              0.2 mm, T 1000 to 400 K, plug flow, a release of 4.84e-6 mol
+#              from 0.3 ms over 40.5 ms), 100 steps of 1 ms, written at 0.05
+#              and 0.1 in binary; bin sets native (100 bins of 1 mm), gamma
+#              (width 0.01, min/max from the mesh), partial ([0.015,
+#              0.0875] m, width 0.01: 27.5 % of the mesh outside, last bin
+#              2.5 mm) and cut ([0.0003, 0.1] m, width 2.5 mm: every edge
+#              cuts a cell); profile times (0.02 0.0304 0.0305 0.07 0.1
+#              0.25); restarted from 0.05 in binary
+#   channelRTC the channel without regular write times (writeInterval 1000),
+#              written only by a runTimeControl function object between two
+#              steps: Time::writeNow() at 0.056 and Time::writeAndEnd() at
+#              0.057 (nWriteStep 2); profile times (0.02 0.057); serial,
+#              4 ranks simple (4 1 1), and 4 ranks with the collated file
+#              handler (whose writes communicate as well).  Reference:
+#              channelEveryStep, the same channel written by controlDict at
+#              every step up to 0.057
+#   pipe       run/012 on the 007 carrier (228960 cells, 424 axial cells),
+#              background Y = 0.1 so that the wall deposits from the first
+#              step, 5 steps of 4 ms; bin sets native (424 bins over
+#              [0, 0.69] m) and gamma (1 cm), profile time 0.012 and the
+#              write time 0.02; serial and 4 ranks simple (4 1 1) and
+#              hierarchical (2 2 1) (ranks with 3, 2, 2, 3 processor
+#              patches), and 3 ranks of an uneven manual split along x.  The outer loop is converged tightly (plan section
+#              16.7): correctors to 1e-13 with relTol 0, the outer tolerance
+#              1e-12, at most 41 correctors, Y_PbI2_gFinal 1e-13
+#   ramp       synthetic deposit: a blockMesh row of 100 cells of 1 mm along
+#              x, one wall cell high (57.46 um), at rest, D = 0, T linear
+#              from 1000 K (x = 0) to 400 K (x = 0.1 m), temperature model
+#              with k = 1 1/K and Tdep = 900 K (f = 0 exactly for x <= 16.7
+#              mm, f = 1 exactly for x >= 23.4 mm); rho Y at t = 0 is a
+#              linear ramp on the cells 30 to 80 (x 30.5 to 80.5 mm, zero
+#              elsewhere), optionally with a spike of 0.3 of the ramp's peak
+#              in cell 10 (x = 10.5 mm, above Tdep: gas only).  One step of
+#              4 ms: without transport every cell keeps its gas plus
+#              deposit, so the observable wallPlusGas is the initial ramp,
+#              and the observable wall is the ramp times the uniform
+#              deposited fraction.  Bin sets native (the cells), coarse
+#              (5 mm) and cut ([0.0003, 0.1] m, width 2.5 mm)
+#   box        the closed box of tests/phaseChange (10 cells, T = 500 K):
+#              areaMultiplier 2, and 1 with writeExchangeField yes; the
+#              inclined box with areaPerVolume layer and a non-uniform gas
+#              (1e-3 to 1e-2); surfaceFieldValue areaIntegrate of
+#              mDep_PbI2_s and mw_PbI2_s on WALL every step
+#   boxRecomputed  the closed box in binary at writePrecision 6 with a
+#              non-uniform gas, INLET fixedGradient (gradient 0) and OUTLET
+#              mixed (valueFraction 0), each a single face whose value is
+#              written as a rounded 'uniform' text entry; restarted from
+#              0.008
+#   run012     run/012 for the 5 steps of its out_excerpt, with profiles at
+#              0.002 and 0.004 (native 424 bins and 1 cm)
+#
+# Criteria
+#
+#   M3.0   testProfiles.C (g++, 0 warnings): bin edges, exact overlap
+#          weights (inside, across bins, outside, zero extent, random
+#          intervals: weights = overlap/length to 1e-13, binned + outside
+#          = total to 1e-13), onset search (ramp, spike, searchFrom, edge
+#          cases)
+#   M3.1a  channel: sum_b n'(b) dx_b M + outside = the gas, wall and
+#          sample inventories of the balance file at the same exact time
+#          to 1e-12, for the bin sets native and gamma, in every profile
+#          file (write times and profile times); the inventories of the
+#          file headers equal the balance file exactly
+#   M3.1b  pipe (serial and the three parallel runs): the same to 1e-12 for the
+#          native (424) and gamma (1 cm) bins
+#   M3.1c  channel, bins that do not cover the mesh and a width that does
+#          not divide the range (partial): binned + outside = inventories
+#          to 1e-12, the gas outside is positive, the last bin 2.5 mm
+#   M3.1d  bins that cut cells (cut): in every file of the channel and of
+#          the ramps (observables wallPlusGas and wall) every bin's gas,
+#          wall, sample and observable equal the exact overlap of the
+#          cell-aligned native profile of the same file time to 1e-13 of
+#          the column's maximum, Twall to 1e-13 relative and wallArea to
+#          1e-13 of its maximum (the solver's axial extents of the cells
+#          and of the wall faces; review of M3, round 1)
+#   M3.2a  pipe, 4 ranks simple (4 1 1) vs serial, converged outer loop:
+#          every column (gas, wall, sample, observable) of every profile
+#          file within 1e-12 of the column's maximum; of every onset
+#          search the status and xPeak equal, T_dep within 1e-9 K, x_dep
+#          within 1e-12 m, the peak and the threshold within 1e-12 of the
+#          observable's maximum
+#   M3.2b  the same for hierarchical (2 2 1)
+#   M3.2c  the same for a genuinely uneven split (carry-over (c) of the M3
+#          sign-off, milestone M5): 3 ranks of a manual decomposition by
+#          the axial position, x < 0.1 m, 0.1-0.25 m and >= 0.25 m (about
+#          33000, 50000 and 146000 cells; 1, 2 and 1 processor patches)
+#   M3.3a  ramp, wallPlusGas: T_dep fromInlet = fromPeak = the analytic
+#          crossing (T at x = 30.5 + 0.01 x 50 mm, 814 K) to 1e-9 K on the
+#          native bins, and the analytic crossing of the analytic 5 mm bin
+#          means on the coarse bins; the recomputation from the columns
+#          (utilities/axialProfiles.py) agrees
+#   M3.3b  ramp with the upstream spike (like T5_60), wallPlusGas: fromInlet
+#          finds the spike (analytic 942.8 K) and fromPeak the ramp (814 K),
+#          both to 1e-9 K on both bin sets; with searchFrom 0.02 m
+#          fromInlet finds the ramp
+#   M3.3c  ramp with the spike, observable wall: the spike is gas only (f
+#          = 0 above Tdep), so both modes find the ramp, to 1e-9 K
+#   M3.4a  channel: profiles at every write time (0.05, 0.1) and at every
+#          'times' entry (0.02; 0.0304 and 0.0305 on the one step end
+#          0.030; 0.07; 0.1 with the write time; 0.25 after the end is not
+#          reached), the header time within dt/2 of the entry; the time
+#          directories of the case are 0, 0.05 and 0.1 only (no partial
+#          time directory: review B4)
+#   M3.4b  the channel restarted from 0.05 (binary): writes 0.07 and 0.1
+#          only, byte-identical to the continuous run; the start-up line
+#          reports the 3 entries written by the run that wrote the restart
+#          state (its record in uniform/phaseChangeLayout) as skipped
+#   M3.4c  the 4-rank pipe: profile time 0.012 written, no time directory
+#          0.012 in the case or in any processor directory
+#   M3.4d  writes started by a function object between two steps (review
+#          of M3, round 1): channelRTC, serial and 4 ranks, has the
+#          profile directories 0.02, 0.056 and 0.057 only, with the
+#          reasons 'write time' (0.056) and 'write time; profile time
+#          0.057' (0.057: the profile time's own files are rewritten by
+#          the write), and the time directories 0, 0.056 and 0.057 only
+#          (every processor directory holds 0.056 and 0.057); the serial
+#          files of 0.056 and 0.057 are byte-identical to those of the
+#          controlDict writes of channelEveryStep; binned + outside = the
+#          inventories to 1e-12 in every file, also on 4 ranks; the
+#          collated 4-rank run writes the same processors4 time
+#          directories and profile files byte-identical to the
+#          uncollated one
+#   M3.5a  box, areaMultiplier 2: mDep_PbI2_s = 2 x mw_PbI2_s exactly on
+#          WALL at every written time (plan section 16.6), and the
+#          areaIntegrate of mDep_ over WALL = the wall inventory to 1e-14
+#          in every step (that of mw_ is half of it)
+#   M3.5b  inclined box, areaPerVolume layer: areaIntegrate of mDep_ = the
+#          wall inventory to 1e-14 in every step; control: that of mw_
+#          differs by more than 1e-3
+#   M3.5c  box, areaMultiplier 1: mDep_ = mw_ exactly; the 4-rank pipe:
+#          the processor patches of mDep_PbI2_s hold the neighbour cells
+#   M3.6   box, writeExchangeField yes: exch_PbI2_g = rho (Y^n - Y^n-1)/dt
+#          in every cell to 1e-12, and sum exch V dt = -(the change of the
+#          wall inventory) to 1e-12 in every step; without the switch no
+#          exch_ file is written
+#   M3.7   run/012 with profiles for its excerpt steps: the log without
+#          the profile lines reproduces run/012/out_excerpt as is; the
+#          profiles at 0.002 and 0.004 (native and gamma) integrate to the
+#          inventories to 1e-12; no time directory is written; the reader
+#          utilities/axialProfiles.py prints T_dep and the integrals
+#   M3.8   carry-over of the final M2 pass (plan section 18): the restart
+#          of boxRecomputed from 0.008, whose INLET (fixedGradient, value
+#          not written) and OUTLET (mixed, value written as a rounded
+#          'uniform' entry) values are recomputed when read: the writer
+#          records neither as rounded, and the restart reports
+#          'exact' without 'rounded for the next steps' (their values are
+#          recomputed when read), with the record of the writer and without
+#          it (no 'possibly rounded'), states what the verdict covers, and
+#          the files at 0.012, 0.016 and 0.02 are cmp-identical to the
+#          continuous run
+#
+# Usage: tests/profiles/Allrun [M3.2c]
+#
+#   M3.2c  only that criterion (the serial pipe and the uneven 3-rank split,
+#          tests/profiles/pipeSection), for tests/Alltest M5
+#
+# Exit status: 0 when every criterion was tested (whatever the results),
+# 1 when the script stopped early; Alltest reports that as a FAIL.
+#
+#------------------------------------------------------------------------------
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+
+PR_DIR=$WORK_DIR/profiles
+PR_SRC=$TESTS_DIR/profiles
+PC_SRC=$TESTS_DIR/phaseChange
+CHECKS="python3 $PR_SRC/checks.py"
+PCCHECKS="python3 $PC_SRC/checks.py"
+READER="python3 $SOLVER_DIR/utilities/axialProfiles.py"
+CMPFIELDS=$TESTS_DIR/cmpFields.sh
+REGRESS=$TESTS_DIR/regress.sh
+MAKE_CARRIER=$PR_DIR/bin/makeCarrier
+BALANCE=postProcessing/phaseChangeBalance/0/PbI2_g.dat
+
+echo "== M3 outputs and diagnostics (work directory $PR_DIR)"
+mkdir -p "$PR_DIR"
+
+
+#------------------------------------------------------------------------------
+# Helpers
+#------------------------------------------------------------------------------
+
+# the carrier generator of tests/phaseChange, rebuilt when its source or
+# OpenFOAM changes
+buildMakeCarrier() {
+  local key
+  key="$WM_PROJECT_DIR $(cat "$PC_SRC"/makeCarrier/makeCarrier.C \
+    "$PC_SRC"/makeCarrier/Make/* | md5sum | cut -d' ' -f1)"
+  if [ -x "$MAKE_CARRIER" ] \
+    && [ "$(cat "$PR_DIR/bin/key" 2>/dev/null)" = "$key" ]
+  then
+    return 0
+  fi
+  rm -rf "$PR_DIR/makeCarrier" "$PR_DIR/bin"
+  mkdir -p "$PR_DIR/bin"
+  cp -r "$PC_SRC/makeCarrier" "$PR_DIR/makeCarrier"
+  (cd "$PR_DIR/makeCarrier" && FOAM_USER_APPBIN=$PR_DIR/bin wmake) \
+    > "$PR_DIR/log.makeCarrier" 2>&1 || {
+      echo "Building makeCarrier failed, see $PR_DIR/log.makeCarrier" >&2
+      return 1
+    }
+  echo "$key" > "$PR_DIR/bin/key"
+}
+
+# blockCase <template of tests/phaseChange> <destination> [<command> ...]:
+# copy, run the optional command in the copy, blockMesh, carrier
+blockCase() {
+  local template=$1 dst=$2
+  shift 2
+  rm -rf "$dst"
+  cp -r "$PC_SRC/$template" "$dst" \
+    && (cd "$dst" && { [ $# -eq 0 ] || "$@"; } \
+        && blockMesh > log.blockMesh 2>&1 \
+        && "$MAKE_CARRIER" > log.makeCarrier 2>&1) \
+    || { echo "Setting up $dst failed" >&2; return 1; }
+  touch "$dst/case.foam"
+}
+
+# edit <file> <sed expression> <pattern that must match afterwards>
+edit() {
+  sed -i -E "$2" "$1" && grep -q -E "$3" "$1" \
+    || { echo "Editing $1 with '$2' failed" >&2; return 1; }
+}
+
+# addProfiles <case> <body of the profiles dictionary>
+addProfiles() {
+  printf '\nprofiles {\n%s\n}\n' "$2" \
+    >> "$1/constant/thermochemistryProperties"
+}
+
+# decomposeWith <case> <n> <method and coeffs>
+decomposeWith() {
+  cat > "$1/system/decomposeParDict" <<EOF
+FoamFile{version 2.0; format ascii; class dictionary; object decomposeParDict;}
+
+numberOfSubdomains $2;
+$3
+EOF
+  (cd "$1" && decomposePar -force > log.decomposePar 2>&1)
+}
+
+# restartCopy <continuous> <restart> <time>: every file of <time>
+restartCopy() {
+  local src=$1 dst=$2 t=$3
+  rm -rf "$dst"
+  mkdir -p "$dst"
+  cp -a "$src"/system "$src"/constant "$src"/0 "$src"/case.foam \
+    "$src/$t" "$dst"/
+  setControl "$dst" startFrom latestTime
+}
+
+# the blockCase hooks: a row of 100 cells over 0.1 m for the ramp, and the
+# inclined top of tests/phaseChange (cell heights 42 to 78 um)
+rampRow() {
+  edit system/blockMeshDict 's/\(0\.01 /(0.1 /g; s/\(10 1 1\)/(100 1 1)/' \
+    '\(100 1 1\)' \
+    && edit system/carrierDict 's/^Tin +500;/Tin       1000;/; s/^Tout +500;/Tout      400;/; s/^L +0\.01;/L         0.1;/' \
+         '^L +0\.1;'
+}
+inclineTop() {
+  edit system/blockMeshDict \
+    's/\(0\.01 57\.46e-6 (0|1e-3)\)/(0.01 80e-6 \1)/g; s/\(0 +57\.46e-6 (0|1e-3)\)/(0 40e-6 \1)/g' \
+    '\(0 40e-6 1e-3\)'
+}
+
+# the areaIntegrate of mDep_PbI2_s and mw_PbI2_s over WALL every step
+addWallIntegrals() {
+  cat >> "$1/system/controlDict" <<'EOF'
+
+functions {
+  wallDeposit {
+    type            surfaceFieldValue;
+    libs            (fieldFunctionObjects);
+    regionType      patch;
+    name            WALL;
+    operation       areaIntegrate;
+    fields          (mDep_PbI2_s mw_PbI2_s);
+    writeFields     false;
+    writePrecision  17;
+    writeControl    timeStep;
+    writeInterval   1;
+    log             false;
+  }
+}
+EOF
+}
+WALLDAT=postProcessing/wallDeposit/0/surfaceFieldValue.dat
+
+
+# tests/profiles/Allrun M3.2c: that criterion only (tests/Alltest M5
+# without M3)
+if [ "${1:-}" = M3.2c ]
+then
+  makeMesh || exit 1
+  seedDynamicCode "$SOLVER_EXE" || exit 1
+  PIPE_SECTION=M3.2c
+  source "$PR_SRC/pipeSection"
+  exit 0
+fi
+
+
+#------------------------------------------------------------------------------
+# M3.0: standalone g++ test of profileBinning.H
+#------------------------------------------------------------------------------
+if g++ -std=c++17 -Wall -Wextra "$TESTS_DIR/testProfiles.C" \
+  -o "$PR_DIR/testProfiles" > "$PR_DIR/log.testProfiles" 2>&1 \
+  && "$PR_DIR/testProfiles" >> "$PR_DIR/log.testProfiles" 2>&1
+then
+  check M3.0 "g++ testProfiles ($(tail -1 "$PR_DIR/log.testProfiles" \
+ | sed 's/\.$//'); $(grep '^random overlaps' "$PR_DIR/log.testProfiles")),\
+ 0 warnings" \
+    [ "$(countWarnings "$PR_DIR/log.testProfiles")" -eq 0 ]
+else
+  result M3.0 FAIL "testProfiles ($PR_DIR/log.testProfiles)"
+fi
+
+buildMakeCarrier || exit 1
+makeMesh || exit 1
+seedDynamicCode "$SOLVER_EXE" || exit 1
+
+
+#------------------------------------------------------------------------------
+# Set-up: channel, ramps, boxes, the recomputed-patch box
+#------------------------------------------------------------------------------
+CH=$PR_DIR/channel
+CHRS=$PR_DIR/channelRestart
+blockCase channel "$CH" || exit 1
+setControl "$CH" endTime 0.1 || exit 1
+addProfiles "$CH" '  axis (1 0 0);
+  bins {
+    native  { min 0; max 0.1; nBins 100; }
+    gamma   { width 0.01; }
+    partial { min 0.015; max 0.0875; width 0.01; }
+    cut     { min 0.0003; max 0.1; width 0.0025; }
+  }
+  times (0.07 0.02 0.0304 0.0305 0.1 0.25);'
+
+# the channel written only by a runTimeControl function object between two
+# steps (writeNow at 0.056, writeAndEnd at 0.057), serial and on 4 ranks,
+# and the reference written by controlDict at every step up to 0.057
+CHRTC=$PR_DIR/channelRTC
+CHRTC4=$PR_DIR/channelRTC-simple411
+CHRTC4C=$PR_DIR/channelRTC-simple411-collated
+CHREF=$PR_DIR/channelEveryStep
+rtcProfiles='  axis (1 0 0);
+  bins {
+    native  { min 0; max 0.1; nBins 100; }
+    gamma   { width 0.01; }
+    partial { min 0.015; max 0.0875; width 0.01; }
+  }
+  times (0.02 0.057);'
+for c in "$CHRTC" "$CHRTC4" "$CHRTC4C"
+do
+  blockCase channel "$c" \
+    && setControl "$c" endTime 0.1 \
+    && setControl "$c" writeInterval 1000 \
+    && addProfiles "$c" "$rtcProfiles" \
+    && cat >> "$c/system/controlDict" <<'EOF'
+
+functions {
+  stopEarly {
+    type             runTimeControl;
+    libs             (utilityFunctionObjects);
+    timeStart        0.0565;
+    conditions       { always { type none; } }
+    satisfiedAction  end;
+    nWriteStep       2;
+  }
+}
+EOF
+  [ $? -eq 0 ] || exit 1
+done
+decomposeWith "$CHRTC4" 4 "method simple; coeffs { n (4 1 1); }" \
+  || { echo "decomposePar failed ($CHRTC4/log.decomposePar)"; exit 1; }
+cp "$CHRTC4/system/decomposeParDict" "$CHRTC4C/system/" \
+  && (cd "$CHRTC4C" && decomposePar -force -fileHandler collated \
+        > log.decomposePar 2>&1) \
+  || { echo "decomposePar failed ($CHRTC4C/log.decomposePar)"; exit 1; }
+blockCase channel "$CHREF" \
+  && setControl "$CHREF" endTime 0.057 \
+  && setControl "$CHREF" writeInterval 1 \
+  && addProfiles "$CHREF" "$rtcProfiles" \
+  || exit 1
+
+RAMPGAS=$PR_DIR/rampGas
+RAMPSPIKE=$PR_DIR/rampSpike
+RAMPFROM=$PR_DIR/rampSpikeSearchFrom
+RAMPWALL=$PR_DIR/rampSpikeWall
+for c in "$RAMPGAS" "$RAMPSPIKE" "$RAMPFROM" "$RAMPWALL"
+do
+  blockCase closedBox "$c" rampRow \
+    && setControl "$c" endTime 0.004 \
+    && edit "$c/constant/speciesTransportProperties" 's/ D 1e-4;/ D 0;/' \
+         ' D 0;' \
+    && edit "$c/constant/thermochemistryProperties" \
+         's/^(  k +)8e-3;/\11;/; s/^(  Tdep +)680;/\1900;/' '^  Tdep +900;' \
+    || exit 1
+done
+rampProfiles() {
+  addProfiles "$1" "  bins {
+    native { min 0; max 0.1; nBins 100; }
+    coarse { min 0; max 0.1; width 0.005; }
+    cut    { min 0.0003; max 0.1; width 0.0025; }
+  }
+  onset { fraction 0.01; $2 }
+  observable $3;"
+}
+rampProfiles "$RAMPGAS" "" wallPlusGas
+rampProfiles "$RAMPSPIKE" "search (fromInlet fromPeak);" wallPlusGas
+rampProfiles "$RAMPFROM" "searchFrom 0.02;" wallPlusGas
+rampProfiles "$RAMPWALL" "" wall
+$CHECKS rampField "$RAMPGAS" 0 || exit 1
+for c in "$RAMPSPIKE" "$RAMPFROM" "$RAMPWALL"
+do
+  $CHECKS rampField "$c" 1 || exit 1
+done
+
+BOXMULT=$PR_DIR/boxAreaMultiplier
+BOXLAYER=$PR_DIR/boxInclinedLayer
+BOXBASE=$PR_DIR/boxExchange
+blockCase closedBox "$BOXMULT" || exit 1
+blockCase closedBox "$BOXLAYER" inclineTop || exit 1
+blockCase closedBox "$BOXBASE" || exit 1
+edit "$BOXMULT/constant/thermochemistryProperties" \
+  's/^(  areaMultiplier +)1;/\12;/' 'areaMultiplier +2;' || exit 1
+edit "$BOXLAYER/constant/thermochemistryProperties" \
+  's/^(  areaPerVolume +)cell;/\1layer;/' 'areaPerVolume +layer;' || exit 1
+# a non-uniform gas, so that the deposits per effective area differ between
+# the cells (with a uniform one sum_e m'' |S_f| = sum_e m'' A_e, since the
+# rescaled areas sum to A_I)
+edit "$BOXLAYER/0/Y_PbI2_g" \
+  's/^internalField uniform 1e-3;/internalField nonuniform List<scalar> 10(1e-3 2e-3 3e-3 4e-3 5e-3 6e-3 7e-3 8e-3 9e-3 1e-2);/' \
+  'nonuniform' || exit 1
+edit "$BOXBASE/constant/thermochemistryProperties" \
+  's/^(  guardTolerance +1e-12;)$/\1\n  writeExchangeField yes;/' \
+  'writeExchangeField yes;' || exit 1
+for c in "$BOXMULT" "$BOXLAYER" "$BOXBASE"
+do
+  addWallIntegrals "$c"
+done
+
+BOXREC=$PR_DIR/boxRecomputed
+BOXRECRS=$PR_DIR/boxRecomputedRestart
+BOXRECRS2=$PR_DIR/boxRecomputedRestartNoRecord
+blockCase closedBox "$BOXREC" || exit 1
+setControl "$BOXREC" endTime 0.02 \
+  && setControl "$BOXREC" writeFormat binary \
+  && setControl "$BOXREC" writePrecision 6 \
+  && edit "$BOXREC/0/Y_PbI2_g" \
+       's/^internalField uniform 1e-3;/internalField nonuniform List<scalar> 10(1e-3 2e-3 3e-3 4e-3 5e-3 6e-3 7e-3 8e-3 9e-3 1e-2);/' \
+       'nonuniform' \
+  && edit "$BOXREC/0/Y_PbI2_g" \
+       's/^  "\(INLET\|OUTLET\|WALL\|TOP\)" \{type zeroGradient;\}$/  INLET {type fixedGradient; gradient uniform 0;}\n  OUTLET {type mixed; refValue uniform 0; refGradient uniform 0; valueFraction uniform 0;}\n  "(WALL|TOP)" {type zeroGradient;}/' \
+       'type mixed;' \
+  || exit 1
+
+echo "Running the channel, the ramps and the boxes"
+for c in "$CH" "$RAMPGAS" "$RAMPSPIKE" "$RAMPFROM" "$RAMPWALL" "$BOXMULT" \
+  "$BOXLAYER" "$BOXBASE" "$BOXREC" "$CHRTC" "$CHREF"
+do
+  startJob runSerial "$c" "$SOLVER_EXE"
+done
+waitJobs || echo "At least one run failed; see the logs below."
+
+# restarts: the channel from 0.05, the recomputed-patch box from 0.008
+# (with and without the writer's record of its rounded 'uniform' values)
+if grep -q '^End' "$CH/log"
+then
+  restartCopy "$CH" "$CHRS" 0.05 && runSerial "$CHRS" "$SOLVER_EXE" &
+fi
+if grep -q '^End' "$BOXREC/log"
+then
+  restartCopy "$BOXREC" "$BOXRECRS" 0.008 \
+    && runSerial "$BOXRECRS" "$SOLVER_EXE" &
+  restartCopy "$BOXREC" "$BOXRECRS2" 0.008 \
+    && $PCCHECKS stripLayout "$BOXRECRS2/0.008/uniform/phaseChangeLayout" \
+         uniformValues > /dev/null \
+    && runSerial "$BOXRECRS2" "$SOLVER_EXE" &
+fi
+runParallel "$CHRTC4" "$SOLVER_EXE" 4 &
+wait
+runParallel "$CHRTC4C" "$SOLVER_EXE" 4 log -fileHandler collated
+
+
+#------------------------------------------------------------------------------
+# M3.1a, M3.1c, M3.4a, M3.4b: channel
+#------------------------------------------------------------------------------
+if grep -q '^End' "$CH/log"
+then
+  out=$($CHECKS integrals "$CH" 1e-12 native gamma)
+  s1=$?
+  header=$($CHECKS inventoryHeader "$CH" 0)
+  s2=$?
+  check M3.1a "channel: ${out#*: }; ${header#*: }" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ]'
+
+  out=$($CHECKS integrals "$CH" 1e-12 partial)
+  s1=$?
+  outside=$($CHECKS outside "$CH" partial 0.0025)
+  s2=$?
+  check M3.1c "channel, bins [0.015, 0.0875] m of width 0.01: ${out#*: };\
+ ${outside#*: }" eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ]'
+
+  out=$($CHECKS times "$CH" 0.001 0.05,0.1 \
+    0.02,0.0304,0.0305,0.07,0.1,0.25)
+  check M3.4a "channel, times (0.07 0.02 0.0304 0.0305 0.1 0.25), write\
+ times 0.05 0.1: ${out#*: }" [ $? -eq 0 ]
+else
+  result M3.1a FAIL "channel failed ($CH/log)"
+  result M3.1c FAIL "channel failed ($CH/log)"
+  result M3.4a FAIL "channel failed ($CH/log)"
+fi
+
+if grep -q '^End' "$CHRS/log" 2>/dev/null
+then
+  out=$($CHECKS times "$CHRS" 0.001 0.1 \
+    0.02,0.0304,0.0305,0.07,0.1,0.25 0.05)
+  s1=$?
+  same=true
+  for t in 0.07 0.1
+  do
+    for f in "$CH/postProcessing/axialProfiles/$t"/*.dat
+    do
+      cmp -s "$f" "$CHRS/postProcessing/axialProfiles/$t/$(basename "$f")" \
+        || same=false
+    done
+  done
+  nWritten=$(ls "$CHRS/postProcessing/axialProfiles" | tr '\n' ' ')
+  check M3.4b "channel restarted from 0.05: profile directories\
+ $nWritten(${out#*: }); the files of 0.07 and 0.1 byte-identical to the\
+ continuous run: $same; start-up: '3 skipped: written by the run that wrote\
+ the restart state'" \
+    eval '[ $s1 -eq 0 ] && $same && [ "$nWritten" = "0.07 0.1 " ] \
+      && grep -q "written at the write times and at 3 profile time(s) (3 skipped: written by the run that wrote the restart state)" "$CHRS/log"'
+else
+  result M3.4b FAIL "channel restart failed ($CHRS/log)"
+fi
+
+
+#------------------------------------------------------------------------------
+# M3.4d: writes started by a function object between two steps
+#------------------------------------------------------------------------------
+if grep -q '^End' "$CHRTC/log" && grep -q '^End' "$CHREF/log" \
+  && grep -q '^End' "$CHRTC4/log" 2>/dev/null \
+  && grep -q '^End' "$CHRTC4C/log" 2>/dev/null
+then
+  out1=$($CHECKS times "$CHRTC" 0.001 0.056,0.057 0.02,0.057)
+  s1=$?
+  out2=$($CHECKS times "$CHRTC4" 0.001 0.056,0.057 0.02,0.057)
+  s2=$?
+  int1=$($CHECKS integrals "$CHRTC" 1e-12)
+  s3=$?
+  int2=$($CHECKS integrals "$CHRTC4" 1e-12)
+  s4=$?
+  same=true
+  nSame=0
+  for t in 0.056 0.057
+  do
+    for f in "$CHREF/postProcessing/axialProfiles/$t"/*.dat
+    do
+      if cmp -s "$f" "$CHRTC/postProcessing/axialProfiles/$t/$(basename "$f")"
+      then
+        nSame=$((nSame + 1))
+      else
+        same=false
+      fi
+    done
+  done
+  reasons=$(for c in "$CHRTC" "$CHRTC4"
+    do
+      for t in 0.056 0.057
+      do
+        sed -n 's/^# time .* reason //p' \
+          "$c/postProcessing/axialProfiles/$t/PbI2_g_native.dat" 2>/dev/null
+      done
+    done | tr '\n' '|')
+  expected="write time|write time; profile time 0.057|"
+  # the state directories of the ranks, uncollated and collated
+  nProc=$(ls -d "$CHRTC4"/processor[0-9]*/0.05[67] 2>/dev/null | wc -l)
+  out3=$($CHECKS times "$CHRTC4C" 0.001 0.056,0.057 0.02,0.057)
+  s5=$?
+  collated=$(ls "$CHRTC4C/processors4" 2>/dev/null | tr '\n' ' ')
+  sameCollated=true
+  nCollated=0
+  for f in "$CHRTC4"/postProcessing/axialProfiles/*/*.dat
+  do
+    rel=${f#$CHRTC4/postProcessing/axialProfiles/}
+    if cmp -s "$f" "$CHRTC4C/postProcessing/axialProfiles/$rel"
+    then
+      nCollated=$((nCollated + 1))
+    else
+      sameCollated=false
+    fi
+  done
+  check M3.4d "channel written by runTimeControl at 0.056 (writeNow) and\
+ 0.057 (writeAndEnd), without regular write times: serial ${out1#*: };\
+ 4 ranks simple (4 1 1) ${out2#*: }, $nProc processor time directories\
+ 0.056/0.057; reasons '$reasons'; the $nSame files of 0.056 and 0.057\
+ byte-identical to the controlDict writes of channelEveryStep: $same;\
+ serial ${int1#*: }; 4 ranks ${int2#*: }; collated: processors4 holds\
+ $collated(${out3#*: }), the $nCollated profile files byte-identical to\
+ the uncollated run: $sameCollated" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ] \
+      && [ $s5 -eq 0 ] && $same && [ $nSame -eq 6 ] && [ $nProc -eq 8 ] \
+      && [ "$reasons" = "$expected$expected" ] && $sameCollated \
+      && [ $nCollated -eq 9 ] && [ "$collated" = "0 0.056 0.057 constant " ]'
+else
+  result M3.4d FAIL "a runTimeControl channel or its reference failed\
+ ($CHRTC/log, $CHRTC4/log, $CHRTC4C/log, $CHREF/log)"
+fi
+
+
+#------------------------------------------------------------------------------
+# M3.1d: bins that cut cells against the exact overlap of the native profile
+#------------------------------------------------------------------------------
+text=""
+status=0
+for c in "$CH" "$RAMPGAS" "$RAMPWALL"
+do
+  if grep -q '^End' "$c/log"
+  then
+    out=$($CHECKS overlap "$c" native cut 1e-13) || status=1
+    text="$text $(basename "$c"): ${out#*: };"
+  else
+    status=1
+    text="$text $(basename "$c") failed ($c/log);"
+  fi
+done
+check M3.1d "bins that cut cells (cut) vs the exact overlap of the\
+ cell-aligned native profile:$text" [ $status -eq 0 ]
+
+
+#------------------------------------------------------------------------------
+# M3.3: synthetic ramp deposit, T_dep against the analytic crossing
+#------------------------------------------------------------------------------
+# tdepCase <id text> <case> <observable> <spike> <searchFrom|-> <expected
+# modes: 'fromInlet:<native>:<coarse> fromPeak:...' computed here>
+rampOk() {
+  local c=$1 observable=$2 spike=$3 from=$4 mode set expected out
+  local status=0 text=""
+  grep -q '^End' "$c/log" || { echo "run failed ($c/log)"; return 1; }
+  for mode in fromInlet fromPeak
+  do
+    for set in native coarse
+    do
+      if [ "$mode" = fromInlet ] && [ "$from" != - ]
+      then
+        expected=$($CHECKS rampExpected $mode $observable $set $spike "$from")
+      else
+        expected=$($CHECKS rampExpected $mode $observable $set $spike)
+      fi
+      out=$($CHECKS tdep "$c" $set $mode "$expected" 1e-9) || status=1
+      text="$text $mode/$set ${out#*: };"
+    done
+  done
+  echo "$text"
+  return $status
+}
+
+out=$(rampOk "$RAMPGAS" wallPlusGas 0 -)
+check M3.3a "ramp, wallPlusGas:$out" [ $? -eq 0 ]
+
+out1=$(rampOk "$RAMPSPIKE" wallPlusGas 1 -)
+s1=$?
+out2=$(rampOk "$RAMPFROM" wallPlusGas 1 0.02)
+s2=$?
+inlet=$(sed -n 's/^# Tdep fromInlet status found T \([^ ]*\) .*/\1/p' \
+  "$RAMPSPIKE/postProcessing/axialProfiles/0.004/PbI2_g_native.dat")
+peak=$(sed -n 's/^# Tdep fromPeak status found T \([^ ]*\) .*/\1/p' \
+  "$RAMPSPIKE/postProcessing/axialProfiles/0.004/PbI2_g_native.dat")
+check M3.3b "ramp with an upstream spike, wallPlusGas (fromInlet $inlet K,\
+ fromPeak $peak K differ):$out1 with searchFrom 0.02 m:$out2" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] \
+    && python3 -c "import sys; sys.exit(0 if abs(float(\"$inlet\") - float(\"$peak\")) > 100 else 1)"'
+
+out=$(rampOk "$RAMPWALL" wall 1 -)
+check M3.3c "ramp with the spike, observable wall (the spike is gas\
+ only):$out" [ $? -eq 0 ]
+
+
+#------------------------------------------------------------------------------
+# M3.5, M3.6: mDep_ and exch_ on the boxes
+#------------------------------------------------------------------------------
+if grep -q '^End' "$BOXMULT/log"
+then
+  factor=$($CHECKS mDepFactor "$BOXMULT" 2)
+  s1=$?
+  mDep=$($CHECKS areaIntegral "$BOXMULT" "$BOXMULT/$WALLDAT" 0 1e-14)
+  s2=$?
+  mw=$(python3 - "$BOXMULT/$WALLDAT" <<'PYEOF'
+import sys
+rows = [l.split() for l in open(sys.argv[1]) if l.strip() and l[0] != '#']
+worst = max(abs(2*float(r[2]) - float(r[1]))/float(r[1]) for r in rows)
+print(f'areaIntegrate(mw_) x 2 = areaIntegrate(mDep_) to {worst:.1e}')
+sys.exit(0 if worst <= 1e-15 else 1)
+PYEOF
+)
+  s3=$?
+  check M3.5a "box, areaMultiplier 2: ${factor#*: }; areaIntegrate of\
+ mDep_PbI2_s on WALL: ${mDep#*: }; $mw" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ]'
+else
+  result M3.5a FAIL "areaMultiplier box failed ($BOXMULT/log)"
+fi
+
+if grep -q '^End' "$BOXLAYER/log"
+then
+  mDep=$($CHECKS areaIntegral "$BOXLAYER" "$BOXLAYER/$WALLDAT" 0 1e-14)
+  s1=$?
+  mw=$($CHECKS areaIntegral "$BOXLAYER" "$BOXLAYER/$WALLDAT" 1 0 1e-3)
+  s2=$?
+  check M3.5b "inclined box, areaPerVolume layer: areaIntegrate of\
+ mDep_PbI2_s on WALL: ${mDep#*: }; mw_PbI2_s: ${mw#*: }" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ]'
+else
+  result M3.5b FAIL "inclined box failed ($BOXLAYER/log)"
+fi
+
+if grep -q '^End' "$BOXBASE/log"
+then
+  out=$($CHECKS exchange "$BOXBASE" 0.004 1e-12)
+  s1=$?
+  nNone=$(find "$BOXMULT" "$BOXLAYER" -name 'exch_*' | wc -l)
+  nBase=$(ls "$BOXBASE"/0.*/exch_PbI2_g 2>/dev/null | wc -l)
+  check M3.6 "box, writeExchangeField yes ($nBase exch_PbI2_g files):\
+ ${out#*: }; $nNone exch_ files without the switch" \
+    eval '[ $s1 -eq 0 ] && [ $nNone -eq 0 ] && [ $nBase -eq 10 ]'
+else
+  result M3.6 FAIL "exchange box failed ($BOXBASE/log)"
+fi
+
+
+#------------------------------------------------------------------------------
+# M3.8: restart verdict with recomputed patch values (carry-over)
+#------------------------------------------------------------------------------
+if grep -q '^End' "$BOXREC/log" && grep -q '^End' "$BOXRECRS/log" \
+  && grep -q '^End' "$BOXRECRS2/log"
+then
+  inlet=$($CHECKS uniformPatch "$BOXREC/0.008/Y_PbI2_g" INLET noValue)
+  s1=$?
+  outlet=$($CHECKS uniformPatch "$BOXREC/0.008/Y_PbI2_g" OUTLET)
+  s2=$?
+  same=$("$CMPFIELDS" -x uniform/time "$BOXREC" "$BOXRECRS" 0.012 0.016 0.02)
+  s3=$?
+  line1=$(grep 'Restart of pair PbI2_g' "$BOXRECRS/log")
+  line2=$(grep 'Restart of pair PbI2_g' "$BOXRECRS2/log")
+  record=$(sed -n '/^uniformValues/,/}/p' \
+    "$BOXREC/0.008/uniform/phaseChangeLayout" | tr -s ' \n' ' ')
+  check M3.8 "restart from 0.008: ${inlet#*: }, the single face held in\
+ memory; ${outlet#*: }; the writer's record: '$record' (neither patch is\
+ recorded as rounded); restart: '${line1#*: }'; without the record\
+ uniformValues: '$(echo "$line2" | sed 's/.*uniform\/phaseChange\/phaseChangeDeposits; //; s/), booked.*//')';\
+ continuation ${same%%$'\n'*}" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] \
+      && [[ "$record" == *"rounded 0 ( );"* ]] \
+      && [[ "$line1" == *"deposits: uniform/phaseChange/phaseChangeDeposits; exact), booked as restart; checked: the inventory, the internal fields and the patch values re-read, not other boundary parameters (e.g. inletValue)" ]] \
+      && [[ "$line2" == *"deposits: uniform/phaseChange/phaseChangeDeposits; exact), booked as restart"* ]] \
+      && [[ "$line1$line2" != *"rounded"* ]]'
+else
+  result M3.8 FAIL "recomputed-patch box or its restarts failed ($BOXREC/log,\
+ $BOXRECRS/log, $BOXRECRS2/log)"
+fi
+
+
+#------------------------------------------------------------------------------
+# M3.1b, M3.2, M3.4c, M3.5c: the pipe, serial and on 3 and 4 ranks,
+# converged outer loop (tests/profiles/pipeSection)
+#------------------------------------------------------------------------------
+PIPE_SECTION=all
+source "$PR_SRC/pipeSection"
+
+
+#------------------------------------------------------------------------------
+# M3.7: run/012 for its excerpt steps with profiles
+#------------------------------------------------------------------------------
+if grep -q '^End' "$C012/log"
+then
+  grep -v -E '^(Profiles|  T_dep of )' "$C012/log" > "$C012/log.withoutProfiles"
+  excerpt=$("$REGRESS" -excerpt "$(runCaseDir 012)/out_excerpt" \
+    "$C012/log.withoutProfiles")
+  s1=$?
+  out=$($CHECKS integrals "$C012" 1e-12)
+  s2=$?
+  $READER "$C012" > "$C012/log.reader" 2>&1
+  s3=$?
+  nTdep=$(grep -c '^  T_dep from' "$C012/log.reader")
+  timeDirs=$(cd "$C012" && ls -d [0-9]* | tr '\n' ' ')
+  profileDirs=$(ls "$C012/postProcessing/axialProfiles" | tr '\n' ' ')
+  check M3.7 "run/012, 5 steps with profiles: out_excerpt as is\
+ ${excerpt%%$'\n'*} (log without the $(grep -c -E '^(Profiles|  T_dep of )' \
+ "$C012/log") profile lines); ${out#*: }; profile directories $profileDirs;\
+ time directories $timeDirs; utilities/axialProfiles.py: $nTdep T_dep lines\
+ ($C012/log.reader)" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $nTdep -eq 8 ] \
+      && [ "$timeDirs" = "0 " ] && [ "$profileDirs" = "0.002 0.004 " ]'
+else
+  result M3.7 FAIL "run/012 with profiles failed ($C012/log)"
+fi
+
+# every criterion was tested; the results are in $RESULTS
+exit 0
+
+#------------------------------------------------------------------------------

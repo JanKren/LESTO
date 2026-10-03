@@ -1,0 +1,1676 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#
+# tests/paperMode/Allrun
+#
+# PURPOSE
+#
+# Acceptance tests of milestone M4 of doc/phase-change-plan.md: the
+# paper-mode carrier (utilities/setFrozenCarrier), the interaction layer
+# 'distance' of interfaceExchange, and the code-to-code case run/014 of the
+# temperature-based model of Lobresco et al. (2026) (plan section 6 M4,
+# acceptance 1 to 6, the binding amendments listed in its focus, and the
+# decisions of plan section 25).  Every numerical claim is checked on the
+# written output by tests/paperMode/checks.py.
+#
+# Usage
+#
+#   tests/paperMode/Allrun          the criteria of 'tests/Alltest M4'
+#                                   (about 25 min on at most 8 cores)
+#   tests/paperMode/Allrun long     the code-to-code runs of acceptance 3 to
+#                                   5 ('tests/Alltest M4long', hours on 16
+#                                   cores; reused when nothing has changed;
+#                                   tests/paperMode/longRuns, its variables
+#                                   M4LONG_RUNS, M4LONG_JOBS, M4LONG_RANKS)
+#
+# Exit status: 0 when every criterion was tested (whatever the results),
+# 1 when the script stopped early; Alltest reports that as a FAIL.
+#
+#------------------------------------------------------------------------------
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+
+PM_DIR=$WORK_DIR/paperMode
+PM_SRC=$TESTS_DIR/paperMode
+CHECKS="python3 $PM_SRC/checks.py"
+PCCHECKS="python3 $TESTS_DIR/phaseChange/checks.py"
+CARRIER_EXE=$FOAM_USER_APPBIN/setFrozenCarrier
+BALANCE=postProcessing/phaseChangeBalance/0/PbI2_g.dat
+CASE014=$(runCaseDir 014) || exit 1
+
+mkdir -p "$PM_DIR"
+
+
+#------------------------------------------------------------------------------
+# Helpers
+#------------------------------------------------------------------------------
+
+# edit <file> <sed expression> <pattern that must match afterwards>
+edit() {
+  sed -i -E "$2" "$1" && grep -q -E "$3" "$1" \
+    || { echo "Editing $1 with '$2' failed" >&2; return 1; }
+}
+
+# the number of lines of a log that match a pattern
+count() {
+  grep -c -E "$2" "$1" 2>/dev/null
+}
+
+# decomposeWith <case> <n> <method and coeffs> [decomposePar options]
+decomposeWith() {
+  local c=$1 n=$2 method=$3
+  shift 3
+  requireCaseDir "$c" || return 1
+  cat > "$c/system/decomposeParDict" <<EOF
+FoamFile{version 2.0; format ascii; class dictionary; object decomposeParDict;}
+
+numberOfSubdomains $n;
+$method
+EOF
+  (cd "$c" && decomposePar -force "$@" > log.decomposePar 2>&1)
+}
+
+# case014 <destination> [<own dynamicCode: yes>]: a copy of run/014 (makeCase)
+# with its carrier written by setFrozenCarrier into 0
+case014() {
+  local dst=$1 own=${2:-no}
+  makeCase 014 "$dst" || return 1
+  if [ "$own" = yes ]
+  then
+    rm -f "$dst/dynamicCode"
+    mkdir -p "$dst/dynamicCode"
+  fi
+}
+
+# carrier <case>: setFrozenCarrier into the start time
+carrier() {
+  requireCaseDir "$1" || return 1
+  (cd "$1" && "$CARRIER_EXE" > log.setFrozenCarrier 2>&1)
+}
+
+#==============================================================================
+# M4long: tests/paperMode/longRuns (executed: Allrun may be edited meanwhile)
+#==============================================================================
+if [ "${1:-}" = long ]
+then
+  exec "$PM_SRC/longRuns"
+fi
+
+
+#==============================================================================
+# M4: the short criteria (tests/Alltest M4)
+#==============================================================================
+
+echo "== M4 paper-mode carrier and layer distance (work directory $PM_DIR)"
+
+#------------------------------------------------------------------------------
+# Criteria of the short part
+#
+#   M4.1a  the paper-mode carrier of run/014 on the pipe of run/001 (serial):
+#          max |sum_f phi| per cell <= 1e-15 of the inflow; U_b = Q/(pi R^2)
+#          (Q = 1.67e-6 m3/s, R = 2.4 mm) to 1e-9; the discrete inflow, the
+#          facet-area ratio and the discrete bulk velocity printed; the
+#          temperature solved (Picard converged) and the wall faces holding
+#          the table at their centres exactly (acceptance 1)
+#   M4.1b  the same carrier decomposed by decomposePar, simple (4 1 1) and
+#          hierarchical (2 2 1): setFrozenCarrier -check -parallel <= 1e-15
+#          (plan section 15, item 7); and written by setFrozenCarrier
+#          -parallel on the decomposed mesh: <= 1e-15, and its phi equal bit
+#          for bit to the decomposed serial phi on every rank (the two sides
+#          of a processor face are exactly opposite)
+#   M4.1c  a small wedge (blockMesh, 5 degrees, 40 x 10 cells; the meshes of
+#          M7): <= 1e-15; the sector (5 degrees) from the wedge patches; the
+#          discrete inflow rescaled to Q 5/360 (rescaleToFacets; to 2.5e-13
+#          with the angle from the wedge-plane normals, to 1e-15 with an
+#          explicit sectorAngle 5: both summed exactly from the written phi;
+#          review of M4, round 3); the facet-area ratio sin(theta)/theta; the
+#          table (format columns) on the whole cross-section (mode profile)
+#   M4.1d  the wedge decomposed (simple (4 1 1)): -check -parallel <= 1e-15;
+#          and decomposed with a single INLET face on rank 1 (manual): the
+#          'uniform' value decomposePar writes for that patch is reported
+#          above 1e-15, and the carrier written with -parallel on that
+#          decomposition is exact (review of M4, round 1)
+#   M4.1e  negative evidence of the decomposed check: the pipe decomposed
+#          with writeFormat ascii (decomposePar writes every value of phi as
+#          text) stays exact on this mesh (the two axial faces of a cell
+#          carry the same flux and round alike); one processor value
+#          rewritten as decomposePar writes a 'uniform' patch (6 digits) is
+#          reported above 1e-15 of the inflow
+#   M4.1f  the wall table of T-Flows: its count line says 66 rows, the file
+#          has 70; 'rows all' (run/014) reads 70 and names the mismatch;
+#          'rows count' (as T-Flows) reads 66 rows (x <= 0.65 m) and stops
+#          with outOfRange fatal at the faces beyond, and holds T(0.65 m)
+#          there with outOfRange hold
+#   M4.1g  the solver on the wedge carrier (temperature model, layer
+#          distance, a release near the axis), 20 steps: closure <= 1e-13 in
+#          every step, the release n0 M to 1e-14
+#   M4.1h  a wedge that is not extruded along the axis (its inner points
+#          moved radially and axially; checks.py perturbWedge interior):
+#          max |sum_f phi| per cell <= 1e-15 of the inflow in serial and
+#          decomposed (simple (4 1 1)), the wall flux <= 1e-12 of the
+#          inflow, and the face-centre flux of the same profile misses
+#          continuity by more than 1e-10 (the exact integral is needed;
+#          review of M4, round 1)
+#   M4.1i  a wedge whose wall faces are tilted against the axis
+#          (perturbWedge wall): setFrozenCarrier stops (the wall would be
+#          permeable) and writes nothing; with permeableWalls yes it writes
+#          the carrier with a warning, continuity <= 1e-15 and the wall
+#          flux reported above 1e-12 of the inflow
+#   M4.1k  inputs that do not fit the mesh (review of M4, round 2), on the
+#          wedge of M4.1c (rescaleToFacets yes): the axis pointing out of
+#          the inlet, and 'inlet' naming the outlet, stop the utility ('The
+#          flux of the profile through the patch ... is ..., not an
+#          inflow') and a radius of 2.3 mm on the mesh of 2.4 mm stops it
+#          ('The radius ... is smaller than the largest distance ...'), each
+#          without writing a field; with allowBackflow yes the last writes
+#   M4.1j  -check of the wedge of M4.1g after its run (startFrom
+#          latestTime, phi only in 0): it checks the phi of 0 found by
+#          findInstance, <= 1e-15; setFrozenCarrier on that case writes the
+#          carrier into 0, identical to the original, and nothing into the
+#          latest time (review of M4, round 1)
+#   M4.2   run/014 on the pipe (acceptance 2): layer distance 30528 cells
+#          with A_I/V_I = 8533.7 (to 1e-5), the centre-distance rule of
+#          T-Flows selects the same cells; layer faceCells 15264 cells with
+#          A_I/V_I = 17681.9
+#   M4.6   the sources (solver and setFrozenCarrier) compile and link with 0
+#          warnings against OpenFOAM v2606 (a copy, built in the work
+#          directory with the installation in LESTO_OPENFOAM_V2606); NOTRUN
+#          without it (M0.4 on Merlin7 remains NOTRUN)
+#   M4.7a  the channel of tests/phaseChange with layer distance 3.5e-4 m (two
+#          cell rows at each wall: 400 cells, A_I/V_I = 2500 1/m), tight
+#          solves, 200 steps: closure <= 1e-13 in every step;
+#          areaIntegrate of mDep_PbI2_s on WALL (surfaceFieldValue, every
+#          step) = the wall inventory to 1e-12; the two walls of the
+#          symmetric channel deposit the same to 1e-12 (the nearest faces of
+#          OpenFOAM's combined wall patch gave the first row of one wall the
+#          faces of the other: plan section 25)
+#   M4.7b  the channel on 4 ranks, a manual split by rows (the first row of
+#          each wall on its own rank: 200 layer cells with their nearest
+#          wall face on another rank): closure <= 1e-13 in every step,
+#          inventories equal to serial to 1e-9 in every step (M2(4), with
+#          21 forced correctors per step solved to the floor of the linear
+#          solver, as M2.4a-c), mDep_ on every wall face equal to serial to
+#          1e-9 of its largest value, areaIntegrate of mDep_ = the wall
+#          inventory to 1e-12 in every step
+#   M4.7c  the pipe of run/014 (SuperBee, background Y = 0.1, 10 steps of 4
+#          ms, every corrector solved to 1e-15 with 3 correctors per step) in
+#          serial and on 4 ranks: simple (4 1 1), hierarchical (2 2 1), and
+#          an uneven manual split whose rank 0 holds the first cell layer (so
+#          that every cell of the second layer, 15264, has its nearest wall
+#          face on another rank): closure <= 1e-13, inventories equal to
+#          serial to 1e-9 in every step (M2(4)), areaIntegrate of mDep_ =
+#          the wall inventory to 1e-12 in every step
+#   M4.7d  binary restarts in distance mode from 0.1: every file at 0.2
+#          cmp-identical to the continuous run (uniform/time excepted, as
+#          before), serial and on 4 ranks, without the warning that mw_
+#          differs from the element deposits
+#   M4.7e  restarts of the pipe of M4.7c onto another decomposition: the
+#          serial state at 0.04 on 4 ranks (hierarchical (2 2 1)), the
+#          state of the uneven split reconstructed and continued in serial;
+#          the deposits re-read from mw_ give the ledger's inventory to
+#          1e-15 (exact; A_I and V_I are compensated sums, plan section 25:
+#          with plain sums 7.3e-15 and 2.8e-15, and 2.0e-14 from 16 ranks to
+#          serial, beyond the bound 1e-14 of an exact restart)
+#   M4.7g  the order of the sums of the nearest-face map (review of M4,
+#          round 2): the channel with layer distance 5.5e-4 m (three rows
+#          per wall) on 4 ranks, the three rows of the lower wall on ranks
+#          0, 1 and 2, so that each of its 100 faces adds the deposits of
+#          two other ranks (printed: '200 elements ..., 100 interface faces
+#          with elements of two or more other ranks'); two runs on that
+#          decomposition write every file bit for bit alike; closure <=
+#          1e-13, inventories equal to serial to 1e-9, mDep_ to 1e-9, and
+#          its areaIntegrate = the wall inventory to 1e-12
+#   M4.7h  two-way nearest-face maps (review of M4, round 3: the scheduled
+#          reverse distribute of round 2 added every contribution twice
+#          between two ranks that map elements to each other's faces), 2
+#          lines: (a) the channel of M4.7a on 4 ranks with the rows 0 and 22
+#          on rank 0 and the rows 1 and 23 on rank 1 (the second row of each
+#          wall maps to the other rank: 200 elements with their nearest wall
+#          face on another rank, 0 faces with elements of two or more other
+#          ranks); (b) the pipe of M4.7c on hierarchical (1 1 4) (161 and 0):
+#          the start-up counts exactly, closure <= 1e-13, inventories equal
+#          to serial to 1e-9 in every step, areaIntegrate of mDep_ = the wall
+#          inventory to 1e-12 in every step (the build before the fix: +50 %
+#          and +7.8e-4, and 200 and 13 faces counted); (a) also mDep_ of
+#          every wall face equal to serial to 1e-9 of its largest value
+#   M4.7f  the serial pipe of M4.7c restarted from 0.02 (its deposits of
+#          9432 layer cells do not all survive the round trip through
+#          (m''_e A_e)/A_e): every file at 0.04 cmp-identical to the
+#          continuous run, mw_ equal to the element deposits (no warning,
+#          tolerance 0 for a binary field; review of M4, round 1)
+#   M4.8   refusals (7 lines): halfCell with layer distance; areaPerVolume
+#          cell with layer distance; layer distance without a distance; a
+#          distance that selects no cell; a restart with another distance;
+#          a restart with another layer rule (both directions)
+#   M4.9   profiles in distance mode (channel): bins + outside = inventory
+#          to 1e-12 for every file and set; T_dep found; the Twall and
+#          wallArea columns equal to those of layer faceCells bit for bit
+#          (the wall temperature of the interface faces for both rules)
+#   M4.10  model HKS with layer distance (the inventory channel of M5, the
+#          sample removed at 0.1 s, interfaceTemperature wall from the
+#          nearest faces), 2 lines: serial: closure <= 1e-13, 0 significant
+#          projections and complementarity violations, the wall deposits,
+#          the removal once; and on 4 ranks split by rows (review of M4,
+#          round 2: the elements of the second row pull the temperature of
+#          their nearest face from another rank): 200 such elements,
+#          closure <= 1e-13, the inventories (gas, wall, sample) equal to
+#          serial to 1e-9 in every step, areaIntegrate of mDep_ = the wall
+#          inventory to 1e-12, the same counts and the removal once
+#   M4.11  run/014: its out_excerpt reproduced (5 steps)
+#   M4.12  provenance (NOTRUN without /home/jan/src/T-Flows or the pinned
+#          revision): constant/wall_x_profile_complete.dat of run/014 is the
+#          T-Flows file at 35c1f6406e8e byte for byte, and the conductivity
+#          table of its setFrozenCarrierDict is k_he of User_Mod/Types.f90
+#   M4.13  layer distance with several interface patches (tests/paperMode/
+#          corners: an L-shaped channel with WALLA, WALLB and WALLC; plan
+#          section 26), the patches in both orders of the boundary file
+#          (2 lines): distance 7.5e-5 m: 5 cells (the row along WALLB with
+#          the corner cell of WALLB and WALLC), A_I/V_I = 20000 1/m, mDep_
+#          0 on every face of WALLA and WALLC and > 0 on every face of
+#          WALLB, the same in both orders; distance 1.25e-4 m: 15 cells
+#          (the cell at the re-entrant corner of WALLA and WALLB included),
+#          A_I/V_I = 6666.67 1/m, mDep_ the same in both orders
+#   M4.14  the layer independent of the decomposition (2 lines): (a) the
+#          corners at 1.25e-4 m on 3 ranks (one block per rank: the rank of
+#          the corner cell holds no interface face): 15 cells, A_I/V_I and
+#          mDep_ equal to serial, 1 nearest face on another rank; the
+#          serial state at 0.001 restarted on the 3 ranks and the 3-rank
+#          state reconstructed and restarted in serial: exact (relative
+#          <= 1e-15); (b) a tetrahedral pipe (gmsh; NOTRUN without gmsh):
+#          the layer of 4e-4 m equal in serial, on 4 ranks (simple (1 2 2))
+#          and recomputed from the mesh (checks.py exactLayer), and the
+#          serial state restarted on the 4 ranks exact; areaIntegrate of
+#          mDep_ = the wall inventory to 1e-12 in serial and on the 4 ranks,
+#          whose maps run both ways (21 elements with their nearest face on
+#          another rank, 0 faces with elements of two or more other ranks;
+#          the build before the review of M4, round 3: +0.92 %, 14 faces)
+#   M4.15  the closure does not drift (review of M4, round 2; plan section
+#          27, item 1): the pipe of run/014 with its own solver settings, a
+#          background Y = 0.1 and 20 steps of 0.1 s on 4 ranks (simple (4 1
+#          1)): closure <= 2e-15 of the reference in every step (the binary
+#          before the fix, with the row-form transport defect and the
+#          rounding of the stored deposits not booked: 1.16e-14 after the 20
+#          steps, growing linearly; with the fix 4.2e-16)
+#   M4.18  the face-flux correction of the transport matrix in flux form
+#          (review of M4, round 3; plan section 29, item 2): the drift pipe of
+#          M4.15 (layer distance) and the same with layer faceCells, on 4
+#          ranks, print with reportMatrixResidual an explicit remainder of 0
+#          kg/s in 0 cells in every step, while the explicit source sum |b -
+#          s| (the non-orthogonal correction of the laplacian, 1e-6 kg/s)
+#          is not 0: the correction enters the defect by its face values and
+#          the closure changes by exactly 0 for it (the build before:
+#          sum_c (b - s)_c dt, up to 1.7e-24 kg per step, unbooked; no such
+#          report); positive control: the channel with Gauss linearUpwind,
+#          whose explicit correction OpenFOAM adds to the source only, leaves
+#          a remainder in some cells
+#   M4.19  the passive-carrier monitor in paper mode (review of M4, round 3;
+#          plan section 29, item 4): the max mole fraction printed for the
+#          last step of the serial pipe of M4.7c equals max c/(c + p/(R T)),
+#          c = rho Y/M, recomputed from its fields at 0.04, to 1e-5 (the
+#          build before printed (Y/M)/(Y/M + 1/M_He), 23.5 times less: rho = 1
+#          is no density of helium)
+#------------------------------------------------------------------------------
+
+PC_SRC=$TESTS_DIR/phaseChange
+HKCHECKS="python3 $TESTS_DIR/hks/checks.py"
+PRCHECKS="python3 $TESTS_DIR/profiles/checks.py"
+REGRESS=$TESTS_DIR/regress.sh
+CMPFIELDS=$TESTS_DIR/cmpFields.sh
+MAKE_CARRIER=$PM_DIR/bin/makeCarrier
+PV_TABLE=$REPO_DIR/thermochemistry/systems/data/pv_PbI2_phases.csv
+TFLOWS_REPO=${LESTO_TFLOWS_REPO:-/home/jan/src/T-Flows}
+TFLOWS_REV=35c1f6406e8eef050b894633bcff9db63e21f06a
+TFLOWS_CASE=Tests/Laminar/Scalar_Transport_Gpu/LESTO_HKS
+
+# the carrier generator of tests/phaseChange (the channel), rebuilt when its
+# source or OpenFOAM changes
+buildMakeCarrier() {
+  local key
+  key="$WM_PROJECT_DIR $(cat "$PC_SRC"/makeCarrier/makeCarrier.C \
+    "$PC_SRC"/makeCarrier/Make/* | md5sum | cut -d' ' -f1)"
+  if [ -x "$MAKE_CARRIER" ] \
+    && [ "$(cat "$PM_DIR/bin/key" 2>/dev/null)" = "$key" ]
+  then
+    return 0
+  fi
+  rm -rf "$PM_DIR/makeCarrier" "$PM_DIR/bin"
+  mkdir -p "$PM_DIR/bin"
+  cp -r "$PC_SRC/makeCarrier" "$PM_DIR/makeCarrier"
+  (cd "$PM_DIR/makeCarrier" && FOAM_USER_APPBIN=$PM_DIR/bin wmake) \
+    > "$PM_DIR/log.makeCarrier" 2>&1 || {
+      echo "Building makeCarrier failed, see $PM_DIR/log.makeCarrier" >&2
+      return 1
+    }
+  echo "$key" > "$PM_DIR/bin/key"
+}
+
+# the surfaceFieldValue of mDep_PbI2_s on WALL, every step
+MDEP_FO='functions {
+  mDepWall {
+    type            surfaceFieldValue;
+    libs            (fieldFunctionObjects);
+    writeControl    timeStep;
+    writeInterval   1;
+    writeFields     false;
+    log             false;
+    writePrecision  17;
+    regionType      patch;
+    name            WALL;
+    operation       areaIntegrate;
+    fields          (mDep_PbI2_s);
+  }
+}'
+MDEP_DAT=postProcessing/mDepWall/0/surfaceFieldValue.dat
+
+# withMdep <case>: the function object appended to controlDict
+withMdep() {
+  printf '\n%s\n' "$MDEP_FO" >> "$1/system/controlDict"
+}
+
+# channel <destination> <layer entries>: the channel of tests/phaseChange
+# (blockMesh, the frozen plug flow of makeCarrier), the given interface
+# entries, tight solves (PBiCGStab 1e-15, relTol 0, no Final dictionary)
+# with 21 forced correctors per step (nCorr 20 and an outer tolerance of
+# 1e-12, which the correctors do not reach: every step ends at the
+# corrector limit, 'NOT converged', the initial residual of the last
+# corrector 6e-8 in the median step of channel-distance, between 2.5e-11
+# and 1.5e-5, as the lagged SuperBee limiter changes the matrix from one
+# corrector to the next; the condition of M2.4a-c, not a converged loop;
+# review of M4, round 2), the mDep_ function object and a profiles
+# dictionary
+channel() {
+  local dst=$1 entries=$2
+  rm -rf "$dst"
+  cp -r "$PC_SRC/channel" "$dst" || return 1
+  edit "$dst/constant/thermochemistryProperties" \
+    "s/^  patches \(WALL\);/  patches (WALL);\n$entries/" "patches \(WALL\);" \
+    || return 1
+  cat >> "$dst/constant/thermochemistryProperties" <<'EOF'
+
+profiles {
+  bins { native { nBins 100; } coarse { width 0.0075; } }
+  times (0.03 0.1);
+  observable wall;
+}
+EOF
+  cat > "$dst/system/fvSolution" <<'EOF'
+FoamFile {version 2.0; format ascii; class dictionary; object fvSolution;}
+
+solvers {
+  Y_PbI2_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-15; relTol 0;}
+  Y_PbI2_s {solver diagonal;}
+}
+EOF
+  setSpeciesControl "$dst" tolerance 1e-12 \
+    && setSpeciesControl "$dst" nCorr 20 \
+    && withMdep "$dst" \
+    && (cd "$dst" && blockMesh > log.blockMesh 2>&1 \
+        && "$MAKE_CARRIER" > log.makeCarrier 2>&1) \
+    && touch "$dst/case.foam"
+}
+
+# rowsSplit <case>: cellDecomposition of the channel by cell rows (100 cells
+# per row, 24 rows): the first row at each wall on its own rank (0 and 3),
+# the rows between on ranks 1 and 2
+rowsSplit() {
+  python3 - "$1/constant/cellDecomposition" <<'EOF'
+import sys
+ranks = []
+for c in range(2400):
+    j = c//100
+    ranks.append(0 if j == 0 else 1 if j <= 11 else 2 if j <= 22 else 3)
+with open(sys.argv[1], 'w') as f:
+    f.write('FoamFile{version 2.0; format ascii; class labelList; '
+            'object cellDecomposition;}\n%d\n(\n%s\n)\n'
+            % (len(ranks), '\n'.join(map(str, ranks))))
+EOF
+}
+
+# rows3Split <case>: cellDecomposition of the channel for a layer of three
+# rows per wall: the rows 0, 1 and 2 at the lower wall on ranks 0, 1 and 2,
+# the other rows on rank 3, so that every face of the lower wall receives
+# the elements of two other ranks
+rows3Split() {
+  python3 - "$1/constant/cellDecomposition" <<'EOF'
+import sys
+ranks = []
+for c in range(2400):
+    j = c//100
+    ranks.append(j if j <= 2 else 3)
+with open(sys.argv[1], 'w') as f:
+    f.write('FoamFile{version 2.0; format ascii; class labelList; '
+            'object cellDecomposition;}\n%d\n(\n%s\n)\n'
+            % (len(ranks), '\n'.join(map(str, ranks))))
+EOF
+}
+
+# twoWaySplit <case>: cellDecomposition of the channel whose nearest-face
+# map runs both ways between ranks 0 and 1: the rows 0 and 22 on rank 0, the
+# rows 1 and 23 on rank 1 (the second row of each wall maps to the faces of
+# the other rank), the rows between on ranks 2 and 3 (review of M4, round 3)
+twoWaySplit() {
+  python3 - "$1/constant/cellDecomposition" <<'EOF'
+import sys
+ranks = []
+for c in range(2400):
+    j = c//100
+    ranks.append(0 if j in (0, 22) else 1 if j in (1, 23) else 2 if j <= 11
+                 else 3)
+with open(sys.argv[1], 'w') as f:
+    f.write('FoamFile{version 2.0; format ascii; class labelList; '
+            'object cellDecomposition;}\n%d\n(\n%s\n)\n'
+            % (len(ranks), '\n'.join(map(str, ranks))))
+EOF
+}
+
+# layersApart <case>: cellDecomposition of the pipe: rank 0 the first cell
+# layer (R - r < 6e-5 m: the first layer lies at 2.9e-5 to 4e-5 m, the
+# second at 9.8e-5 m), the other cells by x on ranks 1 (x < 0.2), 2 (x <
+# 0.45) and 3; cell centres from postProcess writeCellCentres
+layersApart() {
+  (cd "$1" && postProcess -func writeCellCentres -time 0 \
+     > log.writeCellCentres 2>&1) || return 1
+  python3 - "$1" <<EOF
+import os, sys
+sys.path.insert(0, '$PC_SRC')
+import checks as pc
+case = sys.argv[1]
+C = [pc.readScalarField(os.path.join(case, '0', 'C' + x))[0] for x in 'xyz']
+ranks = []
+for x, y, z in zip(*C):
+    r = (y*y + z*z)**0.5
+    ranks.append(0 if 2.4e-3 - r < 6e-5 else 1 if x < 0.2 else 2 if x < 0.45
+                 else 3)
+for x in 'xyz':
+    os.remove(os.path.join(case, '0', 'C' + x))
+os.remove(os.path.join(case, '0', 'C'))
+with open(os.path.join(case, 'constant', 'cellDecomposition'), 'w') as f:
+    f.write('FoamFile{version 2.0; format ascii; class labelList; '
+            'object cellDecomposition;}\n%d\n(\n%s\n)\n'
+            % (len(ranks), '\n'.join(map(str, ranks))))
+print('layersApart: cells per rank', [ranks.count(k) for k in range(4)])
+EOF
+}
+
+# copyCase <source> <destination>: system, constant (links kept), 0 and the
+# marker of a case, without its results
+copyCase() {
+  rm -rf "$2"
+  mkdir -p "$2"
+  cp -a "$1/system" "$1/constant" "$1/0" "$2/" \
+    && touch "$2/case.foam" \
+    && { [ ! -e "$1/dynamicCode" ] || cp -a "$1/dynamicCode" "$2/"; }
+}
+
+# restartCopy <continuous> <restart> <time>: every file of <time> of the
+# continuous run (and of its processor directories)
+restartCopy() {
+  local src=$1 dst=$2 t=$3 d
+  rm -rf "$dst"
+  mkdir -p "$dst"
+  cp -a "$src"/system "$src"/constant "$src"/0 "$src"/case.foam "$dst"/
+  if ls -d "$src"/processor* > /dev/null 2>&1
+  then
+    for d in "$src"/processor*
+    do
+      mkdir -p "$dst/$(basename "$d")"
+      cp -a "$d/constant" "$d/0" "$d/$t" "$dst/$(basename "$d")"/
+    done
+  else
+    cp -a "$src/$t" "$dst"/
+  fi
+  setControl "$dst" startFrom latestTime
+}
+
+# expectFatal <id> <text> <case> <message>: the run fails with the message
+expectFatal() {
+  local id=$1 text=$2 c=$3 message=$4
+  if runSerial "$c" "$SOLVER_EXE"
+  then
+    result "$id" FAIL "$text: the run did not stop ($c/log)"
+  elif grep -q -F -- "$message" "$c/log"
+  then
+    result "$id" PASS "$text: stops with '$message'"
+  else
+    result "$id" FAIL "$text: stopped without '$message' ($c/log)"
+  fi
+}
+
+buildMakeCarrier || exit 1
+
+
+#------------------------------------------------------------------------------
+# M4.1a: the pipe carrier (serial)
+#------------------------------------------------------------------------------
+CAR=$PM_DIR/carrier-pipe
+case014 "$CAR" && carrier "$CAR" || echo "setFrozenCarrier failed ($CAR)"
+s0=1; grep -q '^End' "$CAR/log.setFrozenCarrier" 2>/dev/null && s0=0
+out1=$($CHECKS continuity "$CAR/log.setFrozenCarrier" 1e-15); s1=$?
+Ub=$(python3 -c "import math; print(repr(1.67e-6/(math.pi*2.4e-3**2)))")
+out2=$($CHECKS carrier "$CAR/log.setFrozenCarrier" "Ub=$Ub"); s2=$?
+picard=$(grep -o 'Temperature solved .*' "$CAR/log.setFrozenCarrier" | head -1)
+wallT=$(grep -o 'the wall faces hold the table .*' "$CAR/log.setFrozenCarrier")
+check M4.1a "pipe carrier of run/014 (serial): $out1; $out2; $(grep -o \
+'discrete inflow through .*' "$CAR/log.setFrozenCarrier"); $picard; $wallT" \
+  eval '[ $s0 -eq 0 ] && [ $s1 -eq 0 ] && [ $s2 -eq 0 ] \
+    && [[ "$picard" != *"NOT converged"* ]] && [[ "$wallT" == *"(max deviation 0 K)"* ]]'
+
+#------------------------------------------------------------------------------
+# M4.1b: the pipe carrier decomposed (check), and written in parallel
+#------------------------------------------------------------------------------
+decompositions=(
+  "simple411:method simple; coeffs { n (4 1 1); }"
+  "hierarchical221:method hierarchical; coeffs { n (2 2 1); }"
+)
+ok=true
+text=""
+for d in "${decompositions[@]}"
+do
+  name=${d%%:*}
+  c=$PM_DIR/carrier-pipe-$name
+  copyCase "$CAR" "$c" && decomposeWith "$c" 4 "${d#*:}" \
+    || { ok=false; text+="$name: decomposePar failed; "; continue; }
+  (cd "$c" && mpirun -np 4 --bind-to none "$CARRIER_EXE" -check -parallel \
+     > log.check 2>&1 < /dev/null) || ok=false
+  out=$($CHECKS continuity "$c/log.check" 1e-15) || ok=false
+  text+="$name: ${out#OK: }; "
+done
+c=$PM_DIR/carrier-pipe-simple411
+cp=$PM_DIR/carrier-pipe-parallel
+copyCase "$c" "$cp" && cp -a "$c"/processor* "$cp"/ \
+  && rm -f "$cp"/processor*/0/{rho,U,p,T,phi} \
+  && (cd "$cp" && mpirun -np 4 --bind-to none "$CARRIER_EXE" -parallel \
+        > log.setFrozenCarrier 2>&1 < /dev/null) || ok=false
+out=$($CHECKS continuity "$cp/log.setFrozenCarrier" 1e-15) || ok=false
+text+="written on 4 ranks: ${out#OK: }; "
+same=$($CHECKS samePhi "$c" "$cp" 4) || ok=false
+text+="$same"
+check M4.1b "pipe carrier decomposed (decomposePar; plan section 15, item\
+ 7) and written on the decomposed mesh: $text" $ok
+
+#------------------------------------------------------------------------------
+# M4.1c/d: the wedge
+#------------------------------------------------------------------------------
+WEDGE=$PM_DIR/wedge
+rm -rf "$WEDGE"
+cp -r "$PM_SRC/wedge" "$WEDGE" && touch "$WEDGE/case.foam" \
+  && (cd "$WEDGE" && blockMesh > log.blockMesh 2>&1) \
+  && carrier "$WEDGE" || echo "wedge carrier failed ($WEDGE)"
+out1=$($CHECKS continuity "$WEDGE/log.setFrozenCarrier" 1e-15); s1=$?
+facet=$(python3 -c "import math; t = math.radians(5); print(repr(math.sin(t)/t))")
+out2=$($CHECKS carrier "$WEDGE/log.setFrozenCarrier" inflowRatio=1 \
+         "facetRatio=$facet" 2>&1); s2=$?
+sector=$(grep -c 'sector 5 deg (the two wedge patches)' \
+           "$WEDGE/log.setFrozenCarrier")
+wallT=$(grep -o 'Temperature profile: .*' "$WEDGE/log.setFrozenCarrier")
+# the rescaled inflow summed exactly from the written phi: to the precision
+# of the angle between the wedge-plane normals (pi - acos(n1 . n2)), and to
+# round-off with an explicit sectorAngle (review of M4, round 3)
+out3=$($CHECKS inflowExact "$WEDGE/0/phi" INLET 1 100 5 1e-12); s3=$?
+WEDGEA=$PM_DIR/wedge-sectorAngle
+copyCase "$WEDGE" "$WEDGEA" && rm -f "$WEDGEA"/0/{rho,U,p,T,phi} \
+  && edit "$WEDGEA/system/setFrozenCarrierDict" \
+       's/^(rescaleToFacets +yes;.*)$/\1\nsectorAngle      5;/' '^sectorAngle +5;' \
+  && carrier "$WEDGEA" || echo "the wedge with sectorAngle failed ($WEDGEA)"
+out4=$($CHECKS inflowExact "$WEDGEA/0/phi" INLET 1 100 5 1e-15); s4=$?
+angle=$(grep -c 'sector 5 deg (sectorAngle)' "$WEDGEA/log.setFrozenCarrier")
+check M4.1c "wedge 5 deg, 400 cells: $out1; sector 5 deg from the wedge\
+ patches ($sector line); rescaled: $out2 (facet-area ratio sin(theta)/theta =\
+ $facet, to 1e-9 of the printed digits); $wallT; the rescaled inflow from the\
+ wedge patches: ${out3#OK: }; with sectorAngle 5 ($angle line): ${out4#OK: }" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ "$sector" = 1 ] \
+    && [[ "$wallT" == *"(max deviation 0 K)"* ]] && [ $s3 -eq 0 ] \
+    && [ $s4 -eq 0 ] && [ "$angle" = 1 ]'
+
+WEDGED=$PM_DIR/wedge-simple411
+copyCase "$WEDGE" "$WEDGED" \
+  && decomposeWith "$WEDGED" 4 "method simple; coeffs { n (4 1 1); }" \
+  && (cd "$WEDGED" && mpirun -np 4 --bind-to none "$CARRIER_EXE" -check \
+        -parallel > log.check 2>&1 < /dev/null)
+out=$($CHECKS continuity "$WEDGED/log.check" 1e-15); s=$?
+
+# a single INLET face on rank 1 (the first cell of the blockMesh order, at
+# the inlet next to the axis): decomposePar writes that patch of phi as a
+# 'uniform' value of about 10 digits (an ordinary patch, not a processor
+# patch); -check sees it, and the carrier written with -parallel is exact
+WEDGE1=$PM_DIR/wedge-singleInletFace
+copyCase "$WEDGE" "$WEDGE1" \
+  && python3 -c "
+print('FoamFile{version 2.0; format ascii; class labelList; object cellDecomposition;}')
+print('400\n(\n1\n' + '0\n'*399 + ')')" > "$WEDGE1/constant/cellDecomposition" \
+  && decomposeWith "$WEDGE1" 2 'method manual; coeffs { dataFile "cellDecomposition"; }' \
+  && (cd "$WEDGE1" && mpirun -np 2 --bind-to none "$CARRIER_EXE" -check \
+        -parallel > log.check 2>&1 < /dev/null)
+out1=$($CHECKS continuityAbove "$WEDGE1/log.check" 1e-15); s1=$?
+inlet=$(grep -a -A6 'INLET' "$WEDGE1/processor1/0/phi" \
+          | grep -a -o 'value *uniform [^;]*' | head -1)
+rm -f "$WEDGE1"/processor*/0/{rho,U,p,T,phi}
+(cd "$WEDGE1" && mpirun -np 2 --bind-to none "$CARRIER_EXE" -parallel \
+   > log.setFrozenCarrier 2>&1 < /dev/null)
+out2=$($CHECKS continuity "$WEDGE1/log.setFrozenCarrier" 1e-15); s2=$?
+check M4.1d "wedge decomposed simple (4 1 1): $out; a single INLET face on\
+ rank 1 (processor1/0/phi INLET '$inlet'): $out1; the carrier written with\
+ -parallel on that decomposition: $out2" \
+  eval '[ $s -eq 0 ] && [ $s1 -eq 0 ] && [ -n "$inlet" ] && [ $s2 -eq 0 ]'
+
+#------------------------------------------------------------------------------
+# M4.1h/i: wedges not extruded along the axis
+#------------------------------------------------------------------------------
+WEDGEI=$PM_DIR/wedge-interiorMoved
+rm -rf "$WEDGEI"
+cp -r "$PM_SRC/wedge" "$WEDGEI" && touch "$WEDGEI/case.foam" \
+  && (cd "$WEDGEI" && blockMesh > log.blockMesh 2>&1) \
+  && $CHECKS perturbWedge "$WEDGEI" interior > "$WEDGEI/log.perturb" \
+  && (cd "$WEDGEI" && checkMesh > log.checkMesh 2>&1) \
+  && carrier "$WEDGEI" || echo "the moved wedge failed ($WEDGEI)"
+out1=$($CHECKS continuity "$WEDGEI/log.setFrozenCarrier" 1e-15); s1=$?
+out2=$($CHECKS wallFlux "$WEDGEI/log.setFrozenCarrier" 1e-12); s2=$?
+inflow=$(sed -n 's/.*of the inflow \([^ ]*\) kg\/s;.*/\1/p' \
+           "$WEDGEI/log.setFrozenCarrier" | head -1)
+out3=$($CHECKS faceCentreRule "$WEDGEI" "$inflow"); s3=$?
+meshOk=$(grep -c '^Mesh OK' "$WEDGEI/log.checkMesh" 2>/dev/null)
+WEDGEID=$PM_DIR/wedge-interiorMoved-simple411
+copyCase "$WEDGEI" "$WEDGEID" \
+  && decomposeWith "$WEDGEID" 4 "method simple; coeffs { n (4 1 1); }" \
+  && (cd "$WEDGEID" && mpirun -np 4 --bind-to none "$CARRIER_EXE" -check \
+        -parallel > log.check 2>&1 < /dev/null)
+out4=$($CHECKS continuity "$WEDGEID/log.check" 1e-15); s4=$?
+check M4.1h "a wedge not extruded along the axis ($(cat \
+ "$WEDGEI/log.perturb" 2>/dev/null | sed 's/^OK: //'); checkMesh 'Mesh OK':\
+ $meshOk): $out1; $out2; decomposed: $out4; negative evidence: $out3" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ] \
+    && [ "$meshOk" = 1 ]'
+
+WEDGEW=$PM_DIR/wedge-wallTilted
+rm -rf "$WEDGEW"
+cp -r "$PM_SRC/wedge" "$WEDGEW" && touch "$WEDGEW/case.foam" \
+  && (cd "$WEDGEW" && blockMesh > log.blockMesh 2>&1) \
+  && $CHECKS perturbWedge "$WEDGEW" wall > "$WEDGEW/log.perturb" \
+  || echo "the tilted wedge failed ($WEDGEW)"
+stopped=false
+if ! carrier "$WEDGEW" \
+  && grep -q 'the wall faces are not parallel to the axis' \
+       "$WEDGEW/log.setFrozenCarrier" \
+  && [ ! -e "$WEDGEW/0/phi" ]
+then
+  stopped=true
+fi
+mv "$WEDGEW/log.setFrozenCarrier" "$WEDGEW/log.setFrozenCarrier-stopped" \
+  2>/dev/null
+edit "$WEDGEW/system/setFrozenCarrierDict" \
+  "s/^(walls +\(WALL\);)/\1\npermeableWalls   yes;/" "^permeableWalls +yes;" \
+  && carrier "$WEDGEW"
+out1=$($CHECKS continuity "$WEDGEW/log.setFrozenCarrier" 1e-15); s1=$?
+out2=$($CHECKS wallFlux "$WEDGEW/log.setFrozenCarrier" 1 1e-12); s2=$?
+warned=$(grep -c 'and the wall is permeable (permeableWalls yes)' \
+           "$WEDGEW/log.setFrozenCarrier")
+check M4.1i "a wedge whose wall faces are tilted against the axis: the\
+ utility stops without writing ($stopped); with permeableWalls yes: $out1;\
+ $out2 (warning: $warned)" \
+  eval '$stopped && [ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ "$warned" = 1 ]'
+
+#------------------------------------------------------------------------------
+# M4.1k: inputs that do not fit the mesh (review of M4, round 2): the axis
+# pointing out of the inlet, 'inlet' naming the outflow patch, and a radius
+# below the wall (the wedge of M4.1c, R 2.4 mm, with rescaleToFacets yes,
+# which turned a negative inflow into a negative amplitude)
+#------------------------------------------------------------------------------
+# refusedCarrier <name> <sed expression> <pattern after the edit> <message>:
+# a copy of the wedge with its dictionary edited and no carrier; status 0
+# when the utility stops with the message and writes nothing
+refusedCarrier() {
+  local c=$PM_DIR/wedge-refused-$1
+  copyCase "$WEDGE" "$c" || return 1
+  rm -f "$c"/0/{rho,U,p,T,phi}
+  edit "$c/system/setFrozenCarrierDict" "$2" "$3" || return 1
+  if carrier "$c"
+  then
+    echo "$1: the utility did not stop ($c/log.setFrozenCarrier)"
+    return 1
+  fi
+  if ls "$c"/0/{rho,U,p,T,phi} > /dev/null 2>&1
+  then
+    echo "$1: it stopped but wrote a field ($c/0)"
+    return 1
+  fi
+  echo "$1 stops: '$(grep -a -m1 -o "$4.*" "$c/log.setFrozenCarrier" \
+    | cut -c1-90)...'"
+  grep -a -q "$4" "$c/log.setFrozenCarrier"
+}
+refusals=""
+refusalsOk=true
+out=$(refusedCarrier axisReversed \
+        's/^axis +\(1 0 0\);/axis             (-1 0 0);/' '^axis +\(-1 0 0\);' \
+        'The flux of the profile through the patch INLET is ') \
+  || refusalsOk=false
+refusals+="$out; "
+out=$(refusedCarrier inletIsOutlet \
+        's/^inlet +INLET;/inlet            OUTLET;/' '^inlet +OUTLET;' \
+        'The flux of the profile through the patch OUTLET is ') \
+  || refusalsOk=false
+refusals+="$out; "
+out=$(refusedCarrier radiusBelowWall \
+        's/^radius +2.4e-3;/radius           2.3e-3;/' '^radius +2.3e-3;' \
+        'The radius 0.0023 m is smaller than the largest distance') \
+  || refusalsOk=false
+refusals+="$out; "
+# the override writes the carrier, with the backflow it asks for
+c=$PM_DIR/wedge-allowBackflow
+copyCase "$WEDGE" "$c" && rm -f "$c"/0/{rho,U,p,T,phi} \
+  && edit "$c/system/setFrozenCarrierDict" \
+       's/^radius +2.4e-3;/radius           2.3e-3;\nallowBackflow    yes;/' \
+       '^allowBackflow +yes;' \
+  && carrier "$c" && [ -f "$c/0/phi" ] \
+  && refusals+="radius 2.3e-3 with allowBackflow yes: written ($(grep -a -c \
+'Wrote rho, p, U, T and phi into' "$c/log.setFrozenCarrier") line)" \
+  || { refusalsOk=false; refusals+="allowBackflow yes did not write ($c)"; }
+check M4.1k "inputs that do not fit the wedge (R 2.4 mm, rescaleToFacets\
+ yes): $refusals" $refusalsOk
+
+#------------------------------------------------------------------------------
+# M4.1e: negative evidence: decomposed in ascii
+#------------------------------------------------------------------------------
+c=$PM_DIR/carrier-pipe-ascii
+copyCase "$CAR" "$c" && setControl "$c" writeFormat ascii \
+  && decomposeWith "$c" 4 "method simple; coeffs { n (4 1 1); }" \
+  && (cd "$c" && mpirun -np 4 --bind-to none "$CARRIER_EXE" -check -parallel \
+        > log.check 2>&1 < /dev/null)
+out1=$($CHECKS continuity "$c/log.check" 1e-15); s1=$?
+out2=$($CHECKS roundProcessorFace "$c" 6); s2=$?
+(cd "$c" && mpirun -np 4 --bind-to none "$CARRIER_EXE" -check -parallel \
+   > log.check-rounded 2>&1 < /dev/null)
+out3=$($CHECKS continuityAbove "$c/log.check-rounded" 1e-15); s3=$?
+check M4.1e "the decomposed check: the pipe decomposed with writeFormat ascii\
+ (10 digits) stays exact on this mesh ($out1: the two axial faces of a cell\
+ carry the same flux and round alike); one processor value rewritten as\
+ decomposePar writes a 'uniform' patch ($out2) is reported: $out3" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ]'
+
+
+#------------------------------------------------------------------------------
+# M4.1f: the count line of the T-Flows wall table
+#------------------------------------------------------------------------------
+tableCase() {
+  local c=$1 rows=$2 outOfRange=$3
+  copyCase "$CAR" "$c" || return 1
+  rm -f "$c"/0/{rho,U,p,T,phi}
+  edit "$c/system/setFrozenCarrierDict" "s/^(  mode +)solved;/\1profile;/" \
+    "^  mode +profile;" \
+    && edit "$c/system/setFrozenCarrierDict" "s/^(    rows +)all;/\1$rows;/" \
+         "^    rows +$rows;" \
+    && edit "$c/system/setFrozenCarrierDict" \
+         "s/^(    outOfRange +)fatal;/\1$outOfRange;/" \
+         "^    outOfRange +$outOfRange;"
+}
+tableOk=true
+tableText=""
+countText='count line 66, 70 rows in the file, rows all: 70 read; the count'
+countText+=' differs from the rows in the file: T-Flows reads 66 rows'
+grep -q -F "$countText" "$CAR/log.setFrozenCarrier" || tableOk=false
+c=$PM_DIR/table-count-fatal
+if tableCase "$c" count fatal && ! carrier "$c" \
+  && grep -q 'rows count: 66 read' "$c/log.setFrozenCarrier" \
+  && grep -q 'lies outside the table \[0, 0.65\]' "$c/log.setFrozenCarrier"
+then
+  tableText+="rows count, outOfRange fatal: 66 rows read, stops at x > 0.65 m; "
+else
+  tableOk=false
+  tableText+="rows count, outOfRange fatal: unexpected ($c); "
+fi
+c=$PM_DIR/table-count-hold
+if tableCase "$c" count hold && carrier "$c"
+then
+  held=$($CHECKS heldWall "$c" 0.65 324) && tableText+="$held" \
+    || { tableOk=false; tableText+="hold: $held"; }
+else
+  tableOk=false
+  tableText+="rows count, outOfRange hold failed ($c)"
+fi
+check M4.1f "wall table of T-Flows (count line 66, 70 rows): rows all reads\
+ 70 and names the mismatch (run/014); $tableText" $tableOk
+
+#------------------------------------------------------------------------------
+# M4.1g: the solver on the wedge carrier
+#------------------------------------------------------------------------------
+ln -s "$DYNAMIC_CODE_DIR" "$WEDGE/dynamicCode" 2>/dev/null
+runSerial "$WEDGE" "$SOLVER_EXE" || echo "wedge run failed ($WEDGE/log)"
+out1=$($PCCHECKS closure "$WEDGE/$BALANCE" 1e-13); s1=$?
+out2=$($PCCHECKS released "$WEDGE/$BALANCE" 1e-8 0.46100894 1e-14); s2=$?
+cells=$(grep -o 'Interface (layer distance): .* cells;' "$WEDGE/log")
+check M4.1g "the solver on the wedge carrier (layer distance, 20 steps):\
+ $cells $out1; $out2" eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ]'
+
+#------------------------------------------------------------------------------
+# M4.1j: the utility on the wedge after its run (latest time 0.02, the
+# carrier only in 0)
+#------------------------------------------------------------------------------
+mkdir -p "$WEDGE/carrier0"
+cp "$WEDGE"/0/{rho,U,p,T,phi} "$WEDGE/carrier0/"
+(cd "$WEDGE" && "$CARRIER_EXE" -check > log.check-after-run 2>&1)
+out1=$($CHECKS continuity "$WEDGE/log.check-after-run" 1e-15); s1=$?
+found=$(grep -c 'phi read at time 0 (findInstance from 0.02)' \
+          "$WEDGE/log.check-after-run")
+(cd "$WEDGE" && "$CARRIER_EXE" > log.setFrozenCarrier-after-run 2>&1)
+into=$(grep -o 'Wrote rho, p, U, T and phi into .*' \
+         "$WEDGE/log.setFrozenCarrier-after-run")
+same=true
+for f in rho U p T phi
+do
+  cmp -s "$WEDGE/0/$f" "$WEDGE/carrier0/$f" || same=false
+  [ -e "$WEDGE/0.02/$f" ] && same=false
+done
+check M4.1j "the utility on the wedge after its run (startFrom latestTime,\
+ 0.02): -check: $out1 ($found line with the instance 0 found from 0.02);\
+ '$into'; the carrier in 0 unchanged and none in 0.02 ($same)" \
+  eval '[ $s1 -eq 0 ] && [ "$found" -ge 1 ] && $same \
+    && [[ "$into" == *"into 0 (the instance of rho found from the start time 0.02)"* ]]'
+
+#------------------------------------------------------------------------------
+# M4.2 and M4.11: run/014 (layer distance, 5 steps: the excerpt), and with
+# layer faceCells (1 step)
+#------------------------------------------------------------------------------
+C014=$PM_DIR/run014
+copyCase "$CAR" "$C014" && rm -f "$C014/dynamicCode" \
+  && ln -s "$DYNAMIC_CODE_DIR" "$C014/dynamicCode" \
+  && setControl "$C014" endTime 0.005
+runSerial "$C014" "$SOLVER_EXE" || echo "run/014 failed ($C014/log)"
+C014F=$PM_DIR/run014-faceCells
+copyCase "$CAR" "$C014F" && rm -f "$C014F/dynamicCode" \
+  && ln -s "$DYNAMIC_CODE_DIR" "$C014F/dynamicCode" \
+  && setControl "$C014F" endTime 0.001 \
+  && edit "$C014F/constant/thermochemistryProperties" \
+       "s/^(  layer +)distance;/\1faceCells;/" "^  layer +faceCells;" \
+  && runSerial "$C014F" "$SOLVER_EXE" || echo "run/014 faceCells failed ($C014F/log)"
+out1=$($CHECKS layerCounts "$C014/log" distance 30528 8533.7 1e-5); s1=$?
+out2=$($CHECKS layerCounts "$C014F/log" faceCells 15264 17681.9 1e-5); s2=$?
+centre=$(grep -o 'centre-distance rule .*' "$C014/log")
+same=": 30528 cells (largest R - r selected 9.77116e-05 m, smallest outside"
+same+=" 0.000163789 m); 0 cells only in this rule, 0 only in the layer"
+check M4.2 "acceptance 2 on the pipe of run/014: $out1; $centre; $out2" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [[ "$centre" == *"$same"* ]]'
+
+out=$("$REGRESS" -excerpt "$CASE014/out_excerpt" "$C014/log" 2>&1); s=$?
+check M4.11 "run/014 out_excerpt: ${out%%$'\n'*}" [ $s -eq 0 ]
+
+#------------------------------------------------------------------------------
+# M4.7a/b/d and M4.9: the channel with layer distance (serial, 4 ranks
+# split by rows) and with layer faceCells; restarts from 0.1
+#------------------------------------------------------------------------------
+DISTANCE='  layer distance;\n  distance 3.5e-4;'
+CHD=$PM_DIR/channel-distance
+CHD4=$PM_DIR/channel-distance-rows4
+CHF=$PM_DIR/channel-faceCells
+channel "$CHD" "$DISTANCE" && copyCase "$CHD" "$CHD4" && rowsSplit "$CHD4" \
+  && decomposeWith "$CHD4" 4 'method manual; coeffs { dataFile "cellDecomposition"; }' \
+  && channel "$CHF" '  layer faceCells;' \
+  || echo "setting up the channels failed"
+startJob runSerial "$CHD" "$SOLVER_EXE"
+startJob runSerial "$CHF" "$SOLVER_EXE"
+waitJobs || echo "a channel run failed ($CHD/log, $CHF/log)"
+runParallel "$CHD4" "$SOLVER_EXE" 4 || echo "4-rank channel failed ($CHD4/log)"
+CHD4R=$PM_DIR/channel-distance-rows4-reconstructed
+rm -rf "$CHD4R"
+mkdir -p "$CHD4R"
+cp -a "$CHD4"/system "$CHD4"/constant "$CHD4"/0 "$CHD4"/processor* "$CHD4R"/ \
+  && (cd "$CHD4R" && reconstructPar -time 0.2 > log.reconstructPar 2>&1)
+
+out1=$($PCCHECKS closure "$CHD/$BALANCE" 1e-13); s1=$?
+out2=$($CHECKS layerCounts "$CHD/log" distance 400 2500 1e-12); s2=$?
+out3=$($CHECKS mdep "$CHD/$BALANCE" "$CHD/$MDEP_DAT" 1e-12); s3=$?
+out4=$($CHECKS facesAgree "$CHD/0.2/mDep_PbI2_s" "$CHD/0.2/mDep_PbI2_s" WALL \
+         1e-12); s4=$?
+check M4.7a "channel, layer distance 3.5e-4 m (serial): $out2; $out1; $out3;\
+ $out4" eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ]'
+
+remote=$(grep -o '[0-9]* elements with their nearest wall face on another rank' \
+           "$CHD4/log")
+out1=$($PCCHECKS closure "$CHD4/$BALANCE" 1e-13); s1=$?
+out2=$($CHECKS compareInventories "$CHD/$BALANCE" "$CHD4/$BALANCE" 1e-9 gas \
+         wall); s2=$?
+out3=$($CHECKS facesAgree "$CHD4R/0.2/mDep_PbI2_s" "$CHD/0.2/mDep_PbI2_s" \
+         WALL 1e-9); s3=$?
+out4=$($CHECKS mdep "$CHD4/$BALANCE" "$CHD4/$MDEP_DAT" 1e-12); s4=$?
+check M4.7b "channel, layer distance, 4 ranks split by rows: $remote; $out1;\
+ serial vs 4 ranks: $out2; mDep_: $out3; $out4" \
+  eval '[ "$remote" = "200 elements with their nearest wall face on another rank" ] \
+    && [ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ]'
+
+# M4.7d: restarts
+CHDRS=$PM_DIR/channel-distance-restart
+CHD4RS=$PM_DIR/channel-distance-rows4-restart
+restartCopy "$CHD" "$CHDRS" 0.1 && restartCopy "$CHD4" "$CHD4RS" 0.1
+runSerial "$CHDRS" "$SOLVER_EXE" || echo "restart failed ($CHDRS/log)"
+runParallel "$CHD4RS" "$SOLVER_EXE" 4 || echo "restart failed ($CHD4RS/log)"
+out1=$("$CMPFIELDS" -x uniform/time "$CHD" "$CHDRS" 0.2 2>&1); s1=$?
+out2=$("$CMPFIELDS" -x uniform/time "$CHD4" "$CHD4RS" 0.2 2>&1); s2=$?
+verdict1=$(grep -c 'deposits: uniform/phaseChange/phaseChangeDeposits; exact)' \
+             "$CHDRS/log")
+verdict2=$(grep -c 'deposits: uniform/phaseChange/phaseChangeDeposits; exact)' \
+             "$CHD4RS/log")
+differs=$(cat "$CHDRS/log" "$CHD4RS/log" \
+            | grep -c 'differs from the element deposits')
+check M4.7d "binary restarts in distance mode from 0.1 (deposits of\
+ uniform/phaseChange, exact): serial ${out1%%$'\n'*}; 4 ranks\
+ ${out2%%$'\n'*}; warnings that mw_ differs from the deposits: $differs" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ "$verdict1" = 1 ] \
+    && [ "$verdict2" = 1 ] && [ "$differs" = 0 ]'
+
+# M4.9: profiles
+out1=$($PRCHECKS integrals "$CHD" 1e-12); s1=$?
+out2=$($PRCHECKS integrals "$CHF" 1e-12); s2=$?
+out3=$($CHECKS sameWallColumns "$CHD" "$CHF"); s3=$?
+tdep=$(grep -o 'Tdep fromInlet status found T [0-9.]*' \
+         "$CHD/postProcessing/axialProfiles/0.2/PbI2_g_native.dat" 2>/dev/null)
+check M4.9 "profiles in distance mode (channel): distance: $out1; faceCells:\
+ $out2; $out3; at 0.2: $tdep" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ -n "$tdep" ]'
+
+#------------------------------------------------------------------------------
+# M4.7g: the sums of the nearest-face map in a fixed order (review of M4,
+# round 2).  Layer distance 5.5e-4 m (three rows per wall), the rows 0, 1
+# and 2 of the lower wall on ranks 0, 1 and 2: each of its 100 faces adds
+# the deposits of two other ranks.  With the default nonBlocking
+# communication mapDistribute added them in the order in which the receives
+# completed, so mDep_ could differ in its last bit between two identical
+# runs (timing-dependent: the build before the fix may pass by chance); now
+# in the order of the map's schedule.  Two runs on the same decomposition
+# write the same files bit for bit, and agree with serial.
+#------------------------------------------------------------------------------
+THREE='  layer distance;\n  distance 5.5e-4;'
+CH3=$PM_DIR/channel-distance3
+CH3A=$PM_DIR/channel-distance3-rows3a
+CH3B=$PM_DIR/channel-distance3-rows3b
+channel "$CH3" "$THREE" && setControl "$CH3" endTime 0.1 \
+  && copyCase "$CH3" "$CH3A" && rows3Split "$CH3A" \
+  && decomposeWith "$CH3A" 4 'method manual; coeffs { dataFile "cellDecomposition"; }' \
+  && copyCase "$CH3A" "$CH3B" && cp -a "$CH3A"/processor* "$CH3B"/ \
+  || echo "setting up the three-row channels failed"
+runSerial "$CH3" "$SOLVER_EXE" || echo "three-row channel failed ($CH3/log)"
+runParallel "$CH3A" "$SOLVER_EXE" 4 || echo "4-rank channel failed ($CH3A/log)"
+runParallel "$CH3B" "$SOLVER_EXE" 4 || echo "4-rank channel failed ($CH3B/log)"
+CH3R=$PM_DIR/channel-distance3-rows3a-reconstructed
+rm -rf "$CH3R"
+mkdir -p "$CH3R"
+cp -a "$CH3A"/system "$CH3A"/constant "$CH3A"/0 "$CH3A"/processor* "$CH3R"/ \
+  && (cd "$CH3R" && reconstructPar -time 0.1 > log.reconstructPar 2>&1)
+remote=$(grep -o '[0-9]* elements with their nearest wall face on another rank, [0-9]* interface faces with elements of two or more other ranks' \
+           "$CH3A/log")
+out1=$("$CMPFIELDS" "$CH3A" "$CH3B" 0.1 2>&1); s1=$?
+same=true
+for f in "$CH3A"/postProcessing/phaseChangeBalance/*/*.dat \
+         "$CH3A"/postProcessing/axialProfiles/*/*.dat \
+         "$CH3A"/postProcessing/mDepWall/*/*.dat
+do
+  cmp -s "$f" "$CH3B/${f#$CH3A/}" || same=false
+done
+out2=$($PCCHECKS closure "$CH3A/$BALANCE" 1e-13); s2=$?
+out3=$($CHECKS compareInventories "$CH3/$BALANCE" "$CH3A/$BALANCE" 1e-9 gas \
+         wall); s3=$?
+out4=$($CHECKS facesAgree "$CH3R/0.1/mDep_PbI2_s" "$CH3/0.1/mDep_PbI2_s" \
+         WALL 1e-9); s4=$?
+out5=$($CHECKS mdep "$CH3A/$BALANCE" "$CH3A/$MDEP_DAT" 1e-12); s5=$?
+check M4.7g "channel, layer distance 5.5e-4 m, the three rows of the lower\
+ wall on three ranks: $remote; two runs: ${out1%%$'\n'*}, balance, profile\
+ and mDep_ files identical ($same); $out2; serial vs 4 ranks:\
+ ${out3#*: }; mDep_: $out4; $out5" \
+  eval '[ "$remote" = "200 elements with their nearest wall face on another rank, 100 interface faces with elements of two or more other ranks" ] \
+    && [ $s1 -eq 0 ] && $same && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] \
+    && [ $s4 -eq 0 ] && [ $s5 -eq 0 ]'
+
+#------------------------------------------------------------------------------
+# M4.7c: the pipe of run/014 (SuperBee) in serial and on three 4-rank splits:
+# simple (4 1 1), hierarchical (2 2 1) and the uneven manual split whose rank
+# 0 holds the first cell layer.  Serial/parallel agreement to 1e-9 needs a
+# converged outer loop (plan section 16, item 7), and SuperBee's lagged
+# limiter keeps the loop from converging below about 2e-6 on this mesh
+# (section 25: run/014's own loop agrees to 1.2e-11 on simple (4 1 1) but to
+# 9.8e-9 on hierarchical (2 2 1)).  The runs therefore solve every corrector
+# to the round-off floor (PBiCGStab 1e-15, relTol 0) with a fixed 3
+# correctors per step (nCorr 2, an outer tolerance never reached): the
+# iterates then depend on the decomposition only through round-off.
+#------------------------------------------------------------------------------
+PIPE=$PM_DIR/pipe-distance
+copyCase "$C014" "$PIPE" \
+  && edit "$PIPE/0/Y_PbI2_g" "s/^internalField +uniform 0;/internalField   uniform 0.1;/" \
+       "^internalField +uniform 0.1;" \
+  && setControl "$PIPE" deltaT 0.004 && setControl "$PIPE" endTime 0.04 \
+  && setControl "$PIPE" writeInterval 5 && withMdep "$PIPE" \
+  && cat > "$PIPE/system/fvSolution" <<'EOF' \
+  && setSpeciesControl "$PIPE" tolerance 1e-12 \
+  && setSpeciesControl "$PIPE" nCorr 2 \
+  || echo "setting up the pipe failed"
+FoamFile {version 2.0; format ascii; class dictionary; object fvSolution;}
+
+solvers {
+  Y_PbI2_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-15; relTol 0;}
+  Y_PbI2_s {solver diagonal;}
+}
+EOF
+PIPES=$PM_DIR/pipe-distance-simple411
+PIPEH=$PM_DIR/pipe-distance-hierarchical221
+PIPEM=$PM_DIR/pipe-distance-layersApart
+copyCase "$PIPE" "$PIPES" \
+  && decomposeWith "$PIPES" 4 "method simple; coeffs { n (4 1 1); }" \
+  && copyCase "$PIPE" "$PIPEH" \
+  && decomposeWith "$PIPEH" 4 "method hierarchical; coeffs { n (2 2 1); }" \
+  && copyCase "$PIPE" "$PIPEM" && layersApart "$PIPEM" > "$PIPEM/log.split" \
+  && decomposeWith "$PIPEM" 4 'method manual; coeffs { dataFile "cellDecomposition"; }' \
+  || echo "setting up the pipe runs failed"
+runSerial "$PIPE" "$SOLVER_EXE" || echo "the serial pipe failed ($PIPE/log)"
+for c in "$PIPES" "$PIPEH" "$PIPEM"
+do
+  runParallel "$c" "$SOLVER_EXE" 4 || echo "pipe failed ($c/log)"
+done
+ok=true
+text=""
+for c in "$PIPE" "$PIPES" "$PIPEH" "$PIPEM"
+do
+  out=$($PCCHECKS closure "$c/$BALANCE" 1e-13) || ok=false
+  text+="$(basename "$c"): ${out#*: }; "
+  out=$($CHECKS mdep "$c/$BALANCE" "$c/$MDEP_DAT" 1e-12) || ok=false
+  text+="${out#*: }; "
+  steps=$(count "$c/log" '^Time = ')
+  three=$(count "$c/log" 'exchange: .* outer iterations 3, NOT converged')
+  [ "$steps" = 10 ] && [ "$three" = 10 ] || ok=false
+  text+="3 correctors in $three of $steps steps; "
+done
+for c in "$PIPES" "$PIPEH" "$PIPEM"
+do
+  out=$($CHECKS compareInventories "$PIPE/$BALANCE" "$c/$BALANCE" 1e-9 gas \
+          wall) || ok=false
+  text+="serial vs $(basename "$c"): ${out#*: }; "
+done
+remote=$(grep -o '[0-9]* elements with their nearest wall face on another rank' \
+           "$PIPEM/log")
+[ "$remote" = "15264 elements with their nearest wall face on another rank" ] \
+  || ok=false
+check M4.7c "pipe of run/014 (SuperBee, layer distance), background Y = 0.1,\
+ 10 steps of 4 ms, every corrector solved to 1e-15; the uneven split\
+ $(cat "$PIPEM/log.split" 2>/dev/null) ($remote): $text" $ok
+
+#------------------------------------------------------------------------------
+# M4.7h: two-way nearest-face maps (review of M4, round 3).  The scheduled
+# reverse distribute of round 2 took the schedule of mapDistributeBase,
+# which lists directed pairs, and exchanged both ways for each: between two
+# ranks that map elements to each other's faces every contribution was
+# added twice (mDep_ +50 % on the channel below, +7.8e-4 on the pipe), and
+# the start-up count took the faces with the elements of one other rank for
+# faces with two.  Every test of round 2 had one-way maps only.
+#------------------------------------------------------------------------------
+CH2W=$PM_DIR/channel-distance-twoWay
+CH2WR=$PM_DIR/channel-distance-twoWay-reconstructed
+copyCase "$CHD" "$CH2W" && twoWaySplit "$CH2W" \
+  && decomposeWith "$CH2W" 4 'method manual; coeffs { dataFile "cellDecomposition"; }' \
+  && runParallel "$CH2W" "$SOLVER_EXE" 4 \
+  || echo "the two-way channel failed ($CH2W/log)"
+rm -rf "$CH2WR"
+mkdir -p "$CH2WR"
+cp -a "$CH2W"/system "$CH2W"/constant "$CH2W"/0 "$CH2W"/processor* "$CH2WR"/ \
+  && (cd "$CH2WR" && reconstructPar -time 0.2 > log.reconstructPar 2>&1)
+out1=$($CHECKS mdepCount "$CH2W/log" 200 0); s1=$?
+out2=$($PCCHECKS closure "$CH2W/$BALANCE" 1e-13); s2=$?
+out3=$($CHECKS compareInventories "$CHD/$BALANCE" "$CH2W/$BALANCE" 1e-9 gas \
+         wall); s3=$?
+out4=$($CHECKS facesAgree "$CH2WR/0.2/mDep_PbI2_s" "$CHD/0.2/mDep_PbI2_s" \
+         WALL 1e-9); s4=$?
+out5=$($CHECKS mdep "$CH2W/$BALANCE" "$CH2W/$MDEP_DAT" 1e-12); s5=$?
+check M4.7h "channel, layer distance 3.5e-4 m, rows 0 and 22 on rank 0 and\
+ rows 1 and 23 on rank 1 (the map runs both ways): ${out1#OK: }; ${out2#*: };\
+ serial vs 4 ranks: ${out3#*: }; mDep_: ${out4#OK: }; ${out5#OK: }" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ] \
+    && [ $s5 -eq 0 ]'
+
+PIPEH114=$PM_DIR/pipe-distance-hierarchical114
+copyCase "$PIPE" "$PIPEH114" \
+  && decomposeWith "$PIPEH114" 4 "method hierarchical; coeffs { n (1 1 4); }" \
+  && runParallel "$PIPEH114" "$SOLVER_EXE" 4 \
+  || echo "the pipe on hierarchical (1 1 4) failed ($PIPEH114/log)"
+out1=$($CHECKS mdepCount "$PIPEH114/log" 161 0); s1=$?
+out2=$($PCCHECKS closure "$PIPEH114/$BALANCE" 1e-13); s2=$?
+out3=$($CHECKS compareInventories "$PIPE/$BALANCE" "$PIPEH114/$BALANCE" 1e-9 \
+         gas wall); s3=$?
+out4=$($CHECKS mdep "$PIPEH114/$BALANCE" "$PIPEH114/$MDEP_DAT" 1e-12); s4=$?
+check M4.7h "the pipe of M4.7c on hierarchical (1 1 4) (slabs across the\
+ axis; the map runs both ways between neighbouring slabs): ${out1#OK: };\
+ ${out2#*: }; serial vs 4 ranks: ${out3#*: }; ${out4#OK: }" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ]'
+
+#------------------------------------------------------------------------------
+# M4.19: the passive-carrier monitor in paper mode (review of M4, round 3):
+# the max mole fraction of the last step of the serial pipe of M4.7c, from
+# the carrier's molar concentration p/(R T), recomputed from the fields
+#------------------------------------------------------------------------------
+out=$($CHECKS moleFraction "$PIPE" 0.04 "$PIPE/log"); s=$?
+check M4.19 "the mole-fraction monitor in paper mode (rho = 1): ${out#*: }" \
+  [ $s -eq 0 ]
+
+#------------------------------------------------------------------------------
+# M4.7e: the pipe states of M4.7c at 0.04 restarted onto another
+# decomposition, one step each
+#------------------------------------------------------------------------------
+PIPER4=$PM_DIR/pipe-distance-restart-hierarchical221
+PIPER1=$PM_DIR/pipe-distance-layersApart-restart-serial
+copyCase "$PIPE" "$PIPER4" && cp -a "$PIPE/0.04" "$PIPER4/" \
+  && setControl "$PIPER4" endTime 0.044 \
+  && decomposeWith "$PIPER4" 4 "method hierarchical; coeffs { n (2 2 1); }" \
+       -time '0,0.04' \
+  && runParallel "$PIPER4" "$SOLVER_EXE" 4 \
+  || echo "restart of the serial pipe on 4 ranks failed ($PIPER4/log)"
+copyCase "$PIPEM" "$PIPER1" \
+  && for d in "$PIPEM"/processor*
+     do
+       mkdir -p "$PIPER1/$(basename "$d")" \
+         && cp -a "$d/constant" "$d/0" "$d/0.04" "$PIPER1/$(basename "$d")/"
+     done \
+  && (cd "$PIPER1" && reconstructPar -time 0.04 > log.reconstructPar 2>&1) \
+  && rm -rf "$PIPER1"/processor* && setControl "$PIPER1" endTime 0.044 \
+  && runSerial "$PIPER1" "$SOLVER_EXE" \
+  || echo "serial restart of the uneven split failed ($PIPER1/log)"
+out1=$($CHECKS restartExact "$PIPER4/log" 1e-15); s1=$?
+out2=$($CHECKS restartExact "$PIPER1/log" 1e-15); s2=$?
+check M4.7e "restarts of the pipe in distance mode onto another\
+ decomposition (serial -> hierarchical (2 2 1); the uneven split ->\
+ serial): ${out1#*: }; ${out2#*: }" eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ]'
+
+#------------------------------------------------------------------------------
+# M4.7f: the serial pipe of M4.7c restarted from 0.02 on the same mesh
+#------------------------------------------------------------------------------
+PIPERS=$PM_DIR/pipe-distance-restart
+restartCopy "$PIPE" "$PIPERS" 0.02 && cp -a "$PIPE/dynamicCode" "$PIPERS/" \
+  && runSerial "$PIPERS" "$SOLVER_EXE" \
+  || echo "restart of the serial pipe failed ($PIPERS/log)"
+out1=$("$CMPFIELDS" -x uniform/time "$PIPE" "$PIPERS" 0.04 2>&1); s1=$?
+out2=$($CHECKS restartExact "$PIPERS/log" 0); s2=$?
+differs=$(grep -c 'differs from the element deposits' "$PIPERS/log")
+check M4.7f "the serial pipe of M4.7c restarted from 0.02 (deposits of\
+ uniform/phaseChange): ${out1%%$'\n'*}; ${out2#*: }; warnings that mw_\
+ differs from the deposits: $differs" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ "$differs" = 0 ]'
+
+#------------------------------------------------------------------------------
+# M4.15: the closure does not drift (review of M4, round 2; plan section 27,
+# item 1).  The pipe of run/014 with its own solver settings, a background
+# Y = 0.1 and steps of 0.1 s (20 steps on 4 ranks): the double-precision
+# imbalance of the assembled transport matrix grows with D dt/h^2 of the
+# wall cells (h = 57 um, D about 1e-4 m2/s: about 3000 here, 300 in the
+# T5_60 runs of M4long), so 20 steps show it.  The binary before the fix
+# (the row-form defect, the deposit rounding not booked) drifted linearly to
+# 1.16e-14 of the reference in these 20 steps (the T5_60 run: 7.6e-13 in
+# 6000 steps); with the fix 4.2e-16; the gate is 2e-15, a few ulp of the
+# inventory.  The run prints the debug report of reportMatrixResidual (a
+# diagnostic only: the solution and the booking are the same without it)
+# for M4.18.
+#------------------------------------------------------------------------------
+
+# driftPipe <case> <layer>: the pipe of run/014 with a background Y = 0.1,
+# 20 steps of 0.1 s on 4 ranks (simple (4 1 1)), the debug report on
+driftPipe() {
+  local c=$1 layer=$2
+  copyCase "$C014" "$c" && rm -f "$c/dynamicCode" \
+    && ln -s "$DYNAMIC_CODE_DIR" "$c/dynamicCode" \
+    && edit "$c/0/Y_PbI2_g" "s/^internalField +uniform 0;/internalField   uniform 0.1;/" \
+         "^internalField +uniform 0.1;" \
+    && edit "$c/constant/thermochemistryProperties" \
+         "s/^(  layer +)distance;/\1$layer;/" "^  layer +$layer;" \
+    && edit "$c/constant/thermochemistryProperties" \
+         's/^(  guardTolerance .*)$/\1\n  reportMatrixResidual yes;/' \
+         '^  reportMatrixResidual yes;' \
+    && setControl "$c" deltaT 0.1 && setControl "$c" endTime 2 \
+    && setControl "$c" writeControl timeStep \
+    && setControl "$c" writeInterval 20 \
+    && decomposeWith "$c" 4 "method simple; coeffs { n (4 1 1); }" \
+    && runParallel "$c" "$SOLVER_EXE" 4
+}
+DRIFT=$PM_DIR/pipe-drift
+driftPipe "$DRIFT" distance || echo "the drift pipe failed ($DRIFT/log)"
+steps=$(count "$DRIFT/log" '^Time = ')
+out1=$($PCCHECKS closure "$DRIFT/$BALANCE" 2e-15); s1=$?
+wallKg=$(awk '!/^#/{w=$3} END{print w}' "$DRIFT/$BALANCE" 2>/dev/null)
+check M4.15 "the closure does not drift: the pipe of run/014, background Y =\
+ 0.1, $steps steps of 0.1 s on 4 ranks (wall inventory at the end $wallKg\
+ kg): ${out1#*: } (the binary before the fix: 1.16e-14 after 20 steps,\
+ growing linearly)" eval '[ $s1 -eq 0 ] && [ "$steps" = 20 ]'
+
+#------------------------------------------------------------------------------
+# M4.18: the face-flux correction in flux form (review of M4, round 3; plan
+# section 29, item 2).  The transport matrix of the paired species carries
+# the non-orthogonal correction of its laplacian as a face-flux correction
+# (the species is fluxRequired) and in its source.  matrixDefect.H enters
+# its face values, each internal face once with opposite signs, and keeps
+# of the source only the explicit remainder E = b - fl(s + c), 0 for the
+# solver's schemes: the closure changes by exactly 0 for the correction.
+# The build before kept b - s, whose sum over the cells telescopes only to
+# round-off (up to 1.7e-24 kg per step unbooked on this pipe), and printed no
+# remainder.  Both layer rules on the drift pipe of M4.15 (non-orthogonal up
+# to about 30 degrees); positive control: Gauss linearUpwind on the channel,
+# whose explicit correction OpenFOAM adds to the source only (no face
+# values in the matrix), leaves a remainder.
+#------------------------------------------------------------------------------
+DRIFTF=$PM_DIR/pipe-drift-faceCells
+driftPipe "$DRIFTF" faceCells || echo "the drift pipe failed ($DRIFTF/log)"
+CHLU=$PM_DIR/channel-linearUpwind
+channel "$CHLU" "$DISTANCE" && setControl "$CHLU" endTime 0.01 \
+  && edit "$CHLU/system/fvSchemes" \
+       's/Gauss SuperBee;/Gauss linearUpwind grad(Y_PbI2_g);/' \
+       'Gauss linearUpwind grad\(Y_PbI2_g\);' \
+  && edit "$CHLU/constant/thermochemistryProperties" \
+       's/^(  guardTolerance .*)$/\1\n  reportMatrixResidual yes;/' \
+       '^  reportMatrixResidual yes;' \
+  && runSerial "$CHLU" "$SOLVER_EXE" \
+  || echo "the channel with linearUpwind failed ($CHLU/log)"
+out1=$($CHECKS explicitRemainder "$DRIFT/log" 20); s1=$?
+out2=$($CHECKS explicitRemainder "$DRIFTF/log" 20); s2=$?
+out3=$($PCCHECKS closure "$DRIFTF/$BALANCE" 2e-15); s3=$?
+out4=$($CHECKS explicitRemainder "$CHLU/log" 1 nonzero); s4=$?
+check M4.18 "the face-flux correction of the transport matrix in flux form\
+ (the drift pipe of M4.15, 4 ranks): layer distance: ${out1#OK: }; layer\
+ faceCells: ${out2#OK: }, ${out3#*: }; positive control, the channel with\
+ Gauss linearUpwind: ${out4#OK: }" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ]'
+
+#------------------------------------------------------------------------------
+# M4.8: refusals
+#------------------------------------------------------------------------------
+fatalChannel() {
+  local c=$PM_DIR/fatal-$1
+  channel "$c" "$2" > /dev/null 2>&1 && setControl "$c" endTime 0.002 \
+    && echo "$c"
+}
+c=$(fatalChannel halfCell '  layer distance;\n  distance 3.5e-4;\n  wallResistance halfCell;') \
+  && expectFatal M4.8 "halfCell with layer distance" "$c" \
+       "wallResistance halfCell is not available with layer distance"
+c=$(fatalChannel areaPerVolumeCell '  layer distance;\n  distance 3.5e-4;\n  areaPerVolume cell;') \
+  && expectFatal M4.8 "areaPerVolume cell with layer distance" "$c" \
+       "layer distance needs areaPerVolume layer (the default), not cell"
+c=$(fatalChannel noDistance '  layer distance;') \
+  && expectFatal M4.8 "layer distance without a distance entry" "$c" \
+       "Entry 'distance' not found"
+c=$(fatalChannel tooSmall '  layer distance;\n  distance 1e-6;') \
+  && expectFatal M4.8 "a distance that selects no cell (1e-6 m)" "$c" \
+       "or no cell centre lies within the distance"
+c=$PM_DIR/fatal-restartDistance
+restartCopy "$CHD" "$c" 0.1 \
+  && edit "$c/constant/thermochemistryProperties" \
+       "s/^  distance 3.5e-4;/  distance 4e-4;/" "^  distance 4e-4;" \
+  && expectFatal M4.8 "restart of the distance channel from 0.1 with distance\
+ 4e-4" "$c" "    distance 0.0004 (written with 0.00035)"
+c=$PM_DIR/fatal-restartRule
+restartCopy "$CHD" "$c" 0.1 \
+  && edit "$c/constant/thermochemistryProperties" \
+       "s/^  layer distance;/  layer faceCells;/" "^  layer faceCells;" \
+  && expectFatal M4.8 "restart of the distance channel with layer faceCells"\
+       "$c" "    layer faceCells (written with distance)"
+c=$PM_DIR/fatal-restartRuleBack
+restartCopy "$CHF" "$c" 0.1 \
+  && edit "$c/constant/thermochemistryProperties" \
+       "s/^  layer faceCells;/  layer distance;\n  distance 3.5e-4;/" \
+       "^  distance 3.5e-4;" \
+  && expectFatal M4.8 "restart of the faceCells channel with layer distance"\
+       "$c" "    layer distance (written with faceCells)"
+
+#------------------------------------------------------------------------------
+# M4.10: model HKS with layer distance (the inventory channel)
+#------------------------------------------------------------------------------
+CHH=$PM_DIR/channel-hks-distance
+if channel "$CHH" "$DISTANCE\n  interfaceTemperature wall;"
+then
+  cp "$PV_TABLE" "$CHH/constant/"
+  python3 - "$CHH/constant/thermochemistryProperties" <<'EOF'
+import re, sys
+p = sys.argv[1]
+s = open(p).read()
+s = s.replace('model temperature;', 'model HKS;')
+s = re.sub(r'pairs \{.*?\n\}\n', '''pairs {
+  PbI2_g {
+    condensed PbI2_s;
+    vapourPressure {
+      file "<constant>/pv_PbI2_phases.csv"; phases ("PbI2(cr)" "PbI2(l)");
+      units log10Pa;
+    }
+  }
+}
+''', s, flags=re.S)
+s = re.sub(r'temperatureCoeffs \{.*?\n\}\n', '', s, flags=re.S)
+s = re.sub(r'samples \{.*?\n\}\n', '''samples {
+  boat {
+    pair          PbI2_g;
+    selection     { boat { action use; source box; box (0.01 0.002 -1) (0.02 0.0028 1); } }
+    mode          inventory;
+    amount        4.84e-6;
+    areaPerVolume 4000;
+    removeTime    0.1;
+  }
+}
+''', s, flags=re.S)
+open(p, 'w').write(s)
+EOF
+  setControl "$CHH" endTime 0.15 && runSerial "$CHH" "$SOLVER_EXE" \
+    || echo "HKS channel failed ($CHH/log)"
+fi
+out1=$($PCCHECKS closure "$CHH/$BALANCE" 1e-13); s1=$?
+counts=$($HKCHECKS logCounts "$CHH/log")
+removal=$(grep -c 'Sample boat removed at the start of the step' "$CHH/log")
+wall=$(grep '^Balance' "$CHH/log" | tail -1 | sed 's/.* wall \([^ ]*\) .*/\1/')
+check M4.10 "model HKS with layer distance (inventory channel,\
+ interfaceTemperature wall from the nearest faces): $out1; $counts; removals\
+ $removal; wall $wall mol" \
+  eval '[ $s1 -eq 0 ] && [ "$removal" = 1 ] \
+    && [[ "$counts" == *"projectedSignificant=0 "* ]] \
+    && [[ "$counts" == *"complementaritySignificant=0"* ]] \
+    && python3 -c "import sys; sys.exit(0 if float(\"$wall\") > 0 else 1)"'
+
+#------------------------------------------------------------------------------
+# M4.10b: the same on 4 ranks split by rows (review of M4, round 2): the
+# 200 elements of the second cell row take the temperature of their nearest
+# wall face from another rank (the pull of the face map, which only
+# interfaceTemperature wall uses), and their deposits go back to it (the
+# push, mDep_)
+#------------------------------------------------------------------------------
+CHH4=$PM_DIR/channel-hks-distance-rows4
+copyCase "$CHH" "$CHH4" && rowsSplit "$CHH4" \
+  && decomposeWith "$CHH4" 4 'method manual; coeffs { dataFile "cellDecomposition"; }' \
+  && runParallel "$CHH4" "$SOLVER_EXE" 4 \
+  || echo "HKS channel on 4 ranks failed ($CHH4/log)"
+remote=$(grep -o '[0-9]* elements with their nearest wall face on another rank' \
+           "$CHH4/log")
+out1=$($PCCHECKS closure "$CHH4/$BALANCE" 1e-13); s1=$?
+out2=$($CHECKS compareInventories "$CHH/$BALANCE" "$CHH4/$BALANCE" 1e-9 gas \
+         wall sample); s2=$?
+out3=$($CHECKS mdep "$CHH4/$BALANCE" "$CHH4/$MDEP_DAT" 1e-12); s3=$?
+counts=$($HKCHECKS logCounts "$CHH4/log")
+removal=$(grep -c 'Sample boat removed at the start of the step' "$CHH4/log")
+check M4.10 "model HKS with layer distance on 4 ranks split by rows\
+ (interfaceTemperature wall pulled from the faces of another rank):\
+ $remote; $out1; serial vs 4 ranks: ${out2#*: }; $out3; $counts; removals\
+ $removal" \
+  eval '[ "$remote" = "200 elements with their nearest wall face on another rank" ] \
+    && [ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ "$removal" = 1 ] \
+    && [[ "$counts" == *"projectedSignificant=0 "* ]] \
+    && [[ "$counts" == *"complementaritySignificant=0"* ]]'
+
+#------------------------------------------------------------------------------
+# M4.13: several interface patches (tests/paperMode/corners), the patches
+# in both orders of the boundary file
+#------------------------------------------------------------------------------
+CORNERS=$PM_SRC/corners
+
+# corners <destination> <distance> <order ABC|CBA>: the L-shaped channel,
+# its mesh and its carrier at rest (makeCarrier), the layer distance set
+corners() {
+  local dst=$1 distance=$2 order=$3
+  rm -rf "$dst"
+  cp -r "$CORNERS" "$dst" || return 1
+  edit "$dst/constant/thermochemistryProperties" \
+    "s/^(  distance +)[^;]+;/\1$distance;/" "^  distance +$distance;" \
+    || return 1
+  if [ "$order" = CBA ]
+  then
+    python3 - "$dst/system/blockMeshDict" <<'EOF' || return 1
+import re, sys
+p = sys.argv[1]
+s = open(p).read()
+get = lambda n: re.search(r'^  %s +\{.*\n' % n, s, re.M).group(0)
+a, b, c = get('WALLA'), get('WALLB'), get('WALLC')
+assert s.count(a + b + c) == 1
+open(p, 'w').write(s.replace(a + b + c, c + b + a))
+EOF
+  fi
+  (cd "$dst" && blockMesh > log.blockMesh 2>&1 \
+     && "$MAKE_CARRIER" > log.makeCarrier 2>&1) && touch "$dst/case.foam"
+}
+
+# patchOrder <case>: the interface patches in the order of its boundary file
+patchOrder() {
+  sed -n 's/^ *\(WALL[ABC]\)$/\1/p' "$1/constant/polyMesh/boundary" \
+    | tr '\n' ' '
+}
+
+for d in 7.5e-5 1.25e-4
+do
+  for order in ABC CBA
+  do
+    c=$PM_DIR/corners-$order-$d
+    corners "$c" "$d" "$order" && runSerial "$c" "$SOLVER_EXE" \
+      || echo "corners $order $d failed ($c/log)"
+  done
+done
+A=$PM_DIR/corners-ABC-7.5e-5
+B=$PM_DIR/corners-CBA-7.5e-5
+out1=$($CHECKS layerCounts "$A/log" distance 5 20000 1e-12); s1=$?
+out2=$($CHECKS layerCounts "$B/log" distance 5 20000 1e-12); s2=$?
+out3=$($CHECKS mdepPatches "$A/0.002/mDep_PbI2_s" WALLA,WALLC WALLB \
+         "$B/0.002/mDep_PbI2_s"); s3=$?
+out4=$($CHECKS mdepPatches "$B/0.002/mDep_PbI2_s" WALLA,WALLC WALLB); s4=$?
+out5=$($PCCHECKS closure "$A/$BALANCE" 1e-13); s5=$?
+check M4.13 "two interface patches meeting at a corner, distance 7.5e-5 m,\
+ boundary orders ($(patchOrder "$A")) and ($(patchOrder "$B")): ${out1#OK: };\
+ ${out2#OK: }; ${out3#OK: }; ${out4#OK: }; ${out5#*: }" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ] \
+    && [ $s5 -eq 0 ]'
+
+A=$PM_DIR/corners-ABC-1.25e-4
+B=$PM_DIR/corners-CBA-1.25e-4
+out1=$($CHECKS layerCounts "$A/log" distance 15 6666.67 1e-6); s1=$?
+out2=$($CHECKS layerCounts "$B/log" distance 15 6666.67 1e-6); s2=$?
+out3=$($CHECKS mdepPatches "$A/0.002/mDep_PbI2_s" "" WALLA,WALLB \
+         "$B/0.002/mDep_PbI2_s"); s3=$?
+out4=$($CHECKS samePatches "$A/0.002/mDep_PbI2_s" "$B/0.002/mDep_PbI2_s" \
+         WALLA,WALLB,WALLC); s4=$?
+corner=$($CHECKS patchValue "$A/0.002/mDep_PbI2_s" WALLC 0 2>/dev/null)
+check M4.13 "three interface patches, distance 1.25e-4 m (the cell at the\
+ re-entrant corner of WALLA and WALLB included), boundary orders\
+ ($(patchOrder "$A")) and ($(patchOrder "$B")): ${out1#OK: }; ${out2#OK: };\
+ ${out3#OK: }; ${out4#OK: }; mDep_ of the corner face of WALLC (the corner\
+ cell maps to WALLB): ${corner:-unknown}" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ] \
+    && [ "$corner" = 0 ]'
+
+#------------------------------------------------------------------------------
+# M4.14a: the corners at 1.25e-4 m on 3 ranks, one block per rank (the rank
+# of the cell at the re-entrant corner holds no interface face), and the
+# restarts between serial and the 3 ranks
+#------------------------------------------------------------------------------
+S1=$PM_DIR/corners-ABC-1.25e-4
+P3=$PM_DIR/corners-ABC-1.25e-4-blocks3
+BLOCKS='method manual; coeffs { dataFile "cellDecomposition"; }'
+
+# blocks <case>: the cellDecomposition of the corners by block
+blocks() {
+  python3 -c "
+print('FoamFile{version 2.0; format ascii; class labelList; object cellDecomposition;}')
+print('75\n(\n' + ''.join('%d\n' % (i//25) for i in range(75)) + ')')" \
+    > "$1/constant/cellDecomposition"
+}
+copyCase "$S1" "$P3" && blocks "$P3" && decomposeWith "$P3" 3 "$BLOCKS" \
+  && runParallel "$P3" "$SOLVER_EXE" 3 \
+  || echo "the corners on 3 ranks failed ($P3/log)"
+P3R=$PM_DIR/corners-ABC-1.25e-4-blocks3-reconstructed
+rm -rf "$P3R"
+mkdir -p "$P3R"
+cp -a "$P3"/system "$P3"/constant "$P3"/0 "$P3"/processor* "$P3R"/ \
+  && (cd "$P3R" && reconstructPar -time 0.002 > log.reconstructPar 2>&1)
+
+# serial state at 0.001 on the 3 ranks; the 3-rank state at 0.001 in serial
+R13=$PM_DIR/corners-restart-serial-on-3
+copyCase "$S1" "$R13" && cp -a "$S1/0.001" "$R13/" && blocks "$R13" \
+  && decomposeWith "$R13" 3 "$BLOCKS" -time '0,0.001' \
+  && runParallel "$R13" "$SOLVER_EXE" 3 \
+  || echo "the restart of the serial corners on 3 ranks failed ($R13/log)"
+R31=$PM_DIR/corners-restart-3-in-serial
+rm -rf "$R31"
+mkdir -p "$R31"
+cp -a "$P3"/system "$P3"/constant "$P3"/0 "$R31"/ \
+  && for d in "$P3"/processor*
+     do
+       mkdir -p "$R31/$(basename "$d")" \
+         && cp -a "$d/constant" "$d/0" "$d/0.001" "$R31/$(basename "$d")/"
+     done \
+  && (cd "$R31" && reconstructPar -time 0.001 > log.reconstructPar 2>&1) \
+  && rm -rf "$R31"/processor* && touch "$R31/case.foam" \
+  && runSerial "$R31" "$SOLVER_EXE" \
+  || echo "the serial restart of the 3-rank corners failed ($R31/log)"
+out1=$($CHECKS layerCounts "$P3/log" distance 15 6666.67 1e-6); s1=$?
+out2=$($CHECKS compareInventories "$S1/$BALANCE" "$P3/$BALANCE" 1e-12 gas \
+         wall); s2=$?
+out3=$($CHECKS samePatches "$P3R/0.002/mDep_PbI2_s" "$S1/0.002/mDep_PbI2_s" \
+         WALLA,WALLB,WALLC 1e-12); s3=$?
+remote=$(grep -o '[0-9]* elements with their nearest wall face on another rank' \
+           "$P3/log")
+out4=$($CHECKS restartExact "$R13/log" 1e-15); s4=$?
+out5=$($CHECKS restartExact "$R31/log" 1e-15); s5=$?
+check M4.14 "the corners on 3 ranks, one block each (the rank of the cell at\
+ the re-entrant corner holds no interface face): ${out1#OK: }; $remote;\
+ serial vs 3 ranks: ${out2#*: }; mDep_ reconstructed vs serial:\
+ ${out3#OK: }; restarts: serial state on 3 ranks ${out4#*: }; 3-rank state\
+ in serial ${out5#*: }" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ] \
+    && [ $s5 -eq 0 ] \
+    && [ "$remote" = "1 elements with their nearest wall face on another rank" ]'
+
+#------------------------------------------------------------------------------
+# M4.14b: a tetrahedral pipe (gmsh, if installed): the layer in serial, on 4
+# ranks and recomputed from the mesh, and a restart onto the 4 ranks
+#------------------------------------------------------------------------------
+if command -v gmsh > /dev/null 2>&1
+then
+  TET=$PM_DIR/tetPipe
+  rm -rf "$TET"
+  mkdir -p "$TET/system" "$TET/constant" "$TET/0"
+  cp "$CORNERS"/system/{controlDict,fvSchemes,fvSolution,carrierDict} \
+    "$TET/system/"
+  withMdep "$TET"
+  cp "$CORNERS"/constant/*Properties "$TET/constant/"
+  for f in T U p Y_PbI2_g Y_PbI2_s
+  do
+    sed -e 's/(INLET|OUTLET|SIDE|WALLA|WALLB|WALLC)/(INLET|OUTLET|WALL)/' \
+      -e '/FRONTBACK/d' "$CORNERS/0/$f" > "$TET/0/$f"
+  done
+  edit "$TET/constant/thermochemistryProperties" \
+    "s/^  patches +\([^)]*\);/  patches  (WALL);/" "^  patches +\(WALL\);" \
+    && edit "$TET/constant/thermochemistryProperties" \
+         "s/^(  distance +)[^;]+;/\14e-4;/" "^  distance +4e-4;" \
+    && cat > "$TET/pipe.geo" <<'EOF'
+// tetrahedral pipe of tests/paperMode (M4.14b): R 2.4 mm, L 10 mm
+SetFactory("OpenCASCADE");
+Cylinder(1) = {0, 0, 0, 0.01, 0, 0, 0.0024, 2*Pi};
+Mesh.CharacteristicLengthMax = 0.0006;
+Mesh.MshFileVersion = 2.2;
+Mesh.RandomSeed = 1;
+Physical Surface("WALL") = {1};
+Physical Surface("INLET") = {3};
+Physical Surface("OUTLET") = {2};
+Physical Volume("fluid") = {1};
+EOF
+  (cd "$TET" && gmsh -3 -nt 1 pipe.geo -o pipe.msh > log.gmsh 2>&1 \
+     && gmshToFoam pipe.msh > log.gmshToFoam 2>&1 \
+     && "$MAKE_CARRIER" > log.makeCarrier 2>&1 \
+     && postProcess -func writeCellCentres -time 0 > log.writeCellCentres 2>&1) \
+    && touch "$TET/case.foam" && runSerial "$TET" "$SOLVER_EXE" \
+    || echo "the tetrahedral pipe failed ($TET)"
+  TET4=$PM_DIR/tetPipe-simple122
+  copyCase "$TET" "$TET4" && rm -f "$TET4"/0/C* \
+    && decomposeWith "$TET4" 4 "method simple; coeffs { n (1 2 2); }" \
+    && runParallel "$TET4" "$SOLVER_EXE" 4 \
+    || echo "the tetrahedral pipe on 4 ranks failed ($TET4/log)"
+  TETR=$PM_DIR/tetPipe-restart-serial-on-4
+  copyCase "$TET" "$TETR" && rm -f "$TETR"/0/C* && cp -a "$TET/0.001" "$TETR/" \
+    && decomposeWith "$TETR" 4 "method simple; coeffs { n (1 2 2); }" \
+         -time '0,0.001' \
+    && runParallel "$TETR" "$SOLVER_EXE" 4 \
+    || echo "the restart of the tetrahedral pipe failed ($TETR/log)"
+  cells1=$(grep -o '[0-9]* elements in [0-9]* cells; A_I = [^,]*, V_I = [^,]*, A_I/V_I = [^ ]* 1/m' \
+             "$TET/log")
+  cells4=$(grep -o '[0-9]* elements in [0-9]* cells; A_I = [^,]*, V_I = [^,]*, A_I/V_I = [^ ]* 1/m' \
+             "$TET4/log")
+  out1=$($CHECKS exactLayer "$TET" WALL 4e-4 "$TET/log"); s1=$?
+  out2=$($CHECKS compareInventories "$TET/$BALANCE" "$TET4/$BALANCE" 1e-9 \
+           gas wall); s2=$?
+  out3=$($CHECKS restartExact "$TETR/log" 1e-15); s3=$?
+  # mDep_ through maps that run both ways between the ranks (review of M4,
+  # round 3: +0.92 % on the 4 ranks with the scheduled reverse distribute)
+  out4=$($CHECKS mdep "$TET/$BALANCE" "$TET/$MDEP_DAT" 1e-12); s4=$?
+  out5=$($CHECKS mdep "$TET4/$BALANCE" "$TET4/$MDEP_DAT" 1e-12); s5=$?
+  remote=$(grep -o '[0-9]* elements with their nearest wall face on another rank, [0-9]* interface faces with elements of two or more other ranks' \
+             "$TET4/log")
+  check M4.14 "a tetrahedral pipe (gmsh $(gmsh --version 2>&1 | head -1),\
+ $(grep -a -o 'nCells:[0-9]*' "$TET/constant/polyMesh/owner" | head -1)),\
+ layer 4e-4 m: serial '$cells1', 4 ranks (simple (1 2 2)) '$cells4';\
+ ${out1#OK: }; serial vs 4 ranks: ${out2#*: }; the serial state at 0.001 on\
+ the 4 ranks: ${out3#*: }; mDep_ in serial: ${out4#OK: }; on the 4 ranks\
+ ($remote): ${out5#OK: }" \
+    eval '[ -n "$cells1" ] && [ "$cells1" = "$cells4" ] && [ $s1 -eq 0 ] \
+      && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ] && [ $s5 -eq 0 ] \
+      && [[ "$remote" != "0 elements"* ]] && [ -n "$remote" ]'
+else
+  result M4.14 NOTRUN "the tetrahedral pipe: gmsh is not installed (the\
+ layer on 4 ranks and recomputed from the mesh)"
+fi
+
+#------------------------------------------------------------------------------
+# M4.12: provenance of the T-Flows inputs of run/014
+#------------------------------------------------------------------------------
+if git -C "$TFLOWS_REPO" cat-file -e \
+     "$TFLOWS_REV:$TFLOWS_CASE/wall_x_profile_complete.dat" 2>/dev/null
+then
+  same=false
+  git -C "$TFLOWS_REPO" show "$TFLOWS_REV:$TFLOWS_CASE/wall_x_profile_complete.dat" \
+    | cmp -s - "$CASE014/constant/wall_x_profile_complete.dat" && same=true
+  kTable=$(git -C "$TFLOWS_REPO" show "$TFLOWS_REV:$TFLOWS_CASE/User_Mod/Types.f90" \
+             | $CHECKS conductivityTable "$CASE014/system/setFrozenCarrierDict")
+  s=$?
+  check M4.12 "provenance: run/014 constant/wall_x_profile_complete.dat is\
+ $TFLOWS_CASE/wall_x_profile_complete.dat at ${TFLOWS_REV:0:12} byte for byte\
+ ($same); $kTable" eval '$same && [ $s -eq 0 ]'
+else
+  result M4.12 NOTRUN "provenance of the T-Flows inputs: $TFLOWS_REPO or the\
+ revision ${TFLOWS_REV:0:12} is not on this machine"
+fi
+
+#------------------------------------------------------------------------------
+# M4.6: the sources compile against OpenFOAM v2606 (a copy)
+#------------------------------------------------------------------------------
+V2606=${LESTO_OPENFOAM_V2606:-}
+if [ -n "$V2606" ] && [ -f "$V2606/etc/bashrc" ]
+then
+  B=$PM_DIR/v2606
+  rm -rf "$B"
+  mkdir -p "$B/src" "$B/bin"
+  # the copy without the build directories of any platform (Make/linux*;
+  # review of M4, round 1: './Make/*/' matched nothing, so the copy carried
+  # the v2412 objects, and a v2606 build of the same WM_OPTIONS relinked
+  # them without compiling); wclean in the copy as well, below
+  (cd "$SOLVER_DIR" && tar -c --exclude=./tests --exclude=./doc \
+    --exclude="./Make/linux*" --exclude="./utilities/*/Make/linux*" .) \
+    | tar -x -C "$B/src"
+  # the compile option of the installation's build (e.g. a Debug-only one)
+  option=${LESTO_OPENFOAM_V2606_OPTION:-$(ls "$V2606/platforms" 2>/dev/null \
+    | sed -n 's/^linux64GccDPInt32\(Opt\|Debug\)$/\1/p' | head -1)}
+  env -i HOME="$HOME" PATH=/usr/bin:/bin USER="$USER" bash -c "
+    set +u
+    source '$V2606/etc/bashrc' WM_COMPILE_OPTION=${option:-Opt} \
+      > /dev/null 2>&1
+    cd '$B/src' && export FOAM_USER_APPBIN='$B/bin'
+    echo \"OpenFOAM \$WM_PROJECT_VERSION \$WM_OPTIONS\"
+    wclean > /dev/null 2>&1; wclean utilities/setFrozenCarrier > /dev/null 2>&1
+    wmake && wmake utilities/setFrozenCarrier
+  " > "$B/log.wmake" 2>&1
+  status=$?
+  version=$(head -1 "$B/log.wmake")
+  warnings=$(countWarnings "$B/log.wmake")
+  missing=""
+  for src in $(solverSources) $(utilitySources)
+  do
+    compiled "$src" "$B/log.wmake" || missing+=" $src"
+  done
+  check M4.6 "a copy of the sources (solver and setFrozenCarrier) compiles\
+ and links against $V2606 ($version): exit $status, $warnings warnings,\
+ every source of their Make/files compiled (not compiled:${missing:- none})\
+ ($B/log.wmake)" eval '[ $status -eq 0 ] && [ "$warnings" -eq 0 ] \
+    && [ -z "$missing" ] \
+    && [ -x "$B/bin/rhoFixedFlowFoam" ] && [ -x "$B/bin/setFrozenCarrier" ]'
+else
+  result M4.6 NOTRUN "the compile on OpenFOAM v2606: set LESTO_OPENFOAM_V2606\
+ to an OpenFOAM-v2606 installation (M0.4 on Merlin7 remains NOTRUN)"
+fi
+
+exit 0

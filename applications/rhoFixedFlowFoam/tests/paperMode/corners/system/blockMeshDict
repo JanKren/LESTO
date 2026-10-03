@@ -1,0 +1,52 @@
+/*------------------------------------------------------------------------------
+
+system/blockMeshDict of tests/paperMode/corners
+
+  An L-shaped channel of three blocks (x 0-2 mm, y 0-1 mm, without the
+  block x 1-2 mm, y 0-0.5 mm; one cell of 0.1 mm in z, empty front and
+  back), cells of 0.2 mm (x) by 0.1 mm (y), 75 cells.  Three interface
+  patches meet at two corners (review of M4, round 1; plan section 26):
+
+    WALLA  x = 1 mm, y 0-0.5 mm   the face of the missing block
+    WALLB  y = 0.5 mm, x 1-2 mm   its top
+    WALLC  x = 2 mm, y 0.5-1 mm   the end wall above it
+
+  WALLB and WALLC meet at (2, 0.5) mm, a concave corner: the corner cell
+  has a face on each, its centre 0.05 mm from WALLB and 0.1 mm from WALLC.
+  WALLA and WALLB meet at (1, 0.5) mm, a re-entrant corner: the cell of
+  block 2 at x 0.8-1 mm, y 0.5-0.6 mm (cell 29) touches both only by the
+  corner edge, its centre 0.1118 mm from it.  The test reverses the order
+  of the three patches in the boundary file (the order patchDataWave's
+  per-patch correction depends on) and splits the mesh by blocks onto
+  three ranks (cells 0-24, 25-49, 50-74 in blockMesh order), so that the
+  rank of cell 29 holds no interface face.
+
+------------------------------------------------------------------------------*/
+FoamFile {version 2.0; format ascii; class dictionary; object blockMeshDict;}
+
+scale 1e-3;
+
+vertices (
+  (0 0   0)   (1 0   0)   (1 0.5 0)   (0 0.5 0)
+  (0 1   0)   (1 1   0)   (2 0.5 0)   (2 1   0)
+  (0 0   0.1) (1 0   0.1) (1 0.5 0.1) (0 0.5 0.1)
+  (0 1   0.1) (1 1   0.1) (2 0.5 0.1) (2 1   0.1)
+);
+
+blocks (
+  hex (0 1 2 3 8 9 10 11)   (5 5 1) simpleGrading (1 1 1)
+  hex (3 2 5 4 11 10 13 12) (5 5 1) simpleGrading (1 1 1)
+  hex (2 6 7 5 10 14 15 13) (5 5 1) simpleGrading (1 1 1)
+);
+
+boundary (
+  INLET     {type patch; faces ((0 8 11 3) (3 11 12 4));}
+  OUTLET    {type patch; faces ((4 12 13 5) (5 13 15 7));}
+  SIDE      {type patch; faces ((0 1 9 8));}
+  WALLA     {type patch; faces ((1 2 10 9));}
+  WALLB     {type patch; faces ((2 6 14 10));}
+  WALLC     {type patch; faces ((6 7 15 14));}
+  FRONTBACK {type empty;
+             faces ((0 3 2 1) (8 9 10 11) (3 4 5 2) (11 10 13 12)
+                    (2 5 7 6) (10 14 15 13));}
+);

@@ -1,0 +1,2219 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#
+# tests/hks/Allrun
+#
+# PURPOSE
+#
+# Acceptance tests of milestone M5 of doc/phase-change-plan.md: the
+# Hertz-Knudsen-Schrage law with p_v tables, inventory samples and their
+# removal (plan E2, E3, E4, E6, E7, E9, section 6 M5 with the rewording of
+# section 14.1, and the decisions of section 20), and the carry-overs of the
+# M3 sign-off (wallPlusGas without the gas of the sample cells, the
+# significance of T_dep, the record of the profile times written before a
+# restart; the uneven split of the M3(2) gate is criterion M3.2c of
+# tests/profiles).  Every numerical claim is checked on the written output
+# by tests/hks/checks.py.
+#
+# Cases (all in tests/work/<platform>/hks, never below run/)
+#
+#   box        the closed box of tests/phaseChange (10 cells of 57.46 um on
+#              the WALL, at rest) at 700 K with model HKS, SI, the Gurvich
+#              table data/pv_PbI2_phases.csv (p_eq(700 K) = 35.92 Pa,
+#              Y_eq = 0.0408, lambda dt = 6241 at dt = 4 ms): Y0 = 0.1 (a
+#              bare wall deposits; 3 steps, and 50 steps for the closure
+#              near equilibrium), Y0 = 0.01 (a bare wall below Y_eq:
+#              nothing; exch_ written), Y0 = 0.1 with wallResistance
+#              halfCell, and Y0 = 0 restarted after one step with a wall
+#              deposit m'' set through mw_PbI2_s (without uniform/
+#              phaseChangeDeposits: the deposits are re-read from mw_,
+#              booked as restart): 5e-8 kg/m2 (CAPPED) and 1e-5 kg/m2
+#              (ample condensate)
+#   channel    the channel of tests/phaseChange (100 x 24 cells, T 1000 to
+#              400 K, plug flow) with model HKS and an inventory sample of
+#              4.84e-6 mol in its 40-cell box (x 10-20 mm), areaPerVolume
+#              4000, removed at 0.25 s, 350 steps of 1 ms written every 50
+#              in binary; the solves of the prototype evidence (PBiCGStab
+#              1e-15, relTol 0, no Final dictionary) with nCorr 3 and an
+#              outer tolerance of 1e-12 (4 correctors per step), and with
+#              nCorr 0; binary restarts from 0.2, 0.25 and 0.3; 4 ranks
+#              simple (4 1 1) and an uneven manual split; the channel from
+#              t = 10 s with dt = 0.22 ms and removeTime 10.0011 s (the
+#              removal on the exact clock); restarts with the removed
+#              sample dropped (twice) and re-added, and with a release
+#              sample added in front of the inventory sample; a small
+#              reservoir of 1.7e-8 mol (Cs = 0.98 kg/m3, never removed, 30
+#              steps written every step with exch_) with nCorr 2, 3, 10
+#              and 11, and with nCorr 0 and nGuard 0 or 3; a sample of
+#              4.25e-7 mol in the second cell row above the WALL at 700 K
+#              (interfaceTemperature wall), tight solves with nCorr 2, 3,
+#              10 and 11 (30 steps), loose correctors and a tight Final
+#              solve with nCorr 0, 1, 3 and 10 (100 steps); the inventory
+#              channel on 4 ranks (rank 1 with a single WALL face) with
+#              -fileHandler masterUncollated and with collated -ioRanks
+#              '(0 2)', restarted from 0.05; the inventory channel with its
+#              mesh converted to ascii at writePrecision 6 (round
+#              coordinates)
+#   pipe       run/013-hks-inventory (the 007 carrier, 228960 cells, the
+#              boat of 144 cells at the hot end), background Y = 0.1 so that
+#              the wall deposits from the first step, 25 steps of 4 ms; its
+#              state re-decomposed onto 4 ranks (hierarchical 1 2 2: the
+#              boat, whose cells differ in volume, on all 4 ranks) and
+#              reconstructed back to serial, and decomposed with
+#              writeFormat ascii; run/013 for the 5 steps of its
+#              out_excerpt and, at its own settings, for 25 steps; run/013
+#              with a small reservoir of 1e-7 mol (Cs = 5.68 kg/m3), 12
+#              steps written every step, nCorr 9 and 10
+#   tables     tests/testVapourPressureTable.C on the repository's csv
+#              files, and make_pv_table.py (regenerated into the work
+#              directory from the local thermo.inp and the pinned T-Flows
+#              revision)
+#   carry-overs  the release channel of tests/profiles (temperature model)
+#              with profiles; run/012 with the observable wall; the channel
+#              restarted with another deltaT
+#
+# Criteria
+#
+#   M5.0   testPhaseChange.C (g++, 0 warnings) with the HKS checks: G R T/M =
+#          89.65 m/s at 700 K, kineticScale 1e-5/sqrt(1000) = the T-Flows
+#          expression, the half cell = the Robin flux, the predictor of HKS
+#          wall and sample elements (bare wall deposit only, CAPPED,
+#          sample evaporation only, empty sample NONE), the admissible
+#          flow, the predictor with the previous regimes (a sample element
+#          never jumps between CAPPED and NONE, a wall element is never
+#          damped), a row of 10 stiff sample cells run as the corrector
+#          loop runs (alternating without the previous regimes, settled
+#          and complementary with them; review of M5, round 2)
+#   M5.1a  box, bare wall at 700 K (acceptance 1): Y1 = (Y0 + lambda dt
+#          Y_eq)/(1 + lambda dt) with lambda dt = 6241 to 1e-14, and the next
+#          steps (a wall with a deposit) Y^n = Y_eq + (Y0 - Y_eq)/(1 +
+#          lambda dt)^n; the start-up line prints lambda; closure <= 1e-13
+#   M5.1b  box, CAPPED (acceptance 1): a deposit of 5e-8 kg/m2 and Y = 0:
+#          all 10 elements CAPPED, Y1 = m''/(rho h) to 1e-14, the deposit,
+#          mw_PbI2_s and Y_PbI2_s exactly 0, the closure of the step (the
+#          ledger closed exactly before it) exactly 0
+#   M5.1c  box, ample condensate (acceptance 1): a deposit of 1e-5 kg/m2 and
+#          Y = 0: IMPLICIT evaporation, Y1 = lambda dt Y_eq/(1 + lambda dt)
+#          to 1e-14, the deposit m'' - Y1 rho h; closure <= 1e-13
+#   M5.1d  box, bare wall below Y_eq (Y0 = 0.01): every element NONE, the
+#          realised exchange exch_, the deposit and Y_PbI2_s exactly 0 (a
+#          bare wall deposits only; review B2), Y = Y0 to 1e-14 (not bit
+#          for bit: the linear solver iterates once per step on the
+#          uniform field and changes its last bits)
+#   M5.1e  box, wallResistance halfCell: the closed form with G' = G/(1 +
+#          G beta d/(rho D)) (Robin), lambda dt = 233, to 1e-14
+#   M5.1f  box, bare wall, 50 steps (review of M5): the closure <= 1e-13 in
+#          every step, although the gas sits at Y_eq in cells of lambda dt
+#          = 6241 for 45 steps (the defect of the transport-only matrix
+#          plus the realised flows; with the defect of the assembled
+#          matrix the closure grew by 6.7e-14 per step to 2.7e-12), and the
+#          closed form over all 50 steps (Y to 1e-14; the deposit to 1e-10:
+#          at the fixed point it drifts by the rounding of q = a - g Y,
+#          about 9e-13 per step, which the ledger books as solver defect)
+#   M5.2a  channel with inventory and removal, nCorr 3 (acceptance 2):
+#          closure <= 1e-13 in every step, 0 projections, 0 significant
+#          complementarity violations and no step whose violations exceed
+#          guardTolerance x inventory in total (totalLeft); the removal once,
+#          in the step starting at 0.25 s on the exact clock, of exactly the
+#          reservoir held then, the sample 0 afterwards, the layout records
+#          it; the sample decreases strictly before the removal
+#   M5.2b  the same with nCorr 0 (acceptance 2 as written in plan section
+#          6): guard passes > 0 and 0 projections; also 0 significant
+#          complementarity violations, no step whose complementarity
+#          violations exceed guardTolerance x inventory in total, recomputed
+#          from the balance file (totalLeft) and flagged by the solver,
+#          closure <= 1e-13 (review of M5, round 2: the guard now also
+#          switches back missed deposition, which the round-2 guard left in
+#          56 steps; round 3: it acts on the total, where the round-3 guard
+#          accepted 1.43 times the tolerance in the step ending at 0.167 s
+#          without a pass; round 4: a guard re-solve solves the matrix of
+#          the recorded solve, where the re-assembled SuperBee matrix left
+#          projections in 2 steps, which passed only under the rewording
+#          '0 significant projections', now dropped)
+#   M5.2c  binary restarts from 0.2, 0.25 (the removal is the first step of
+#          the restart) and 0.3 (after it: never removed again): every file
+#          at 0.35 cmp-identical to the continuous run, restart term 0
+#   M5.2d  4 ranks, simple (4 1 1) and an uneven manual split (288, 56,
+#          1096 and 960 cells; rank 1 without WALL faces; the sample on three
+#          ranks): closure <= 1e-13 in every step, the removal once
+#   M5.2f  the serial state of 0.2 re-decomposed onto 4 ranks (simple 4 1
+#          1): the reservoirs of uniform/ belong to other sample elements
+#          (a warning) and are re-read from Cs_PbI2_s (binary: exact), the
+#          inventory re-read equals the ledger to 1e-15
+#   M5.2e  the channel from t = 10 s, dt = 0.22 ms, timePrecision 6,
+#          removeTime 10.0011 s: the removal in the step whose exact start
+#          t_k = 10 + 5 dt is the first t_k >= removeTime - dt/2 (plan
+#          section 14.2), not at a rounded time name
+#   M5.2g  the serial pipe state of 0.1 decomposed onto 4 ranks
+#          (hierarchical 1 2 2), 2 steps, reconstructed and continued in
+#          serial: both restarts are accepted (V_Z and the centre of the
+#          boat are sums over the ranks: compared to 1e-12, review of M5),
+#          re-read from Cs_PbI2_s and exact, closure <= 1e-13
+#   M5.2h  the removed sample dropped at the restart from 0.3, then a
+#          second restart and a third with the sample re-added: every run
+#          ends, the layout keeps the record of the removed sample, the
+#          restarts are exact, the re-added sample stays empty (review of
+#          M5: the second restart stopped)
+#   M5.2i  a release sample (window from 0.31 s) added in front of the
+#          inventory sample at the restart from 0.2: the reservoirs and
+#          regimes of uniform/ still fit (no warning, exact), and the
+#          fields at 0.25 and 0.3 are cmp-identical to the continuous run
+#   M5.2j  the channel of acceptance 2 with the recommended solves (the
+#          channel's own loose correctors plus a tight Final solve, outer
+#          tolerance 1e-7), 500 steps, nCorr 3 and nCorr 0: closure <=
+#          1e-13, 0 significant projections, one removal, and with nCorr 0
+#          guard passes > 0 (the other counts are printed).  Not acceptance
+#          2 as written (M5.2b): with the loose correctors 1 and 4 steps
+#          end with projections below guardTolerance x inventory, in steps
+#          without guard passes, which E5.4 leaves to the projection by
+#          design (plan section 24, item 1)
+#   M5.2k  a small reservoir (review of M5, round 2: the regimes of the
+#          sample cells alternated between all CAPPED and all NONE at
+#          every corrector, and the parity of nCorr decided the step):
+#          the channel at 1.7e-8 mol with nCorr 2, 3, 10 and 11 has the
+#          same regimes in every step, its inventories agree to 1e-3 of n0
+#          M between nCorr 2 and 3 and between 10 and 11 (the correctors
+#          of the SuperBee transport are not converged; the round-2 build:
+#          0.65), the bounded law holds in every sample cell of every step
+#          (checks.py complementarity, recomputed from the fields: 0
+#          misses above 1e-9 n0 M), 0 significant projections and
+#          complementarity violations, none above the tolerance in total
+#          (totalLeft), closure <= 1e-13
+#   M5.2l  the same with one corrector per step (nCorr 0): with nGuard 0
+#          the first step's CAPPED sample cells in supersaturated gas are
+#          reported as significant complementarity violations, as many as
+#          the fields show (the round-2 check reported 0), and the exchange
+#          line and the summary name the total above the tolerance; with
+#          nGuard 3 the guard, switching in both directions, leaves 0
+#          significant violations (fields and log) and none above the
+#          tolerance in total, the regimes of nCorr 3 in the first step (the
+#          one the guard repairs), the inventories within 2e-2 of n0 M of
+#          nCorr 3 (one corrector per step of the lagged SuperBee
+#          transport: 7e-3; review of M5, round 4: the guard re-solves the
+#          matrix of the recorded solve, so its passes are no extra
+#          correctors, and the regimes of nCorr 3 in every step, which the
+#          re-assembling guard gave, are no longer expected), closure <=
+#          1e-13
+#   M5.2n  the collated file handler with another number of ranks (review
+#          of M5, round 3): the inventory channel on 2 ranks with
+#          -fileHandler collated to 0.2; uniform/ holds the ledger and the
+#          layout as plain files (global objects) and the per-rank lists
+#          as containers; the state reconstructed (reconstructPar
+#          -fileHandler collated) and continued in serial, and
+#          re-decomposed with the collated handler onto 4 ranks, both to
+#          0.3 across the removal: every run ends, the per-rank lists are
+#          named as containers of 2 ranks that the run cannot read (3
+#          warnings), the deposits and reservoirs come from mw_ and Cs_,
+#          exact (relative <= 1e-15), one removal, closure <= 1e-13 (the
+#          round-3 build stopped both restarts with a FatalIOError of the
+#          file handler)
+#   M5.2q  the per-rank lists on the same ranks and decomposition with the
+#          file handlers that read on the master (review of M5, round 4):
+#          the inventory channel on 4 ranks (a manual split, rank 1 with a
+#          single WALL face) with -fileHandler masterUncollated, and with
+#          -fileHandler collated -ioRanks '(0 2)', to 0.1, restarted from
+#          0.05 with the same handler: the restart reads the lists of
+#          uniform/phaseChange/ (no warning, 'exact'), every file at 0.1
+#          cmp-identical to the continuous run (in uniform/ itself the
+#          lists resolved to the master's file on every rank: the state came
+#          from the rounded mw_ and Cs_, 14 and 9 files differed)
+#   M5.2o  the recorded V_Z and centre of an inventory sample within the
+#          point rounding of BOTH runs (review of M5, round 3): the state
+#          of M5.2m reconstructed onto the original binary mesh and
+#          continued for 1 step; the boat moved to x 0.60-0.61 m, 1 serial
+#          step, decomposed with writeFormat ascii at writePrecision 10 and
+#          12 and 1 step on 4 ranks.  All accepted with 144 cells, the
+#          layout records the points ('ascii, <p> significant digits' or
+#          'binary'), closure <= 1e-13 (the round-3 build refused all three
+#          as 'changed': the tolerance followed the reading run's points
+#          only, and did not grow with |x|/cell size)
+#   M5.2p  a sample next to a colder wall at several nCorr (review of M5,
+#          round 4: the guard re-solve re-assembled the SuperBee matrix, so
+#          a bare wall element at Y_eq cycled between IMPLICIT and NONE
+#          until nGuard was used up and the step was accepted far above the
+#          tolerance, depending on nCorr): tight solves with nCorr 2, 3, 10
+#          and 11, loose ones with nCorr 0, 1, 3 and 10.  In every run the
+#          bounded law of every wall element (checks.py wallLaw) and of
+#          every sample cell (complementarity) recomputed from the fields,
+#          0 misses above 1e-12 of the inventory; 0 significant projections
+#          and complementarity violations and none above the tolerance in
+#          total (totalLeft); closure <= 1e-13; guard passes in some run
+#   M5.2m  the pipe state of M5.2g decomposed with writeFormat ascii (the
+#          processor meshes at writePrecision 6), 1 step on 4 ranks: the
+#          restart is accepted and booked as rounded, the boat keeps its
+#          144 cells, closure <= 1e-13 (review of M5, round 2: refused as
+#          'changed'; the volume tolerance follows the format of the mesh
+#          points, and run/013's radius lies between two rings of cell
+#          centres)
+#   M5.3a  pipe run/013, SI, SuperBee, 25 steps (acceptance 3 with the
+#          rewording of section 14.1): 0 significant regime changes in the
+#          deciding corrector and in the final predictor, 0 significant
+#          projections, no step above the guard's tolerance in total
+#          (totalLeft), closure <= 1e-13, solverDefect <= 1e-11 (Final
+#          1e-12), the sample decreasing strictly, the wall depositing
+#   M5.3b  run/013: its out_excerpt reproduced (5 steps)
+#   M5.3c  run/013 at its own settings (1 ms, Y0 = 0), 25 steps (acceptance
+#          3 literally): 0 significant regime changes in the deciding
+#          corrector and in the final predictor, 0 significant projections,
+#          closure <= 1e-13, solverDefect <= 1e-11, the sample decreasing
+#          strictly; the wall stays empty (plan section 20, item 12)
+#   M5.3d  run/013 with a small reservoir (1e-7 mol), nCorr 9 and 10, 12
+#          steps: every step converged, identical balance files, 0
+#          significant projections and complementarity violations, the
+#          bounded law of the 144 boat cells recomputed from the fields,
+#          closure <= 1e-13, solverDefect <= 1e-11 (review of M5, round
+#          2: nCorr 10 never evaporated the boat, nCorr 9 dumped it)
+#   M5.4a  tables (acceptance 4), the repository's csv files through
+#          vapourPressureTable.H (testVapourPressureTable.C): nodes exact,
+#          the melting point from the phase crossing 683.0 +- 0.1 K, the
+#          T-Flows table at its nodes to 1e-12
+#   M5.4b  tables from their sources (acceptance 4): make_pv_table.py
+#          regenerates the csv files of the repository byte for byte from
+#          thermo.inp and the pinned T-Flows revision, and the 5 K table
+#          interpolated by the solver is within 2e-3 decades of NASA-9;
+#          NOTRUN when a source is not on this machine
+#   M5.5   start-up and restart refusals (FatalIOError): a release key in an
+#          inventory sample; an unknown table unit; a phase missing from
+#          the table; outOfRange fatal with elements outside the table;
+#          equilibrium GEMS without the bridge; a restart with a new
+#          inventory sample, with a changed amount, with a dropped sample
+#          before its removal, with a changed mode, with the selection
+#          moved to other cells of the same number and volume (its
+#          centre); a fresh start with a Cs_PbI2_s field (state without
+#          the ledger); a fresh start at removeTime (filled and removed in
+#          the first step); on a mesh of round coordinates in ascii at
+#          writePrecision 6 (review of M5, round 4: the bounds followed the
+#          digits the points need, 2 for '0.011', and accepted the moved
+#          sample): the moved selection and a selection with one cell
+#          replaced by its neighbour (5e-6 m, within the rounding bound of
+#          6-digit points, above the limit of a one-cell change) are
+#          refused, and the unchanged restart is accepted (15 lines)
+#   M5.6   carry-over (a): wallPlusGas = the wall deposit plus the gas outside
+#          the cells of every sample: in every file of the release channel
+#          the observable is wall + gas - sampleGas, sampleGas is non-zero
+#          exactly in the bins that overlap the sample, and it integrates
+#          to the gas of the sample cells (the onsets of wallPlusGas and of
+#          the wall column at t = 0.03 are printed: the gas around the
+#          sample cells still sets the onset of wallPlusGas, 949.9 K)
+#   M5.7   carry-over (b): run/012 at 0.004 s with the observable wall, whose
+#          wall column is solver noise (about 1e-37 mol): both searches
+#          report 'none (insignificant)' (the reader agrees), and with onset
+#          { significance 0; } they search the column (found or
+#          notBracketed)
+#   M5.8   carry-over (d): the channel written at 0.05 (dt 1 ms) with the
+#          profile times (0.02 0.0502 0.0508 0.07), restarted with dt 0.2 ms
+#          and with dt 2 ms: every entry is written exactly once over the two
+#          runs (the earlier rule wrote 0.0502 twice with 0.2 ms and lost
+#          0.0508 with 2 ms), the layout records the entries written
+#   M5.9   inputs of the other model (HKSCoeffs and a pair's vapourPressure
+#          under model temperature, temperatureCoeffs under model HKS) are
+#          named in a start-up warning, and the runs end normally
+#
+# Every gate captures the exit status of its checker right after the call
+# (s1, s2, ...) and tests it in the eval: inside check(), $? would be the
+# status of its own shift.
+#
+# Usage: tests/hks/Allrun
+#
+# Exit status: 0 when every criterion was tested (whatever the results),
+# 1 when the script stopped early; Alltest reports that as a FAIL.
+#
+#------------------------------------------------------------------------------
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+
+HK_DIR=$WORK_DIR/hks
+HK_SRC=$TESTS_DIR/hks
+PC_SRC=$TESTS_DIR/phaseChange
+CHECKS="python3 $HK_SRC/checks.py"
+PCCHECKS="python3 $PC_SRC/checks.py"
+PRCHECKS="python3 $TESTS_DIR/profiles/checks.py"
+READER="python3 $SOLVER_DIR/utilities/axialProfiles.py"
+CMPFIELDS=$TESTS_DIR/cmpFields.sh
+REGRESS=$TESTS_DIR/regress.sh
+MAKE_CARRIER=$HK_DIR/bin/makeCarrier
+BALANCE=postProcessing/phaseChangeBalance/0/PbI2_g.dat
+DATA_DIR=$REPO_DIR/thermochemistry/systems/data
+PV_TABLE=$DATA_DIR/pv_PbI2_phases.csv
+PV_TFLOWS=$DATA_DIR/pv_PbI2_TFlows.csv
+MAKE_PV=$REPO_DIR/thermochemistry/systems/make_pv_table.py
+
+echo "== M5 HKS, tables, inventory (work directory $HK_DIR)"
+mkdir -p "$HK_DIR"
+
+
+#------------------------------------------------------------------------------
+# Helpers
+#------------------------------------------------------------------------------
+
+# the carrier generator of tests/phaseChange, rebuilt when its source or
+# OpenFOAM changes
+buildMakeCarrier() {
+  local key
+  key="$WM_PROJECT_DIR $(cat "$PC_SRC"/makeCarrier/makeCarrier.C \
+    "$PC_SRC"/makeCarrier/Make/* | md5sum | cut -d' ' -f1)"
+  if [ -x "$MAKE_CARRIER" ] \
+    && [ "$(cat "$HK_DIR/bin/key" 2>/dev/null)" = "$key" ]
+  then
+    return 0
+  fi
+  rm -rf "$HK_DIR/makeCarrier" "$HK_DIR/bin"
+  mkdir -p "$HK_DIR/bin"
+  cp -r "$PC_SRC/makeCarrier" "$HK_DIR/makeCarrier"
+  (cd "$HK_DIR/makeCarrier" && FOAM_USER_APPBIN=$HK_DIR/bin wmake) \
+    > "$HK_DIR/log.makeCarrier" 2>&1 || {
+      echo "Building makeCarrier failed, see $HK_DIR/log.makeCarrier" >&2
+      return 1
+    }
+  echo "$key" > "$HK_DIR/bin/key"
+}
+
+# blockCase <template of tests/phaseChange> <destination> [<command> ...]:
+# copy, run the optional command in the copy, blockMesh, carrier
+blockCase() {
+  local template=$1 dst=$2
+  shift 2
+  rm -rf "$dst"
+  cp -r "$PC_SRC/$template" "$dst" \
+    && (cd "$dst" && { [ $# -eq 0 ] || "$@"; } \
+        && blockMesh > log.blockMesh 2>&1 \
+        && "$MAKE_CARRIER" > log.makeCarrier 2>&1) \
+    || { echo "Setting up $dst failed" >&2; return 1; }
+  touch "$dst/case.foam"
+}
+
+# edit <file> <sed expression> <pattern that must match afterwards>
+edit() {
+  sed -i -E "$2" "$1" && grep -q -E "$3" "$1" \
+    || { echo "Editing $1 with '$2' failed" >&2; return 1; }
+}
+
+# blockCase hook: the box at 700 K
+at700K() {
+  edit system/carrierDict 's/^Tin +500;/Tin       700;/; s/^Tout +500;/Tout      700;/' \
+    '^Tout +700;' \
+    && sed -i 's/uniform 500;/uniform 700;/g' 0/T
+}
+
+# hksDict <case> <interface entries> [<samples dictionary body>]: model HKS
+# with the Gurvich table (copied into constant/), SI
+hksDict() {
+  cp "$PV_TABLE" "$1/constant/" || return 1
+  cat > "$1/constant/thermochemistryProperties" <<EOF
+FoamFile {version 2.0; format ascii; class dictionary; object thermochemistryProperties;}
+
+model HKS;
+
+pairs {
+  PbI2_g {
+    condensed PbI2_s;
+    vapourPressure {
+      file          "<constant>/pv_PbI2_phases.csv";
+      phases        ("PbI2(cr)" "PbI2(l)");
+      units         log10Pa;
+      interpolation logInverseT;
+      outOfRange    extrapolate;
+    }
+  }
+}
+
+interface {
+  patches (WALL);
+$2
+}
+
+HKSCoeffs { accommodation 1; Ce 1; kineticScale 1; equilibrium table; }
+
+balance { nGuard 3; guardTolerance 1e-12; }
+EOF
+  if [ -n "${3:-}" ]
+  then
+    printf '\nsamples {\n%s\n}\n' "$3" \
+      >> "$1/constant/thermochemistryProperties"
+  fi
+}
+
+# the inventory sample of the channel
+BOAT='  boat {
+    pair          PbI2_g;
+    selection     { boat { action use; source box; box (0.01 0.002 -1) (0.02 0.0028 1); } }
+    mode          inventory;
+    amount        4.84e-6;
+    areaPerVolume 4000;
+    removeTime    0.25;
+  }'
+
+# the solves of the prototype evidence: tight, no Final dictionary
+tightSolvers() {
+  cat > "$1/system/fvSolution" <<'EOF'
+FoamFile {version 2.0; format ascii; class dictionary; object fvSolution;}
+
+solvers {
+  Y_PbI2_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-15; relTol 0;}
+  Y_PbI2_s {solver diagonal;}
+}
+EOF
+}
+
+# setY0 <case> <value>: uniform initial gas
+setY0() {
+  edit "$1/0/Y_PbI2_g" "s/^internalField +uniform [^;]+;/internalField uniform $2;/" \
+    "^internalField uniform $2;"
+}
+
+# expectFatal <id> <text> <case> <message>: the run fails with the message
+expectFatal() {
+  local id=$1 text=$2 c=$3 message=$4
+  if runSerial "$c" "$SOLVER_EXE"
+  then
+    result "$id" FAIL "$text: the run did not stop ($c/log)"
+  elif grep -q -F -- "$message" "$c/log"
+  then
+    result "$id" PASS "$text: stops with '$message'"
+  else
+    result "$id" FAIL "$text: stopped without '$message' ($c/log)"
+  fi
+}
+
+# decomposeWith <case> <n> <method and coeffs> [decomposePar options]
+decomposeWith() {
+  local c=$1 n=$2 method=$3
+  shift 3
+  requireCaseDir "$c" || return 1
+  cat > "$c/system/decomposeParDict" <<EOF
+FoamFile{version 2.0; format ascii; class dictionary; object decomposeParDict;}
+
+numberOfSubdomains $n;
+$method
+EOF
+  (cd "$c" && decomposePar -force "$@" > log.decomposePar 2>&1)
+}
+
+# restartCopy <continuous> <restart> <time>: every file of <time> of the
+# continuous run (and of its processor directories)
+restartCopy() {
+  local src=$1 dst=$2 t=$3 d
+  rm -rf "$dst"
+  mkdir -p "$dst"
+  cp -a "$src"/system "$src"/constant "$src"/0 "$src"/case.foam "$dst"/
+  if ls -d "$src"/processor* > /dev/null 2>&1
+  then
+    for d in "$src"/processor*
+    do
+      mkdir -p "$dst/$(basename "$d")"
+      cp -a "$d/constant" "$d/0" "$d/$t" "$dst/$(basename "$d")"/
+    done
+  else
+    cp -a "$src/$t" "$dst"/
+  fi
+  setControl "$dst" startFrom latestTime
+}
+
+# the number of lines of a log that match a pattern
+count() {
+  grep -c -E "$2" "$1" 2>/dev/null
+}
+
+
+#------------------------------------------------------------------------------
+# M5.0: g++ testPhaseChange with the HKS checks
+#------------------------------------------------------------------------------
+if g++ -std=c++17 -Wall -Wextra "$TESTS_DIR/testPhaseChange.C" \
+  -o "$HK_DIR/testPhaseChange" > "$HK_DIR/log.testPhaseChange" 2>&1 \
+  && "$HK_DIR/testPhaseChange" >> "$HK_DIR/log.testPhaseChange" 2>&1
+then
+  check M5.0 "g++ testPhaseChange ($(tail -1 "$HK_DIR/log.testPhaseChange"\
+ | sed 's/\.$//'); with G R T/M = 89.65 m/s at 700 K, the T-Flows\
+ kineticScale, the HKS half cell and the HKS wall and sample elements of\
+ the predictor, the admissible flow, the predictor with the previous\
+ regimes; $(grep '^sample block' "$HK_DIR/log.testPhaseChange"), without the\
+ previous regimes alternating), 0 warnings" \
+    [ "$(countWarnings "$HK_DIR/log.testPhaseChange")" -eq 0 ]
+else
+  result M5.0 FAIL "testPhaseChange ($HK_DIR/log.testPhaseChange)"
+fi
+
+buildMakeCarrier || exit 1
+makeMesh || exit 1
+seedDynamicCode "$SOLVER_EXE" || exit 1
+
+
+#------------------------------------------------------------------------------
+# Set-up: boxes
+#------------------------------------------------------------------------------
+BOXBARE=$HK_DIR/boxBareWall
+BOXLONG=$HK_DIR/boxBareWallLong
+BOXBELOW=$HK_DIR/boxBelowYeq
+BOXHALF=$HK_DIR/boxHalfCell
+BOXBASE=$HK_DIR/boxBase
+BOXCAPPED=$HK_DIR/boxCapped
+BOXAMPLE=$HK_DIR/boxAmple
+
+for c in "$BOXBARE" "$BOXLONG" "$BOXBELOW" "$BOXHALF" "$BOXBASE"
+do
+  blockCase closedBox "$c" at700K \
+    && setControl "$c" endTime 0.012 \
+    || exit 1
+done
+hksDict "$BOXBARE" "" && setY0 "$BOXBARE" 0.1 || exit 1
+hksDict "$BOXLONG" "" && setY0 "$BOXLONG" 0.1 \
+  && setControl "$BOXLONG" endTime 0.2 || exit 1
+hksDict "$BOXBELOW" "" && setY0 "$BOXBELOW" 0.01 \
+  && edit "$BOXBELOW/constant/thermochemistryProperties" \
+       's/^balance \{ (.*) \}$/balance { \1 writeExchangeField yes; }/' \
+       'writeExchangeField yes; }' || exit 1
+hksDict "$BOXHALF" "  wallResistance halfCell;" && setY0 "$BOXHALF" 0.1 \
+  || exit 1
+hksDict "$BOXBASE" "" && setY0 "$BOXBASE" 0 \
+  && setControl "$BOXBASE" endTime 0.004 || exit 1
+
+
+#------------------------------------------------------------------------------
+# Set-up: channels
+#------------------------------------------------------------------------------
+CH=$HK_DIR/channelInventory
+CH0=$HK_DIR/channelInventoryNCorr0
+CH4S=$HK_DIR/channelInventory-simple411
+CH4U=$HK_DIR/channelInventory-manual4
+CHCLOCK=$HK_DIR/channelInventoryClock
+CHL=$HK_DIR/channelInventoryLoose
+CHL0=$HK_DIR/channelInventoryLooseNCorr0
+
+inventoryChannel() {
+  blockCase channel "$1" \
+    && hksDict "$1" "" "$BOAT" \
+    && tightSolvers "$1" \
+    && setControl "$1" endTime 0.35 \
+    && setSpeciesControl "$1" tolerance 1e-12 \
+    && setSpeciesControl "$1" nCorr 3
+}
+for c in "$CH" "$CH0" "$CH4S" "$CH4U"
+do
+  inventoryChannel "$c" || exit 1
+done
+setSpeciesControl "$CH0" nCorr 0 && setSpeciesControl "$CH0" tolerance 1 \
+  || exit 1
+
+# the recommended solves: loose correctors (GAMG 1e-8, relTol 0.1) and a
+# tight Final solve (1e-12, relTol 0), the channel's own fvSolution and
+# outer loop (tolerance 1e-7, nCorr 3), 500 steps; and with nCorr 0
+for c in "$CHL" "$CHL0"
+do
+  blockCase channel "$c" && hksDict "$c" "" "$BOAT" \
+    && setControl "$c" endTime 0.5 || exit 1
+done
+setSpeciesControl "$CHL0" nCorr 0 && setSpeciesControl "$CHL0" tolerance 1 \
+  || exit 1
+
+decomposeWith "$CH4S" 4 "method simple; coeffs { n (4 1 1); }" \
+  || { echo "decomposePar failed ($CH4S/log.decomposePar)"; exit 1; }
+python3 - "$CH4U/constant/cellDecomposition" <<'EOF' || exit 1
+import sys
+nx, ny = 100, 24
+ranks = []
+for c in range(nx*ny):
+    i, j = c % nx, c // nx
+    if i < 12:
+        r = 0
+    elif i < 16 and 5 <= j < 19:
+        r = 1
+    elif i < 60:
+        r = 2
+    else:
+        r = 3
+    ranks.append(r)
+with open(sys.argv[1], 'w') as f:
+    f.write('FoamFile {version 2.0; format ascii; class labelList; '
+            'object cellDecomposition;}\n\n')
+    f.write(f'{len(ranks)}\n(\n' + '\n'.join(map(str, ranks)) + '\n)\n')
+EOF
+decomposeWith "$CH4U" 4 'method manual; coeffs { dataFile "cellDecomposition"; }' \
+  || { echo "decomposePar failed ($CH4U/log.decomposePar)"; exit 1; }
+
+# the removal on the exact clock: from t = 10 s, dt = 0.22 ms
+inventoryChannel "$CHCLOCK" \
+  && mv "$CHCLOCK/0" "$CHCLOCK/10" \
+  && setControl "$CHCLOCK" startTime 10 \
+  && setControl "$CHCLOCK" endTime 10.0033 \
+  && setControl "$CHCLOCK" deltaT 0.00022 \
+  && setControl "$CHCLOCK" writeInterval 1000 \
+  && setControl "$CHCLOCK" timePrecision 6 \
+  && edit "$CHCLOCK/constant/thermochemistryProperties" \
+       's/^(    removeTime +)0.25;/\110.0011;/' 'removeTime +10.0011;' \
+  || exit 1
+
+# a small reservoir (review of M5, round 2): 1.7e-8 mol in the 40 cells of
+# the boat (Cs = 0.98 kg/m3), never removed, 30 steps written every step
+# with exch_; the solves of M5.2a, with nCorr 2, 3, 10 and 11 (M5.2k), and
+# one corrector (nCorr 0) with nGuard 0 and with nGuard 3 (M5.2l)
+SMALL=$(echo "$BOAT" | sed 's/^    amount        4.84e-6;/    amount        1.7e-8;/; /removeTime/d')
+smallChannel() {
+  inventoryChannel "$1" \
+    && hksDict "$1" "" "$SMALL" \
+    && grep -q '^    amount        1.7e-8;' "$1/constant/thermochemistryProperties" \
+    && edit "$1/constant/thermochemistryProperties" \
+         "s/^balance \\{ nGuard 3; (.*) \\}$/balance { nGuard $2; \\1 writeExchangeField yes; }/" \
+         "nGuard $2; .*writeExchangeField yes; }" \
+    && setControl "$1" endTime 0.03 \
+    && setControl "$1" writeInterval 1 \
+    && setSpeciesControl "$1" nCorr "$3" \
+    && (cd "$1" && postProcess -func writeCellCentres -time 0 > log.C 2>&1 \
+          && postProcess -func writeCellVolumes -time 0 > log.V 2>&1)
+}
+CHSMALL=()
+for n in 2 3 10 11
+do
+  CHSMALL+=("$HK_DIR/channelSmallReservoir-nCorr$n")
+  smallChannel "$HK_DIR/channelSmallReservoir-nCorr$n" 3 $n || exit 1
+done
+CHSG0=$HK_DIR/channelSmallReservoir-nCorr0-nGuard0
+CHSG3=$HK_DIR/channelSmallReservoir-nCorr0-nGuard3
+smallChannel "$CHSG0" 0 0 && setSpeciesControl "$CHSG0" tolerance 1 \
+  && smallChannel "$CHSG3" 3 0 && setSpeciesControl "$CHSG3" tolerance 1 \
+  || exit 1
+
+# a sample next to a colder wall (review of M5, round 4): the WALL at 700 K
+# with interfaceTemperature wall (the gas from 1000 to 400 K), a sample of
+# 4.25e-7 mol in the second cell row (x 10-20 mm, y 0.2-0.4 mm, 10 cells)
+# above the bottom wall, never removed; the tight solves of M5.2a with
+# nCorr 2, 3, 10 and 11 for 30 steps, and the channel's own loose
+# correctors and tight Final solve (outer tolerance 1e-7) with nCorr 0, 1,
+# 3 and 10 for 100 steps; every step written, with exch_ (M5.2p)
+WALLSAMPLE='  boat {
+    pair          PbI2_g;
+    selection     { boat { action use; source box; box (0.01 0.0002 -1) (0.02 0.0004 1); } }
+    mode          inventory;
+    amount        4.25e-7;
+    areaPerVolume 4000;
+  }'
+WALLBOX="box 0.01 0.0002 -1 0.02 0.0004 1"
+# blockCase hook: the WALL patch of the carrier at 700 K
+wallAt700K() {
+  echo 'Twall     700;' >> system/carrierDict
+}
+wallSampleChannel() {
+  blockCase channel "$1" wallAt700K \
+    && hksDict "$1" "  interfaceTemperature wall;" "$WALLSAMPLE" \
+    && edit "$1/constant/thermochemistryProperties" \
+         's/^balance \{ (.*) \}$/balance { \1 writeExchangeField yes; }/' \
+         'writeExchangeField yes; }' \
+    && setControl "$1" writeInterval 1 \
+    && setSpeciesControl "$1" nCorr "$2" \
+    && if [ "$3" = tight ]
+       then
+         tightSolvers "$1" && setControl "$1" endTime 0.03 \
+           && setSpeciesControl "$1" tolerance 1e-12
+       else
+         setControl "$1" endTime 0.1
+       fi \
+    && (cd "$1" && postProcess -func writeCellCentres -time 0 > log.C 2>&1 \
+          && postProcess -func writeCellVolumes -time 0 > log.V 2>&1)
+}
+CHWALL=()
+for spec in 2:tight 3:tight 10:tight 11:tight 0:loose 1:loose 3:loose \
+  10:loose
+do
+  c=$HK_DIR/channelWallSample-${spec#*:}-nCorr${spec%:*}
+  CHWALL+=("$c")
+  wallSampleChannel "$c" "${spec%:*}" "${spec#*:}" || exit 1
+done
+
+
+#------------------------------------------------------------------------------
+# Set-up: pipe (run/013)
+#------------------------------------------------------------------------------
+PIPE=$HK_DIR/pipe013
+C013=$HK_DIR/run013
+makeCase 013 "$PIPE" \
+  && setControl "$PIPE" endTime 0.1 \
+  && setControl "$PIPE" deltaT 0.004 \
+  && setControl "$PIPE" writeInterval 25 \
+  && edit "$PIPE/0/Y_PbI2_g" 's/^(internalField +)uniform 0;/\1uniform 0.1;/' \
+       'uniform 0.1;' \
+  || { echo "Setting up $PIPE failed"; exit 1; }
+C013L=$HK_DIR/run013Steps25
+makeCase 013 "$C013" && setControl "$C013" endTime 0.005 \
+  || { echo "Setting up $C013 failed"; exit 1; }
+makeCase 013 "$C013L" && setControl "$C013L" endTime 0.025 \
+  || { echo "Setting up $C013L failed"; exit 1; }
+
+# run/013 with a small reservoir, 1e-7 mol (Cs = 5.68 kg/m3), at its own
+# settings, 12 steps written every step with exch_, nCorr 9 and 10 (M5.3d)
+PIPESMALL=()
+for n in 9 10
+do
+  c=$HK_DIR/run013SmallReservoir-nCorr$n
+  PIPESMALL+=("$c")
+  makeCase 013 "$c" \
+    && edit "$c/constant/thermochemistryProperties" \
+         's/^(    amount +)4.84e-6;/\11e-7;/' '^    amount +1e-7;' \
+    && edit "$c/constant/thermochemistryProperties" \
+         's/^(  writeFile +yes;.*)$/\1\n  writeExchangeField yes;/' \
+         '^  writeExchangeField yes;' \
+    && setControl "$c" endTime 0.012 \
+    && setControl "$c" writeInterval 1 \
+    && setSpeciesControl "$c" nCorr $n \
+    || { echo "Setting up $c failed"; exit 1; }
+done
+(cd "${PIPESMALL[0]}" && postProcess -func writeCellCentres -time 0 > log.C 2>&1 \
+   && postProcess -func writeCellVolumes -time 0 > log.V 2>&1) \
+  || { echo "writeCellCentres/Volumes of ${PIPESMALL[0]} failed"; exit 1; }
+
+
+#------------------------------------------------------------------------------
+# Runs
+#------------------------------------------------------------------------------
+echo "Running the boxes, the channels and the pipe"
+runSerial "$PIPE" "$SOLVER_EXE" &
+pPipe=$!
+for c in "$BOXBARE" "$BOXLONG" "$BOXBELOW" "$BOXHALF" "$BOXBASE" "$CH" \
+  "$CH0" "$CHCLOCK" "$C013" "$C013L" "$CHL" "$CHL0" "${CHSMALL[@]}" \
+  "$CHSG0" "$CHSG3" "${PIPESMALL[@]}" "${CHWALL[@]}"
+do
+  startJob runSerial "$c" "$SOLVER_EXE"
+done
+waitJobs || echo "At least one run failed; see the logs below."
+runParallel "$CH4S" "$SOLVER_EXE" 4 &
+pPar1=$!
+runParallel "$CH4U" "$SOLVER_EXE" 4 &
+pPar2=$!
+
+# the CAPPED and the ample box: the base state at 0.004 (Y = 0, bare wall,
+# closure exactly 0) with a deposit written into mw_PbI2_s and uniform/
+# phaseChangeDeposits removed, so the deposits are re-read from mw_
+depositRestart() {
+  restartCopy "$BOXBASE" "$1" 0.004 \
+    && setControl "$1" endTime 0.008 \
+    && rm -f "$1/0.004/uniform/phaseChange/phaseChangeDeposits" \
+    && python3 - "$1/0.004/mw_PbI2_s" "$2" <<'EOF'
+import re, sys
+p, value = sys.argv[1], sys.argv[2]
+s = open(p).read()
+new, n = re.subn(r'(\n\s*WALL\s*\{[^}]*?value\s+)uniform 0;',
+                 r'\g<1>uniform ' + value + ';', s)
+assert n == 1, n
+open(p, 'w').write(new)
+EOF
+}
+if grep -q '^End' "$BOXBASE/log"
+then
+  depositRestart "$BOXCAPPED" 5e-8 && startJob runSerial "$BOXCAPPED" \
+    "$SOLVER_EXE"
+  depositRestart "$BOXAMPLE" 1e-5 && startJob runSerial "$BOXAMPLE" \
+    "$SOLVER_EXE"
+fi
+
+# binary restarts of the inventory channel across the removal
+CHRS020=$HK_DIR/channelInventoryRestart0.2
+CHRS025=$HK_DIR/channelInventoryRestart0.25
+CHRS030=$HK_DIR/channelInventoryRestart0.3
+if grep -q '^End' "$CH/log"
+then
+  for spec in "$CHRS020|0.2" "$CHRS025|0.25" "$CHRS030|0.3"
+  do
+    IFS='|' read -r dst t <<< "$spec"
+    restartCopy "$CH" "$dst" "$t" && startJob runSerial "$dst" "$SOLVER_EXE"
+  done
+fi
+waitJobs
+wait $pPipe $pPar1 $pPar2
+
+
+#------------------------------------------------------------------------------
+# M5.1: boxes
+#------------------------------------------------------------------------------
+if grep -q '^End' "$BOXBARE/log"
+then
+  model=$($CHECKS model "$BOXBARE")
+  out=$($CHECKS approach "$BOXBARE" 0.1 1e-14)
+  s1=$?
+  closure=$($CHECKS closureStep "$BOXBARE/$BALANCE" 1e-13)
+  s2=$?
+  lambdaLine=$(sed -n 's/.*lambda = sum_e g_e\/(rho_c V_c) \([^ ]*\)-.*/\1/p' \
+    "$BOXBARE/log")
+  check M5.1a "box at 700 K, bare wall: ${model#OK: }; the solver prints\
+ lambda = $lambdaLine 1/s; ${out#*: }; ${closure#*: }; exchange lines\
+ 'implicit 10' in all 3 steps" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] \
+      && [ "$(count "$BOXBARE/log" "exchange: implicit 10, capped 0, none 0 elements")" -eq 3 ] \
+      && python3 -c "import sys; sys.exit(0 if abs(float(\"$lambdaLine\")*0.004 - 6240.88) < 0.01 else 1)"'
+else
+  result M5.1a FAIL "bare-wall box failed ($BOXBARE/log)"
+fi
+
+if grep -q '^End' "$BOXCAPPED/log" 2>/dev/null
+then
+  out=$($CHECKS evaporate "$BOXCAPPED" 0.008 5e-8 1e-14)
+  s1=$?
+  closure=$($CHECKS closureStep "$BOXCAPPED/postProcessing/phaseChangeBalance/0.004/PbI2_g.dat" 0)
+  s2=$?
+  base=$(grep -v '^#' "$BOXBASE/$BALANCE" | awk '{print $NF}')
+  check M5.1b "box, CAPPED (m'' = 5e-8 kg/m2, Y = 0; the base ledger closed\
+ to $base): ${out#*: }; the step: ${closure#*: }; exchange 'implicit 0,\
+ capped 10'; the deposits re-read from mw_PbI2_s (warning)" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [[ "$out" == *CAPPED* ]] \
+      && [ "$base" = "0" ] \
+      && grep -q "exchange: implicit 0, capped 10, none 0 elements" "$BOXCAPPED/log" \
+      && grep -q "The deposits are re-read from the interface patches" "$BOXCAPPED/log"'
+else
+  result M5.1b FAIL "CAPPED box failed ($BOXCAPPED/log)"
+fi
+
+if grep -q '^End' "$BOXAMPLE/log" 2>/dev/null
+then
+  out=$($CHECKS evaporate "$BOXAMPLE" 0.008 1e-5 1e-14)
+  s1=$?
+  closure=$($CHECKS closureStep "$BOXAMPLE/postProcessing/phaseChangeBalance/0.004/PbI2_g.dat" 1e-13)
+  s2=$?
+  check M5.1c "box, ample condensate (m'' = 1e-5 kg/m2, Y = 0): ${out#*: };\
+ ${closure#*: }" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [[ "$out" == *IMPLICIT* ]] \
+      && grep -q "exchange: implicit 10, capped 0, none 0 elements" "$BOXAMPLE/log"'
+else
+  result M5.1c FAIL "ample-condensate box failed ($BOXAMPLE/log)"
+fi
+
+if grep -q '^End' "$BOXBELOW/log"
+then
+  out=$($CHECKS unchanged "$BOXBELOW" 0.01 1e-14)
+  s1=$?
+  closure=$($CHECKS closureStep "$BOXBELOW/$BALANCE" 1e-13)
+  s2=$?
+  iterations=$(grep -c 'Solving for Y_PbI2_g, .* No Iterations 1$' "$BOXBELOW/log")
+  check M5.1d "box, bare wall below Y_eq: ${out#*: }; ${closure#*: };\
+ exchange 'implicit 0, capped 0, none 10' in all 3 steps; the linear solver\
+ iterated once in $iterations steps" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] \
+      && [ "$(count "$BOXBELOW/log" "exchange: implicit 0, capped 0, none 10 elements")" -eq 3 ]'
+else
+  result M5.1d FAIL "below-Y_eq box failed ($BOXBELOW/log)"
+fi
+
+if grep -q '^End' "$BOXHALF/log"
+then
+  model=$($CHECKS model "$BOXHALF" halfCell)
+  out=$($CHECKS approach "$BOXHALF" 0.1 1e-14 halfCell)
+  s1=$?
+  check M5.1e "box, wallResistance halfCell: ${model#OK: }; ${out#*: }; the\
+ start-up line says '(with the half cell)'" \
+    eval '[ $s1 -eq 0 ] && grep -q "m/s (with the half cell)" "$BOXHALF/log"'
+else
+  result M5.1e FAIL "halfCell box failed ($BOXHALF/log)"
+fi
+
+if grep -q '^End' "$BOXLONG/log"
+then
+  out=$($CHECKS approach "$BOXLONG" 0.1 1e-14 deposit=1e-10)
+  s1=$?
+  closure=$($CHECKS closureStep "$BOXLONG/$BALANCE" 1e-13)
+  s2=$?
+  defect=$($PCCHECKS defect "$BOXLONG/$BALANCE" 1)
+  check M5.1f "box, bare wall, 50 steps near equilibrium: ${closure#*: };\
+ ${out#*: } (at the fixed point the solver no longer iterates, but q =\
+ fl(a - g Y) is not 0: the deposit drifts by up to eps lambda dt Y_eq/(Y0 -\
+ Y_eq) = 9.5e-13 per step, booked as solver defect: ${defect#*: })" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] \
+      && [ "$(count "$BOXLONG/log" "exchange: implicit 10, capped 0, none 0 elements")" -eq 50 ]'
+else
+  result M5.1f FAIL "50-step box failed ($BOXLONG/log)"
+fi
+
+
+#------------------------------------------------------------------------------
+# M5.2: channel with inventory and removal
+#------------------------------------------------------------------------------
+if grep -q '^End' "$CH/log"
+then
+  closure=$($PCCHECKS closure "$CH/$BALANCE" 1e-13)
+  s1=$?
+  removal=$($CHECKS removal "$CH/$BALANCE" 0.25 0.001 0 350)
+  s2=$?
+  decreasing=$($CHECKS decreasing "$CH/$BALANCE" sample 0.25)
+  s3=$?
+  layout=$($CHECKS layoutSample "$CH/0.3/uniform/phaseChangeLayout" boat \
+    removalClock 0.25000000000000017)
+  s4=$?
+  counts=$($CHECKS logCounts "$CH/log")
+  left=$($CHECKS totalLeft "$CH/log" "$CH/$BALANCE" 1e-12)
+  s5=$?
+  nRemoved=$(count "$CH/log" "^Sample boat removed at")
+  check M5.2a "channel with inventory, removeTime 0.25, nCorr 3: ${closure#*: };\
+ log: $counts; ${left#*: }; ${removal#*: }; ${decreasing#*: };\
+ ${layout#*: }; $nRemoved removal line" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ] \
+      && [ $s5 -eq 0 ] && [[ "$counts" == *" projected=0 "* ]] \
+      && [[ "$counts" == *" complementaritySignificant=0" ]] \
+      && [ "$nRemoved" -eq 1 ]'
+else
+  result M5.2a FAIL "inventory channel failed ($CH/log)"
+fi
+
+if grep -q '^End' "$CH0/log"
+then
+  closure=$($PCCHECKS closure "$CH0/$BALANCE" 1e-13)
+  s1=$?
+  counts=$($CHECKS logCounts "$CH0/log")
+  left=$($CHECKS totalLeft "$CH0/log" "$CH0/$BALANCE" 1e-12)
+  s2=$?
+  nGuard=$(echo "$counts" | sed -n 's/.* guard=\([0-9]*\) .*/\1/p')
+  check M5.2b "the same with nCorr 0 (acceptance 2 as written in plan\
+ section 6: guard passes > 0 and 0 projections): $nGuard steps with guard\
+ passes; $counts; ${left#*: }; ${closure#*: } (and 0 significant\
+ complementarity violations.  Review of M5, round 4: the guard re-solve re-assembled the\
+ SuperBee matrix, so its switches were applied to another matrix and 2\
+ steps ended with projections of 1.0e-18 and 9.2e-21 kg, which only the\
+ pending rewording '0 significant projections' accepted; it re-solves the\
+ matrix of the recorded solve now.  Round 3: the guard accepted 1.43 times\
+ the tolerance in the step ending at 0.167 s without a pass; round 2: the\
+ guard never switched back and left missed deposition in 56 steps)" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ "$nGuard" -gt 0 ] \
+      && [[ "$counts" == *" projected=0 projectedSignificant=0 projectedAbove=0 "* ]] \
+      && [[ "$counts" == *" complementarityAbove=0 complementaritySignificant=0" ]]'
+else
+  result M5.2b FAIL "nCorr 0 channel failed ($CH0/log)"
+fi
+
+text=""
+status=0
+for spec in "$CHRS020|0.2|1" "$CHRS025|0.25|1" "$CHRS030|0.3|0"
+do
+  IFS='|' read -r dst t removals <<< "$spec"
+  if grep -q '^End' "$dst/log" 2>/dev/null
+  then
+    same=$("$CMPFIELDS" -x uniform/time "$CH" "$dst" 0.35)
+    s1=$?
+    n=$(count "$dst/log" "^Sample boat removed at")
+    term=$(grep -c 'Restart of pair PbI2_g: .* differs from the ledger by 0 kg .*reservoirs: uniform/phaseChange/phaseChangeReservoirs; exact' "$dst/log")
+    text="$text from $t: ${same%%$'\n'*}, $n removal(s), restart term 0 and\
+ 'exact': $term;"
+    { [ $s1 -eq 0 ] && [ "$n" -eq "$removals" ] && [ "$term" -eq 1 ]; } \
+      || status=1
+  else
+    text="$text from $t failed ($dst/log);"
+    status=1
+  fi
+done
+check M5.2c "binary restarts of the inventory channel, every file at 0.35\
+ cmp-identical to the continuous run:$text" [ $status -eq 0 ]
+
+# M5.2f: the serial state of 0.2 re-decomposed onto 4 ranks, 10 steps
+CHRD=$HK_DIR/channelInventoryRedecomposed
+if grep -q '^End' "$CH/log"
+then
+  rm -rf "$CHRD"
+  mkdir -p "$CHRD"
+  cp -a "$CH"/system "$CH"/constant "$CH"/0 "$CH"/0.2 "$CH"/case.foam "$CHRD"/
+  setControl "$CHRD" startFrom latestTime
+  setControl "$CHRD" endTime 0.21
+  cat > "$CHRD/system/decomposeParDict" <<'EOF'
+FoamFile{version 2.0; format ascii; class dictionary; object decomposeParDict;}
+
+numberOfSubdomains 4;
+method simple;
+coeffs { n (4 1 1); }
+EOF
+  (cd "$CHRD" && decomposePar -force -time '0,0.2' > log.decomposePar 2>&1) \
+    && runParallel "$CHRD" "$SOLVER_EXE" 4
+  line=$(grep 'Restart of pair PbI2_g' "$CHRD/log" 2>/dev/null)
+  relative=$(echo "$line" | sed -n 's/.*(relative \([^;]*\);.*/\1/p')
+  closure=$($PCCHECKS closure "$CHRD/postProcessing/phaseChangeBalance/0.2/PbI2_g.dat" 1e-13)
+  check M5.2f "inventory channel at 0.2, serial to 4 ranks simple (4 1 1):\
+ '${line#*: }'; ${closure#*: }" \
+    eval 'grep -q "^End" "$CHRD/log" \
+      && echo "$line" | grep -q "reservoirs: Cs_PbI2_s written in binary; exact)" \
+      && python3 -c "import sys; sys.exit(0 if abs(float(\"$relative\")) <= 1e-15 else 1)" \
+      && grep -q "uniform/phaseChange/phaseChangeReservoirs at time 0.2 is written for other sample elements" "$CHRD/log" \
+      && [[ "$closure" == OK* ]]'
+else
+  result M5.2f FAIL "inventory channel failed ($CH/log)"
+fi
+
+text=""
+status=0
+for c in "$CH4S" "$CH4U"
+do
+  if grep -q '^End' "$c/log"
+  then
+    out=$($PCCHECKS closure "$c/$BALANCE" 1e-13) || status=1
+    removal=$($CHECKS removal "$c/$BALANCE" 0.25 0.001 0 350) || status=1
+    n=$(count "$c/log" "^Sample boat removed at")
+    [ "$n" -eq 1 ] || status=1
+    cells=$(for d in "$c"/processor*
+      do
+        grep -a -m1 -o 'nCells: *[0-9]*' "$d/constant/polyMesh/owner" \
+          | sed 's/[^0-9]//g'
+      done | tr '\n' ' ')
+    text="$text $(basename "$c") (cells per rank $cells): ${out#*: }, $n\
+ removal;"
+  else
+    text="$text $(basename "$c") failed ($c/log);"
+    status=1
+  fi
+done
+check M5.2d "4 ranks:$text" [ $status -eq 0 ]
+
+if grep -q '^End' "$CHCLOCK/log"
+then
+  removal=$($CHECKS removal "$CHCLOCK/postProcessing/phaseChangeBalance/10/PbI2_g.dat" \
+    10.0011 0.00022 10 15)
+  s1=$?
+  line=$(grep '^Sample boat removed at' "$CHCLOCK/log")
+  check M5.2e "channel from t = 10 s, dt = 0.22 ms, removeTime 10.0011 s:\
+ ${removal#*: }; log '$line'" \
+    eval '[ $s1 -eq 0 ] && [ "$(count "$CHCLOCK/log" "^Sample boat removed at")" -eq 1 ]'
+else
+  result M5.2e FAIL "clock channel failed ($CHCLOCK/log)"
+fi
+
+# M5.2g: the serial pipe state of 0.1 on 4 ranks (hierarchical 1 2 2: the
+# boat, a cylinder around the axis, lies on all 4 ranks), 2 steps, then
+# reconstructed and continued in serial for 1 step
+PIPERD=$HK_DIR/pipe013Redecomposed
+restartFromCs() {
+  grep -c 'Restart of pair PbI2_g: .*reservoirs: Cs_PbI2_s written in binary; exact)' "$1"
+}
+if grep -q '^End' "$PIPE/log"
+then
+  rm -rf "$PIPERD"
+  mkdir -p "$PIPERD"
+  cp -a "$PIPE"/system "$PIPE"/constant "$PIPE"/0 "$PIPE"/0.1 \
+    "$PIPE"/case.foam "$PIPE"/dynamicCode "$PIPERD"/
+  setControl "$PIPERD" startFrom latestTime \
+    && setControl "$PIPERD" endTime 0.108 \
+    && setControl "$PIPERD" writeInterval 1 \
+    && printf '%s\n' 'FoamFile{version 2.0; format ascii; class dictionary; object decomposeParDict;}' \
+         'numberOfSubdomains 4;' 'method hierarchical;' 'coeffs { n (1 2 2); }' \
+         > "$PIPERD/system/decomposeParDict" \
+    && (cd "$PIPERD" && decomposePar -force -time '0,0.1' > log.decomposePar 2>&1) \
+    && runParallel "$PIPERD" "$SOLVER_EXE" 4 log.parallel \
+    && (cd "$PIPERD" && reconstructPar -time 0.108 > log.reconstructPar 2>&1) \
+    && [ -f "$PIPERD/0.108/Cs_PbI2_s" ] \
+    && setControl "$PIPERD" endTime 0.112 \
+    && runSerial "$PIPERD" "$SOLVER_EXE" log.serial
+  nPar=$(restartFromCs "$PIPERD/log.parallel" 2>/dev/null)
+  nSer=$(restartFromCs "$PIPERD/log.serial" 2>/dev/null)
+  closurePar=$($PCCHECKS closure "$PIPERD/postProcessing/phaseChangeBalance/0.1/PbI2_g.dat" 1e-13)
+  s1=$?
+  closureSer=$($PCCHECKS closure "$PIPERD/postProcessing/phaseChangeBalance/0.108/PbI2_g.dat" 1e-13)
+  s2=$?
+  volumes=$(sed -n 's/^ *volume *"\([^"]*\)";/\1/p' \
+    "$PIPE/0.1/uniform/phaseChangeLayout" \
+    "$PIPERD/processor0/0.108/uniform/phaseChangeLayout" \
+    "$PIPERD/0.112/uniform/phaseChangeLayout" 2>/dev/null | tr '\n' ' ')
+  check M5.2g "pipe run/013 at 0.1, serial to 4 ranks (hierarchical 1 2 2)\
+ and back (reconstructPar at 0.108): restarts re-read from Cs_PbI2_s and\
+ exact: $nPar and $nSer; V_Z of the boat as written by the serial, the\
+ parallel and the reconstructed run: $volumes m3; ${closurePar#*: };\
+ ${closureSer#*: }" \
+    eval 'grep -q "^End" "$PIPERD/log.parallel" && grep -q "^End" "$PIPERD/log.serial" \
+      && [ "$nPar" -eq 1 ] && [ "$nSer" -eq 1 ] && [ $s1 -eq 0 ] && [ $s2 -eq 0 ]'
+else
+  result M5.2g FAIL "pipe run/013 failed ($PIPE/log)"
+fi
+
+# M5.2m: the same state decomposed with writeFormat ascii (the processor
+# meshes and fields at writePrecision 6), 1 step on 4 ranks: the restart
+# is accepted and booked as rounded (review of M5, round 2: refused as
+# 'changed', the volume of the boat moved by the rounding of the points)
+PIPEASC=$HK_DIR/pipe013RedecomposedAscii
+if grep -q '^End' "$PIPE/log"
+then
+  rm -rf "$PIPEASC"
+  mkdir -p "$PIPEASC"
+  cp -a "$PIPE"/system "$PIPE"/constant "$PIPE"/0 "$PIPE"/0.1 \
+    "$PIPE"/case.foam "$PIPE"/dynamicCode "$PIPEASC"/
+  setControl "$PIPEASC" startFrom latestTime \
+    && setControl "$PIPEASC" endTime 0.104 \
+    && setControl "$PIPEASC" writeInterval 1 \
+    && setControl "$PIPEASC" writeFormat ascii \
+    && printf '%s\n' 'FoamFile{version 2.0; format ascii; class dictionary; object decomposeParDict;}' \
+         'numberOfSubdomains 4;' 'method hierarchical;' 'coeffs { n (1 2 2); }' \
+         > "$PIPEASC/system/decomposeParDict" \
+    && (cd "$PIPEASC" && decomposePar -force -time '0,0.1' > log.decomposePar 2>&1) \
+    && runParallel "$PIPEASC" "$SOLVER_EXE" 4
+  points=$(grep -a -m1 -o 'format *[a-z]*;' "$PIPEASC/processor0/constant/polyMesh/points" 2>/dev/null \
+    | sed 's/format *//; s/;//')
+  line=$(grep -m1 'Restart of pair PbI2_g' "$PIPEASC/log" 2>/dev/null)
+  cells=$(grep -m1 -o 'Sample boat (pair PbI2_g): [0-9]* cells' "$PIPEASC/log" 2>/dev/null)
+  volumes=$(sed -n 's/^ *volume *"\([^"]*\)";/\1/p' \
+    "$PIPE/0.1/uniform/phaseChangeLayout" \
+    "$PIPEASC/processor0/0.104/uniform/phaseChangeLayout" 2>/dev/null | tr '\n' ' ')
+  closure=$($PCCHECKS closure "$PIPEASC/postProcessing/phaseChangeBalance/0.1/PbI2_g.dat" 1e-13)
+  s1=$?
+  check M5.2m "pipe run/013 at 0.1 decomposed onto 4 ranks with writeFormat\
+ ascii (processor points: $points): $cells; restart '${line#*: }'; V_Z of\
+ the boat as written by the serial run and the ascii-decomposed one:\
+ $volumes m3 (the rounding of the points; the round-2 build refused the\
+ restart as 'changed' with the tolerance 1e-12); ${closure#*: }" \
+    eval 'grep -q "^End" "$PIPEASC/log" && [ "$points" = ascii ] \
+      && [ "$cells" = "Sample boat (pair PbI2_g): 144 cells" ] \
+      && [ "$(echo $volumes | wc -w)" -eq 2 ] \
+      && echo "$line" | grep -q "; rounded)" && [ $s1 -eq 0 ]'
+else
+  result M5.2m FAIL "pipe run/013 failed ($PIPE/log)"
+fi
+
+# M5.2o: the tolerance of the recorded V_Z and centre follows the rounding
+# of the mesh points of both runs (review of M5, round 3).  (a) The state of
+# M5.2m (processor meshes in ascii) reconstructed and continued for 1 step
+# on the original binary mesh: the record of the ascii run carries its
+# bounds.  (b) The boat moved to x 0.60-0.61 m (the same 144 cells of
+# different volumes), 1 serial step, then decomposed with writeFormat
+# ascii at writePrecision 10 and 12 and 1 step on 4 ranks: the V_Z error
+# of rounded points grows with |x|/cell size.  The round-3 build refused
+# all three as 'changed'
+PIPEASCREC=$HK_DIR/pipe013RedecomposedAsciiReconstructed
+PIPEFAR=$HK_DIR/pipe013FarBoat
+text=""
+status=0
+if grep -q '^End' "$PIPEASC/log" 2>/dev/null
+then
+  rm -rf "$PIPEASCREC"
+  mkdir -p "$PIPEASCREC"
+  cp -a "$PIPEASC"/system "$PIPEASC"/constant "$PIPEASC"/0 \
+    "$PIPEASC"/case.foam "$PIPEASC"/dynamicCode "$PIPEASCREC"/
+  for d in "$PIPEASC"/processor*
+  do
+    mkdir -p "$PIPEASCREC/$(basename "$d")"
+    cp -a "$d/constant" "$d/0" "$d/0.104" "$PIPEASCREC/$(basename "$d")"/
+  done
+  (cd "$PIPEASCREC" && reconstructPar -time 0.104 > log.reconstructPar 2>&1) \
+    && setControl "$PIPEASCREC" endTime 0.108 \
+    && runSerial "$PIPEASCREC" "$SOLVER_EXE"
+  if grep -q '^End' "$PIPEASCREC/log"
+  then
+    points=$(grep -a -m1 -o 'format *[a-z]*;' "$PIPEASCREC/constant/polyMesh/points" \
+      | sed 's/format *//; s/;//')
+    written=$(sed -n 's/^ *meshPoints *"\([^"]*\)";/\1/p' \
+      "$PIPEASC/processor0/0.104/uniform/phaseChangeLayout")
+    now=$(sed -n 's/^ *meshPoints *"\([^"]*\)";/\1/p' \
+      "$PIPEASCREC/0.108/uniform/phaseChangeLayout")
+    volumes=$(sed -n 's/^ *volume *"\([^"]*\)";/\1/p' \
+      "$PIPEASC/processor0/0.104/uniform/phaseChangeLayout" \
+      "$PIPEASCREC/0.108/uniform/phaseChangeLayout" | tr '\n' ' ' | sed 's/ $//')
+    cells=$(grep -m1 -o 'Sample boat (pair PbI2_g): [0-9]* cells' "$PIPEASCREC/log")
+    closure=$($PCCHECKS closure "$PIPEASCREC/postProcessing/phaseChangeBalance/0.104/PbI2_g.dat" 1e-13) \
+      || status=1
+    [ "$points" = binary ] && [ "$written" = "ascii, 10 significant digits" ] \
+      && [ "$now" = binary ] && [ "$cells" = "Sample boat (pair PbI2_g): 144 cells" ] \
+      || status=1
+    text="$text (a) reconstructed onto the binary mesh (points $points): $cells,\
+ accepted; meshPoints recorded by the ascii run '$written', by this run\
+ '$now'; V_Z $volumes m3; ${closure#*: };"
+  else
+    text="$text (a) the serial restart of the reconstructed state failed\
+ ($PIPEASCREC/log: $(grep -m1 -A2 'FATAL' "$PIPEASCREC/log" | tail -2 | tr -s ' \n' ' '));"
+    status=1
+  fi
+else
+  text="$text (a) M5.2m failed;"
+  status=1
+fi
+if grep -q '^End' "$PIPE/log"
+then
+  rm -rf "$PIPEFAR"
+  mkdir -p "$PIPEFAR"
+  cp -a "$PIPE"/system "$PIPE"/constant "$PIPE"/0 "$PIPE"/case.foam \
+    "$PIPE"/dynamicCode "$PIPEFAR"/
+  edit "$PIPEFAR/constant/thermochemistryProperties" \
+    's/^( +point1 +)\(0.04 0 0\);/\1(0.60 0 0);/; s/^( +point2 +)\(0.05 0 0\);/\1(0.61 0 0);/' \
+    'point2 +\(0.61 0 0\);' \
+    && setControl "$PIPEFAR" endTime 0.004 \
+    && setControl "$PIPEFAR" writeInterval 1 \
+    && runSerial "$PIPEFAR" "$SOLVER_EXE" || status=1
+  for P in 10 12
+  do
+    c=$PIPEFAR-ascii$P
+    rm -rf "$c"
+    mkdir -p "$c"
+    cp -a "$PIPEFAR"/system "$PIPEFAR"/constant "$PIPEFAR"/0 "$PIPEFAR"/0.004 \
+      "$PIPEFAR"/case.foam "$PIPEFAR"/dynamicCode "$c"/ 2>/dev/null
+    setControl "$c" startFrom latestTime \
+      && setControl "$c" endTime 0.008 \
+      && edit "$c/system/controlDict" \
+           "s/^writeFormat .*$/writeFormat ascii;\nwritePrecision $P;/" \
+           "^writePrecision $P;" \
+      && printf '%s\n' 'FoamFile{version 2.0; format ascii; class dictionary; object decomposeParDict;}' \
+           'numberOfSubdomains 4;' 'method hierarchical;' 'coeffs { n (1 2 2); }' \
+           > "$c/system/decomposeParDict" \
+      && (cd "$c" && decomposePar -force -time '0,0.004' > log.decomposePar 2>&1) \
+      && runParallel "$c" "$SOLVER_EXE" 4
+    if grep -q '^End' "$c/log" 2>/dev/null
+    then
+      cells=$(grep -m1 -o 'Sample boat (pair PbI2_g): [0-9]* cells' "$c/log")
+      now=$(sed -n 's/^ *meshPoints *"\([^"]*\)";/\1/p' \
+        "$c/processor0/0.008/uniform/phaseChangeLayout")
+      volumes=$(sed -n 's/^ *volume *"\([^"]*\)";/\1/p' \
+        "$PIPEFAR/0.004/uniform/phaseChangeLayout" \
+        "$c/processor0/0.008/uniform/phaseChangeLayout" | tr '\n' ' ' | sed 's/ $//')
+      closure=$($PCCHECKS closure "$c/postProcessing/phaseChangeBalance/0.004/PbI2_g.dat" 1e-13) \
+        || status=1
+      [ "$cells" = "Sample boat (pair PbI2_g): 144 cells" ] \
+        && [ "$now" = "ascii, $P significant digits" ] \
+        && grep -m1 'Restart of pair PbI2_g' "$c/log" | grep -q '; rounded)' \
+        || status=1
+      text="$text (b) writePrecision $P: $cells, accepted, meshPoints '$now';\
+ V_Z serial and ascii $volumes m3; ${closure#*: };"
+    else
+      text="$text (b) writePrecision $P failed ($c/log: $(grep -m1 -A2 'FATAL' "$c/log" 2>/dev/null | tail -2 | tr -s ' \n' ' '));"
+      status=1
+    fi
+  done
+else
+  text="$text (b) pipe run/013 failed;"
+  status=1
+fi
+check M5.2o "the V_Z and centre of an inventory sample within the bounds\
+ of the point rounding of both runs:$text" [ $status -eq 0 ]
+
+# M5.2h: the removed sample dropped at the restart from 0.3 (to 0.31), a
+# second restart (to 0.32), and a third with the sample re-added (to 0.33)
+CHDROP=$HK_DIR/channelInventoryDropped
+dropSamples() {
+  python3 - "$1/constant/thermochemistryProperties" <<'EOF'
+import re, sys
+p = sys.argv[1]
+s = open(p).read()
+s, n = re.subn(r'\nsamples \{.*\n\}\n', '\n', s, flags=re.S)
+assert n == 1
+open(p, 'w').write(s)
+EOF
+}
+if grep -q '^End' "$CH/log"
+then
+  restartCopy "$CH" "$CHDROP" 0.3 \
+    && cp "$CHDROP/constant/thermochemistryProperties" "$CHDROP/thermo.withSample" \
+    && dropSamples "$CHDROP" \
+    && setControl "$CHDROP" writeInterval 10 \
+    && setControl "$CHDROP" endTime 0.31 \
+    && runSerial "$CHDROP" "$SOLVER_EXE" log.1 \
+    && setControl "$CHDROP" endTime 0.32 \
+    && runSerial "$CHDROP" "$SOLVER_EXE" log.2 \
+    && cp "$CHDROP/thermo.withSample" "$CHDROP/constant/thermochemistryProperties" \
+    && setControl "$CHDROP" endTime 0.33 \
+    && runSerial "$CHDROP" "$SOLVER_EXE" log.3
+  ended=$(cat "$CHDROP"/log.[123] 2>/dev/null | grep -c '^End')
+  kept=$(cat "$CHDROP"/log.[12] 2>/dev/null \
+    | grep -c -F 'Sample boat (mode inventory, removed at t = 0.25000000000000017 s) is no longer in the dictionary; its record is kept')
+  exact=$(cat "$CHDROP"/log.[123] 2>/dev/null \
+    | grep -c 'Restart of pair PbI2_g: the inventory re-read differs from the ledger by 0 kg .*exact)')
+  empty=$(grep -c -F 'Sample boat was removed at t = 0.25 s by the run that wrote the state; it stays empty' \
+    "$CHDROP/log.3" 2>/dev/null)
+  layout=$($CHECKS layoutSample "$CHDROP/0.32/uniform/phaseChangeLayout" boat removed yes)
+  s1=$?
+  closure=$($PCCHECKS closure "$CHDROP/postProcessing/phaseChangeBalance/0.32/PbI2_g.dat" 1e-13)
+  s2=$?
+  check M5.2h "inventory channel with the removed sample dropped at 0.3,\
+ restarted again at 0.31 and re-added at 0.32: runs ended $ended of 3;\
+ 'its record is kept' in $kept runs; exact restarts: $exact; the re-added\
+ sample stays empty: $empty; ${layout#*: } at 0.32; the last run:\
+ ${closure#*: }" \
+    eval '[ "$ended" -eq 3 ] && [ "$kept" -eq 2 ] && [ "$exact" -eq 3 ] \
+      && [ "$empty" -eq 1 ] && [ $s1 -eq 0 ] && [ $s2 -eq 0 ]'
+else
+  result M5.2h FAIL "inventory channel failed ($CH/log)"
+fi
+
+# M5.2i: a release sample added in front of the inventory sample at the
+# restart from 0.2; its window begins at 0.31, so nothing changes up to 0.3
+# (a window from 0.3 would not do: the exact clock of the step ending at 0.3
+# is 0.30000000000000021, so that step would release)
+CHPUFF=$HK_DIR/channelInventoryAddRelease
+addPuff() {
+  python3 - "$1/constant/thermochemistryProperties" <<'EOF'
+import sys
+p = sys.argv[1]
+s = open(p).read()
+puff = ('  puff { pair PbI2_g; selection { puff { action use; source box; '
+        'box (0.05 0.002 -1) (0.06 0.0028 1); } } mode release; '
+        'amount 1e-7; startTime 0.31; duration 0.01; }\n')
+assert s.count('\nsamples {\n') == 1
+s = s.replace('\nsamples {\n', '\nsamples {\n' + puff)
+open(p, 'w').write(s)
+EOF
+}
+if grep -q '^End' "$CH/log"
+then
+  restartCopy "$CH" "$CHPUFF" 0.2 \
+    && setControl "$CHPUFF" endTime 0.3 \
+    && addPuff "$CHPUFF" \
+    && runSerial "$CHPUFF" "$SOLVER_EXE"
+  same=$("$CMPFIELDS" -x uniform/time -x uniform/phaseChangeLayout "$CH" \
+    "$CHPUFF" 0.25 0.3)
+  s1=$?
+  warnings=$(grep -c -E 'uniform/phaseChange/phase[A-Za-z]* at time 0.2 is (written for other|missing or belongs to other)' \
+    "$CHPUFF/log" 2>/dev/null)
+  exact=$(grep -c 'Restart of pair PbI2_g: the inventory re-read differs from the ledger by 0 kg .*reservoirs: uniform/phaseChange/phaseChangeReservoirs; exact)' \
+    "$CHPUFF/log" 2>/dev/null)
+  check M5.2i "inventory channel restarted at 0.2 with a release sample\
+ (window from 0.31 s) in front of the inventory sample: warnings about\
+ uniform/ at 0.2: $warnings; reservoirs from uniform/ and exact: $exact;\
+ fields at 0.25 and 0.3 vs the continuous run: ${same%%$'\n'*}" \
+    eval 'grep -q "^End" "$CHPUFF/log" && [ $s1 -eq 0 ] \
+      && [ "$warnings" -eq 0 ] && [ "$exact" -eq 1 ]'
+else
+  result M5.2i FAIL "inventory channel failed ($CH/log)"
+fi
+
+# M5.2n: the collated file handler with another number of ranks (review of
+# M5, round 3).  The inventory channel on 2 ranks with -fileHandler collated
+# to 0.2; its state reconstructed (reconstructPar -fileHandler collated) and
+# continued in serial across the removal to 0.3, and re-decomposed with the
+# collated handler onto 4 ranks and continued there.  The ledger and the
+# layout are global, plain files that both read; the per-rank lists are
+# containers of 2 blocks, which neither can read: the state comes from mw_
+# and Cs_ (before the fix both restarts stopped with a FatalIOError of the
+# file handler)
+CHCOL=$HK_DIR/channelInventory-collated2
+CHCOLSER=$HK_DIR/channelInventory-collated2-reconstructed
+CHCOL4=$HK_DIR/channelInventory-collated2-to4
+collatedCopy() {
+  rm -rf "$2"
+  mkdir -p "$2/processors2"
+  cp -a "$1"/system "$1"/constant "$1"/0 "$1"/case.foam "$2"/ \
+    && cp -a "$1"/processors2/constant "$1"/processors2/0 \
+         "$1"/processors2/0.2 "$2"/processors2/ \
+    && setControl "$2" startFrom latestTime \
+    && setControl "$2" endTime 0.3 \
+    && (cd "$2" && reconstructPar -fileHandler collated -time 0.2 \
+          > log.reconstructPar 2>&1)
+}
+# (no result of an earlier invocation may survive a failed step)
+rm -rf "$CHCOL" "$CHCOLSER" "$CHCOL4"
+if inventoryChannel "$CHCOL" \
+  && setControl "$CHCOL" endTime 0.2 \
+  && decomposeWith "$CHCOL" 2 "method simple; coeffs { n (2 1 1); }" \
+       -fileHandler collated \
+  && runParallel "$CHCOL" "$SOLVER_EXE" 2 log -fileHandler collated
+then
+  collatedCopy "$CHCOL" "$CHCOLSER" \
+    && runSerial "$CHCOLSER" "$SOLVER_EXE"
+  collatedCopy "$CHCOL" "$CHCOL4" \
+    && rm -rf "$CHCOL4/processors2" \
+    && decomposeWith "$CHCOL4" 4 "method simple; coeffs { n (4 1 1); }" \
+         -fileHandler collated -time '0,0.2' \
+    && runParallel "$CHCOL4" "$SOLVER_EXE" 4 log -fileHandler collated
+fi
+# the kind of every file of uniform/ at 0.2 of the 2-rank run: a container
+# of the collated handler (per rank) or a plain list (global)
+kinds=""
+for f in phaseChangeBalance phaseChangeLayout phaseChange/phaseChangeDeposits \
+  phaseChange/phaseChangeRegimes phaseChange/phaseChangeReservoirs
+do
+  if grep -a -q -m1 'class *decomposedBlockData' \
+    "$CHCOL/processors2/0.2/uniform/$f" 2>/dev/null
+  then
+    kinds="$kinds $f container,"
+  elif [ -f "$CHCOL/processors2/0.2/uniform/$f" ]
+  then
+    kinds="$kinds $f plain,"
+  else
+    kinds="$kinds $f missing,"
+  fi
+done
+kinds=${kinds%,}
+text=""
+status=0
+[[ "$kinds" == " phaseChangeBalance plain, phaseChangeLayout plain,\
+ phaseChange/phaseChangeDeposits container, phaseChange/phaseChangeRegimes\
+ container, phaseChange/phaseChangeReservoirs container" ]] || status=1
+for spec in "$CHCOLSER|a serial run" "$CHCOL4|this run on 4 ranks"
+do
+  IFS='|' read -r c who <<< "$spec"
+  if grep -q '^End' "$c/log" 2>/dev/null
+  then
+    line=$(grep 'Restart of pair PbI2_g' "$c/log")
+    relative=$(echo "$line" | sed -n 's/.*(relative \([^;]*\);.*/\1/p')
+    nForeign=$(grep -c "uniform/phaseChange/phaseChange[A-Za-z]* at time 0.2 is a container of the collated file handler written on 2 ranks, which $who cannot read" "$c/log")
+    n=$(count "$c/log" "^Sample boat removed at")
+    closure=$($PCCHECKS closure "$c/postProcessing/phaseChangeBalance/0.2/PbI2_g.dat" 1e-13) \
+      || status=1
+    echo "$line" | grep -q "deposits: mw_PbI2_s written in binary; reservoirs: Cs_PbI2_s written in binary; exact)" \
+      && python3 -c "import sys; sys.exit(0 if abs(float('$relative')) <= 1e-15 else 1)" \
+      && [ "$nForeign" -eq 3 ] && [ "$n" -eq 1 ] || status=1
+    text="$text $(basename "$c"): '${line#*: }', $nForeign warnings\
+ 'a container of the collated file handler written on 2 ranks, which $who\
+ cannot read' (deposits, regimes, reservoirs), $n removal, ${closure#*: };"
+  else
+    text="$text $(basename "$c") failed ($c/log);"
+    status=1
+  fi
+done
+check M5.2n "the inventory channel on 2 ranks with -fileHandler collated to\
+ 0.2; uniform/ of processors2/0.2:$kinds; its state reconstructed and\
+ continued in serial, and re-decomposed (collated) onto 4 ranks, to 0.3\
+ across the removal:$text" [ $status -eq 0 ]
+
+# M5.2q: restarts on the same ranks and decomposition with the file
+# handlers that read on the master (review of M5, round 4).  The inventory
+# channel on 4 ranks, a manual split in which rank 1 holds a single WALL
+# face, to 0.1 with -fileHandler masterUncollated, and with -fileHandler
+# collated -ioRanks '(0 2)' (containers processors4_0-1 and
+# processors4_2-3), each restarted from 0.05 with the same handler.  The
+# per-rank lists lie in uniform/phaseChange/: in uniform/ itself these
+# handlers resolved them to the master's file (or the container of rank 0's
+# IO group) on every rank, the fingerprints refused them, and the state
+# came from the rounded mw_ and Cs_ (14 and 9 files differed at 0.1)
+CHMU=$HK_DIR/channelInventory-masterUncollated
+CHIO=$HK_DIR/channelInventory-ioRanks
+singleWallFace() {
+  python3 - "$1/constant/cellDecomposition" <<'EOF2'
+import sys
+nx, ny = 100, 24
+ranks = []
+for c in range(nx*ny):
+    i, j = c % nx, c // nx
+    if i < 20:
+        r = 0
+    elif i < 30:
+        r = 1 if (i == 20 and j == 0) or 1 <= j <= 22 else 2
+    elif i < 60:
+        r = 2
+    else:
+        r = 3
+    ranks.append(r)
+with open(sys.argv[1], 'w') as f:
+    f.write('FoamFile {version 2.0; format ascii; class labelList; '
+            'object cellDecomposition;}\n\n')
+    f.write(f'{len(ranks)}\n(\n' + '\n'.join(map(str, ranks)) + '\n)\n')
+EOF2
+}
+rm -rf "$CHMU" "$CHMU-restart" "$CHIO" "$CHIO-restart"
+text=""
+status=0
+for spec in "$CHMU|masterUncollated|" "$CHIO|collated|(0 2)"
+do
+  IFS='|' read -r c handler io <<< "$spec"
+  options=(-fileHandler "$handler")
+  [ -n "$io" ] && options+=(-ioRanks "$io")
+  decomposeOptions=()
+  [ -n "$io" ] && decomposeOptions=("${options[@]}")
+  if inventoryChannel "$c" \
+    && setControl "$c" endTime 0.1 \
+    && singleWallFace "$c" \
+    && decomposeWith "$c" 4 'method manual; coeffs { dataFile "cellDecomposition"; }' \
+         "${decomposeOptions[@]}" \
+    && runParallel "$c" "$SOLVER_EXE" 4 log "${options[@]}" \
+    && restartCopy "$c" "$c-restart" 0.05 \
+    && runParallel "$c-restart" "$SOLVER_EXE" 4 log "${options[@]}"
+  then
+    same=$("$CMPFIELDS" -x uniform/time "$c" "$c-restart" 0.1)
+    s1=$?
+    line=$(grep 'Restart of pair PbI2_g' "$c-restart/log")
+    nWarn=$(grep -c 'uniform/phaseChange/phaseChange[A-Za-z]* at time 0.05 is' \
+      "$c-restart/log")
+    dirs=$(cd "$c" && ls -d processor* | tr '\n' ' ' | sed 's/ $//')
+    wallFaces=""
+    if [ -f "$c/processor1/constant/polyMesh/boundary" ]
+    then
+      wallFaces="; WALL faces per rank $(for r in 0 1 2 3
+        do
+          sed -n '/^ *WALL$/,/}/s/^ *nFaces *\([0-9]*\);/\1/p' \
+            "$c/processor$r/constant/polyMesh/boundary"
+        done | tr '\n' ' ' | sed 's/ $//')"
+      [[ "$wallFaces" == *" 1 "* ]] || status=1
+    fi
+    [ $s1 -eq 0 ] && [ "$nWarn" -eq 0 ] \
+      && echo "$line" | grep -q "deposits: uniform/phaseChange/phaseChangeDeposits; reservoirs: uniform/phaseChange/phaseChangeReservoirs; exact)" \
+      || status=1
+    text="$text -fileHandler $handler${io:+ -ioRanks '$io'} ($dirs$wallFaces):\
+ restart '${line#*: }', $nWarn warnings about uniform/phaseChange/,\
+ 0.1 vs the continuous run: ${same%%$'\n'*};"
+  else
+    text="$text -fileHandler $handler${io:+ -ioRanks '$io'} failed ($c/log,\
+ $c-restart/log);"
+    status=1
+  fi
+done
+check M5.2q "restarts on the same 4 ranks and decomposition (rank 1 with a\
+ single WALL face) with the file handlers that read on the master: the\
+ per-rank lists of uniform/phaseChange/ are read, exact, and every file at\
+ 0.1 is cmp-identical to the continuous run:$text" [ $status -eq 0 ]
+
+# M5.2j: acceptance 2 with the recommended solves (plan section 20, item 11)
+text=""
+status=0
+for c in "$CHL" "$CHL0"
+do
+  if grep -q '^End' "$c/log"
+  then
+    closure=$($PCCHECKS closure "$c/$BALANCE" 1e-13) || status=1
+    counts=$($CHECKS logCounts "$c/log")
+    nRemoved=$(count "$c/log" "^Sample boat removed at")
+    [[ "$counts" == *"steps=500 "* ]] \
+      && [[ "$counts" == *" projectedSignificant=0 "* ]] \
+      && [ "$nRemoved" -eq 1 ] || status=1
+    if [ "$c" = "$CHL0" ]
+    then
+      nGuard=$(echo "$counts" | sed -n 's/.* guard=\([0-9]*\) .*/\1/p')
+      [ "$nGuard" -gt 0 ] || status=1
+    fi
+    text="$text $(basename "$c"): $counts; ${closure#*: }; $nRemoved removal;"
+  else
+    text="$text $(basename "$c") failed ($c/log);"
+    status=1
+  fi
+done
+check M5.2j "the channel of acceptance 2 with loose correctors and a tight\
+ Final solve, 500 steps (nCorr 3, then nCorr 0 with guard passes > 0): 0\
+ significant projections (the projected steps carry less than\
+ guardTolerance x inventory, left to the projection by design, E5.4):$text"\
+ [ $status -eq 0 ]
+
+# M5.2k: a small reservoir, independent of nCorr (review of M5, round 2)
+BOATBOX="box 0.01 0.002 -1 0.02 0.0028 1"
+N0M=$(python3 -c "print(1.7e-8*0.46100894)")
+text=""
+status=0
+for c in "${CHSMALL[@]}"
+do
+  if grep -q '^End' "$c/log"
+  then
+    compl=$($CHECKS complementarity "$c" 1e-9 $BOATBOX) || status=1
+    closure=$($PCCHECKS closure "$c/$BALANCE" 1e-13) || status=1
+    left=$($CHECKS totalLeft "$c/log" "$c/$BALANCE" 1e-12) || status=1
+    counts=$($CHECKS logCounts "$c/log")
+    [[ "$counts" == *" projectedSignificant=0 "* ]] \
+      && [[ "$counts" == *" complementaritySignificant=0" ]] || status=1
+    text="$text $(basename "$c"): ${compl#*: }; ${closure#*: };\
+ ${left#*: };"
+  else
+    text="$text $(basename "$c") failed ($c/log);"
+    status=1
+  fi
+done
+regimes=$($CHECKS sameRegimes "${CHSMALL[@]/%//log}") || status=1
+same23=$($CHECKS inventories "${CHSMALL[0]}/$BALANCE" "${CHSMALL[1]}/$BALANCE" \
+  "$N0M" 1e-3) || status=1
+same1011=$($CHECKS inventories "${CHSMALL[2]}/$BALANCE" "${CHSMALL[3]}/$BALANCE" \
+  "$N0M" 1e-3) || status=1
+check M5.2k "small reservoir (1.7e-8 mol, Cs = 0.98 kg/m3) in the channel,\
+ nCorr 2, 3, 10 and 11: ${regimes#*: }; inventories nCorr 2 vs 3:\
+ ${same23#*: }; 10 vs 11: ${same1011#*: } (the round-2 build: the regimes\
+ alternated at every corrector, and nCorr 2 and 3 differed by 0.65 of n0 M);\
+ the bounded law recomputed from the fields, 0 significant projections and\
+ complementarity violations:$text" [ $status -eq 0 ]
+
+# M5.2l: one corrector per step; the guard alone settles the regimes, and
+# without it the complementarity check reports the CAPPED sample cells in
+# supersaturated gas that the fields show
+if grep -q '^End' "$CHSG0/log" && grep -q '^End' "$CHSG3/log"
+then
+  first=$(grep -m1 'exchange:' "$CHSG0/log")
+  nSolver=$(echo "$first" | sed -n 's/.*complementarity [0-9]* ([^ ]* kg\( > tolerance [^ ]* kg\)\{0,1\}, \([0-9]*\) significant).*/\2/p')
+  flagged=$(echo "$first" | grep -o 'complementarity [0-9]* ([^ ]* kg > tolerance [^ ]* kg')
+  summary0=$(grep 'Phase change summary' "$CHSG0/log")
+  compl0=$($CHECKS complementarity "$CHSG0" 1e-9 $BOATBOX)
+  s0=$?
+  nFields=$(echo "$compl0" | sed -n 's/.*: \([0-9]*\) elements in 1 steps miss .*/\1/p')
+  nSuper=$(echo "$compl0" | sed -n 's/.*exhausted in supersaturated gas \([0-9]*\),.*/\1/p')
+  compl3=$($CHECKS complementarity "$CHSG3" 1e-9 $BOATBOX)
+  s3=$?
+  counts3=$($CHECKS logCounts "$CHSG3/log")
+  left3=$($CHECKS totalLeft "$CHSG3/log" "$CHSG3/$BALANCE" 1e-12)
+  s6=$?
+  guard3=$(grep -m1 'exchange:' "$CHSG3/log" | sed -n 's/.*guard passes \([0-9]*\) .*/\1/p')
+  closure3=$($PCCHECKS closure "$CHSG3/$BALANCE" 1e-13)
+  s4=$?
+  regimes=$($CHECKS sameRegimes steps=1 "$CHSG3/log" "${CHSMALL[1]}/log")
+  s5=$?
+  same3=$($CHECKS inventories "$CHSG3/$BALANCE" "${CHSMALL[1]}/$BALANCE" \
+    "$N0M" 2e-2)
+  s7=$?
+  check M5.2l "one corrector per step (nCorr 0), small reservoir: with nGuard\
+ 0 the first step reports $nSolver significant complementarity violations\
+ ('$flagged'; summary '${summary0#*: }'), the fields show ${compl0#*: };\
+ with nGuard 3 the guard switches in both directions ($guard3 passes in the\
+ first step): ${compl3#*: }; $counts3; ${left3#*: }; ${closure3#*: };\
+ the first step's regimes as with nCorr 3: ${regimes#*: }; inventories vs\
+ nCorr 3 (one corrector of the lagged SuperBee transport per step; the\
+ round-3 guard re-assembled the matrix in its passes, which acted as extra\
+ correctors and gave the regimes of nCorr 3 in every step): ${same3#*: }" \
+    eval '[ $s0 -ne 0 ] && [ -n "$nFields" ] && [ "$nFields" -gt 0 ] \
+      && [ "$nSolver" = "$nFields" ] && [ "$nSuper" = "$nFields" ] \
+      && [ -n "$flagged" ] \
+      && [[ "$summary0" == *" above the tolerance in total)"* ]] \
+      && [ $s3 -eq 0 ] && [ "$guard3" -gt 0 ] && [ $s4 -eq 0 ] && [ $s5 -eq 0 ] \
+      && [ $s6 -eq 0 ] && [ $s7 -eq 0 ] \
+      && [[ "$counts3" == *" complementaritySignificant=0" ]] \
+      && [[ "$counts3" == *" projectedSignificant=0 "* ]]'
+else
+  result M5.2l FAIL "nCorr 0 small-reservoir channels failed ($CHSG0/log,\
+ $CHSG3/log)"
+fi
+
+# M5.2p: a sample next to a colder wall, several nCorr (review of M5, round
+# 4): the bounded law of the wall elements and of the sample cells
+# recomputed from the fields, and the solver's own counts
+text=""
+status=0
+nGuardAll=0
+for c in "${CHWALL[@]}"
+do
+  if grep -q '^End' "$c/log"
+  then
+    wall=$($CHECKS wallLaw "$c" 1e-12) || status=1
+    compl=$($CHECKS complementarity "$c" 1e-12 $WALLBOX) || status=1
+    closure=$($PCCHECKS closure "$c/$BALANCE" 1e-13) || status=1
+    left=$($CHECKS totalLeft "$c/log" "$c/$BALANCE" 1e-12) || status=1
+    counts=$($CHECKS logCounts "$c/log")
+    nGuard=$(echo "$counts" | sed -n 's/.* guard=\([0-9]*\) .*/\1/p')
+    nGuardAll=$((nGuardAll + nGuard))
+    [[ "$counts" == *" projectedSignificant=0 projectedAbove=0 "* ]] \
+      && [[ "$counts" == *" complementarityAbove=0 complementaritySignificant=0" ]] \
+      || status=1
+    text="$text $(basename "$c"): $counts; wall ${wall#*: }; sample\
+ ${compl#*: }; ${left#*: }; ${closure#*: };"
+  else
+    text="$text $(basename "$c") failed ($c/log);"
+    status=1
+  fi
+done
+[ "$nGuardAll" -gt 0 ] || status=1
+check M5.2p "a sample next to a colder wall (WALL at 700 K,\
+ interfaceTemperature wall; review of M5, round 4: the guard re-solve\
+ re-assembled the SuperBee matrix, and a bare wall element at Y_eq cycled\
+ between IMPLICIT and NONE; the build before the fix failed this in 6 of\
+ the 8 runs), tight solves with nCorr 2, 3, 10 and 11 and loose ones with nCorr 0, 1, 3 and\
+ 10: the bounded law of every wall element and of every sample cell\
+ recomputed from the fields (0 misses above 1e-12 of the inventory), 0\
+ significant projections and complementarity violations, none above the\
+ tolerance in total, closure <= 1e-13; $nGuardAll steps with guard passes\
+ in all runs:$text" [ $status -eq 0 ]
+
+
+#------------------------------------------------------------------------------
+# M5.3: pipe run/013
+#------------------------------------------------------------------------------
+if grep -q '^End' "$PIPE/log"
+then
+  closure=$($PCCHECKS closure "$PIPE/$BALANCE" 1e-13)
+  s1=$?
+  defect=$($PCCHECKS defect "$PIPE/$BALANCE" 1e-11)
+  s2=$?
+  decreasing=$($CHECKS decreasing "$PIPE/$BALANCE" sample)
+  s3=$?
+  counts=$($CHECKS logCounts "$PIPE/log")
+  left=$($CHECKS totalLeft "$PIPE/log" "$PIPE/$BALANCE" 1e-12)
+  s4=$?
+  wall=$(grep '^Balance' "$PIPE/log" | tail -1 | sed 's/.* wall \([^ ]*\) .*/\1/')
+  check M5.3a "pipe run/013, background Y = 0.1, 25 steps of 4 ms: $counts;\
+ ${left#*: }; ${closure#*: }; ${defect#*: }; ${decreasing#*: }; wall $wall\
+ mol" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ] \
+      && [[ "$counts" == *"steps=25 "* ]] \
+      && [[ "$counts" == *" decidingSignificant=0 finalPredictorSignificant=0 "* ]] \
+      && [[ "$counts" == *"projectedSignificant=0 "* ]] \
+      && python3 -c "import sys; sys.exit(0 if float(\"$wall\") > 0 else 1)"'
+else
+  result M5.3a FAIL "pipe run/013 failed ($PIPE/log)"
+fi
+
+if grep -q '^End' "$C013/log"
+then
+  out=$("$REGRESS" -excerpt "$(runCaseDir 013)/out_excerpt" "$C013/log")
+  status=$?
+  echo "$out" | head -20
+  check M5.3b "run/013 out_excerpt: ${out%%$'\n'*}" [ $status -eq 0 ]
+else
+  result M5.3b FAIL "run/013 failed ($C013/log)"
+fi
+
+if grep -q '^End' "$C013L/log"
+then
+  closure=$($PCCHECKS closure "$C013L/$BALANCE" 1e-13)
+  s1=$?
+  defect=$($PCCHECKS defect "$C013L/$BALANCE" 1e-11)
+  s2=$?
+  decreasing=$($CHECKS decreasing "$C013L/$BALANCE" sample)
+  s3=$?
+  counts=$($CHECKS logCounts "$C013L/log")
+  wall=$(grep '^Balance' "$C013L/log" | tail -1 | sed 's/.* wall \([^ ]*\) .*/\1/')
+  check M5.3c "acceptance 3 at run/013's own settings (1 ms, Y0 = 0, 25\
+ steps): $counts; ${closure#*: }; ${defect#*: }; ${decreasing#*: }; wall\
+ $wall mol (no gas reaches the wall in 25 steps: plan section 20, item 12)" \
+    eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] \
+      && [[ "$counts" == *"steps=25 "* ]] \
+      && [[ "$counts" == *" decidingSignificant=0 finalPredictorSignificant=0 "* ]] \
+      && [[ "$counts" == *"projectedSignificant=0 "* ]]'
+else
+  result M5.3c FAIL "run/013, 25 steps, failed ($C013L/log)"
+fi
+
+# M5.3d: run/013 with a small reservoir, independent of nCorr
+text=""
+status=0
+for c in "${PIPESMALL[@]}"
+do
+  if grep -q '^End' "$c/log"
+  then
+    nConverged=$(grep -c 'exchange: .*, converged (' "$c/log")
+    closure=$($PCCHECKS closure "$c/$BALANCE" 1e-13) || status=1
+    defect=$($PCCHECKS defect "$c/$BALANCE" 1e-11) || status=1
+    counts=$($CHECKS logCounts "$c/log")
+    [ "$nConverged" -eq 12 ] \
+      && [[ "$counts" == *" projectedSignificant=0 "* ]] \
+      && [[ "$counts" == *" complementaritySignificant=0" ]] || status=1
+    text="$text $(basename "$c"): $nConverged of 12 steps converged,\
+ ${closure#*: }, ${defect#*: };"
+  else
+    text="$text $(basename "$c") failed ($c/log);"
+    status=1
+  fi
+done
+cmp -s "${PIPESMALL[0]}/$BALANCE" "${PIPESMALL[1]}/$BALANCE" \
+  && same=identical || { same=different; status=1; }
+compl=$($CHECKS complementarity "${PIPESMALL[0]}" 1e-9 \
+  cylinder 0.04 0 0 0.05 0 0 4.8e-4) || status=1
+sample=$(grep -v '^#' "${PIPESMALL[0]}/$BALANCE" | awk '{printf "%s%.3g", (NR > 1 ? " " : ""), $4}')
+check M5.3d "run/013 with a small reservoir (1e-7 mol, Cs = 5.68 kg/m3) at\
+ its own settings, nCorr 9 and 10 (the round-2 build: nCorr 10 never\
+ evaporated the boat and converged in no step, nCorr 9 dumped it in the\
+ first step):$text balance files $same; sample [kg] $sample; nCorr 9:\
+ ${compl#*: }" [ $status -eq 0 ]
+
+
+#------------------------------------------------------------------------------
+# M5.4: tables
+#------------------------------------------------------------------------------
+TB=$HK_DIR/tables
+rm -rf "$TB"
+mkdir -p "$TB"
+
+# M5.4a: the repository's tables through vapourPressureTable.H
+if g++ -std=c++17 -Wall -Wextra "$TESTS_DIR/testVapourPressureTable.C" \
+     -o "$TB/testVapourPressureTable" > "$TB/log.testVapourPressureTable" 2>&1 \
+  && (cd "$TB" && ./testVapourPressureTable "$PV_TABLE" - "$PV_TFLOWS") \
+       >> "$TB/log.testVapourPressureTable" 2>&1
+then
+  check M5.4a "tables of the repository through vapourPressureTable.H\
+ (testVapourPressureTable, no NASA-9 reference):\
+ $(grep '^Gurvich table' "$TB/log.testVapourPressureTable" | sed 's/^Gurvich table [^:]*: //; s/; vs NASA-9.*//');\
+ $(grep '^T-Flows table' "$TB/log.testVapourPressureTable" | sed 's/^T-Flows table [^:]*: //');\
+ $(tail -1 "$TB/log.testVapourPressureTable"); 0 warnings" \
+    [ "$(countWarnings "$TB/log.testVapourPressureTable")" -eq 0 ]
+else
+  result M5.4a FAIL "tables ($TB/log.testVapourPressureTable)"
+fi
+
+# M5.4b: the tables from their sources (thermo.inp, the pinned T-Flows
+# revision), when this machine has them
+sources=$(python3 "$MAKE_PV" --sources 2>&1)
+if [ $? -ne 0 ]
+then
+  result M5.4b NOTRUN "tables from their sources: $sources"
+elif python3 "$MAKE_PV" --out "$TB" --reference "$TB/reference.csv" --check \
+       > "$TB/log.make_pv_table" 2>&1 \
+  && (cd "$TB" && ./testVapourPressureTable "$PV_TABLE" reference.csv \
+        "$PV_TFLOWS") > "$TB/log.testVapourPressureTableNASA" 2>&1
+then
+  same=true
+  for f in pv_PbI2_phases.csv pv_PbI2_TFlows.csv
+  do
+    cmp -s "$TB/$f" "$DATA_DIR/$f" || same=false
+  done
+  check M5.4b "tables from their sources (${sources#sources: }):\
+ make_pv_table.py regenerates the repository's csv files byte for byte:\
+ $same; $(grep '^5 K table' "$TB/log.make_pv_table");\
+ testVapourPressureTable: $(grep '^Gurvich table' "$TB/log.testVapourPressureTableNASA" | sed 's/.*; vs NASA-9/vs NASA-9/');\
+ $(tail -1 "$TB/log.testVapourPressureTableNASA")" \
+    eval '$same && grep -q "check passed" "$TB/log.make_pv_table"'
+else
+  result M5.4b FAIL "tables from their sources ($TB/log.make_pv_table,\
+ $TB/log.testVapourPressureTableNASA)"
+fi
+
+
+#------------------------------------------------------------------------------
+# M5.5: refusals
+#------------------------------------------------------------------------------
+fatalBox() {
+  blockCase closedBox "$HK_DIR/fatal-$1" at700K > /dev/null \
+    && setControl "$HK_DIR/fatal-$1" endTime 0.004 \
+    && echo "$HK_DIR/fatal-$1"
+}
+
+c=$HK_DIR/fatal-releaseKey
+blockCase channel "$c" > /dev/null \
+  && hksDict "$c" "" "$(echo "$BOAT" | sed 's/^    removeTime    0.25;/    removeTime 0.25;\n    duration 1;/')" \
+  && grep -q '^    duration 1;' "$c/constant/thermochemistryProperties" \
+  && expectFatal M5.5 "inventory sample with the release key duration" "$c" \
+       "Sample boat: duration belongs to mode release, not to mode inventory"
+
+c=$(fatalBox units) && hksDict "$c" "" \
+  && edit "$c/constant/thermochemistryProperties" 's/units +log10Pa;/units mbar;/' \
+       'units mbar;' \
+  && expectFatal M5.5 "table units mbar" "$c" \
+       "vapourPressure: unknown units mbar.  Choose log10Pa, Pa or bar."
+
+c=$(fatalBox phase) && hksDict "$c" "" \
+  && edit "$c/constant/thermochemistryProperties" 's/"PbI2\(l\)"/"PbI2(g)"/' \
+       'PbI2\(g\)' \
+  && expectFatal M5.5 "a phase that is not a column of the table" "$c" \
+       "no column 'PbI2(g)' (columns: PbI2(cr), PbI2(l))"
+
+c=$HK_DIR/fatal-outOfRange
+blockCase channel "$c" > /dev/null && hksDict "$c" "" \
+  && edit "$c/constant/thermochemistryProperties" \
+       's/outOfRange +extrapolate;/outOfRange fatal;/' 'outOfRange fatal;' \
+  && python3 - "$c/constant/pv_PbI2_phases.csv" <<'EOF' \
+  && expectFatal M5.5 "outOfRange fatal with wall temperatures below the table\
+ (the table cut at 500 K; the channel reaches 403 K)" "$c" \
+       "K lie outside the table [500, 1250] K (outOfRange fatal)"
+import sys
+p = sys.argv[1]
+lines = open(p).read().splitlines(True)
+out = [l for l in lines if l.startswith('#') or float(l.split(',')[0]) >= 500]
+open(p, 'w').write(''.join(out))
+EOF
+
+c=$(fatalBox gems) && hksDict "$c" "" \
+  && edit "$c/constant/thermochemistryProperties" \
+       's/equilibrium table;/equilibrium GEMS;/' 'equilibrium GEMS;' \
+  && expectFatal M5.5 "equilibrium GEMS in a build without the bridge" "$c" \
+       "LESTO_GEMSBRIDGE"
+
+# restarts of the inventory channel from 0.2
+restartFatal() {
+  local name=$1 text=$2 message=$3
+  shift 3
+  local dst=$HK_DIR/fatal-restart-$name
+  restartCopy "$CH" "$dst" 0.2 && (cd "$dst" && "$@") \
+    && expectFatal M5.5 "$text" "$dst" "$message"
+}
+if grep -q '^End' "$CH/log"
+then
+  restartFatal newSample "restart with a new inventory sample" \
+    "Sample boat2 (mode inventory) is new at the restart" \
+    python3 - <<'EOF'
+p = 'constant/thermochemistryProperties'
+s = open(p).read()
+add = ('  boat2 { pair PbI2_g; selection { b { action use; source box; '
+       'box (0.03 0.002 -1) (0.04 0.0028 1); } } mode inventory; '
+       'amount 1e-7; areaPerVolume 4000; }\n')
+open(p, 'w').write(s.rstrip()[:-1] + add + '}\n')
+EOF
+  restartFatal amount "restart with a changed amount of the inventory sample" \
+    "Inventory sample boat was changed at the restart" \
+    sed -i 's/^    amount        4.84e-6;/    amount        5e-6;/' \
+      constant/thermochemistryProperties
+  restartFatal dropped "restart without the inventory sample before its\
+ removal" "Inventory sample boat of the run that wrote the state at time 0.2" \
+    python3 - <<'EOF'
+import re
+p = 'constant/thermochemistryProperties'
+s = open(p).read()
+s, n = re.subn(r'\nsamples \{.*\n\}\n', '\n', s, flags=re.S)
+assert n == 1
+open(p, 'w').write(s)
+EOF
+  restartFatal mode "restart with the sample in mode release" \
+    "Sample boat changes its mode at the restart" \
+    python3 - <<'EOF'
+import re
+p = 'constant/thermochemistryProperties'
+s = open(p).read()
+s = s.replace('mode          inventory;', 'mode release; duration 1;')
+s = re.sub(r'\n\s*(areaPerVolume|removeTime)\s+[^;]+;', '', s)
+open(p, 'w').write(s)
+EOF
+  # the box of 10 x 4 cells moved from x 10-20 mm to 30-40 mm: the same
+  # number of cells and (to round-off) the same volume, another centre
+  restartFatal moved "restart with the inventory sample moved to other cells\
+ of the same number and volume" "    centre (" \
+    sed -i 's/box (0.01 0.002 -1) (0.02 0.0028 1);/box (0.03 0.002 -1) (0.04 0.0028 1);/' \
+      constant/thermochemistryProperties
+else
+  for i in 1 2 3 4 5
+  do
+    result M5.5 FAIL "inventory channel failed ($CH/log): no restart refusals"
+  done
+fi
+
+# the moved selection on a mesh of round coordinates in ascii (review of M5,
+# round 4: the digits the points need, 2 for '0.011', were taken for the
+# precision they were written with, and bounds larger than the channel
+# accepted the sample moved by 20 mm, re-read as 0 from Cs_ in the new
+# cells).  The inventory channel with its mesh and 0/ converted to ascii at
+# writePrecision 6 (foamFormatConvert), run to 0.05, and restarted for one
+# step with the box moved (refused), with one cell of the selection
+# replaced by the one below it (refused: 5e-6 m is within the rounding
+# bound of 6-digit points, but above the limit of a one-cell change), and
+# unchanged (accepted)
+CHASC=$HK_DIR/channelInventoryAsciiMesh
+swapCell() {
+  python3 - constant/thermochemistryProperties <<'EOF2'
+import sys
+p = sys.argv[1]
+s = open(p).read()
+old = ('selection     { boat { action use; source box; '
+       'box (0.01 0.002 -1) (0.02 0.0028 1); } }')
+new = ('selection     { boat { action use; source box; '
+       'box (0.01 0.002 -1) (0.02 0.0028 1); } '
+       'out { action subtract; source box; '
+       'box (0.01 0.002 -1) (0.011 0.0022 1); } '
+       'in { action add; source box; '
+       'box (0.01 0.0018 -1) (0.011 0.002 1); } }')
+assert s.count(old) == 1
+open(p, 'w').write(s.replace(old, new))
+EOF2
+}
+if inventoryChannel "$CHASC" \
+  && setControl "$CHASC" endTime 0.05 \
+  && setControl "$CHASC" writeFormat ascii \
+  && (cd "$CHASC" && foamFormatConvert -constant > log.foamFormatConvert 2>&1) \
+  && grep -a -q -m1 'format *ascii;' "$CHASC/constant/polyMesh/points" \
+  && runSerial "$CHASC" "$SOLVER_EXE"
+then
+  ascFatal() {
+    local name=$1 text=$2 message=$3
+    shift 3
+    local dst=$HK_DIR/fatal-asciiMesh-$name
+    restartCopy "$CHASC" "$dst" 0.05 && setControl "$dst" endTime 0.051 \
+      && (cd "$dst" && "$@") && expectFatal M5.5 "$text" "$dst" "$message"
+  }
+  recorded=$(sed -n 's/^ *meshPoints *"\([^"]*\)";/\1/p' \
+    "$CHASC/0.05/uniform/phaseChangeLayout")
+  ascFatal moved "restart with the inventory sample moved by 20 mm on an\
+ ascii mesh of round coordinates (recorded: meshPoints '$recorded')" \
+    "a quarter of the centre shift of a selection with one cell replaced" \
+    sed -i 's/box (0.01 0.002 -1) (0.02 0.0028 1);/box (0.03 0.002 -1) (0.04 0.0028 1);/' \
+      constant/thermochemistryProperties
+  ascFatal swap "restart with one cell of the inventory sample replaced by\
+ the one below it on the same ascii mesh (the centre moves by 5e-6 m, within\
+ the rounding bound of 6-digit points)" \
+    "The difference lies within the rounding of the ascii mesh points" \
+    swapCell
+  CHASCRS=$HK_DIR/channelInventoryAsciiMesh-restart
+  restartCopy "$CHASC" "$CHASCRS" 0.05 && setControl "$CHASCRS" endTime 0.051 \
+    && runSerial "$CHASCRS" "$SOLVER_EXE"
+  line=$(grep 'Restart of pair PbI2_g' "$CHASCRS/log" 2>/dev/null)
+  check M5.5 "the unchanged restart on the ascii mesh of round coordinates\
+ (meshPoints '$recorded') is accepted: '${line#*: }'" \
+    eval 'grep -q "^End" "$CHASCRS/log" && [ "$recorded" = "ascii, 6 significant digits" ] \
+      && grep -q "Sample boat (pair PbI2_g): 40 cells" "$CHASCRS/log"'
+else
+  for i in 1 2 3
+  do
+    result M5.5 FAIL "inventory channel on an ascii mesh failed ($CHASC/log)"
+  done
+fi
+
+c=$HK_DIR/fatal-freshCs
+blockCase channel "$c" > /dev/null && hksDict "$c" "" "$BOAT" \
+  && sed -e 's/object Y_PbI2_g;/object Cs_PbI2_s;/' \
+       -e 's/^dimensions.*/dimensions    [1 -3 0 0 0 0 0];/' \
+       -e 's/type fixedValue; value uniform 0;/type calculated; value uniform 0;/' \
+       -e 's/type zeroGradient;/type calculated; value uniform 0;/g' \
+       "$c/0/Y_PbI2_g" > "$c/0/Cs_PbI2_s" \
+  && expectFatal M5.5 "fresh start with a Cs_PbI2_s field (state without the\
+ ledger)" "$c" "the reservoir field(s) 1(Cs_PbI2_s)) but not the ledger"
+
+# removeTime 0.4 ms < deltaT/2: filled and removed in the first step
+c=$HK_DIR/fatal-removeAtStart
+blockCase channel "$c" > /dev/null \
+  && hksDict "$c" "" "$(echo "$BOAT" | sed 's/^    removeTime    0.25;/    removeTime    0.0004;/')" \
+  && grep -q '^    removeTime    0.0004;' "$c/constant/thermochemistryProperties" \
+  && expectFatal M5.5 "fresh start at removeTime - deltaT/2 or later\
+ (removeTime 0.4 ms, deltaT 1 ms)" "$c" \
+       "would be filled and removed at the start of the first step"
+
+
+#------------------------------------------------------------------------------
+# M5.6: carry-over (a), wallPlusGas without the gas of the sample cells
+#------------------------------------------------------------------------------
+PRCH=$HK_DIR/profilesChannel
+blockCase channel "$PRCH" && setControl "$PRCH" endTime 0.05 \
+  && printf '\nprofiles {\n%s\n}\n' '  bins {
+    native { min 0; max 0.1; nBins 100; }
+    gamma  { width 0.01; }
+  }
+  times (0.03);' >> "$PRCH/constant/thermochemistryProperties" \
+  || exit 1
+runSerial "$PRCH" "$SOLVER_EXE"
+if grep -q '^End' "$PRCH/log"
+then
+  out=$(python3 - "$PRCH" "$SOLVER_DIR" "$TESTS_DIR" <<'EOF'
+import math, os, sys
+sys.path.insert(0, os.path.join(sys.argv[2], 'utilities'))
+sys.path.insert(0, os.path.join(sys.argv[3], 'phaseChange'))
+import axialProfiles as ap
+from checks import readScalarField
+case = sys.argv[1]
+ok = True
+text = []
+for path in ap.files(case):
+    p = ap.read(path)
+    obs, wall, gas, sg = (p.column(n) for n in
+                          ('observable', 'wall', 'gas', 'sampleGas'))
+    scale = max(abs(v) for v in obs) or 1
+    worst = max(abs(o - (w + g - s)) for o, w, g, s in
+                zip(obs, wall, gas, sg))/scale
+    lo, hi = p.column('x_lo'), p.column('x_hi')
+    outside = [s for s, a, b in zip(sg, lo, hi) if b <= 0.01 or a >= 0.02]
+    inside = [s for s, a, b in zip(sg, lo, hi) if a < 0.02 and b > 0.01]
+    # outside: at most the round-off of the axial extents of the cells at
+    # the sample's edges (blockMesh points within 1e-18 m of 0.02)
+    good = worst <= 1e-15 and all(abs(s) <= 1e-9*max(sg) for s in outside) \
+        and all(s > 0 for s in inside)
+    ok = ok and good
+    text.append(f'{p.directory}/{p.set} {worst:.0e}')
+# the gas of the 40 sample cells (i 10..19, j 10..13) at the write time 0.05
+Y = readScalarField(os.path.join(case, '0.05', 'Y_PbI2_g'))[0]
+rho = readScalarField(os.path.join(case, '0', 'rho'))[0]
+V = 1e-3*2e-4*1e-3
+cells = [i + 100*j for i in range(10, 20) for j in range(10, 14)]
+mass = math.fsum(rho[c]*Y[c]*V for c in cells)
+p = ap.read(os.path.join(case, 'postProcessing', 'axialProfiles', '0.05',
+                         'PbI2_g_native.dat'))
+binned = math.fsum(s*(b - a) for s, a, b in
+                   zip(p.column('sampleGas'), p.column('x_lo'),
+                       p.column('x_hi')))*p.molarMass
+rel = abs(binned - mass)/mass
+ok = ok and rel <= 1e-12
+print(f'observable = wall + gas - sampleGas in every file to '
+      f'{", ".join(text)}; sampleGas > 0 in the bins that overlap the '
+      f'sample, at most 1e-9 of its maximum in the others (the round-off of '
+      f'the cell extents at x = 0.02); its integral at 0.05 = the gas of '
+      f'the 40 sample cells {mass:.10g} kg to {rel:.1e}')
+sys.exit(0 if ok else 1)
+EOF
+)
+  s1=$?
+  onsetNew=$(sed -n 's/^# Tdep fromPeak status found T \([^ ]*\) .*/\1/p' \
+    "$PRCH/postProcessing/axialProfiles/0.03/PbI2_g_native.dat")
+  onsetWall=$($READER "$PRCH" --time 0.03 --set native \
+    | sed -n 's/^  wall column: T_dep fromPeak: //p')
+  check M5.6 "carry-over (a), the release channel: $out; at 0.03 T_dep\
+ fromPeak of wallPlusGas $onsetNew K (M3 definition: 949.5 K; the gas\
+ around the sample cells is still counted), of the wall column: $onsetWall\
+ (its deposit is solver noise)" [ $s1 -eq 0 ]
+else
+  result M5.6 FAIL "profiles channel failed ($PRCH/log)"
+fi
+
+
+#------------------------------------------------------------------------------
+# M5.7: carry-over (b), T_dep of a noise-level column
+#------------------------------------------------------------------------------
+N012=$HK_DIR/run012Noise
+N012S=$HK_DIR/run012NoiseSignificance0
+for c in "$N012" "$N012S"
+do
+  makeCase 012 "$c" && setControl "$c" endTime 0.004 || exit 1
+done
+printf '\nprofiles {\n%s\n}\n' '  bins { native { min 0; max 0.69; nBins 424; } }
+  times (0.004);
+  observable wall;' >> "$N012/constant/thermochemistryProperties"
+printf '\nprofiles {\n%s\n}\n' '  bins { native { min 0; max 0.69; nBins 424; } }
+  times (0.004);
+  onset { significance 0; }
+  observable wall;' >> "$N012S/constant/thermochemistryProperties"
+runSerial "$N012" "$SOLVER_EXE" &
+runSerial "$N012S" "$SOLVER_EXE" &
+wait
+if grep -q '^End' "$N012/log" && grep -q '^End' "$N012S/log"
+then
+  f1=$N012/postProcessing/axialProfiles/0.004/PbI2_g_native.dat
+  f2=$N012S/postProcessing/axialProfiles/0.004/PbI2_g_native.dat
+  wall=$(sed -n 's/^# inventory gas [^ ]* wall \([^ ]*\) .*/\1/p' "$f1")
+  nInsignificant=$(grep -c '^# Tdep from[A-Za-z]* status insignificant' "$f1")
+  nFound=$(grep -c -E '^# Tdep from[A-Za-z]* status (found|notBracketed)' "$f2")
+  $READER "$N012" > "$N012/log.reader" 2>&1
+  nReader=$(grep -c 'T_dep from[A-Za-z]*: none (insignificant); recomputed: insignificant' \
+    "$N012/log.reader")
+  logLine=$(grep -m1 'none (insignificant' "$N012/log" | sed 's/^ *//')
+  check M5.7 "carry-over (b): run/012 at 0.004 s, observable wall, wall\
+ inventory $wall mol: $nInsignificant searches 'insignificant' (log:\
+ '${logLine:0:160}...'), the reader recomputes $nReader; with onset {\
+ significance 0; } $nFound searched (found or notBracketed)" \
+    eval '[ "$nInsignificant" -eq 2 ] && [ "$nFound" -eq 2 ] && [ "$nReader" -eq 2 ]'
+else
+  result M5.7 FAIL "run/012 noise cases failed ($N012/log, $N012S/log)"
+fi
+
+
+#------------------------------------------------------------------------------
+# M5.8: carry-over (d), profile times of a restart with another deltaT
+#------------------------------------------------------------------------------
+DT=$HK_DIR/profileTimes
+blockCase channel "$DT" && setControl "$DT" endTime 0.05 \
+  && printf '\nprofiles {\n%s\n}\n' '  bins { native { min 0; max 0.1; nBins 100; } }
+  times (0.02 0.0502 0.0508 0.07);' >> "$DT/constant/thermochemistryProperties" \
+  || exit 1
+runSerial "$DT" "$SOLVER_EXE"
+if grep -q '^End' "$DT/log"
+then
+  text=""
+  status=0
+  record=$(sed -n '/^profiles/,/}/p' "$DT/0.05/uniform/phaseChangeLayout" \
+    | tr -s ' \n' ' ')
+  [[ "$record" == *'"0.02" "0.0502"'* ]] || status=1
+  for spec in "0.0002|dtSmall" "0.002|dtLarge"
+  do
+    IFS='|' read -r dt name <<< "$spec"
+    rs=$HK_DIR/profileTimes-$name
+    restartCopy "$DT" "$rs" 0.05 \
+      && setControl "$rs" endTime 0.08 \
+      && setControl "$rs" deltaT "$dt" \
+      && setControl "$rs" writeInterval 100000 \
+      && sed -i -E "s/^(deltaT0?) +[^;]+;/\1 $dt;/" "$rs/0.05/uniform/time" \
+      && runSerial "$rs" "$SOLVER_EXE"
+    if grep -q '^End' "$rs/log" 2>/dev/null
+    then
+      entries=$(cat "$DT"/postProcessing/axialProfiles/*/PbI2_g_native.dat \
+        "$rs"/postProcessing/axialProfiles/*/PbI2_g_native.dat \
+        | sed -n 's/^# time .* reason \(.*\)/\1/p' | tr ';' '\n' \
+        | sed -n 's/^ *profile time \(.*\)/\1/p' | sort -g | tr '\n' ' ')
+      skipped=$(grep -o '([0-9]* skipped: written by the run that wrote the restart state[^)]*)' "$rs/log")
+      text="$text deltaT $dt: entries written over both runs: $entries$skipped;"
+      [ "$entries" = "0.02 0.0502 0.0508 0.07 " ] || status=1
+    else
+      text="$text deltaT $dt failed ($rs/log);"
+      status=1
+    fi
+  done
+  check M5.8 "carry-over (d): the channel written at 0.05 (dt 1 ms) records\
+ '$record' in uniform/phaseChangeLayout; restarts:$text" [ $status -eq 0 ]
+else
+  result M5.8 FAIL "profile-times channel failed ($DT/log)"
+fi
+
+
+
+#------------------------------------------------------------------------------
+# M5.9: inputs of the other model are named at start-up
+#------------------------------------------------------------------------------
+IGT=$HK_DIR/ignoredInputsTemperature
+IGH=$HK_DIR/ignoredInputsHKS
+blockCase closedBox "$IGT" && setControl "$IGT" endTime 0.004 \
+  && python3 - "$IGT/constant/thermochemistryProperties" <<'EOF' \
+  && blockCase closedBox "$IGH" at700K && setControl "$IGH" endTime 0.004 \
+  && hksDict "$IGH" "" \
+  && printf '\ntemperatureCoeffs { A 220; k 8e-3; Tdep 680; }\n' \
+       >> "$IGH/constant/thermochemistryProperties" \
+  || exit 1
+import sys
+p = sys.argv[1]
+s = open(p).read()
+old = '  PbI2_g { condensed PbI2_s; }'
+assert s.count(old) == 1
+s = s.replace(old, '  PbI2_g { condensed PbI2_s; vapourPressure { file "x.csv"; } }')
+s += '\nHKSCoeffs { accommodation 1; }\n'
+open(p, 'w').write(s)
+EOF
+runSerial "$IGT" "$SOLVER_EXE" &
+runSerial "$IGH" "$SOLVER_EXE" &
+wait
+wT=$(grep -c -F 'Model temperature does not read HKSCoeffs pairs/PbI2_g/vapourPressure (inputs of the other model)' "$IGT/log")
+wH=$(grep -c -F 'Model HKS does not read temperatureCoeffs (inputs of the other model)' "$IGH/log")
+check M5.9 "inputs of the other model named at start-up: model temperature\
+ with HKSCoeffs and a vapourPressure of the pair: $wT warning; model HKS with\
+ temperatureCoeffs: $wH warning; both runs end" \
+  eval '[ "$wT" -eq 1 ] && [ "$wH" -eq 1 ] && grep -q "^End" "$IGT/log" \
+    && grep -q "^End" "$IGH/log"'
+
+# every criterion was tested; the results are in $RESULTS
+exit 0
+
+#------------------------------------------------------------------------------

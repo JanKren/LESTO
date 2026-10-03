@@ -1,0 +1,9 @@
+/* frozen carrier of the closed box: T = 500 K, at rest (phi = 0) */
+FoamFile {version 2.0; format ascii; class dictionary; object carrierDict;}
+
+Tin       500;
+Tout      500;
+L         0.01;
+p         101325;
+molarMass 4.0026e-3;
+massFlux  0;

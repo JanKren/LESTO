@@ -1,0 +1,644 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#
+# tests/build/Allrun
+#
+# PURPOSE
+#
+# Tests the build plumbing: the OpenFOAM versions accepted by Allwmake, the
+# optional GEMS3K bridge (plan section 6, M0 acceptance 3 and 4, and
+# section 12, point 8) and the optional xGEMS start-up call of the main
+# branch (LESTO_XGEMS, plan section 31).
+#
+# The builds use a copy of the solver sources in tests/work/<platform>/build/
+# src and install into .../build/bin (FOAM_USER_APPBIN is overridden), so the
+# solver in $FOAM_USER_APPBIN is never touched.
+#
+# Bridges
+#
+#   - the bridge of M0.3b/c is $LESTO_GEMSBRIDGE_TEST if set, otherwise the
+#     repository's thermochemistry/gemsbridge if it holds gemsbridge.h and
+#     libgemsbridge.so (the .so is git-ignored and absent in a fresh clone),
+#     otherwise a dummy bridge;
+#   - a dummy bridge is a throw-away gemsbridge.h with one plain-C
+#     declaration and a libgemsbridge.so built from it with the C compiler.
+#     No bridge symbol is used before the GEMS backend exists, so the
+#     plumbing (stamp, wclean, gemsConfig.H, -lgemsbridge, rpath, ldd) is
+#     tested just as well.  M0.3f always uses a dummy, because it edits the
+#     bridge header.
+#   - the xGEMS installation of M0.3j-l is always a dummy (an xGEMS built
+#     with the compiler of this OpenFOAM is not available here): the
+#     header include/xGEMS/ChemicalEngine.hpp with the members that the
+#     start-up call of rhoFixedFlowFoam.C uses, a stand-in
+#     include/eigen3/Eigen/Dense for its Eigen::VectorXd, and
+#     lib/libxGEMS.so built from them with the C++ compiler.  The start-up
+#     call is compiled and linked against it exactly as against a real
+#     installation (flags, xgemsConfig.H, stamp, wclean, -lxGEMS, rpath).
+#
+# Criteria
+#
+#   M0.3a  Allwmake without LESTO_GEMSBRIDGE builds with 0 warnings; ldd
+#          lists no libgemsbridge; -help reports "not compiled in".
+#   M0.3b  Allwmake with LESTO_GEMSBRIDGE set: the state change triggers
+#          wclean; 0 warnings; ldd lists libgemsbridge from the bridge
+#          directory; -help reports "compiled in".
+#   M0.3c  A plain wmake after unsetting LESTO_GEMSBRIDGE picks up the
+#          toggle through the generated gemsConfig.H: gemsEquilibrium.C is
+#          recompiled, ldd lists no libgemsbridge, -help reports "not
+#          compiled in", 0 warnings.
+#   M0.3d  A second plain wmake with the same state recompiles nothing
+#          (gemsConfig.H is rewritten only when the state changes).
+#   M0.3e  Allwmake accepts WM_PROJECT_VERSION 2412, v2412, 2606 and v2606
+#          and refuses any other version (checked with stand-in wmake and
+#          wclean commands, so nothing is compiled).
+#   M0.3f  In a bridge build, an edit of gemsbridge.h recompiles
+#          gemsEquilibrium.C, and only it, with a plain wmake (the header's
+#          checksum is part of the generated gemsConfig.H); a further plain
+#          wmake recompiles nothing; 0 warnings.
+#   M0.3g  Allwmake runs wclean when the OpenFOAM installation
+#          (WM_PROJECT_DIR) differs from the one recorded in the stamp
+#          Make/$WM_OPTIONS/openfoam.state, or when objects exist without
+#          that stamp (also objects of the utility setFrozenCarrier alone,
+#          after a wclean of the solver; review of M4, round 1), and not
+#          otherwise (stand-in wmake and wclean).
+#   M0.3h  GEMS_INC and GEMS_LIBS in the environment never reach a build
+#          without the bridge: a plain wmake with GEMS_INC=-DLESTO_HAVE_GEMS
+#          and GEMS_LIBS=-lLESTO_no_such_library builds and links without
+#          them (Make/options assigns both explicitly).
+#   M0.3i  A relative LESTO_GEMSBRIDGE: Allwmake resolves it against the
+#          directory it is called from; a plain wmake, which runs in the
+#          solver directory, refuses it with a clear message.
+#   M0.3j  Allwmake with LESTO_XGEMS set (a dummy xGEMS): the state change
+#          triggers wclean; 0 warnings; ldd lists libxGEMS.so from the
+#          dummy's lib/; -help reports "xGEMS start-up call: compiled in";
+#          the executable holds the start-up call (its message "xGEMS
+#          ChemicalEngine constructed successfully").
+#   M0.3k  A plain wmake after unsetting LESTO_XGEMS picks up the toggle
+#          through the generated xgemsConfig.H: rhoFixedFlowFoam.C, and
+#          only it, is recompiled; ldd lists no libxGEMS, -help reports "not
+#          compiled in", the start-up call is gone, 0 warnings.
+#   M0.3l  A relative LESTO_XGEMS: Allwmake resolves it against the
+#          directory it is called from; a plain wmake refuses it with a
+#          clear message.
+#   M0.4   The solver compiles on OpenFOAM v2606: PASS when this test runs
+#          under v2606 (M0.3a-c are then v2606 builds), NOTRUN otherwise.
+#
+# Usage: tests/build/Allrun
+#
+# Exit status: 0 when every criterion was tested (whatever the results),
+# 1 when the script stopped early; Alltest reports that as a FAIL.
+#
+#------------------------------------------------------------------------------
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+
+BUILD_DIR=$WORK_DIR/build
+SRC=$BUILD_DIR/src
+BIN=$BUILD_DIR/bin
+EXE=$BIN/rhoFixedFlowFoam
+REPO_BRIDGE=$REPO_DIR/thermochemistry/gemsbridge
+DUMMY_BRIDGE=$BUILD_DIR/dummyBridge
+HEADER_BRIDGE=$BUILD_DIR/headerBridge
+DUMMY_XGEMS=$BUILD_DIR/dummyXgems
+XGEMS_MESSAGE="xGEMS ChemicalEngine constructed successfully"
+
+echo "== Build plumbing (work directory $BUILD_DIR)"
+mkdir -p "$BUILD_DIR"
+
+# copy of the solver sources without tests, documentation and build objects
+copySources() {
+  rm -rf "$1"
+  mkdir -p "$1"
+  (cd "$SOLVER_DIR" && tar -c --exclude=./tests --exclude=./doc \
+    --exclude="./Make/$WM_OPTIONS" \
+    --exclude="./utilities/*/Make/$WM_OPTIONS" .) | tar -x -C "$1"
+}
+
+# makeDummyBridge <dir> [extra declaration]: gemsbridge.h and libgemsbridge.so
+makeDummyBridge() {
+  local dir=$1 extra=${2:-}
+  mkdir -p "$dir"
+  cat > "$dir/gemsbridge.h" <<EOF
+/* Dummy GEMS3K bridge of tests/build/Allrun: no GEMS3K inside. */
+#ifndef GEMSBRIDGE_H
+#define GEMSBRIDGE_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+int gemsb_dummy_version(void);
+$extra
+#ifdef __cplusplus
+}
+#endif
+#endif
+EOF
+  printf '#include "gemsbridge.h"\nint gemsb_dummy_version(void) { return 0; }\n' \
+    > "$dir/gemsbridge.c"
+  "${WM_CC:-gcc}" -shared -fPIC -Wall -I"$dir" -o "$dir/libgemsbridge.so" \
+    "$dir/gemsbridge.c"
+}
+
+hasBridge() {
+  [ -f "$1/gemsbridge.h" ] && [ -f "$1/libgemsbridge.so" ]
+}
+
+# makeDummyXgems <prefix>: include/xGEMS/ChemicalEngine.hpp with the members
+# of the start-up call, include/eigen3/Eigen/Dense, lib/libxGEMS.so
+makeDummyXgems() {
+  local dir=$1
+  mkdir -p "$dir/include/xGEMS" "$dir/include/eigen3/Eigen" "$dir/lib"
+  cat > "$dir/include/eigen3/Eigen/Dense" <<'EOF'
+/* Stand-in of tests/build/Allrun for the Eigen type of the start-up call. */
+#ifndef LESTO_DUMMY_EIGEN_DENSE
+#define LESTO_DUMMY_EIGEN_DENSE
+#include <vector>
+namespace Eigen {
+  struct VectorXd { std::vector<double> values; };
+}
+#endif
+EOF
+  cat > "$dir/include/xGEMS/ChemicalEngine.hpp" <<'EOF'
+/* Dummy xGEMS of tests/build/Allrun: the members that the start-up call of
+   rhoFixedFlowFoam.C uses, no GEMS3K inside. */
+#ifndef LESTO_DUMMY_XGEMS_CHEMICALENGINE
+#define LESTO_DUMMY_XGEMS_CHEMICALENGINE
+#include <string>
+#include <eigen3/Eigen/Dense>
+namespace xGEMS {
+  class ChemicalEngine {
+  public:
+    ChemicalEngine();
+    void initialize(std::string filename);
+    Eigen::VectorXd elementAmounts() const;
+    int equilibrate(double T, double P, const Eigen::VectorXd& b);
+    double temperature() const;
+    double pressure() const;
+    bool converged() const;
+    int numIterations() const;
+  private:
+    double T_ = 298.15;
+    double P_ = 1e5;
+  };
+}
+#endif
+EOF
+  cat > "$dir/lib/ChemicalEngine.cpp" <<'EOF'
+#include <xGEMS/ChemicalEngine.hpp>
+namespace xGEMS {
+  ChemicalEngine::ChemicalEngine() {}
+  void ChemicalEngine::initialize(std::string) {}
+  Eigen::VectorXd ChemicalEngine::elementAmounts() const { return {}; }
+  int ChemicalEngine::equilibrate(double T, double P, const Eigen::VectorXd&)
+  { T_ = T; P_ = P; return 0; }
+  double ChemicalEngine::temperature() const { return T_; }
+  double ChemicalEngine::pressure() const { return P_; }
+  bool ChemicalEngine::converged() const { return true; }
+  int ChemicalEngine::numIterations() const { return 0; }
+}
+EOF
+  "${WM_CXX:-g++}" -std=c++17 -shared -fPIC -Wall -Wextra -I"$dir/include" \
+    -o "$dir/lib/libxGEMS.so" "$dir/lib/ChemicalEngine.cpp"
+}
+
+# build <log> <command ...>: run a build command in $SRC, installing into $BIN
+build() {
+  local log=$1
+  shift
+  (cd "$SRC" && FOAM_USER_APPBIN=$BIN "$@") > "$BUILD_DIR/$log" 2>&1
+}
+
+linksBridge() {
+  ldd "$EXE" | grep -q "libgemsbridge.so => $1/libgemsbridge.so"
+}
+
+linksNoBridge() {
+  ! ldd "$EXE" | grep -q libgemsbridge
+}
+
+linksXgems() {
+  ldd "$EXE" | grep -q "libxGEMS.so => $1/lib/libxGEMS.so"
+}
+
+linksNoXgems() {
+  ! ldd "$EXE" | grep -q libxGEMS
+}
+
+# the executable holds the message of the xGEMS start-up call
+holdsXgemsCall() {
+  grep -q -a -F "$XGEMS_MESSAGE" "$EXE"
+}
+
+helpSays() {
+  "$EXE" -help 2>&1 | tr '\n' ' ' | grep -q "$1"
+}
+
+noWarnings() {
+  [ "$(countWarnings "$BUILD_DIR/$1")" -eq 0 ]
+}
+
+# compiledIn <source> <log>: compiled in the log $BUILD_DIR/<log>
+compiledIn() {
+  compiled "$1" "$BUILD_DIR/$2"
+}
+
+# nothingCompiled <log>: no .C file compiled in $BUILD_DIR/<log>
+nothingCompiled() {
+  ! grep -q -E "(-c|Ctoo:) [^ ]+\.C( |$)" "$BUILD_DIR/$1"
+}
+
+# onlyCompiled <source> <log>: <source> compiled, no other solver source
+onlyCompiled() {
+  local s
+  compiledIn "$1" "$2" || return 1
+  for s in $(solverSources)
+  do
+    [ "$s" = "$1" ] && continue
+    compiledIn "$s" "$2" && return 1
+  done
+  return 0
+}
+
+#------------------------------------------------------------------------------
+# The bridge of M0.3b/c
+#------------------------------------------------------------------------------
+if [ -n "${LESTO_GEMSBRIDGE_TEST:-}" ]
+then
+  BRIDGE=$LESTO_GEMSBRIDGE_TEST
+  bridgeKind="LESTO_GEMSBRIDGE_TEST"
+elif hasBridge "$REPO_BRIDGE"
+then
+  BRIDGE=$REPO_BRIDGE
+  bridgeKind="the repository's bridge"
+else
+  rm -rf "$DUMMY_BRIDGE"
+  makeDummyBridge "$DUMMY_BRIDGE" || {
+    echo "Could not build the dummy bridge in $DUMMY_BRIDGE" >&2
+    exit 1
+  }
+  BRIDGE=$DUMMY_BRIDGE
+  bridgeKind="a dummy bridge (no libgemsbridge.so in $REPO_BRIDGE)"
+fi
+[ -d "$BRIDGE" ] && BRIDGE=$(cd "$BRIDGE" && pwd -P)
+echo "Bridge of M0.3b/c: $BRIDGE ($bridgeKind)"
+
+copySources "$SRC"
+mkdir -p "$BIN"
+rm -f "$EXE"
+
+#------------------------------------------------------------------------------
+# M0.3a: Allwmake without the bridge
+#------------------------------------------------------------------------------
+if (unset LESTO_GEMSBRIDGE; build log.1-Allwmake ./Allwmake) \
+  && [ -x "$EXE" ]
+then
+  check M0.3a "Allwmake without LESTO_GEMSBRIDGE: 0 warnings, no\
+ libgemsbridge in ldd, -help 'not compiled in'" \
+    eval 'noWarnings log.1-Allwmake && linksNoBridge \
+      && helpSays "GEMS3K bridge: not compiled in"'
+else
+  result M0.3a FAIL "Allwmake without LESTO_GEMSBRIDGE failed" \
+    "($BUILD_DIR/log.1-Allwmake)"
+fi
+
+#------------------------------------------------------------------------------
+# M0.3b: Allwmake with the bridge: wclean on the toggle
+#------------------------------------------------------------------------------
+if ! hasBridge "$BRIDGE"
+then
+  result M0.3b FAIL "no gemsbridge.h and libgemsbridge.so in $BRIDGE" \
+    "($bridgeKind)"
+elif LESTO_GEMSBRIDGE=$BRIDGE build log.2-Allwmake-bridge ./Allwmake
+then
+  check M0.3b "Allwmake with LESTO_GEMSBRIDGE ($bridgeKind): wclean on the\
+ toggle, 0 warnings, ldd lists $BRIDGE/libgemsbridge.so, -help 'compiled in'" \
+    eval 'grep -q -F "GEMS3K bridge state changed (none -> $BRIDGE): wclean" \
+        "$BUILD_DIR/log.2-Allwmake-bridge" \
+      && noWarnings log.2-Allwmake-bridge && linksBridge "$BRIDGE" \
+      && helpSays "GEMS3K bridge: compiled in from"'
+else
+  result M0.3b FAIL "Allwmake with LESTO_GEMSBRIDGE failed" \
+    "($BUILD_DIR/log.2-Allwmake-bridge)"
+fi
+
+#------------------------------------------------------------------------------
+# M0.3c: plain wmake picks up the toggle back
+#------------------------------------------------------------------------------
+if (unset LESTO_GEMSBRIDGE; build log.3-wmake wmake)
+then
+  check M0.3c "plain wmake after unsetting LESTO_GEMSBRIDGE: recompiles\
+ gemsEquilibrium.C, no libgemsbridge in ldd, -help 'not compiled in',\
+ 0 warnings" \
+    eval 'compiledIn gemsEquilibrium.C log.3-wmake \
+      && noWarnings log.3-wmake && linksNoBridge \
+      && helpSays "GEMS3K bridge: not compiled in"'
+else
+  result M0.3c FAIL "plain wmake failed ($BUILD_DIR/log.3-wmake)"
+fi
+
+#------------------------------------------------------------------------------
+# M0.3d: nothing to do without a change
+#------------------------------------------------------------------------------
+if (unset LESTO_GEMSBRIDGE; build log.4-wmake wmake)
+then
+  check M0.3d "second plain wmake with the same state recompiles nothing" \
+    nothingCompiled log.4-wmake
+else
+  result M0.3d FAIL "second plain wmake failed ($BUILD_DIR/log.4-wmake)"
+fi
+
+#------------------------------------------------------------------------------
+# M0.3f: an edit of the bridge header recompiles gemsEquilibrium.C.  Plain
+# wmake throughout: toggle on (dummy bridge), edit the header, rebuild,
+# rebuild again.
+#------------------------------------------------------------------------------
+rm -rf "$HEADER_BRIDGE"
+if makeDummyBridge "$HEADER_BRIDGE" \
+  && LESTO_GEMSBRIDGE=$HEADER_BRIDGE build log.5-wmake-bridge wmake \
+  && linksBridge "$HEADER_BRIDGE" \
+  && makeDummyBridge "$HEADER_BRIDGE" "int gemsb_dummy_edited(void);" \
+  && LESTO_GEMSBRIDGE=$HEADER_BRIDGE build log.6-wmake-header wmake \
+  && LESTO_GEMSBRIDGE=$HEADER_BRIDGE build log.7-wmake-same wmake
+then
+  check M0.3f "plain wmake after an edit of gemsbridge.h recompiles\
+ gemsEquilibrium.C and nothing else; next plain wmake recompiles nothing;\
+ 0 warnings" \
+    eval 'onlyCompiled gemsEquilibrium.C log.6-wmake-header \
+      && nothingCompiled log.7-wmake-same \
+      && noWarnings log.5-wmake-bridge && noWarnings log.6-wmake-header \
+      && linksBridge "$HEADER_BRIDGE"'
+else
+  result M0.3f FAIL "bridge-header edit build failed" \
+    "($BUILD_DIR/log.5-wmake-bridge, log.6-wmake-header, log.7-wmake-same)"
+fi
+
+#------------------------------------------------------------------------------
+# M0.3h: GEMS_INC and GEMS_LIBS in the environment never reach the build.
+# The tree is a bridge build (M0.3f); a plain wmake without the bridge but
+# with GEMS_INC=-DLESTO_HAVE_GEMS and a non-existent library in GEMS_LIBS
+# recompiles gemsEquilibrium.C and relinks.  If Make/options inherited the
+# variables, the compile would look for gemsbridge.h and the link for the
+# library, and both would fail.
+#------------------------------------------------------------------------------
+rm -f "$EXE"
+if (unset LESTO_GEMSBRIDGE; build log.8-wmake-environment env \
+    GEMS_INC=-DLESTO_HAVE_GEMS GEMS_LIBS=-lLESTO_no_such_library wmake) \
+  && [ -x "$EXE" ]
+then
+  check M0.3h "plain wmake without the bridge ignores GEMS_INC and GEMS_LIBS\
+ of the environment (-DLESTO_HAVE_GEMS, -lLESTO_no_such_library): builds,\
+ no libgemsbridge in ldd, -help 'not compiled in', 0 warnings" \
+    eval 'compiledIn gemsEquilibrium.C log.8-wmake-environment \
+      && noWarnings log.8-wmake-environment && linksNoBridge \
+      && ! grep -q LESTO_no_such_library "$BUILD_DIR/log.8-wmake-environment" \
+      && helpSays "GEMS3K bridge: not compiled in"'
+else
+  result M0.3h FAIL "plain wmake with GEMS_INC/GEMS_LIBS in the environment\
+ failed ($BUILD_DIR/log.8-wmake-environment)"
+fi
+
+#------------------------------------------------------------------------------
+# M0.3j: Allwmake with a dummy xGEMS installation (LESTO_XGEMS): wclean on
+# the toggle, the start-up call compiled in and linked against libxGEMS
+#------------------------------------------------------------------------------
+rm -rf "$DUMMY_XGEMS"
+DUMMY_XGEMS_OK=false
+makeDummyXgems "$DUMMY_XGEMS" > "$BUILD_DIR/log.dummyXgems" 2>&1 \
+  && DUMMY_XGEMS=$(cd "$DUMMY_XGEMS" && pwd -P) && DUMMY_XGEMS_OK=true
+if ! $DUMMY_XGEMS_OK
+then
+  result M0.3j FAIL "could not build the dummy xGEMS in $DUMMY_XGEMS" \
+    "($BUILD_DIR/log.dummyXgems)"
+elif (unset LESTO_GEMSBRIDGE; LESTO_XGEMS=$DUMMY_XGEMS \
+      build log.9-Allwmake-xgems ./Allwmake) && [ -x "$EXE" ]
+then
+  check M0.3j "Allwmake with LESTO_XGEMS (a dummy xGEMS): wclean on the\
+ toggle, 0 warnings, ldd lists $DUMMY_XGEMS/lib/libxGEMS.so, -help\
+ 'compiled in', the start-up call in the executable" \
+    eval 'grep -q -F "xGEMS state changed (none -> $DUMMY_XGEMS): wclean" \
+        "$BUILD_DIR/log.9-Allwmake-xgems" \
+      && grep -q -F "Building rhoFixedFlowFoam with the xGEMS start-up\
+ call, xGEMS from $DUMMY_XGEMS" "$BUILD_DIR/log.9-Allwmake-xgems" \
+      && noWarnings log.9-Allwmake-xgems && linksXgems "$DUMMY_XGEMS" \
+      && helpSays "xGEMS start-up call: compiled in from" \
+      && holdsXgemsCall'
+else
+  result M0.3j FAIL "Allwmake with LESTO_XGEMS failed" \
+    "($BUILD_DIR/log.9-Allwmake-xgems)"
+fi
+
+#------------------------------------------------------------------------------
+# M0.3k: a plain wmake picks up the toggle back through xgemsConfig.H
+#------------------------------------------------------------------------------
+if (unset LESTO_GEMSBRIDGE LESTO_XGEMS; build log.10-wmake-xgems-off wmake)
+then
+  check M0.3k "plain wmake after unsetting LESTO_XGEMS: recompiles\
+ rhoFixedFlowFoam.C and nothing else, no libxGEMS in ldd, -help 'not\
+ compiled in', no start-up call, 0 warnings" \
+    eval 'onlyCompiled rhoFixedFlowFoam.C log.10-wmake-xgems-off \
+      && noWarnings log.10-wmake-xgems-off && linksNoXgems \
+      && helpSays "xGEMS start-up call: not compiled in" \
+      && ! holdsXgemsCall'
+else
+  result M0.3k FAIL "plain wmake after unsetting LESTO_XGEMS failed" \
+    "($BUILD_DIR/log.10-wmake-xgems-off)"
+fi
+
+#------------------------------------------------------------------------------
+# M0.3e, M0.3g, M0.3i and M0.3l use stand-in wmake and wclean commands,
+# which only record that they were called, in a separate copy of the sources
+#------------------------------------------------------------------------------
+STUB_SRC=$BUILD_DIR/stubs
+copySources "$STUB_SRC"
+mkdir -p "$STUB_SRC/fakebin"
+for tool in wmake wclean
+do
+  printf '#!/bin/sh\necho %s >> "%s/calls"\nexit 0\n' "$tool" "$STUB_SRC" \
+    > "$STUB_SRC/fakebin/$tool"
+  chmod +x "$STUB_SRC/fakebin/$tool"
+done
+
+# stubAllwmake <log> [VAR=value ...]: Allwmake with the stand-in tools
+stubAllwmake() {
+  local log=$1
+  shift
+  rm -f "$STUB_SRC/calls"
+  (cd "$STUB_SRC" && unset LESTO_GEMSBRIDGE LESTO_XGEMS \
+    && env PATH="$STUB_SRC/fakebin:$PATH" "$@" ./Allwmake) \
+    > "$BUILD_DIR/$log" 2>&1
+}
+
+wcleanCalled() {
+  grep -q -x wclean "$STUB_SRC/calls" 2>/dev/null
+}
+
+#------------------------------------------------------------------------------
+# M0.3e: accepted and refused OpenFOAM versions
+#------------------------------------------------------------------------------
+versionsOk=true
+for v in 2412 v2412 2606 v2606
+do
+  stubAllwmake "log.version-$v" WM_PROJECT_VERSION=$v \
+    || { echo "Allwmake refused $v"; versionsOk=false; }
+done
+for v in v2312 2506 v2506 11
+do
+  if stubAllwmake "log.version-$v" WM_PROJECT_VERSION=$v
+  then
+    echo "Allwmake accepted $v"
+    versionsOk=false
+  fi
+done
+check M0.3e "Allwmake accepts 2412, v2412, 2606, v2606 and refuses\
+ v2312, 2506, v2506, 11" $versionsOk
+
+#------------------------------------------------------------------------------
+# M0.3g: wclean when the OpenFOAM installation changes
+#------------------------------------------------------------------------------
+OBJ=$STUB_SRC/Make/$WM_OPTIONS
+OTHER_FOAM=/nonexistent/OpenFOAM-other
+foamOk=true
+
+# objects built with another installation
+rm -rf "$OBJ"
+mkdir -p "$OBJ"
+touch "$OBJ/rhoFixedFlowFoam.o"
+echo none > "$OBJ/gems.state"
+echo "$OTHER_FOAM" > "$OBJ/openfoam.state"
+if stubAllwmake log.foam-1-changed && wcleanCalled \
+  && grep -q -F "OpenFOAM installation changed ($OTHER_FOAM ->\
+ $WM_PROJECT_DIR): wclean" "$BUILD_DIR/log.foam-1-changed" \
+  && [ "$(cat "$OBJ/openfoam.state")" = "$WM_PROJECT_DIR" ]
+then
+  :
+else
+  echo "no wclean after a change of installation ($BUILD_DIR/log.foam-1-changed)"
+  foamOk=false
+fi
+
+# the same installation again
+if stubAllwmake log.foam-2-same && ! wcleanCalled
+then
+  :
+else
+  echo "wclean without a change ($BUILD_DIR/log.foam-2-same)"
+  foamOk=false
+fi
+
+# objects without the stamp (a tree built before the stamp existed)
+rm -f "$OBJ/openfoam.state"
+if stubAllwmake log.foam-3-unknown && wcleanCalled \
+  && grep -q -F "OpenFOAM installation changed (unknown ->\
+ $WM_PROJECT_DIR): wclean" "$BUILD_DIR/log.foam-3-unknown"
+then
+  :
+else
+  echo "no wclean for objects without a stamp ($BUILD_DIR/log.foam-3-unknown)"
+  foamOk=false
+fi
+# objects of the utility without the solver's stamps: a wclean of the solver
+# alone removes Make/$WM_OPTIONS with the stamps, and the utility's objects
+# must not be relinked for another installation (review of M4, round 1)
+rm -rf "${OBJ:?}"
+UOBJ=$STUB_SRC/utilities/setFrozenCarrier/Make/$WM_OPTIONS
+mkdir -p "$UOBJ"
+touch "$UOBJ/setFrozenCarrier.o"
+if stubAllwmake log.foam-4-utility && wcleanCalled \
+  && grep -q -F "OpenFOAM installation changed (unknown ->\
+ $WM_PROJECT_DIR): wclean" "$BUILD_DIR/log.foam-4-utility"
+then
+  :
+else
+  echo "no wclean for objects of the utility without the solver's stamps" \
+       "($BUILD_DIR/log.foam-4-utility)"
+  foamOk=false
+fi
+rm -rf "${UOBJ:?}"
+check M0.3g "Allwmake runs wclean when WM_PROJECT_DIR differs from the\
+ stamp or the stamp is missing (also when only the utility has objects,\
+ after a wclean of the solver alone), and not otherwise" $foamOk
+
+#------------------------------------------------------------------------------
+# M0.3i: a relative LESTO_GEMSBRIDGE
+#   - Allwmake, called from $BUILD_DIR with LESTO_GEMSBRIDGE=headerBridge,
+#     resolves it against $BUILD_DIR (stand-in wmake);
+#   - a plain wmake refuses it with a clear message (it runs in the solver
+#     directory, not where the path was typed).
+#------------------------------------------------------------------------------
+relativeOk=true
+rm -f "$STUB_SRC/calls"
+(cd "$BUILD_DIR" && env PATH="$STUB_SRC/fakebin:$PATH" \
+  LESTO_GEMSBRIDGE=headerBridge "$STUB_SRC/Allwmake") \
+  > "$BUILD_DIR/log.relative-Allwmake" 2>&1 || relativeOk=false
+grep -q -F "Relative LESTO_GEMSBRIDGE resolved against $BUILD_DIR:\
+ $BUILD_DIR/headerBridge" "$BUILD_DIR/log.relative-Allwmake" \
+  && grep -q -F "Building rhoFixedFlowFoam with the GEMS3K bridge from\
+ $HEADER_BRIDGE" "$BUILD_DIR/log.relative-Allwmake" \
+  || { echo "Allwmake did not resolve the relative path\
+ ($BUILD_DIR/log.relative-Allwmake)"; relativeOk=false; }
+
+if (cd "$SRC" && FOAM_USER_APPBIN=$BIN LESTO_GEMSBRIDGE=../headerBridge \
+    wmake) > "$BUILD_DIR/log.relative-wmake" 2>&1
+then
+  echo "plain wmake accepted a relative LESTO_GEMSBRIDGE"
+  relativeOk=false
+fi
+grep -q "LESTO_GEMSBRIDGE=../headerBridge is a relative path" \
+  "$BUILD_DIR/log.relative-wmake" \
+  || { echo "no clear message ($BUILD_DIR/log.relative-wmake)"; \
+       relativeOk=false; }
+check M0.3i "relative LESTO_GEMSBRIDGE: Allwmake resolves it against the\
+ directory it is called from; plain wmake refuses it with a clear message"\
+ $relativeOk
+
+#------------------------------------------------------------------------------
+# M0.3l: a relative LESTO_XGEMS, as M0.3i for the bridge
+#   - Allwmake, called from $BUILD_DIR with LESTO_XGEMS=dummyXgems, resolves
+#     it against $BUILD_DIR (stand-in wmake);
+#   - a plain wmake refuses it with a clear message.
+#------------------------------------------------------------------------------
+relativeXgemsOk=true
+rm -f "$STUB_SRC/calls"
+(cd "$BUILD_DIR" && unset LESTO_GEMSBRIDGE \
+  && env PATH="$STUB_SRC/fakebin:$PATH" LESTO_XGEMS=dummyXgems \
+  "$STUB_SRC/Allwmake") > "$BUILD_DIR/log.relative-xgems-Allwmake" 2>&1 \
+  || relativeXgemsOk=false
+grep -q -F "Relative LESTO_XGEMS resolved against $BUILD_DIR:\
+ $BUILD_DIR/dummyXgems" "$BUILD_DIR/log.relative-xgems-Allwmake" \
+  && grep -q -F "Building rhoFixedFlowFoam with the xGEMS start-up call,\
+ xGEMS from $DUMMY_XGEMS" "$BUILD_DIR/log.relative-xgems-Allwmake" \
+  || { echo "Allwmake did not resolve the relative LESTO_XGEMS\
+ ($BUILD_DIR/log.relative-xgems-Allwmake)"; relativeXgemsOk=false; }
+
+if (cd "$SRC" && unset LESTO_GEMSBRIDGE && FOAM_USER_APPBIN=$BIN \
+    LESTO_XGEMS=../dummyXgems wmake) \
+    > "$BUILD_DIR/log.relative-xgems-wmake" 2>&1
+then
+  echo "plain wmake accepted a relative LESTO_XGEMS"
+  relativeXgemsOk=false
+fi
+grep -q "LESTO_XGEMS=../dummyXgems is a relative path" \
+  "$BUILD_DIR/log.relative-xgems-wmake" \
+  || { echo "no clear message ($BUILD_DIR/log.relative-xgems-wmake)"; \
+       relativeXgemsOk=false; }
+check M0.3l "relative LESTO_XGEMS: Allwmake resolves it against the\
+ directory it is called from; plain wmake refuses it with a clear message"\
+ $relativeXgemsOk
+
+#------------------------------------------------------------------------------
+# M0.4: v2606
+#------------------------------------------------------------------------------
+case "$WM_PROJECT_VERSION" in
+  2606|v2606)
+    check M0.4 "compiles on OpenFOAM $WM_PROJECT_VERSION (builds M0.3a-c)" \
+      [ -x "$EXE" ]
+    ;;
+  *)
+    result M0.4 NOTRUN "compile on v2606: this OpenFOAM is" \
+      "$WM_PROJECT_VERSION; run tests/Alltest M0 under v2606"
+    ;;
+esac
+
+# every criterion was tested; the results are in $RESULTS
+exit 0
+
+#------------------------------------------------------------------------------

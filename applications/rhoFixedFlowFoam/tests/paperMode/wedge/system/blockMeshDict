@@ -1,0 +1,40 @@
+/*------------------------------------------------------------------------------
+
+system/blockMeshDict of tests/paperMode/wedge
+
+  An axisymmetric pipe as an OpenFOAM wedge of 5 degrees about the x axis:
+  R = 2.4 mm, L = 20 mm, 40 axial x 10 radial cells refined towards the wall
+  (the axis is a collapsed edge, its cells are prisms).  The test mesh of
+  setFrozenCarrier on a wedge (milestone M4; M7 uses wedges for its
+  Graetz-Robin series).
+
+------------------------------------------------------------------------------*/
+FoamFile {version 2.0; format ascii; class dictionary; object blockMeshDict;}
+
+scale 1;
+
+vertices (
+  (0    0                     0)
+  (0.02 0                     0)
+  (0.02 0.0023977157317964584 -0.0001046865296768064)
+  (0    0.0023977157317964584 -0.0001046865296768064)
+  (0.02 0.0023977157317964584  0.0001046865296768064)
+  (0    0.0023977157317964584  0.0001046865296768064)
+);
+
+blocks (hex (0 1 2 3 0 1 4 5) (40 10 1) simpleGrading (1 0.25 1));
+
+edges (
+  arc 2 4 (0.02 0.0024 0)
+  arc 3 5 (0    0.0024 0)
+);
+
+boundary (
+  INLET  {type patch; faces ((0 0 5 3));}
+  OUTLET {type patch; faces ((1 2 4 1));}
+  WALL   {type patch; faces ((2 3 5 4));}
+  front  {type wedge; faces ((0 1 4 5));}
+  back   {type wedge; faces ((0 3 2 1));}
+);
+
+defaultPatch {name axis; type empty;}   /* the collapsed axis: no faces */

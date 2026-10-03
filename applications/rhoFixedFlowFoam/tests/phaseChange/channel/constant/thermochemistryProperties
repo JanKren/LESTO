@@ -1,0 +1,44 @@
+/*------------------------------------------------------------------------------
+
+constant/thermochemistryProperties of tests/phaseChange/channel
+
+  Temperature model; a sample of 40 cells (x 10-20 mm, y 2.0-2.8 mm)
+  releases 4.84e-6 mol from 0.3 ms over 40.5 ms: the release window starts
+  and ends inside a time step, t_ev/dt = 40.5 is not an integer.
+
+------------------------------------------------------------------------------*/
+FoamFile {version 2.0; format ascii; class dictionary; object thermochemistryProperties;}
+
+model temperature;
+
+pairs {
+  PbI2_g { condensed PbI2_s; }
+}
+
+interface {
+  patches (WALL);
+}
+
+temperatureCoeffs {
+  A     220;
+  k     8e-3;
+  Tdep  680;
+}
+
+samples {
+  boat {
+    pair       PbI2_g;
+    selection  {
+      boat { action use; source box; box (0.01 0.002 -1) (0.02 0.0028 1); }
+    }
+    mode       release;
+    amount     4.84e-6;
+    startTime  3e-4;
+    duration   0.0405;
+  }
+}
+
+balance {
+  nGuard          3;
+  guardTolerance  1e-12;
+}

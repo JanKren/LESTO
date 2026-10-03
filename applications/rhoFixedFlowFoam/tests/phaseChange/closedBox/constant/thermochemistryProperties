@@ -1,0 +1,35 @@
+/*------------------------------------------------------------------------------
+
+constant/thermochemistryProperties of tests/phaseChange/closedBox
+
+  Temperature model with A = 220 1/s: at T = 500 K, f = 1 - exp(-1.44) and
+  lambda dt = A f dt = 0.671504 (the layer is the whole box).
+
+------------------------------------------------------------------------------*/
+FoamFile {version 2.0; format ascii; class dictionary; object thermochemistryProperties;}
+
+model temperature;
+
+pairs {
+  PbI2_g { condensed PbI2_s; }
+}
+
+interface {
+  patches              (WALL);
+  layer                faceCells;
+  areaPerVolume        cell;
+  areaMultiplier       1;
+  interfaceTemperature cell;
+  wallResistance       none;
+}
+
+temperatureCoeffs {
+  A     220;
+  k     8e-3;
+  Tdep  680;
+}
+
+balance {
+  nGuard          3;
+  guardTolerance  1e-12;
+}

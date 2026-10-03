@@ -1,0 +1,1136 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#
+# tests/paperMode/longRuns
+#
+# PURPOSE
+#
+# The code-to-code runs of milestone M4 (acceptance 3 to 5 of plan section 6
+# M4; 'tests/Alltest M4long', called as tests/paperMode/Allrun long): run/014
+# with the parameters of Fig. 9 of Lobresco et al. (2026) and of the
+# temperature-based column of their Table 2, for both layer rules, and the
+# criteria M4.3, M4.4, M4.5 and M4.5b on their profiles.  LONG_JOBS runs
+# (default 2, M4LONG_JOBS) go at a time, each on LONG_RANKS ranks (default
+# 8, M4LONG_RANKS; 1 = serial runs, the most efficient on an oversubscribed
+# machine, plan section 25).  A run whose key is unchanged and that ended is
+# reused; one that was stopped resumes from its latest second,
+# re-decomposed when the number of ranks changed (an exact restart in
+# binary; the number of ranks is not part of the key: it changes a result
+# only at the level of the outer-loop tolerance, plan section 16, item 7).
+# Hours of compute; see plan sections 25 and 26 for the cost and the pins.
+#
+# The key of a run (longKey) hashes
+#   - the solver and the utility setFrozenCarrier, without comments;
+#   - the inputs of run/014 without comments (system, constant, 0; not the
+#     linked mesh);
+#   - the mesh: the checksum of tests/work/mesh (mesh.md5, the md5 of
+#     run/001's pipe.msh that makeMesh converted), as the cache keys of the
+#     regression gate do;
+#   - the shell functions that set a run up (declare -f setupLong case014
+#     makeCase runCaseDir carrier decomposeLong decomposeWith edit
+#     setControl);
+#   - the run's spec line (its parameters) and the OpenFOAM installation.
+# Before the review of M4, round 3 the mesh and the set-up functions were
+# not in it, so a run made on another mesh or set up by an older script
+# was reused (criterion M4.20 checks that both change the key).
+#
+# Revalidation (plan sections 26 and 27; opt-in: M4LONG_REVALIDATE=yes).  A
+# run that ended under another key (the sources or the inputs have changed
+# since) is then not run again when the current build reproduces it: its
+# set-up made now (run/014 and setFrozenCarrier) must give its dictionaries
+# (without comments and without the entries a run changes: endTime,
+# decomposeParDict) and its carrier bit for bit, and the binaries it was
+# made with (kept in long/bin/<key of the binaries>/) and the current ones,
+# each run for REVALIDATE_STEPS steps from a copy of its state at its last
+# write before its end (the same decomposition), must write the same
+# profiles and state (cmpFields.sh; only the files that a change of the
+# sources alters on purpose are left out: REVALIDATE_EXCLUDE) and the same
+# balance file but for the columns of the ledger's booking
+# (REVALIDATE_EXCLUDE_COLUMNS).  The run is then reused under the current
+# key, with the record in m4revalidated, and every criterion line that uses
+# it names it ('revalidated from key ... by a 5-step probe from ... s').  A
+# revalidated run stands for the physics of the current sources (fields,
+# deposits, profiles, inventories), not for their ledger: M4.17 gates the
+# closure only of runs made with the current sources.  The probe cannot
+# see a change that acts only before the run's last write (the release
+# window, the first steps, a fresh start; review of M4, round 2), so
+# revalidation is off by default: a run whose key changed is run again (or,
+# with M4LONG_RUNS=ended, prepared and NOTRUN).  Switch it on only for a
+# change known to act in the probed steps as well (plan section 27: the
+# booking of the ledger, which acts alike in every step and changes no
+# field).
+#
+# Criteria: M4.3, M4.4, M4.5 (10 lines), M4.5b, M4.16 (2 lines, not a gate),
+# M4.17, the closure of the runs made with the current sources (plan
+# section 27, item 1: at most 1e-14 of the reference in every step), and
+# M4.20, the key follows the mesh and the set-up functions (no run).
+#
+# M4LONG_RUNS selects the runs that may be run (default 'all'): a list of
+# run ids, or 'ended' for none (an evaluation of the runs that ended).  A
+# run that is neither selected nor ended is prepared (set up, decomposed,
+# ready to run) and its criteria are NOTRUN with its cost, measured here
+# in wall-clock seconds per step of the runs that ended.
+#
+# This file is executed, not sourced, so that tests/paperMode/Allrun can be
+# edited while the runs go on.  Replace this file only atomically (a copy
+# moved over it) while it runs: bash reads a script while executing it.
+#
+# Exit status: 0 when every criterion was tested (whatever the results),
+# 1 when a run could not be set up or ended with an error.
+#
+#------------------------------------------------------------------------------
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+
+PM_DIR=$WORK_DIR/paperMode
+PM_SRC=$TESTS_DIR/paperMode
+CHECKS="python3 $PM_SRC/checks.py"
+CARRIER_EXE=$FOAM_USER_APPBIN/setFrozenCarrier
+CASE014=$(runCaseDir 014) || exit 1
+
+mkdir -p "$PM_DIR"
+
+
+#------------------------------------------------------------------------------
+# Helpers
+#------------------------------------------------------------------------------
+
+# edit <file> <sed expression> <pattern that must match afterwards>
+edit() {
+  sed -i -E "$2" "$1" && grep -q -E "$3" "$1" \
+    || { echo "Editing $1 with '$2' failed" >&2; return 1; }
+}
+
+# the number of lines of a log that match a pattern
+count() {
+  grep -c -E "$2" "$1" 2>/dev/null
+}
+
+# decomposeWith <case> <n> <method and coeffs> [decomposePar options]
+decomposeWith() {
+  local c=$1 n=$2 method=$3
+  shift 3
+  requireCaseDir "$c" || return 1
+  cat > "$c/system/decomposeParDict" <<EOF
+FoamFile{version 2.0; format ascii; class dictionary; object decomposeParDict;}
+
+numberOfSubdomains $n;
+$method
+EOF
+  (cd "$c" && decomposePar -force "$@" > log.decomposePar 2>&1)
+}
+
+# case014 <destination> [<own dynamicCode: yes>]: a copy of run/014 (makeCase)
+# with its carrier written by setFrozenCarrier into 0
+case014() {
+  local dst=$1 own=${2:-no}
+  makeCase 014 "$dst" || return 1
+  if [ "$own" = yes ]
+  then
+    rm -f "$dst/dynamicCode"
+    mkdir -p "$dst/dynamicCode"
+  fi
+}
+
+# carrier <case>: setFrozenCarrier into the start time
+carrier() {
+  requireCaseDir "$1" || return 1
+  (cd "$1" && "$CARRIER_EXE" > log.setFrozenCarrier 2>&1)
+}
+
+# the md5 of source files or dictionaries without their comments and blank
+# lines, so that a change of a comment does not invalidate the long runs
+strippedSum() {
+  python3 - "$@" <<'EOF'
+import hashlib, re, sys
+h = hashlib.md5()
+for path in sys.argv[1:]:
+    text = open(path, errors='replace').read()
+    text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
+    text = re.sub(r'//[^\n]*', '', text)
+    lines = [l.strip() for l in text.splitlines() if l.strip()]
+    h.update(path.rsplit('/', 1)[-1].encode())
+    h.update('\n'.join(lines).encode())
+print(h.hexdigest())
+EOF
+}
+
+
+#==============================================================================
+# M4long: the code-to-code runs (acceptance 3, 4 and 5)
+#==============================================================================
+
+#------------------------------------------------------------------------------
+# The runs, as edits of run/014 (plan sections 25 and 26 pin every value),
+# in the order of plan section 25 (Fig. 9 at t_ev 6 s, the T106 cases for
+# both rules, Fig. 9 at t_ev 15 s, then the others), and the sensitivity
+# variant of plan section 26 (the parameter set of the T-Flows
+# temperature-model code, not gated):
+#
+#   id  flow  n0 [mol]  Tdep [K]  t_ev [s]  end [s]  dt [s]  layer  times
+#   [edits]
+#
+# times: the profile times, separated by commas, e.g. (7,12).
+# flow: 'Q <m3/s>' or 'mL <mL/min>'.  end: the end of the run; 'adaptive <t0>
+# <step> <t experiment>': run to t0, then extend by step until the interval
+# of T_dep at the end of the experiment (checks.py boundWidth) is below
+# BOUND_WIDTH or the experiment's end is reached.  edits: optional entries
+# of temperatureCoeffs and interface, name=value separated by commas (A, k,
+# distance).  The sensitivity variant runs at dt 4 ms (Courant 0.45): its
+# purpose is the position of the front and the deposit, which a 4 ms run of
+# run/014 reproduces to 4 digits at 16 s (plan section 26).
+#------------------------------------------------------------------------------
+BOUND_WIDTH=0.05
+LONG_RUNS=(
+  "fig9-tev6           Q:1.67e-6  3.16e-5 680 6  fixed:12                1e-3    distance  (7,12)"
+  "T106_6-distance     mL:106     4.84e-6 775 6  fixed:6                 1e-3    distance  (6)"
+  "T106_6-faceCells    mL:106     4.84e-6 775 6  fixed:6                 1e-3    faceCells (6)"
+  "T106_60-distance    mL:106     4.43e-6 712 6  adaptive:10:2:60        1e-3    distance  ()"
+  "T106_60-faceCells   mL:106     4.43e-6 712 6  adaptive:10:2:60        1e-3    faceCells ()"
+  "T106_300-distance   mL:106     2.97e-6 666 6  adaptive:10:2:300       1e-3    distance  ()"
+  "T106_300-faceCells  mL:106     2.97e-6 666 6  adaptive:10:2:300       1e-3    faceCells ()"
+  "fig9-tev15          Q:1.67e-6  3.16e-5 680 15 fixed:30                1e-3    distance  (16,30)"
+  "T5_60-distance      mL:5       3.15e-6 788 6  fixed:60                1e-2    distance  ()"
+  "T5_60-faceCells     mL:5       3.15e-6 788 6  fixed:60                1e-2    faceCells ()"
+  "T5_60-distance-dt5ms mL:5      3.15e-6 788 6  fixed:60                5e-3    distance  ()"
+  "T540_60-distance    mL:540     3.93e-6 671 6  adaptive:4:1:60         2.2e-4  distance  ()"
+  "T540_60-faceCells   mL:540     3.93e-6 671 6  adaptive:4:1:60         2.2e-4  faceCells ()"
+  "fig9-tev15-TFlows   Q:1.67e-6  3.16e-5 638.15 15 fixed:30             4e-3    distance  (16,30) A=150,k=0.02,distance=2.4e-4"
+)
+LONG_RANKS=${M4LONG_RANKS:-8}
+LONG_JOBS=${M4LONG_JOBS:-2}
+
+# the key of a run (header): the solver and the utility, the inputs of
+# run/014 (both without comments), the mesh checksum, the set-up functions,
+# the run's parameters and the OpenFOAM installation
+longKey() {
+  {
+    strippedSum "$SOLVER_DIR"/*.C "$SOLVER_DIR"/*.H \
+      "$SOLVER_DIR"/utilities/setFrozenCarrier/*.C
+    (cd "$CASE014" && find -L system constant 0 -type f ! -path '*/polyMesh/*' \
+      | sort | while read -r f; do echo "$f $(strippedSum "$f")"; done)
+    echo "mesh $(cat "$MESH_DIR/mesh.md5" 2>/dev/null)"
+    echo "set-up $(declare -f setupLong case014 makeCase runCaseDir carrier \
+      decomposeLong decomposeWith edit setControl | md5sum | cut -d' ' -f1)"
+    echo "$1 $WM_PROJECT_DIR"
+  } | md5sum | cut -d' ' -f1
+}
+
+# latestTime <case>: the latest written time of a run, decomposed or serial
+latestTime() {
+  if [ -d "$1/processor0" ]
+  then
+    timeDirs "$1/processor0" | tail -1
+  else
+    timeDirs "$1" | tail -1
+  fi
+}
+
+# decomposeLong <case> [decomposePar options]: onto LONG_RANKS ranks (simple
+# slabs along x); one rank: nothing (a serial run; OpenFOAM refuses
+# -parallel on one rank)
+decomposeLong() {
+  local c=$1
+  shift
+  [ "$LONG_RANKS" -gt 1 ] || return 0
+  decomposeWith "$c" "$LONG_RANKS" \
+    "method simple; coeffs { n ($LONG_RANKS 1 1); }" "$@"
+}
+
+# redecompose <case>: its latest time (and the carrier in 0) onto LONG_RANKS
+# ranks, or into the case for one rank; the solver restarts from the fields
+# (exact in binary, plan section 25) and books what the per-rank state of the
+# other decomposition held as a restart.  decomposePar links <time>/uniform
+# of every processor to the case's <time>/uniform: the links are replaced by
+# copies before the case's time is removed.
+redecompose() {
+  local c=$1 latest d
+  latest=$(latestTime "$c")
+  if [ -d "$c/processor0" ]
+  then
+    (cd "$c" && reconstructPar -time "$latest" > log.reconstructPar 2>&1) \
+      || return 1
+    rm -rf "$c"/processor*
+  fi
+  [ "$LONG_RANKS" -gt 1 ] || return 0
+  decomposeLong "$c" -time "0,$latest" || return 1
+  for d in "$c"/processor*/"$latest"
+  do
+    if [ -L "$d/uniform" ]
+    then
+      rm "$d/uniform" && cp -r "$c/$latest/uniform" "$d/uniform" || return 1
+    fi
+  done
+  [ -f "$c/processor0/$latest/uniform/phaseChangeBalance" ] \
+    && rm -rf "${c:?}/$latest"
+}
+
+# the number of ranks a case is decomposed for (1: a serial case)
+ranksOf() {
+  local n
+  n=$(ls -d "$1"/processor* 2>/dev/null | wc -l)
+  echo $(( n > 0 ? n : 1 ))
+}
+
+# setupLong <case> <spec ...>: the copy of run/014 for one run
+setupLong() {
+  local c=$1 id=$2 flow=$3 n0=$4 Tdep=$5 tev=$6 end=$7 dt=$8 layer=$9
+  local times=${10//,/ } edits=${11:-} item name value
+  local first
+  case "$end" in
+    fixed:*) first=${end#fixed:} ;;
+    adaptive:*) first=$(echo "$end" | cut -d: -f2) ;;
+  esac
+
+  case014 "$c" yes || return 1
+  local d=$c/system/setFrozenCarrierDict
+  case "$flow" in
+    Q:*) edit "$d" "s/^flowRate +[^;]+;/flowRate         ${flow#Q:};/" \
+           "^flowRate +${flow#Q:};" ;;
+    mL:*) edit "$d" "s/^flowRate +[^;]+;/flowRateMLPerMin ${flow#mL:};/" \
+            "^flowRateMLPerMin ${flow#mL:};" ;;
+  esac || return 1
+
+  local t=$c/constant/thermochemistryProperties
+  edit "$t" "s/^(  layer +)[a-zA-Z]+;/\1$layer;/" "^  layer +$layer;" \
+    && edit "$t" "s/^(    amount +)[^;]+;/\1$n0;/" "^    amount +$n0;" \
+    && edit "$t" "s/^(    duration +)[^;]+;/\1$tev;/" "^    duration +$tev;" \
+    && edit "$t" "s/^(  Tdep +)[^;]+;/\1$Tdep;/" "^  Tdep +$Tdep;" \
+    && edit "$t" "s/^(  times +)\([^)]*\);/\1$times;/" "^  times +\\(" \
+    || return 1
+  for item in ${edits//,/ }
+  do
+    name=${item%%=*}
+    value=${item#*=}
+    edit "$t" "s/^(  $name +)[^;]+;/\1$value;/" "^  $name +$value;" \
+      || return 1
+  done
+
+  setControl "$c" endTime "$first" \
+    && setControl "$c" deltaT "$dt" \
+    && setControl "$c" writeControl runTime \
+    && setControl "$c" writeInterval 1 \
+    || return 1
+
+  carrier "$c" && decomposeLong "$c"
+}
+
+# runLong <spec line>: one run, reused when its key matches and it ended,
+# resumed from its latest written time when its key matches and it did not
+# end (e.g. stopped to free the cores for another test)
+runLong() {
+  local spec=($1)
+  local id=${spec[0]} end=${spec[5]}
+  local c=$PM_DIR/long/$id key t tEnd step limit segment=1
+  key=$(longKey "$1")
+
+  if [ "$(cat "$c/m4key" 2>/dev/null)" = "$key" ] && [ -f "$c/m4done" ]
+  then
+    echo "  $id: reused ($c, key $key)"
+    return 0
+  fi
+
+  rm -f "$c/m4failed"
+  if [ "$(cat "$c/m4key" 2>/dev/null)" = "$key" ] \
+    && [ -n "$(latestTime "$c")" ]
+  then
+    segment=$(($(ls "$c"/log.[0-9]* 2>/dev/null | wc -l) + 1))
+    echo "  $id: resumed from $(latestTime "$c") s ($c)"
+    if [ "$(ranksOf "$c")" -ne "$LONG_RANKS" ]
+    then
+      echo "  $id: re-decomposed from $(ranksOf "$c") onto $LONG_RANKS ranks"
+      redecompose "$c" || { echo "  $id: re-decomposition failed" >&2
+                            return 1; }
+    fi
+  else
+    echo "  $id: running ($c)"
+    rm -rf "$c"
+    mkdir -p "$PM_DIR/long"
+    setupLong "$c" "${spec[@]}" \
+      || { echo "  $id: setup failed" >&2; return 1; }
+    echo "$key" > "$c/m4key"
+    echo "$binKey" > "$c/m4bin"
+  fi
+
+  while true
+  do
+    if [ "$LONG_RANKS" -gt 1 ]
+    then
+      MPI_TIMEOUT=$((24*3600)) runParallel "$c" "$SOLVER_EXE" "$LONG_RANKS" \
+        "log.$segment"
+    else
+      runSerial "$c" "$SOLVER_EXE" "log.$segment"
+    fi || { echo "  $id: run failed ($c/log.$segment)" >&2; return 1; }
+    case "$end" in
+      fixed:*) break ;;
+    esac
+    t=$(sed -n 's/^endTime *\([^;]*\);/\1/p' "$c/system/controlDict")
+    tEnd=$(echo "$end" | cut -d: -f4)
+    step=$(echo "$end" | cut -d: -f3)
+    if $CHECKS boundWidth "$c" "$(lastProfileTime "$c")" "$tEnd" \
+         "$BOUND_WIDTH" >> "$c/log.bound" 2>&1 \
+       || [ "$(python3 -c "print(int($t + $step > $tEnd))")" = 1 ]
+    then
+      break
+    fi
+    setControl "$c" endTime "$(python3 -c "print($t + $step)")" || return 1
+    segment=$((segment + 1))
+  done
+  touch "$c/m4done"
+}
+
+# stop the runs between two of them while the file PAUSE exists in the
+# work directory (e.g. while another test needs the cores)
+waitWhilePaused() {
+  while [ -f "$PM_DIR/long/PAUSE" ]
+  do
+    sleep 30
+  done
+}
+
+# the time directory name of the last profiles of a run
+lastProfileTime() {
+  (cd "$1/postProcessing/axialProfiles" && ls | sort -g | tail -1)
+}
+
+echo "== M4long code-to-code runs of run/014 (work directory $PM_DIR/long," \
+     "$LONG_JOBS runs at a time, each on $LONG_RANKS rank(s))"
+
+#------------------------------------------------------------------------------
+# The runs use copies of the solver and of setFrozenCarrier, made when the
+# sources (without comments) change, in long/bin/<key of the binaries>/: a
+# rebuild during the hours of the runs (e.g. the BUILD step of another
+# Alltest) never replaces the executable of a run, every segment of an
+# extended run uses the same one, and the binaries a run was made with
+# (m4bin of the run) stay available for its revalidation.  The layout of
+# the first M4 round (the binaries and their key directly in long/bin) is
+# moved into its key's directory.
+#
+# The installed executables are brought up to date with the sources first
+# (an incremental ./Allwmake, quick when nothing changed; review of M4,
+# round 2: 'tests/paperMode/Allrun long' runs no BUILD step, so a source
+# edit without a rebuild stored the stale executables under the key of the
+# new sources), and the md5 sums of the copies are recorded with them
+# (long/bin/<key>/md5sums) and checked whenever a run uses them.
+#------------------------------------------------------------------------------
+LONG_BIN_ROOT=$PM_DIR/long/bin
+if [ -f "$LONG_BIN_ROOT/key" ] && [ -x "$LONG_BIN_ROOT/rhoFixedFlowFoam" ]
+then
+  oldKey=$(cat "$LONG_BIN_ROOT/key")
+  mkdir -p "$LONG_BIN_ROOT/$oldKey"
+  mv "$LONG_BIN_ROOT/rhoFixedFlowFoam" "$LONG_BIN_ROOT/setFrozenCarrier" \
+    "$LONG_BIN_ROOT/$oldKey/" && mv "$LONG_BIN_ROOT/key" \
+    "$LONG_BIN_ROOT/$oldKey/key" || exit 1
+  echo "  binaries of key $oldKey moved into $LONG_BIN_ROOT/$oldKey"
+fi
+binKey=$(longKey bin)
+LONG_BIN=$LONG_BIN_ROOT/$binKey
+if [ "$(cat "$LONG_BIN/key" 2>/dev/null)" != "$binKey" ]
+then
+  mkdir -p "$PM_DIR/long"
+  (cd "$SOLVER_DIR" && ./Allwmake) > "$PM_DIR/long/log.Allwmake" 2>&1 || {
+    echo "Building the solver and setFrozenCarrier failed (incremental" \
+         "./Allwmake; $PM_DIR/long/log.Allwmake)" >&2
+    exit 1
+  }
+  rm -rf "${LONG_BIN:?}"
+  mkdir -p "$LONG_BIN"
+  cp "$SOLVER_EXE" "$CARRIER_EXE" "$LONG_BIN/" || exit 1
+  (cd "$LONG_BIN" && md5sum rhoFixedFlowFoam setFrozenCarrier > md5sums) \
+    || exit 1
+  echo "$binKey" > "$LONG_BIN/key"
+  echo "  binaries of key $binKey: built from the current sources and kept" \
+       "in $LONG_BIN"
+fi
+if [ -f "$LONG_BIN/md5sums" ] \
+  && ! (cd "$LONG_BIN" && md5sum --status -c md5sums)
+then
+  echo "The binaries in $LONG_BIN differ from their md5sums: remove the" \
+       "directory to make them again" >&2
+  exit 1
+fi
+SOLVER_EXE=$LONG_BIN/rhoFixedFlowFoam
+CARRIER_EXE=$LONG_BIN/setFrozenCarrier
+
+#------------------------------------------------------------------------------
+# Revalidation of a run that ended under another key (header).
+#
+#   REVALIDATE_STEPS    steps of each probe from the run's state
+#   REVALIDATE_EXCLUDE  files of a written time that a change of the
+#                       sources alters on purpose, left out of the
+#                       comparison: uniform/time (the clock of a restart
+#                       differs in its last bits, as in every restart
+#                       test), mw_PbI2_s (review of M4, round 1: the cell
+#                       values of layer distance are now the deposits
+#                       m''_e themselves; output only, re-read only after
+#                       a re-decomposition; the deposits themselves are
+#                       compared in uniform/phaseChange/), and
+#                       uniform/phaseChangeBalance (the ledger's state:
+#                       its booking entries, below; its other entries are
+#                       the columns of the balance file, compared there in
+#                       every step)
+#   REVALIDATE_EXCLUDE_COLUMNS
+#                       the columns of the balance file that a change of
+#                       the ledger's booking alters on purpose (review of
+#                       M4, round 2, plan section 27, item 1: the transport
+#                       defect in flux form and the rounding of the stored
+#                       condensate booked; round 3, plan section 29, item
+#                       2: the face-flux correction in flux form):
+#                       solverDefect, clamped and closure; and the
+#                       diagnostic evaporatedAboveWarning (round 3, plan
+#                       section 29, item 4: the mole fraction of the
+#                       monitor from the carrier's p/(R T); in paper mode
+#                       the release cells now exceed moleFractionWarning,
+#                       and the mass released there is counted; not part
+#                       of the closure, no field); every other column (the
+#                       time, the inventories, released, transport,
+#                       removed, restart, projected) is compared bit for
+#                       bit
+#------------------------------------------------------------------------------
+REVALIDATE_STEPS=${M4LONG_REVALIDATE_STEPS:-5}
+REVALIDATE_EXCLUDE=(uniform/time mw_PbI2_s uniform/phaseChangeBalance)
+REVALIDATE_EXCLUDE_COLUMNS=(solverDefect clamped closure
+                            evaporatedAboveWarning)
+
+# stripped <file>: a dictionary without comments, blank lines, leading and
+# trailing blanks, and without the entries a run changes (endTime)
+stripped() {
+  python3 - "$1" <<'EOF'
+import re, sys
+text = open(sys.argv[1], errors='replace').read()
+text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
+text = re.sub(r'//[^\n]*', '', text)
+lines = [l.strip() for l in text.splitlines() if l.strip()]
+print('\n'.join(l for l in lines if not re.match(r'endTime\s', l)))
+EOF
+}
+
+# sameSetup <run> <fresh set-up>: the dictionaries (stripped) and the
+# carrier of the run equal those of a fresh set-up of its spec
+sameSetup() {
+  local run=$1 fresh=$2 f
+  for f in $(cd "$fresh" && ls system/* constant/*Properties 0/Y_*)
+  do
+    [ "$f" = system/decomposeParDict ] && continue
+    cmp -s <(stripped "$run/$f") <(stripped "$fresh/$f") \
+      || { echo "$f differs (without comments and endTime)"; return 1; }
+  done
+  for f in rho U p T phi
+  do
+    cmp -s "$run/0/$f" "$fresh/0/$f" \
+      || { echo "the carrier field 0/$f differs"; return 1; }
+  done
+}
+
+# probeCase <run> <probe> <time>: a copy of the run's state at <time> (the
+# case's or its processor directories' state; their mesh, carrier and the
+# run's own compiled dynamicCode linked), to run REVALIDATE_STEPS steps and
+# write the last one
+probeCase() {
+  local run=$1 probe=$2 t=$3 d f dt
+  rm -rf "${probe:?}"
+  mkdir -p "$probe/constant"
+  cp -a "$run/system" "$probe/" || return 1
+  for f in "$run"/constant/*
+  do
+    ln -s "$(readlink -f "$f")" "$probe/constant/$(basename "$f")"
+  done
+  ln -s "$(readlink -f "$run/0")" "$probe/0"
+  ln -s "$(readlink -f "$run/dynamicCode")" "$probe/dynamicCode"
+  if [ -d "$run/processor0" ]
+  then
+    for d in "$run"/processor*
+    do
+      mkdir -p "$probe/$(basename "$d")"
+      ln -s "$(readlink -f "$d/constant")" "$probe/$(basename "$d")/constant"
+      ln -s "$(readlink -f "$d/0")" "$probe/$(basename "$d")/0"
+      cp -a "$d/$t" "$probe/$(basename "$d")/" || return 1
+    done
+  else
+    cp -a "$run/$t" "$probe/" || return 1
+  fi
+  dt=$(sed -n 's/^deltaT *\([^;]*\);/\1/p' "$probe/system/controlDict")
+  setControl "$probe" startFrom latestTime \
+    && setControl "$probe" endTime \
+         "$(python3 -c "print(repr($t + $REVALIDATE_STEPS*$dt))")" \
+    && setControl "$probe" writeControl timeStep \
+    && setControl "$probe" writeInterval "$REVALIDATE_STEPS" \
+    && touch "$probe/case.foam"
+}
+
+# probeRun <probe> <executable> <ranks>
+probeRun() {
+  if [ "$3" -gt 1 ]
+  then
+    runParallel "$1" "$2" "$3" log.probe
+  else
+    runSerial "$1" "$2" log.probe
+  fi
+}
+
+# revalidate <spec line>: 0 when the run was revalidated (its m4key is then
+# the current key), 1 otherwise; the record and the reason in
+# <run>/m4revalidated (appended)
+revalidate() {
+  local spec=($1)
+  local id=${spec[0]} c=$PM_DIR/long/${spec[0]} key oldKey oldBin t ranks
+  local work=$PM_DIR/long/revalidate/${spec[0]} x out tEnd excludes=()
+  key=$(longKey "$1")
+  oldKey=$(cat "$c/m4key" 2>/dev/null)
+  oldBin=$(cat "$c/m4bin" 2>/dev/null)
+  record() {
+    echo "$(date '+%F %T') $*" >> "$c/m4revalidated"
+    echo "  $id: $*"
+  }
+  if [ -z "$oldBin" ] || [ ! -x "$LONG_BIN_ROOT/$oldBin/rhoFixedFlowFoam" ]
+  then
+    record "not revalidated: the binaries of key ${oldBin:-unknown} are" \
+      "not kept"
+    return 1
+  fi
+
+  # 1. the set-up of its spec now
+  rm -rf "${work:?}"
+  mkdir -p "$work"
+  if ! (LONG_RANKS=1 setupLong "$work/setup" "${spec[@]}") \
+       > "$work/log.setup" 2>&1
+  then
+    record "not revalidated: the set-up failed ($work/log.setup)"
+    return 1
+  fi
+  if ! out=$(sameSetup "$c" "$work/setup")
+  then
+    record "not revalidated: the set-up differs: $out"
+    return 1
+  fi
+
+  # 2. both binaries from the state of its last write before its end
+  if [ -d "$c/processor0" ]
+  then
+    t=$(timeDirs "$c/processor0" | tail -2 | head -1)
+  else
+    t=$(timeDirs "$c" | tail -2 | head -1)
+  fi
+  ranks=$(ranksOf "$c")
+  for x in old new
+  do
+    probeCase "$c" "$work/$x" "$t" || {
+      record "not revalidated: the probe case failed ($work/$x)"
+      return 1
+    }
+  done
+  if ! probeRun "$work/old" "$LONG_BIN_ROOT/$oldBin/rhoFixedFlowFoam" \
+         "$ranks" || ! probeRun "$work/new" "$SOLVER_EXE" "$ranks"
+  then
+    record "not revalidated: a probe run failed ($work/old/log.probe," \
+      "$work/new/log.probe)"
+    return 1
+  fi
+  for x in "${REVALIDATE_EXCLUDE[@]}"
+  do
+    excludes+=(-x "$x")
+  done
+  tEnd=$(latestTime "$work/new")
+  if ! out=$("$TESTS_DIR/cmpFields.sh" "${excludes[@]}" "$work/old" \
+               "$work/new" "$tEnd" 2>&1)
+  then
+    record "not revalidated: the probes from $t s differ: $out"
+    return 1
+  fi
+  local columns balance=
+  columns=$(IFS=,; echo "${REVALIDATE_EXCLUDE_COLUMNS[*]}")
+  for x in "$work"/old/postProcessing/phaseChangeBalance/*/*.dat
+  do
+    [ -f "$x" ] || continue
+    balance=$($CHECKS sameBalance "$x" "$work/new/${x#$work/old/}" \
+                "$columns") || {
+      record "not revalidated: ${x#$work/old/} of the probes differs:" \
+        "${balance#*: }"
+      return 1
+    }
+  done
+  for x in "$work"/old/postProcessing/axialProfiles/*/*.dat
+  do
+    [ -f "$x" ] || continue
+    cmp -s "$x" "$work/new/${x#$work/old/}" || {
+      record "not revalidated: ${x#$work/old/} of the probes differs"
+      return 1
+    }
+  done
+
+  echo "$key" > "$c/m4key"
+  echo "$binKey" > "$c/m4bin"
+  record "revalidated: key $oldKey (binaries $oldBin) -> $key (binaries" \
+    "$binKey): the set-up of its spec equals the run's (dictionaries" \
+    "without comments and endTime; carrier bit for bit), and" \
+    "$REVALIDATE_STEPS steps from its state at $t s on $ranks rank(s) with" \
+    "both binaries write the same files (${out#IDENTICAL: }; profile files" \
+    "identical; left out: ${REVALIDATE_EXCLUDE[*]}; balance file:" \
+    "${balance#OK: })"
+  rm -rf "${work:?}"
+  return 0
+}
+
+# the runs that ended under another key, revalidated when asked for
+# (M4LONG_REVALIDATE=yes; at most LONG_JOBS at a time; each probe runs on
+# the run's own number of ranks)
+if [ "${M4LONG_REVALIDATE:-no}" = yes ]
+then
+  MAX_JOBS=$LONG_JOBS
+  for spec in "${LONG_RUNS[@]}"
+  do
+    id=${spec%% *}
+    c=$PM_DIR/long/$id
+    if [ -f "$c/m4done" ] && [ "$(cat "$c/m4key" 2>/dev/null)" != \
+         "$(longKey "$spec")" ]
+    then
+      startJob revalidate "$spec"
+    fi
+  done
+  waitJobs
+  rmdir "$PM_DIR/long/revalidate" 2>/dev/null
+fi
+
+#------------------------------------------------------------------------------
+# The runs: a selected run is run (or reused, or resumed); another one is
+# reused when it ended, otherwise prepared and left for later
+#------------------------------------------------------------------------------
+
+# selected <id>: the run is in M4LONG_RUNS (default all)
+selected() {
+  case " ${M4LONG_RUNS:-all} " in
+    *" all "*|*" $1 "*) return 0 ;;
+  esac
+  return 1
+}
+
+# prepareLong <spec line>: the case of a run that is not run now, set up and
+# decomposed (kept when its key matches: also a partial run)
+prepareLong() {
+  local spec=($1)
+  local id=${spec[0]} c=$PM_DIR/long/${spec[0]} key
+  key=$(longKey "$1")
+  [ "$(cat "$c/m4key" 2>/dev/null)" = "$key" ] && return 0
+  rm -rf "$c"
+  mkdir -p "$PM_DIR/long"
+  setupLong "$c" "${spec[@]}" && echo "$key" > "$c/m4key"
+}
+
+# runLongJob <spec line>: runLong in the background (startJob), leaving the
+# marker m4failed when it fails
+runLongJob() {
+  local id=${1%% *}
+  runLong "$1" && return 0
+  mkdir -p "$PM_DIR/long/$id" && touch "$PM_DIR/long/$id/m4failed"
+  return 1
+}
+
+MAX_JOBS=$LONG_JOBS
+for spec in "${LONG_RUNS[@]}"
+do
+  id=${spec%% *}
+  c=$PM_DIR/long/$id
+  if selected "$id"
+  then
+    waitWhilePaused
+    startJob runLongJob "$spec"
+  elif [ "$(cat "$c/m4key" 2>/dev/null)" = "$(longKey "$spec")" ] \
+    && [ -f "$c/m4done" ]
+  then
+    echo "  $id: reused ($c)"
+  elif prepareLong "$spec"
+  then
+    echo "  $id: not selected (M4LONG_RUNS), prepared ($c)"
+  else
+    echo "  $id: not selected (M4LONG_RUNS), preparing it failed" >&2
+    mkdir -p "$c" && touch "$c/m4failed"
+  fi
+done
+waitJobs
+
+declare -A STATE    # id: ended, failed or prepared
+for spec in "${LONG_RUNS[@]}"
+do
+  id=${spec%% *}
+  c=$PM_DIR/long/$id
+  if [ "$(cat "$c/m4key" 2>/dev/null)" = "$(longKey "$spec")" ] \
+    && [ -f "$c/m4done" ]
+  then
+    STATE[$id]=ended
+  elif [ -f "$c/m4failed" ]
+  then
+    STATE[$id]=failed
+  else
+    STATE[$id]=prepared
+  fi
+done
+
+# the wall-clock seconds per step of the runs that ended (all segments)
+SECONDS_PER_STEP=$(python3 - "$PM_DIR/long" <<'EOF'
+import glob, os, re, sys
+steps, clock = 0, 0.0
+for done in glob.glob(os.path.join(sys.argv[1], '*', 'm4done')):
+    for log in glob.glob(os.path.join(os.path.dirname(done), 'log.[0-9]*')):
+        n, c = 0, 0.0
+        for line in open(log, errors='replace'):
+            if line.startswith('Time = '):
+                n += 1
+            m = re.search(r'ClockTime = (\S+) s', line)
+            if m:
+                c = float(m.group(1))
+        steps, clock = steps + n, clock + c
+print(f'{clock/steps:.3f}' if steps else '0.4')
+EOF
+)
+
+# notRunText <id>: the cost and the way to run a run that did not end
+notRunText() {
+  local id=$1 spec s c=$PM_DIR/long/$1
+  for s in "${LONG_RUNS[@]}"
+  do
+    [ "${s%% *}" = "$id" ] && spec=($s)
+  done
+  local end=${spec[5]} dt=${spec[6]} reached=0
+  [ -d "$c" ] && reached=$(latestTime "$c")
+  python3 - "$id" "$end" "$dt" "${reached:-0}" "$SECONDS_PER_STEP" \
+    "$LONG_RANKS" "$c" <<'EOF'
+import sys
+id_, end, dt, done, sps, ranks, case = sys.argv[1:]
+dt, done, sps = float(dt), float(done), float(sps)
+kind, *v = end.split(':')
+if kind == 'fixed':
+    lo = hi = float(v[0])
+else:
+    lo, hi = float(v[0]), float(v[2])
+steps = lambda t: max(t - done, 0.0)/dt
+text = f'{id_}: not run'
+if done > 0:
+    text += f' (stopped at {done:g} s; it resumes from there)'
+if lo == hi:
+    text += (f'; {steps(lo):.0f} steps to go, about {steps(lo)*sps/3600:.1f} h '
+             f'on {ranks} ranks')
+else:
+    text += (f'; at least {steps(lo):.0f} steps to go (to {lo:g} s, then the '
+             f'bound decides; at most {steps(hi):.0f} to {hi:g} s), at least '
+             f'{steps(lo)*sps/3600:.1f} h on {ranks} ranks')
+text += (f' at the {sps:g} s per step measured here; ready to run: '
+         f"M4LONG_RUNS='{id_}' tests/Alltest M4long (prepared in {case})")
+print(text)
+EOF
+}
+
+# ended <id> ...: every run ended; else print what did not (the NOTRUN or
+# FAIL text) and return 1 (2 when one of them failed)
+ended() {
+  local id status=0
+  for id in "$@"
+  do
+    case "${STATE[$id]}" in
+      ended) ;;
+      failed) echo "$id: the run failed ($PM_DIR/long/$id)"; status=2 ;;
+      *) notRunText "$id"; [ $status -eq 0 ] && status=1 ;;
+    esac
+  done
+  return $status
+}
+
+# notEnded <criterion> <text> <ids>: NOTRUN or FAIL for runs that did not end
+notEnded() {
+  local id=$1 text=$2 out s
+  shift 2
+  out=$(ended "$@")
+  s=$?
+  out=$(echo "$out" | sed ':a; N; $!ba; s/\n/; /g')
+  if [ $s -eq 2 ]
+  then
+    result "$id" FAIL "$text: $out"
+  else
+    result "$id" NOTRUN "$text: $out"
+  fi
+}
+
+# origin <id> ...: how the outputs of these runs belong to the current
+# sources, for the criterion lines (review of M4, round 2): '(run with the
+# current sources)', or the runs revalidated under the current key with
+# their record ('<id> revalidated from key <old> by a <n>-step probe from
+# <t> s, not run with the current sources')
+origin() {
+  local id c key line out revalidated=
+  for id in "$@"
+  do
+    c=$PM_DIR/long/$id
+    key=$(cat "$c/m4key" 2>/dev/null)
+    line=$(grep -F 'revalidated: key' "$c/m4revalidated" 2>/dev/null \
+             | grep -F -- "-> $key " | tail -1)
+    [ -n "$line" ] || continue
+    out=$(echo "$line" | sed -n 's/^.* revalidated: key \([^ ]*\) .* and \([0-9]*\) steps from its state at \([^ ]*\) s on .*/\1 by a \2-step probe from \3 s/p')
+    revalidated+="${revalidated:+; }$id revalidated from key ${out:-unknown},"
+    revalidated+=" not run with the current sources"
+  done
+  if [ -n "$revalidated" ]
+  then
+    echo "($revalidated)"
+  else
+    echo "(run with the current sources)"
+  fi
+}
+
+#------------------------------------------------------------------------------
+# M4.3: the Fig. 9 identity n' t_ev = n0/U_b,d on the plateau at t_ev + 1
+# (one line per run).  M4.3 and M4.4 read the profiles of fixed times, final
+# once written: a run whose key matches is evaluated as soon as they exist
+# (profileAt), also before it ends.
+#------------------------------------------------------------------------------
+
+# profileAt <id> <time>: the run's native profile of that time exists, the
+# run is not failed and its key matches its inputs
+profileAt() {
+  local s spec=
+  for s in "${LONG_RUNS[@]}"
+  do
+    [ "${s%% *}" = "$1" ] && spec=$s
+  done
+  [ -n "$spec" ] && [ "${STATE[$1]}" != failed ] \
+    && [ "$(cat "$PM_DIR/long/$1/m4key" 2>/dev/null)" = "$(longKey "$spec")" ] \
+    && [ -f "$PM_DIR/long/$1/postProcessing/axialProfiles/$2/PbI2_g_native.dat" ]
+}
+
+plateauOf() {
+  local id=$1 time=$2 tev=$3 c=$PM_DIR/long/$1 bulk Ub
+  bulk=$(sed -n 's/.*discrete bulk velocity \([^ ]*\) m\/s.*/\1/p' \
+           "$c/log.setFrozenCarrier")
+  Ub=$(sed -n 's/.*U_b = Q\/(pi R^2) = \([^ ]*\) m\/s.*/\1/p' \
+         "$c/log.setFrozenCarrier")
+  $CHECKS plateau "$c" "$time" "$tev" 3.16e-5 0.25 0.45 0.01 "$bulk" \
+    "$Ub" 3.38e-4
+}
+for run in "fig9-tev6 7 6" "fig9-tev15 16 15"
+do
+  set -- $run
+  text="Fig. 9 identity n' t_ev = n0/U_b of the carrier on the plateau\
+ (0.25-0.45 m) to 1 %, t_ev $3 s at $2 s"
+  if profileAt "$1" "$2"
+  then
+    out=$(plateauOf "$1" "$2" "$3")
+    s=$?
+    check M4.3 "$text: $out $(origin "$1")" [ $s -eq 0 ]
+  else
+    notEnded M4.3 "$text" "$1"
+  fi
+done
+
+#------------------------------------------------------------------------------
+# M4.4: the solid profiles at 2 t_ev for t_ev = 6 and 15 s agree to 1 %: a
+# check of a property of the model (the final deposit does not depend on
+# t_ev), which Fig. 9 shows for t_ev = 15 to 90 s; Fig. 9 has no 6 s curve
+# (plan section 26)
+#------------------------------------------------------------------------------
+text="solid profiles at 2 t_ev (t_ev 6 and 15 s; a property of the model,\
+ not a curve of Fig. 9), L1 norm of the native profiles relative to the\
+ deposit, limit 1 %"
+if profileAt fig9-tev6 12 && profileAt fig9-tev15 30
+then
+  out=$($CHECKS solidAgree "$PM_DIR/long/fig9-tev6" 12 \
+          "$PM_DIR/long/fig9-tev15" 30 0.01)
+  s=$?
+  check M4.4 "$text: $out $(origin fig9-tev6 fig9-tev15)" [ $s -eq 0 ]
+else
+  notEnded M4.4 "$text" fig9-tev6 fig9-tev15
+fi
+
+#------------------------------------------------------------------------------
+# M4.5: Table 2, temperature-based column, both layer rules, the gate
+# restated by the researcher (2026-10-02): |T_dep - T_paper| <= max(2 K,
+# dT_bin), dT_bin the drop of the wall temperature across the native bin
+# of the onset; the raw difference, dT_bin and the plain +-2 K comparison
+# are printed (checks.py tdep; one line per case and rule).  A run that has not ended is evaluated at its latest
+# profiles: the deposit is irreversible, so the interval of T_dep at the
+# end of the experiment (checks.py tdepDecided) decides the criterion as
+# soon as it lies within +-2 K (met) or entirely outside (not met); the
+# run's stopping rule (BOUND_WIDTH) only narrows that interval further.
+#------------------------------------------------------------------------------
+table2() {
+  local case=$1 expected=$2 tEnd=$3 rule c time out s
+  for rule in distance faceCells
+  do
+    c=$PM_DIR/long/$case-$rule
+    if ended "$case-$rule" > /dev/null
+    then
+      time=$(lastProfileTime "$c")
+      out=$($CHECKS tdep "$c" "$time" "$tEnd" "$expected" 2 \
+              "$case, layer $rule")
+      s=$?
+      check M4.5 "$out $(origin "$case-$rule")" [ $s -eq 0 ]
+      continue
+    fi
+    time=$(lastProfileTime "$c" 2>/dev/null)
+    if [ "${STATE[$case-$rule]}" != failed ] && [ -n "$time" ]
+    then
+      out=$($CHECKS tdepDecided "$c" "$time" "$tEnd" "$expected" 2 \
+              "$case, layer $rule (the run has not ended)")
+      s=$?
+      if [ $s -eq 0 ]
+      then
+        result M4.5 PASS "$out $(origin "$case-$rule")"
+        continue
+      elif [ $s -eq 2 ]
+      then
+        result M4.5 FAIL "$out $(origin "$case-$rule")"
+        continue
+      fi
+      notEnded M4.5 "$out" "$case-$rule"
+    else
+      notEnded M4.5 "$case, layer $rule (Table 2: $expected K)" "$case-$rule"
+    fi
+  done
+}
+table2 T106_6 775 6
+table2 T106_60 713 60
+table2 T106_300 666 300
+table2 T5_60 787 60
+table2 T540_60 670 60
+
+#------------------------------------------------------------------------------
+# M4.5b: T5_60 at dt 10 ms and 5 ms (the larger dt needs a demonstrated
+# insensitivity of T_dep): within 0.5 K
+#------------------------------------------------------------------------------
+a=$PM_DIR/long/T5_60-distance
+b=$PM_DIR/long/T5_60-distance-dt5ms
+text="T5_60 (5 mL/min), layer distance, at dt 10 ms and 5 ms: T_dep within\
+ 0.5 K"
+if ended T5_60-distance T5_60-distance-dt5ms > /dev/null
+then
+  Ta=$($CHECKS tdep "$a" "$(lastProfileTime "$a")" 60 0 1e9 a \
+         | sed -n 's/.*: T_dep \([0-9.]*\) K.*/\1/p')
+  Tb=$($CHECKS tdep "$b" "$(lastProfileTime "$b")" 60 0 1e9 b \
+         | sed -n 's/.*: T_dep \([0-9.]*\) K.*/\1/p')
+  ok=$(python3 -c "print(int(abs($Ta - $Tb) <= 0.5))" 2>/dev/null || echo 0)
+  check M4.5b "$text: $Ta K at dt 10 ms and $Tb K at dt 5 ms (dt 10 ms is\
+ used for T5_60) $(origin T5_60-distance T5_60-distance-dt5ms)" [ "$ok" = 1 ]
+else
+  notEnded M4.5b "$text" T5_60-distance T5_60-distance-dt5ms
+fi
+
+#------------------------------------------------------------------------------
+# M4.16 (not a gate): the positions of Figs. 9 and 10 (t_ev 15 s: the gas
+# at 16 s, the solid at 30 s), digitised from the paper (plan section 26),
+# against run/014 and against the parameter set of the T-Flows
+# temperature-model code (A 150, k 0.02, Tdep 638.15 K, layer R - r <= 0.24
+# mm); PASS when computed, whatever the differences
+#------------------------------------------------------------------------------
+PAPER_POSITIONS="gas50=0.507 gas10=0.518 solidOnset=0.502 solidPeakX=0.513"
+PAPER_POSITIONS+=" solidPeak=1.14e-3"
+for id in fig9-tev15 fig9-tev15-TFlows
+do
+  text="positions of Figs. 9 and 10 against $id (not a gate; the paper:\
+ the gas 50 % at 0.507 m and 10 % at 0.518 m at 16 s (Fig. 9), the solid\
+ from 0.502 m, its peak 1.14e-3 mol/m at 0.513 m at 30 s (Fig. 10; Fig. 9:\
+ a spike of 3.5e-3 mol/m at 0.501-0.505 m))"
+  if profileAt "$id" 16 && profileAt "$id" 30
+  then
+    out=$($CHECKS positions "$PM_DIR/long/$id" 16 30 $PAPER_POSITIONS)
+    s=$?
+    check M4.16 "$text: ${out#OK: } $(origin "$id")" [ $s -eq 0 ]
+  else
+    notEnded M4.16 "$text" "$id"
+  fi
+done
+
+#------------------------------------------------------------------------------
+# M4.17: the closure of the long runs made with the current sources (review
+# of M4, round 2; plan section 27, item 1): at most 1e-14 of the reference
+# in every step of every such run, the drift gate at the length of the
+# runs.  A run revalidated under the current key (made with older
+# binaries) stands for the physics of the current sources, not for their
+# ledger: its closure is printed, not gated (the runs made before the fix,
+# with the row-form defect and the rounding of the stored condensate not
+# booked, reached 7.6e-13 in T5_60 and 1.8e-14 to 8.2e-14 elsewhere).
+# NOTRUN when no run was made with the current sources; FAIL when one of
+# the runs failed.
+#------------------------------------------------------------------------------
+
+# revalidatedNow <id>: the run was revalidated under its current key
+revalidatedNow() {
+  local c=$PM_DIR/long/$1 key
+  key=$(cat "$c/m4key" 2>/dev/null)
+  grep -F 'revalidated: key' "$c/m4revalidated" 2>/dev/null \
+    | grep -q -F -- "-> $key "
+}
+
+madeNow=()
+reusedNow=()
+notDone=()
+for spec in "${LONG_RUNS[@]}"
+do
+  id=${spec%% *}
+  if [ "${STATE[$id]}" != ended ]
+  then
+    notDone+=("$id")
+  elif revalidatedNow "$id"
+  then
+    reusedNow+=("$id")
+  else
+    madeNow+=("$id")
+  fi
+done
+text="the closure of the long runs made with the current sources, in every\
+ step, limit 1e-14 of the reference"
+others=""
+if [ ${#reusedNow[@]} -gt 0 ]
+then
+  out=$($CHECKS closureRuns 1 \
+          $(for id in "${reusedNow[@]}"; do echo "$PM_DIR/long/$id"; done))
+  out=${out#*per run: }
+  others+="; not gated, revalidated (made with older binaries, the closure"
+  others+=" of their booking): ${out% (limit 1)}"
+fi
+if [ ${#notDone[@]} -gt 0 ]
+then
+  others+="; not ended: ${notDone[*]}"
+fi
+if [ ${#madeNow[@]} -gt 0 ]
+then
+  out=$($CHECKS closureRuns 1e-14 \
+          $(for id in "${madeNow[@]}"; do echo "$PM_DIR/long/$id"; done))
+  s=$?
+  failedRuns=$(ended "${notDone[@]}" 2>/dev/null | grep -c 'the run failed')
+  check M4.17 "$text: ${out#*per run: }$others" \
+    eval '[ $s -eq 0 ] && [ "$failedRuns" -eq 0 ]'
+elif ended "${notDone[@]}" > /dev/null || [ $? -ne 2 ]
+then
+  result M4.17 NOTRUN "$text: no run was made with the current sources$others"
+else
+  result M4.17 FAIL "$text: no run was made with the current sources$others"
+fi
+
+#------------------------------------------------------------------------------
+# M4.20: the key of a run follows the mesh and the shell functions that set
+# the run up (review of M4, round 3), as the cache keys of the regression
+# gate do.  The key of the first run, against the same key with a stand-in
+# mesh directory whose checksum differs, and with setupLong redefined (in a
+# subshell); the old key of round 2 (without both) gave the same key in all
+# three cases.  Nothing is changed but the stand-in directory.
+#------------------------------------------------------------------------------
+keyTest() {
+  local spec=${LONG_RUNS[0]} dir=$PM_DIR/long/keytest k0 kMesh kSetup
+  rm -rf "$dir"
+  mkdir -p "$dir" && echo "a stand-in checksum" > "$dir/mesh.md5" || return 1
+  k0=$(longKey "$spec")
+  kMesh=$(MESH_DIR=$dir longKey "$spec")
+  kSetup=$(setupLong() { return 1; }; longKey "$spec")
+  rm -rf "$dir"
+  echo "key ${k0:0:12}, with another mesh checksum ${kMesh:0:12}, with a" \
+       "changed setupLong ${kSetup:0:12} (mesh.md5" \
+       "$(cat "$MESH_DIR/mesh.md5"))"
+  [ -n "$k0" ] && [ "$k0" != "$kMesh" ] && [ "$k0" != "$kSetup" ] \
+    && [ "$kMesh" != "$kSetup" ]
+}
+out=$(keyTest); s=$?
+check M4.20 "the key of a long run follows the mesh and the set-up functions\
+ (as the cache keys of the gate): $out" [ $s -eq 0 ]
+
+for id in "${!STATE[@]}"
+do
+  [ "${STATE[$id]}" = failed ] && exit 1
+done
+exit 0
