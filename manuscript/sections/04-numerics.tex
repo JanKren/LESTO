@@ -1,0 +1,45 @@
+%==============================================================================
+\section{Numerical implementation}
+\label{sec:numerics}
+%==============================================================================
+
+\todo{Describe the OpenFOAM implementation (\texttt{rhoFixedFlowFoam}):}
+\begin{itemize}
+  \item \textbf{Carrier flow.}  Physical mode: \texttt{rhoSimpleFoam}
+        (SIMPLEC recommended: 66 instead of 236 iterations for case 001), then
+        frozen; continuity of the frozen flux to $5\times10^{-7}$ per cell.
+        Paper mode: analytic $\rho$, $\vect{u}$ and $\phi$ generated directly
+        (exactly divergence-free on the extruded mesh).  Only $\phi$ and $\rho$
+        enter the species equations; frozen fields are not re-written.
+  \item \textbf{Species.}  Implicit Euler on \cref{eq:species} in conservative
+        form (\texttt{fvm::ddt(rho,Y)}, \texttt{fvm::div(phi,Y)},
+        \texttt{fvm::laplacian(rho*D,Y)}); bounded TVD convection (SuperBee, as in
+        \citet{Lobresco2026assessment}; not the 0--1 bounded variants, since
+        $Y$ can exceed 1); $\Delta t=\SI{1}{ms}$ (Courant $\le0.5$ at
+        \SI{106}{mL/min}; \SI{0.33}{ms} at \SI{540}{mL/min} in physical mode).
+        First-order upwind would add axial numerical diffusion of 0.3--3 times
+        $D_{\ce{PbI2}}$ at the target flows.
+  \item \textbf{Phase-change coupling.}  The thermochemistry interface returns
+        a linearized source $(S_u, S_p)$ per species and receives a per-cell
+        context ($\rho$, $V$, $\Delta t$, wall-layer and sample flags,
+        $A_I/V_I$).  The gas equation carries
+        $+\,$\texttt{fvm::Sp}$(\lambda\rho, Y) = S_u$ ($\lambda\ge0$;
+        never \texttt{fvm::SuSp}: the HKS law is affine in $Y$, so it enters as
+        \texttt{fvm::Sp}$(S_p,Y)$ plus $S_u$ with $S_u, S_p \ge 0$ on every branch).  The deposit is
+        updated from the \emph{realized} exchange after the last outer
+        iteration, so the gas and solid balance closes exactly.
+        Evaporation is limited to the available condensate.
+  \item \textbf{GEMS3K coupling.}  One \texttt{TNode} per MPI rank;
+        DCH/IPM/DBR system files; calls only in interfacial and sample cells;
+        warm start from the previous cell solution; a unit test that
+        reproduces tabulated $p_v(T)$ points and fixes the Pa/bar convention.
+  \item \textbf{Mesh.}  Block-structured O-grid, 228\,960 hexahedra (424 axial
+        $\times$ 540 per cross-section), first cell $57.46\,\mu\mathrm{m}$, max
+        non-orthogonality \ang{30}, max skewness 0.51 -- identical to the mesh
+        of \citet{Lobresco2026assessment}.
+  \item \textbf{Cost.}  Currently \SI{0.88}{s} per step serially (with a
+        redundant tracer, relaxation 0.995 and up to 47 outer iterations on a
+        linear equation).  Expected \SIrange{0.5}{2.5}{h} for 60--\SI{300}{s}
+        on about 20 ranks after cleanup \todo{measure}.  Versions: OpenFOAM
+        v2412/v2606 (identical results), GEMS3K \todo{version}.
+\end{itemize}

@@ -1,0 +1,224 @@
+%==============================================================================
+\section{Introduction}
+\label{sec:introduction}
+%==============================================================================
+% First draft generated from literature-review.md.  Citations use \cite{} and
+% resolve against references.bib (verified corpus).  Needs mhchem (\ce{}),
+% and siunitx (\SI{}), which main.tex already loads; for elsarticle add
+% \usepackage[version=4]{mhchem} and \usepackage{siunitx}.
+% "% TODO" marks scope decisions that are still open.
+
+Lead and lead--bismuth eutectic (LBE) are the coolants of the Generation~IV
+lead-cooled fast reactor (LFR) and of accelerator-driven systems such as
+MYRRHA \cite{Alemberti2014overview,Cinotti2011lead,AitAbderrahim2012myrrha,OECD2015handbook}.
+A central argument in their safety case is that the liquid metal retains most
+fission and activation products. The safety design criteria of the Generation~IV
+International Forum quote volatilized fractions of the order of $10^{-6}$ for
+\ce{^{137}Cs} and \ce{^{131}I} at \SI{700}{\celsius}. The same documents,
+however, state that this retention still has to be verified for occupational
+hazards and accidental source terms \cite{Alemberti2020lead,Alemberti2021safety}.
+Equilibrium estimates for ALFRED indicate that iodine, cesium and noble gases
+contribute significantly to the gas-phase source term once a fuel assembly has
+failed \cite{Ivan2025assessment}.
+Species that leave the coolant are carried by the cover gas and deposit on
+colder structures, where they can cause localized contamination and later be
+remobilized \cite{Neuhausen2020radionuclide,Aerts2020behavior}.
+Where and how fast they deposit therefore links the coolant source term to the
+activity that reaches the reactor hall.
+Mechanistic source-term tools represent this link with lumped control volumes
+or flow networks \cite{Hua2020development,Miyahara2023development}, and
+retention and transport data are still missing for many elements
+\cite{Trivedi2017retention}.
+The Euratom project LESTO, which continues earlier work on the licensing of
+ALFRED and MYRRHA \cite{Gianfelici2025research}, addresses the transport of
+volatile fission products from the coolant to the reactor hall.
+
+Most of what is known about these species in heavy liquid metals comes from
+radiochemical experiments.
+Henry's-law and transpiration studies supply the release data.
+Iodine, for example, evaporates from LBE in significant amounts only above
+about \SI{800}{K}, at a rate controlled by desorption at the interface rather
+than by diffusion in the liquid
+\cite{Neuhausen2006investigations,Ohno2006equilibrium,GonzalezPrieto2014equilibrium,Ivan2026evaporation}.
+Speciation depends on concentration, atmosphere and wall material.
+At trace level, iodine evaporated from LBE deposits as a single species
+tentatively identified as \ce{BiI}
+\cite{Karlsson2020thermochromatographic,Karlsson2021thermochromatographic}.
+At iodine mole fractions of $10^{-5}$--$10^{-3}$ the deposits are \ce{PbI2} and
+\ce{BiI3}, and \ce{BiI} disproportionates \cite{Liu2025chemical}.
+An independent platform found \ce{PbI2}(g) to be the dominant species in dry
+argon \cite{Liu2025exploring}.
+These results were obtained with thermochromatography and
+thermosublimatography. In both techniques a carrier gas transports the
+volatile species along a column with a negative axial temperature gradient,
+and the position of the deposit reflects its volatility
+\cite{Merinis1969etude,Eichler1982evaluation,Gaggeler2014gasphase,Eichler1992volatilization}.
+For weighable amounts, adsorption gives way to desublimation at about one
+monolayer coverage \cite{Eichler1993complex}.
+The onset of deposition is then commonly estimated from a saturation balance:
+the evaporated mass, diluted in the total carrier volume, is set equal to the
+equilibrium vapor pressure \cite{Liu2025chemical}.
+In recent \ce{PbI2} experiments the measured deposition temperature fell with
+both experiment duration and carrier flow rate \cite{Lobresco2026assessment}.
+Earlier gradient-tube studies had found no flow-rate dependence
+\cite{Helas1978investigation}.
+
+Interpretation and modeling of such columns have remained one- or
+zero-dimensional.
+Monte Carlo models of the adsorption--desorption random walk assume an
+idealized laminar flow \cite{Zvara1985simulation,Dietzel2024extended}.
+Analytical kinetic models share this limitation \cite{Zhuikov2021kinetic}, and
+the saturation estimate ignores transport altogether.
+Nuclear reactor safety faces the same problem at larger scale.
+The Ph\'ebus experiments showed that fission-product deposition concentrates
+where wall and gas temperatures fall steeply, and that vapor chemistry, wall
+condensation, homogeneous nucleation and thermophoresis act together there
+\cite{Haste2013transport,Girault2013insights}.
+The integral codes used to analyze these tests represent the circuit as a chain
+of control volumes \cite{Cantrel2014astec}.
+They underestimate condensation of supersaturated vapor in developing laminar
+flow, disagree with measured retention where the flow is not fully developed,
+and lack heterogeneous chemistry in thermal-gradient tubes
+\cite{Kissane2006interpretation,Cousin2013modelling,Gouello2021interaction}.
+Several studies have also shown that local gas-phase equilibrium is a poor
+assumption for iodine at the short residence times of such circuits
+\cite{Cantrel2003reaction,Xerri2012ab,Gregoire2017study}.
+Other fields supply the physics these codes lack.
+Boundary-layer theories of salt deposition and chemical vapor deposition
+include thermal (Soret) diffusion of heavy vapors, variable properties, and fog
+formation near cooled walls
+\cite{Rosner1979chemically,Gokoglu1988significance,Holstein1988thermal,Castillo1989theory}.
+Metal fog can enhance fission-product release from Pb and LBE pools by up to an
+order of magnitude \cite{Epstein2020enhancement}, and \ce{PbI2} fluxes from
+molten lead to cooled steel are consistent with such a fog model
+\cite{BaniMelhem2026experimentalb}.
+Resolved CFD of vapor and aerosol transport exists for sodium cover gases
+\cite{Huang2019numerical,Ohira2022numerical,Anoop2026development} and for wall
+condensation in containments, where face-flux boundary conditions were more
+accurate and less grid-dependent than volumetric sinks
+\cite{VijayaKumar2021implementation}.
+None of this work, however, treats the laminar, strongly non-isothermal
+transport of a heavy fission-product compound in a light carrier gas.
+
+A predictive model must also represent chemistry. Speciation, phase stability
+and vapor pressures of multicomponent systems are computed by Gibbs energy
+minimization. The GEMS3K kernel was designed for exactly this purpose: it is
+called in every control volume of a transport code whose composition,
+temperature or pressure has changed \cite{Kulik2013gemselektor}.
+Operator-split coupling of transport and equilibrium chemistry is mature in
+reactive-transport modeling
+\cite{Steefel2015reactive,Leal2017overview,Kosakowski2014opengeosysgem}.
+Its splitting errors are well characterized, including a mass-balance error
+under continuous boundary fluxes
+\cite{Valocchi1992accuracy,Carrayrou2004operatorsplitting}.
+In nuclear engineering, ANSYS Fluent has been coupled with the Gibbs-energy
+solver of HSC Chemistry to model LBE coolant chemistry
+\cite{Marino2020multiphysics}. OpenFOAM has been coupled with Thermochimica to
+model fission-product retention and release in molten salts
+\cite{Scuro2024coupleda,Scuro2024coupledb}. GEMS itself has been coupled with
+the lumped severe-accident code MELCOR
+\cite{Nichenko2021modelling,Nichenko2022msr}.
+The main obstacle is cost: an equilibrium calculation can cost $10$--$10^{4}$
+times a transport step \cite{Leal2020accelerating}.
+Several approaches have been proposed to reduce it:
+\begin{itemize}
+  \item in situ adaptive tabulation \cite{Pope1997computationally};
+  \item on-demand learning \cite{Leal2020accelerating};
+  \item neural-network surrogates trained on speciation data
+        \cite{Prasianakis2020neural,Prasianakis2025geochemistry}.
+\end{itemize}
+These couplings all concern liquid or aqueous systems, and the acceleration
+strategies were developed for aqueous geochemistry or combustion kinetics.
+None addresses the transport of a condensable vapor to a wall in a
+high-temperature gas flow.
+
+Lobresco et al.\ \cite{Lobresco2026assessment} presented the first CFD study of
+a thermosublimatography column, using the T-Flows code and the \ce{PbI2}
+experiments of the PSI setup \cite{Liu2025chemical}.
+They compared two deposition models:
+\begin{itemize}
+  \item a temperature-activated relaxation model, calibrated against a
+        reference experiment;
+  \item a Hertz--Knudsen--Schrage (HKS) model driven by \ce{PbI2} vapor
+        pressures from GEMS \cite{Persad2016expressions}.
+\end{itemize}
+Both models reproduced the decrease of the deposition temperature with
+experiment duration. The vapor-pressure model, however, predicted systematically
+broader downstream tails, which the authors attributed to unresolved
+condensation mechanisms and represented by an empirical enhancement
+coefficient.
+They deliberately limited the scope to model assessment:
+\begin{itemize}
+  \item the carrier velocity was a prescribed, fully developed laminar
+        profile;
+  \item \ce{PbI2} was a dilute passive scalar in molar-concentration form;
+  \item wall uptake was a volumetric source in a near-wall layer of fixed
+        thickness;
+  \item the results were obtained on a single mesh.
+\end{itemize}
+In the experiment, however, helium density changes by a factor of about 3.5
+between the evaporation furnace and the cold end of the column. Because the
+molar-mass ratio \ce{PbI2}/He is about 115, a mole fraction of only
+\SI{1}{\percent} corresponds to a \ce{PbI2} mass fraction above 0.5.
+Three effects were not quantified: thermal diffusion of the heavy species
+\cite{Rosner2000heavy}, non-dilute transport \cite{Liao2007generalized}, and
+nucleation in the cooling gas \cite{Barrett2000aerosol}.
+The authors concluded that direct coupling with GEMS, and surrogates to make
+it affordable, are the next steps. Liu et al.\ reached the same conclusion
+from the experimental side \cite{Liu2025chemical}.
+No CFD framework yet combines the following:
+\begin{itemize}
+  \item a variable-density carrier flow;
+  \item gas--solid phase change that conserves mass exactly and does not
+        depend on the mesh;
+  \item equilibrium coupling for several condensing species;
+  \item verification and validation against thermosublimatography data.
+\end{itemize}
+
+In this work, we develop and assess such a framework, implemented as the
+OpenFOAM solver \texttt{rhoFixedFlowFoam} \cite{Weller1998tensorial}.
+Our contributions are:
+(i) a compressible, variable-density description of the helium carrier and a
+mass-fraction formulation of species transport, with the temperature-based
+and HKS deposition models written as wall fluxes that conserve gas plus
+deposit exactly and are independent of the near-wall mesh;
+(ii) a scaling analysis of wall uptake that separates transport-limited from
+kinetics-limited deposition, and an assessment of what the empirical
+enhancement coefficient represents%
+% TODO: final wording depends on the reference-parameter check with the
+%       T-Flows authors (notes-for-authors.md, sections A--C)
+;
+(iii) a quantification of the physics omitted so far: carrier expansion,
+thermal diffusion, non-dilute loading, a supersaturation-based nucleation
+indicator, collision-integral accuracy, and the uncertainty of the \ce{PbI2}
+vapor-pressure data
+\cite{Neufeld1972empirical,Konings1996infrared,Chase1998nist}%
+% TODO: decide whether the Soret term and two-way coupling of the mixture
+%       density enter the final model or only the sensitivity study
+;
+(iv) coupling to the GEMS3K equilibrium kernel, first through tabulated
+vapor pressures and then through direct calls in interfacial cells, with
+an analysis of the splitting error at the depositing wall%
+% TODO: include ML/tabulation surrogates here, or defer them to a
+%       follow-up paper?
+;
+(v) verification against analytical solutions for laminar tube flow with wall
+uptake \cite{Shah1978circular,Tandon2004extended,Sankarasubramanian1973unsteady},
+the method of manufactured solutions \cite{Roache2002code}, grid-convergence
+analysis \cite{Celik2008procedure}, and code-to-code comparison with T-Flows
+\cite{Lobresco2026assessment,Niceno2005unstructured}; and
+(vi) validation against the five PSI \ce{PbI2} thermosublimatography
+experiments and the reference experiment of Liu et al.\
+\cite{Lobresco2026assessment,Liu2025chemical}%
+% TODO: add the Pb--Bi--I (PbI2 + BiI3) experiments of Liu et al. (2025)
+%       as a multi-species demonstration, if in scope
+.
+Section~\ref{sec:experiments} summarizes the experiments,
+Section~\ref{sec:model} the mathematical model,
+Section~\ref{sec:numerics} its implementation,
+Section~\ref{sec:verification} the verification, and
+Section~\ref{sec:validation} the validation.
+Section~\ref{sec:multispecies} demonstrates the multi-species coupling%
+% TODO: keep or drop together with contribution (vi)
+, and Section~\ref{sec:conclusions} concludes with an outlook on cesium,
+polonium and reactor-hall-scale applications.

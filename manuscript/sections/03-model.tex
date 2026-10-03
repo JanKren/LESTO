@@ -1,0 +1,260 @@
+%==============================================================================
+\section{Mathematical model}
+\label{sec:model}
+%==============================================================================
+
+%------------------------------------------------------------------------------
+\subsection{Carrier-gas flow}
+\label{sec:model:flow}
+%------------------------------------------------------------------------------
+
+The carrier gas is helium, treated as a laminar, steady, low-Mach-number ideal
+gas ($\mathrm{Ma}\sim10^{-3}$) with density $\rho = pM_\mathrm{He}/(RT)$:
+\begin{align}
+  \nabla\cdot(\rho\vect{u}) &= 0, \\
+  \nabla\cdot(\rho\vect{u}\vect{u}) &= -\nabla p + \nabla\cdot\boldsymbol{\tau},
+  \qquad
+  \boldsymbol{\tau} = \mu\left[\nabla\vect{u} + (\nabla\vect{u})^\mathsf{T}
+    - \tfrac{2}{3}(\nabla\cdot\vect{u})\mathbf{I}\right], \\
+  \nabla\cdot(\rho\vect{u}e) &= \nabla\cdot(\kappa\nabla T)
+    - p\,\nabla\cdot\vect{u},
+\end{align}
+with $\mu(T)$ and $\kappa(T)$ from NIST helium data.  A Sutherland fit is
+7--10\% low above \SI{1000}{K}; a power law
+$\mu = \SI{1.9813e-5}{Pa.s}\,(T/\SI{300}{K})^{0.7027}$ stays within 0.6\% over
+\SIrange{300}{1260}{K} (\cref{app:properties}).  At the inlet the
+\emph{mass} flow rate is prescribed from the standard volumetric rate,
+$\dot m = \rho_\mathrm{He}^\mathrm{STP}\dot V^\mathrm{STP}$ with
+$\rho_\mathrm{He}^\mathrm{STP} = \SI{0.17848}{kg/m^3}$, so
+\SIlist{5;106;540}{mL/min} correspond to
+\SIlist{1.488e-8;3.155e-7;1.607e-6}{kg/s}.  The wall temperature is the
+measured profile $T_w(x)$ for each flow rate.  Since the fully developed
+gas--wall temperature difference is below \SI{1}{K} at \SI{106}{mL/min} and
+about \SI{3}{K} at \SI{540}{mL/min} on the falling branch, the gas temperature
+follows the wall closely.
+
+\paragraph{Carrier-gas expansion.}  Between the \SI{\sim1070}{K} evaporation
+zone and the \SI{300}{K} outlet the helium density changes by a factor of
+about 3.5.  For a given mass flow, the local bulk velocity is therefore
+$U_b(x) = (\dot V^\mathrm{STP}/A)\,T(x)/\SI{273.15}{K}$, which is 2.6--3.9 times
+the standard-condition value in the deposition zone.  The T-Flows simulations of
+\citet{Lobresco2026assessment} prescribe a uniform parabola with
+$U_b = \dot V^\mathrm{STP}/A$ and unit density.  In that frame the transported
+concentration is higher than the physical one by $T/\SI{273.15}{K}$, and the
+residence time is longer by the same factor.
+\todo{State this neutrally and confirm with the T-Flows authors before
+submission (evidence: \texttt{Initialize\_Variables.f90}, \texttt{u\_max =
+2*FLOW\_RATE/(pi*R\_PIPE**2)}; \texttt{Beginning\_Of\_Iteration.fpp},
+\texttt{density = 1.0}; flat gas plateaus in their Fig.~9).}
+For an equilibrium-controlled, reversible deposit the front sits where the
+carrier that has swept past it, saturated at $p_v(T)$, could hold the whole
+inventory $n_0$:
+\begin{equation}
+  p_v(\Tdep)\,\dot V(\Tdep)\,t = n_0 R\,\Tdep
+  \quad\Longrightarrow\quad
+  p_v(\Tdep) = \frac{n_0 R\,T_\mathrm{ref}}{\dot V^\mathrm{STP}\,t},
+  \label{eq:equilibrium-front}
+\end{equation}
+where $T_\mathrm{ref} = \SI{273.15}{K}$ for the physical, expanding carrier.
+With the non-expanding convention $T_\mathrm{ref}$ is replaced by $\Tdep$.
+\todo{Preliminary estimate (1-D, digitized $p_v$ and $T_w$): the physical
+kinematics give \SIlist{807;729;678}{K} for T106\_6/60/300 against measured
+\SIlist{814;723;667}{K} (RMS \SI{8}{K}); the non-expanding convention
+reproduces the published vapor-pressure-model values
+(\SIlist{841;760;701}{K}, RMS error \SI{33}{K}).  Confirm with the full CFD --
+potentially a headline result.}
+
+\decide{Frozen carrier vs.\ two-way coupling.  The flow is solved once and
+frozen.  During sample evaporation the \ce{PbI2} mole fraction reaches 0.2--3\%
+(12\% for T5\_60), but its mass ratio to He reaches 1--16 because
+$M_{\ce{PbI2}}/M_\mathrm{He}=115$.  Either justify the passive-scalar
+assumption quantitatively (and exclude T5\_60) or solve continuity with the
+mixture density.}
+
+%------------------------------------------------------------------------------
+\subsection{Species transport}
+\label{sec:model:species}
+%------------------------------------------------------------------------------
+
+Each gaseous species $i$ is transported as $Y_i$, the mass of species $i$ per
+unit mass of carrier.  With the frozen He density this is a mass ratio, not
+bounded by one:
+\begin{equation}
+  \frac{\partial(\rho Y_i)}{\partial t} + \nabla\cdot(\rho\vect{u}Y_i)
+  = \nabla\cdot\left(\rho D_i\nabla Y_i\right)
+    - \nabla\cdot\vect{j}_i^{T} + \dot s_i .
+  \label{eq:species}
+\end{equation}
+Here $\dot s_i$ [\si{kg.m^{-3}.s^{-1}}] is the phase-change source and
+$\vect{j}_i^{T}$ an optional thermal-diffusion (Soret) flux.  For a heavy
+trace species in a light carrier
+\begin{equation}
+  \vect{j}_i^{T} = -\rho D_i\,\alpha_{T,i}\,Y_i\,\nabla\ln T ,
+  \label{eq:soret}
+\end{equation}
+with $\alpha_{T,i}>0$ driving the heavy species towards colder regions.
+Fick's law is written for the mass (mole) fraction, which is the correct form
+for a non-isothermal ideal gas.  With a constant-density carrier, as in
+\citet{Lobresco2026assessment}, it reduces to $-D\nabla c$.
+\decide{Include \cref{eq:soret}?  It needs $\alpha_T$ for \ce{PbI2}--He
+(Chapman--Enskog).  The axial gradient in the deposition zone is
+\SIrange{1200}{1500}{K/m}; the radial gradient is small (thermal P\'eclet
+number $\approx0.7$).  A first estimate (literature review, Sect.~10) gives a radial Soret drift of
+0.2--1\% of the wall mass-transfer coefficient: likely negligible; keep as a
+sensitivity case only.}
+
+\paragraph{Binary diffusivity.}  $D_i$ follows from Chapman--Enskog theory
+\begin{equation}
+  D_{i,\mathrm{He}}\,[\si{cm^2/s}] = \frac{1.86\times10^{-3}\,T^{3/2}}
+       {p\,\sigma_{i,\mathrm{He}}^2\,\Omega^{(1,1)*}(T^*)}
+       \sqrt{\frac{1}{M_i}+\frac{1}{M_\mathrm{He}}},
+  \qquad T^* = \frac{k_BT}{\varepsilon_{i,\mathrm{He}}},
+  \label{eq:diffusivity}
+\end{equation}
+with $p$ in atm, $M$ in g/mol and $\sigma$ in \AA.  The \ce{PbI2}
+Lennard-Jones parameters come from its computed static polarizability
+(116.3~a.u.\ $=\SI{17.23}{\angstrom^3}$) through the Brandt (1956)
+correlation with $N=16$ electrons: $\sigma_{\ce{PbI2}} = \SI{5.966}{\angstrom}$
+and $\varepsilon/k_B = \SI{495.9}{K}$.  With He from tables (\SI{2.551}{\angstrom},
+\SI{10.2}{K}) the mixing rules give $\sigma_{12}=\SI{4.2585}{\angstrom}$ and
+$\varepsilon_{12}/k_B=\SI{71.118}{K}$.  These values are not stated in
+\citet{Lobresco2026assessment} and are needed to reproduce their Fig.~3.
+\decide{Two known biases.  (i) The five-coefficient $\Omega$ fit of
+\citet{Lobresco2026assessment} lies 0.5--8.7\% below Neufeld et al.\ (1972) for
+$T^*=4$--$15$, so $D$ is 8--9.5\% too high at \SIrange{666}{1100}{K}.
+(ii) The valence-electron count of \ce{PbI2} is 18, not 16; using 18 lowers
+$D$ by 2.4--3.1\%.  The Brandt route itself is uncertain by more than 10\% for
+heavy halides.  Proposal: keep the published fit in the code-to-code
+comparison, use Neufeld in the physical model, and propagate a $\pm15\%$
+uncertainty in $D$.}
+
+%------------------------------------------------------------------------------
+\subsection{Condensed phases and gas--solid phase change}
+\label{sec:model:phasechange}
+%------------------------------------------------------------------------------
+
+Condensed material is immobile.  It is held in two reservoirs: the
+evaporating sample, as a volumetric density $C_{s}$ [\si{kg/m^3}] in the sample
+cells, and the wall deposit, as a surface density $m''_{w}$ [\si{kg/m^2}] on
+each wall face.  Phase change is written as a net \emph{evaporation} mass flux
+$\dot m''_i$ [\si{kg.m^{-2}.s^{-1}}] across an interface of area $A$:
+\begin{equation}
+  \dot s_i\big|_\mathrm{cell} = \frac{1}{V}\sum_{f\in\mathrm{wall}}
+      \dot m''_{i,f}A_f ,
+  \qquad
+  \frac{\partial m''_{w,i}}{\partial t} = -\dot m''_{i} .
+  \label{eq:wallflux}
+\end{equation}
+Gas plus condensed mass is therefore conserved exactly by construction, and the
+deposit per unit wall area does not depend on the first-cell thickness.  On the
+mesh of \citet{Lobresco2026assessment} (first cell $57.46\,\mu\mathrm{m}$),
+exactly one cell layer lies entirely within their \SI{0.1}{mm} interaction
+layer, with $A_I/V_I = \SI{17682}{m^{-1}}$.  A cell-centre distance test would
+select two layers and halve $A_I/V_I$.
+
+\paragraph{Temperature-based model.}  The calibrated model of
+\citet{Lobresco2026assessment} (their Eq.~5) is a volumetric sink in the wall
+layer.  In flux form it becomes
+\begin{equation}
+  \dot m''_i = -\,v_d\left[1-e^{-k(\Tdep-T)}\right]^{+}\rho Y_i ,
+  \qquad v_d = A\,\frac{V_I}{A_I} ,
+  \label{eq:tempmodel}
+\end{equation}
+with $[\cdot]^{+}=\max(\cdot,0)$.  For $A=\SI{220}{s^{-1}}$ on their mesh,
+$v_d = \SI{1.24}{cm/s}$.  Wall uptake is thus kinetics-limited: $v_d$ is about
+0.1 of the laminar mass-transfer coefficient $k_m = 3.66\,D/d\approx\SI{0.1}{m/s}$.
+The calibrated $A$ therefore belongs to that mesh (it scales with $1/h_1$);
+$v_d$ is the mesh-independent parameter.  The calibration also assumed the
+non-expanding carrier: keeping the same decay length with physical velocities
+requires $v_d$ to be larger by about $T/\SI{273.15}{K}$.
+\todo{Recalibrate against the Liu reference histogram in physical kinematics.
+The $\Tdep$ correlation of \citet{Liu2025chemical} must be obtained; it is not
+in either paper's text we have.}
+
+\paragraph{Hertz--Knudsen--Schrage model.}  The net evaporation flux is
+\begin{equation}
+  \dot m''_i = C_e\,\frac{2\sigma_a}{2-\sigma_a}
+     \sqrt{\frac{M_i}{2\pi RT}}\,\bigl[p_{v,i}(T) - p_i\bigr],
+  \qquad p_i = \frac{\rho Y_i RT}{M_i},
+  \label{eq:hks}
+\end{equation}
+in SI units ($M_i$ in kg/mol, pressures in Pa).  Evaporation
+($\dot m''_i>0$) is allowed only where condensate exists, and deposition only
+at walls \citep[cf.\ Fig.~7 in][]{Lobresco2026assessment}.  With $\sigma_a=1$
+the kinetic velocity $\frac{2\sigma_a}{2-\sigma_a}\sqrt{RT/(2\pi M)}$ is
+\SI{\sim90}{m/s} at \SI{700}{K}.  That is about $10^3$ times the diffusive
+supply $k_m$, so in consistent units wall deposition is
+\emph{transport-limited}: the near-wall gas sits at $p_v(T_w)$, and the flux
+hardly depends on $C_e$.  In the wall layer the implied relaxation rate
+$\sim\SI{1.6e6}{s^{-1}}$ must be treated implicitly.
+\decide{The reference T-Flows implementation evaluates $p_v$ and $p_i$ in bar
+and $M$ in g/mol inside the SI prefactor.  It also multiplies $A_I/V_I$ by
+200 in the wall layer and uses $5\times2/R_\mathrm{sample}$ at the sample
+(\texttt{LESTO\_HKS/User\_Mod/Source.fpp}, \texttt{Types.f90}).  A 1-D fit to
+their Fig.~11 needs a rate factor of about $10^{-5}$ relative to SI.  If this
+is confirmed, their conclusion that condensation kinetics are "slower than in
+the experiment" (hence $C_e>1$) is a units effect.  Must be discussed with
+F.~Lobresco and B.~Ni\v{c}eno before it enters the paper.}
+
+%------------------------------------------------------------------------------
+\subsection{Chemical equilibrium with GEMS3K}
+\label{sec:model:gems}
+%------------------------------------------------------------------------------
+
+For multi-species chemistry the vapor pressures $p_{v,i}(T)$ are replaced by
+local equilibrium from the Gibbs energy minimization kernel GEMS3K
+\citep{Kulik2013gemselektor,Wagner2012gemselektor}.  In each interfacial (and sample) cell the
+bulk elemental composition $\vect{b}$ of gas plus adjacent condensate (Pb, Bi,
+I, He \decide{+ O?}) is assembled from the transported species and the
+deposit, with the carrier amount $n_\mathrm{He} = pV/(RT)$.  GEMS3K then solves
+\begin{equation}
+  \min_{\vect{n}\ge0}\; G(\vect{n};T,p) \quad\text{s.t.}\quad
+  \mathbf{A}\vect{n} = \vect{b},
+\end{equation}
+which gives the equilibrium amounts $\vect{n}^\mathrm{eq}$ of all gaseous
+species (\ce{PbI2}, \ce{PbI}, \ce{Pb}, \ce{I}, \ce{I2}, \ce{BiI3}, \ce{BiI},
+\ce{Bi}, \ldots) and condensed phases (\ce{PbI2}(s,l), \ce{BiI3}(s),
+\ldots).  The equilibrium partial pressures $p_i^\mathrm{eq}$ over the local
+condensed assemblage replace $p_{v,i}(T)$ in \cref{eq:hks}; for pure \ce{PbI2}
+this reduces to the two-phase vapor pressure.  This coupling requires the
+physical (expanding) carrier, because only there are the concentrations
+physical.
+Open, redistributable data suffice for Pb--I--He: the Gurvich (1991)
+evaluation as distributed with NASA CEA (Apache-2.0), cross-checked against
+NIST-JANAF, covers \ce{He}, \ce{I}, \ce{I2}, \ce{Pb}, \ce{PbI}, \ce{PbI2}(g)
+and \ce{PbI2}(cr,l), \ce{Pb}(cr,l).  With these data a GEMS3K system generated
+without GEM-Selektor reproduces the speciation of Fig.~4 of
+\citet{Lobresco2026assessment} and returns $p_{\ce{PbI2}}$ over the stable
+condensed phase to $|\Delta\log_{10}p| < 10^{-4}$ of the direct evaluation
+(\SIrange{500}{1100}{K}).
+\todo{Two findings to state carefully: (i) the $p_v(T)$ of their Fig.~6 is
+the gas--\emph{solid} curve extrapolated through the melting point
+($T_m=\SI{683}{K}$); over the stable liquid, $p_v$ is lower by a factor of 2.1
+at \SI{823}{K}, 4 at \SI{1000}{K} and $\sim$7 at \SI{1173}{K}, i.e.\ in the
+evaporation zone.  (ii) JANAF \ce{PbI4}(g) is spurious and must be excluded
+(it disproportionates \ce{PbI2} over condensed Pb); Gurvich \ce{PbI4} is
+harmless.  Bi--I data exist only in HERACLES (Barin-derived, GPL-3; no
+\ce{BiI3}(l), defective Pb(g) record) -- provenance to confirm with PSI.}
+\decide{Coupling: (a) HKS driven by GEMS $p_i^\mathrm{eq}$ (recommended;
+reduces to the published model); (b) instantaneous local equilibrium
+(operator-split); (c) relaxation towards $\vect{n}^\mathrm{eq}$.  Thermodynamic
+database: HSC MainDB (commercial) vs.\ an open database -- licensing for
+distributing GEMS3K input files.}
+
+%------------------------------------------------------------------------------
+\subsection{Acceleration of the equilibrium calls}
+\label{sec:model:surrogate}
+%------------------------------------------------------------------------------
+
+Measured cost with the open-data Pb--I--He system, called from an OpenFOAM
+application through a plain-C bridge: $60\,\mu$s per warm-started
+equilibrium (3.9 iterations on average, no failures in $5\times10^4$ calls
+along a \SIrange{1100}{400}{K} wall profile).  At $\Delta t=\SI{1}{ms}$ a
+\SI{60}{s} run needs $9\times10^8$ calls if restricted to the 15\,264 wall
+cells, i.e.\ about 15~CPU-hours -- the same as the transport itself.
+Direct coupling in interfacial cells is therefore affordable; tabulation
+\citep{Pope1997computationally} or learning-based surrogates
+\citep{Leal2020accelerating,Prasianakis2020neural} become necessary only for
+calls in every cell or for non-ideal multi-component phases.
+\todo{Re-measure for the Pb--Bi--I system.}
+\decide{Include surrogates in this paper or defer?}

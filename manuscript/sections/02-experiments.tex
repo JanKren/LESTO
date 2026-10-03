@@ -1,0 +1,49 @@
+%==============================================================================
+\section{Reference experiments: thermosublimatography}
+\label{sec:experiments}
+%==============================================================================
+
+The reference configuration is the thermosublimatography setup of
+\citet{Liu2025chemical}, used for model assessment by
+\citet{Lobresco2026assessment}: a stainless-steel column with an active
+section of length $L = \SI{0.7}{m}$ and inner diameter
+$D = \SI{4.8}{mm}$, through which dried helium flows at standard volumetric
+rates of \SIlist{5;106;540}{mL/min} (\SI{273.15}{K}, \SI{1.01325}{bar}).
+A sample of \ce{PbI2} (or of LBE loaded with iodine) is placed in a boat at
+the hot end, the evaporation furnace is kept at \SI{1073}{K}, and a gradient
+oven imposes a negative axial wall-temperature profile.  After the experiment
+the deposition profile along the column is measured by $\gamma$-spectroscopy of
+\ce{^{126}I}.
+\todo{Figure: sketch of the setup (redraw, do not copy Fig.~1 of Liu et
+al.) and the measured wall-temperature profile(s).}
+
+\begin{table}[h]
+  \centering
+  \caption{\ce{PbI2} thermosublimatography experiments used for validation
+    (from \citet{Lobresco2026assessment}, Table~1).  $\Tdep^\mathrm{calc}$ is
+    the deposition temperature from the semi-empirical formula of
+    \citet{Liu2025chemical}.}
+  \label{tab:experiments}
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Case & Flow [mL/min] & Duration [s] & Mass [mg] & Moles [\SI{e-6}{mol}]
+         & $\Tdep^\mathrm{calc}$ [K] \\
+    \midrule
+    T106\_6   & 106 &   6 & 2.23 & 4.84 & 775 \\
+    T106\_60  & 106 &  60 & 2.04 & 4.43 & 712 \\
+    T106\_300 & 106 & 300 & 1.37 & 2.97 & 666 \\
+    T5\_60    &   5 &  60 & 1.45 & 3.15 & 788 \\
+    T540\_60  & 540 &  60 & 1.81 & 3.93 & 671 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\todo{Measured deposition temperatures (Table~2 of Lobresco et al.) go in
+\cref{sec:validation}.  Obtain the raw deposition profiles and the
+per-flow-rate wall-temperature profiles from the experimental team; only one
+measured wall profile is currently available (T-Flows branch
+\texttt{advanced\_scalar\_model}, \texttt{LESTO\_HKS/wall\_x\_profile\_complete.dat}).}
+
+\decide{Multi-species validation: which Pb--Bi--I experiments from
+\citet{Liu2025chemical} (iodine evaporated from LBE; \ce{PbI2} and \ce{BiI3}
+deposits, \ce{BiI} disproportionation) are used for \cref{sec:multispecies}?}

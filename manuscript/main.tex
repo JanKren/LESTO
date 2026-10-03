@@ -1,0 +1,111 @@
+\documentclass{article}
+
+\usepackage{arxiv}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[version=4]{mhchem}
+\usepackage{siunitx}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{doi}
+\usepackage{cleveref}
+
+\graphicspath{{figures/}}
+
+%------------------------------------------------------------------------------
+% Drafting aids -- remove before submission
+%------------------------------------------------------------------------------
+\newcommand{\todo}[1]{{\color{red}\textbf{[TODO:} #1\textbf{]}}}
+\newcommand{\decide}[1]{{\color{orange}\textbf{[DECIDE:} #1\textbf{]}}}
+
+%------------------------------------------------------------------------------
+% Notation
+%------------------------------------------------------------------------------
+\newcommand{\vect}[1]{\mathbf{#1}}
+\newcommand{\PbIg}{\ce{PbI2}(g)}
+\newcommand{\PbIs}{\ce{PbI2}(s)}
+\newcommand{\Tdep}{T_\mathrm{dep}}
+
+%------------------------------------------------------------------------------
+% Title and authors
+%------------------------------------------------------------------------------
+\title{Coupling compressible-flow CFD with Gibbs-energy minimization for the
+       transport and deposition of volatile fission products under strong
+       thermal gradients\\
+       {\normalsize\decide{working title}}}
+
+\usepackage{authblk}
+\renewcommand\Authfont{\bfseries}
+\setlength{\affilsep}{0em}
+\author[1]{Jan Kren}
+\author[1]{Bojan Ni\v{c}eno}
+% \decide{co-authors and order: candidates from Lobresco et al. (2026) are
+%   F. Lobresco (T-Flows models), N.I. Prasianakis and O. Marinich (GEMS),
+%   J. Neuhausen, G. Tiebel, G.C. Conigliaro, P. Steinegger (experiments)}
+\affil[1]{PSI Center for Scientific Computing, Theory and Data,
+          5232 Villigen PSI, Switzerland \todo{check affiliations}}
+
+\renewcommand{\shorttitle}{CFD--GEMS coupling for volatile fission-product
+                           deposition}
+
+\hypersetup{
+  colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue,
+  pdftitle={Coupling compressible-flow CFD with Gibbs-energy minimization for
+            volatile fission-product transport and deposition},
+  pdfauthor={J. Kren, B. Niceno},
+  pdfkeywords={fission products, PbI2, thermosublimatography, CFD, OpenFOAM,
+               GEMS, Gibbs energy minimization, deposition},
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  \todo{Write last.  One paragraph: safety motivation (volatile fission
+  products in LFR/LBE systems); gap (CFD with calibrated or offline
+  thermodynamics, Lobresco et al.\ 2026); what we do (OpenFOAM framework with
+  variable-density carrier, conservative gas--solid phase change, direct
+  GEMS3K equilibrium coupling \decide{and surrogates}); how we check it
+  (verification against analytical solutions and T-Flows, validation against
+  PSI thermosublimatography of \ce{PbI2} \decide{and Pb--Bi--I}); key
+  quantitative results.}
+\end{abstract}
+
+\keywords{Volatile fission products \and \ce{PbI2} deposition \and
+          Thermosublimatography \and Computational fluid dynamics \and
+          Gibbs energy minimization \and GEMS3K}
+
+\input{sections/01-introduction}
+\input{sections/02-experiments}
+\input{sections/03-model}
+\input{sections/04-numerics}
+\input{sections/05-verification}
+\input{sections/06-validation}
+\input{sections/07-multispecies}
+\input{sections/08-conclusions}
+
+\section*{Acknowledgments}
+This work was supported by the Swiss State Secretariat for Education,
+Research and Innovation (SBFI) within the EURATOM LESTO project
+\todo{confirm grant number -- Lobresco et al.\ (2026) cite SBFI grant
+No.~207103024001; check other funding}.
+
+\section*{Data availability}
+\todo{OpenFOAM solver and cases: repository URL / Zenodo DOI.}
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\appendix
+\input{sections/A-properties}
+
+\end{document}

@@ -1,0 +1,37 @@
+%==============================================================================
+\section{Verification}
+\label{sec:verification}
+%==============================================================================
+
+\todo{Planned verification hierarchy:}
+\begin{enumerate}
+  \item \textbf{Conservation.}  Closed box ($\phi=0$, uniform sink rate
+        $\lambda$): $\int\rho Y\,\mathrm{d}V$ must decay as
+        $(1+\lambda\Delta t)^{-n}$ and gas plus deposit must stay constant to
+        round-off.  Open tube: $\int\dot m_\mathrm{in}\mathrm{d}t =
+        M_\mathrm{gas} + M_\mathrm{deposit} + \int\dot m_\mathrm{out}\mathrm{d}t$
+        for both deposition models and for the GEMS coupling.
+  \item \textbf{Analytical solution.}  Isothermal, fully developed laminar
+        flow with a first-order wall sink (Graetz problem with a Robin
+        condition): axial decay of the bulk value and of the wall flux against
+        the eigenfunction solution \todo{cite}; grid convergence (GCI).
+  \item \textbf{Code-to-code against T-Flows (``paper mode'').}  Constant
+        density and a uniform parabola with $U_b=\dot V^\mathrm{STP}/A$ (inlet
+        flux rescaled for the 0.51\% facet-area deficit), the digitized or
+        measured $T_w(x)$, NIST He, the published $\Omega$ fit, the same sample
+        source, $A$, $k$, $\Tdep$, $\sigma_a$, $C_e$ and $p_v(T)$ -- and, for
+        HKS, the unit convention of the reference code.  In this mode
+        \cref{eq:species} reduces term by term to Eq.~(1) of
+        \citet{Lobresco2026assessment}.  Targets: the gas line density
+        $n'\,t_\mathrm{ev} = \SI{3.38e-4}{mol.s/m}$ (their Fig.~9), the solid
+        independent of $t_\mathrm{ev}$, the Fig.~11 profiles and the Fig.~12
+        front positions.
+        \decide{Pin the reference parameter set.  The paper and the T-Flows
+        branches differ ($A_I/V_I$ multipliers $\times200$/$\times5$, $A$,
+        $k$, one or two wall layers), and Figs.~9 and 10 are not mutually
+        consistent with $A=\SI{220}{s^{-1}}$, $k=\SI{8e-3}{K^{-1}}$,
+        $\Tdep=\SI{680}{K}$.}
+  \item \textbf{Effect of each modeling change} (``physical mode''), one at a
+        time: expanding carrier; SI-consistent HKS; Neufeld collision integral;
+        mesh-independent wall flux; Soret term.
+\end{enumerate}

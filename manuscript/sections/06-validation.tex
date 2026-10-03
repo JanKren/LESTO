@@ -1,0 +1,48 @@
+%==============================================================================
+\section{Validation: \ce{PbI2} thermosublimatography}
+\label{sec:validation}
+%==============================================================================
+
+\todo{Simulate the five experiments of \cref{tab:experiments} with both
+deposition models in physical mode and compare deposition profiles and
+deposition temperatures.  As in \citet{Lobresco2026assessment}, $\Tdep$ is the
+wall temperature at the first axial position where the deposit exceeds 1\% of
+its peak (linear interpolation).  Simulated profiles are also rebinned to the
+\SI{1}{cm} bins of the $\gamma$-scan.}
+
+\begin{table}[h]
+  \centering
+  \caption{Deposition temperatures [K]: experiment and T-Flows models from
+    \citet{Lobresco2026assessment} (Table~2), and the present work.}
+  \label{tab:tdep}
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Case & Experiment & T-based & VP-based & This work (HKS) &
+      This work (GEMS) \\
+    \midrule
+    T106\_6   & 814 & 775 & 841 & -- & -- \\
+    T106\_60  & 723 & 713 & 760 & -- & -- \\
+    T106\_300 & 667 & 666 & 701 & -- & -- \\
+    T5\_60    & 847 & 787 & 797 & -- & -- \\
+    T540\_60  & 700 & 670 & 685 & -- & -- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{What the targets test.}  The temperature-based column equals the
+input $\Tdep^\mathrm{calc}$ of \cref{tab:experiments} to within $\pm\SI{1}{K}$,
+so it only checks that the onset follows the imposed $\Tdep$.  The
+vapor-pressure column is set by equilibrium thermochromatography
+(\cref{eq:equilibrium-front}) and is insensitive to the kinetic parameters.
+Kinetics show only in the peak height, width and tail of the profiles.
+Acceptance criteria are therefore profile-based: onset position, peak
+position and height, and integral $\approx n_0$.  $\Tdep$ agreement is only
+testable to the accuracy of the wall-temperature data ($\pm\SI{15}{K}$
+thermocouples; a \SI{1}{cm} shift corresponds to \SIrange{12}{15}{K} at
+\SIrange{1200}{1500}{K/m}).
+\todo{T5\_60: the published HKS value comes from an upstream back-diffusion
+deposit on the steep rising branch; evaluate on the main deposit instead.}
+
+\todo{Sensitivity: $\sigma_a$/$C_e$, wall temperature ($\pm\SI{15}{K}$), flow
+rate ($\pm5\%$), $D$ ($\pm15\%$), Soret term, $p_v$ source (GEMS vs
+Binnewies--Milke: \SIrange{15}{25}{K} in $\Tdep$).}
