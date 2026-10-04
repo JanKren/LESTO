@@ -16,7 +16,9 @@ interval 3) are reproduced bit for bit.
 Otherwise the constructor reads the dictionary, builds the interface
 elements of the interaction layer and the samples (with one sample element
 per cell of an inventory sample), reads the p_eq tables of model HKS
-(vapourPressureTable.H), runs the start-up checks of every paired gas
+(vapourPressureTable.H) and, with equilibrium GEMS, creates the GEMS3K
+engine of every rank and checks the system (mode frozen: the GEMS table of
+every pair; gemsEquilibrium.H), runs the start-up checks of every paired gas
 species (Euler ddt, a conservative Gauss convection scheme, zeroGradient on
 the interface patches, relTol 0 of the final solve, relaxation ignored, an
 outer tolerance below the solver tolerance, molar masses) and prints the

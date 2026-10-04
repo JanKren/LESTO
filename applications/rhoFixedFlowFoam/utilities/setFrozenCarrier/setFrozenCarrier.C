@@ -99,21 +99,21 @@ count line says 66 rows (x <= 0.65 m) of the 70 in the file, a wall face
 whose centre lies in no interval of the table is never assigned
 (Read_Controls_Mod/Boundary_Conditions.f90:538-607 of the GPU solver), so
 it keeps the boundary value 0 of its allocation (Var_Mod/
-Create_Variable.f90:38), which the copy of all boundary values (:670-683)
-makes the wall temperature, and the energy equation treats the whole
-region as a Dirichlet wall (Process_Mod/Insert_Energy_Bc.f90,
-Form_Energy_Matrix.f90): in LESTO_HKS the wall beyond x = 0.65 m is a 0 K
-wall.  The conductivity lookup of User_Mod/Beginning_Of_Iteration.fpp:33-36
-clamps only above (dataIndex <= 50), so a cell cooled below 250 K
-extrapolates k_He below the table and one below 230 K reads it out of
-bounds.  Neither 'rows count' with 'outOfRange hold' (the wall beyond 0.65
-m held at T(0.65 m) = 324 K) nor 'rows all' (the measured rows to 0.68 m,
-run/014) reproduces that; it is not reproduced here (review of M4, round
-3; plan section 29, item 5).  From its initial 500 K the
-field reaches its steady state within a few thermal diffusion times R^2/
-alpha = 0.1 s (alpha = k/(rho cp) with rho = 1), long before the gas
-reaches the deposition zone (a few seconds), so mode 'solved' computes
-that steady state once:
+Create_Variable.f90:38), which the copy of all boundary values
+(Read_Controls_Mod/Boundary_Conditions.f90:670-683) makes the wall
+temperature, and the energy equation treats the whole region as a
+Dirichlet wall (Process_Mod/Insert_Energy_Bc.f90, Form_Energy_Matrix.f90):
+in LESTO_HKS the wall beyond x = 0.65 m is a 0 K wall.  The conductivity
+lookup of User_Mod/Beginning_Of_Iteration.fpp:33-36 clamps only above
+(dataIndex <= 50), so a cell cooled below 250 K extrapolates k_He below
+the table and one below 230 K reads it out of bounds.  Neither 'rows
+count' with 'outOfRange hold' (the wall beyond 0.65 m held at T(0.65 m) =
+324 K) nor 'rows all' (the measured rows to 0.69 m, run/014) reproduces
+that; it is not reproduced here (review of M4, round 3; plan section 29,
+item 5).  From its initial 500 K the field reaches its steady state within
+a few thermal diffusion times R^2/alpha = 0.1 s (alpha = k/(rho cp) with
+rho = 1), long before the gas reaches the deposition zone (a few seconds),
+so mode 'solved' computes that steady state once:
 
   div(rho cp phi_v T) - laplacian(k(T), T) = 0   (phi_v the volume flux),
 

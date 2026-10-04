@@ -351,6 +351,12 @@ public:
   const std::string& file() const { return file_; }
   const std::vector<std::string>& phases() const { return phases_; }
   std::size_t nNodes() const { return T_.size(); }
+
+  /* the nodes [K] and the interpolation: the GEMS table of mode frozen is
+     built at the nodes of the pair's table and interpolated alike
+     (gemsEquilibrium.H) */
+  const std::vector<double>& nodes() const { return T_; }
+  interpolationType interpolationMode() const { return interpolation_; }
   double Tmin() const { return T_.front(); }
   double Tmax() const { return T_.back(); }
   bool inRange(const double T) const { return T >= Tmin() && T <= Tmax(); }

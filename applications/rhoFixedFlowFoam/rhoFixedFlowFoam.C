@@ -99,7 +99,9 @@ the per-cell solver defect (of the transport-only matrix plus the realised
 exchange: matrixDefect.H), so its closure is round-off for any linear-
 solver tolerance.  The sign convention is: positive = evaporation into the
 gas.  See interfaceExchange.H, phaseChangeKinetics.H, phaseChangeLedger.H
-and readme.md.
+and readme.md.  The equilibrium vapour pressure of the HKS law comes from a
+table, or from GEMS3K (equilibrium GEMS, a build with the bridge; mode
+frozen at start-up, or mode local per step and element: gemsEquilibrium.H).
 
 Outputs of the exchange: the deposit per effective element area mw_ and
 per wall area mDep_ of every condensate, the reservoir Cs_ of the inventory
@@ -124,8 +126,9 @@ PROGRAM FLOW
 
   - while physical time advances {
       phase change: the exact step on the clock of the ledger, the removal
-        of inventory samples, release rates, bounds and a check of the
-        final solver of the step
+        of inventory samples, bounds, equilibrium GEMS in mode local: p_eq
+        of every element from GEMS3K (every updateInterval steps), release
+        rates and a check of the final solver of the step
       model mock: evaluate thermochemistry once in every cell and suppress
         the precipitation sources outside WALL-adjacent cells
       solve all gaseous species: paired ones with the exchange, the others

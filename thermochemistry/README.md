@@ -2,8 +2,13 @@
 
 This directory holds the pieces that connect the OpenFOAM solver in
 `../applications/rhoFixedFlowFoam` to the GEMS3K Gibbs-energy-minimisation
-kernel. Status (2026-09-23): prototype, validated end to end for Pb–I–He.
-It is not yet wired into the solver.
+kernel. Status (2026-10-04): the bridge is wired into the solver as the
+optional backend `equilibrium GEMS` of its Hertz-Knudsen-Schrage law
+(milestone M9 of `applications/rhoFixedFlowFoam/doc/phase-change-plan.md`,
+sections 32 and 35; `gemsEquilibrium.{H,C}`, the readme's section "p_eq
+from GEMS3K"). A solver built with `LESTO_GEMSBRIDGE` pointing here calls
+it; the default build stays without it. Case `run/015-hks-gems-local` uses
+it, and `tests/Alltest M9` tests it.
 
     gemsbridge/   plain-C interface to GEMS3K (libgemsbridge.so)
     systems/      GEMS3K input generator, open thermodynamic data, PbI2He system
@@ -42,6 +47,19 @@ cd ../../systems/PbI2He && gemsPbI2Check PbI2He-dat.lst
 
 The full GEMS3K build with ThermoFun, and the xGEMS Python API, are installed
 in `~/opt/gems-env` (`conda activate ~/opt/gems-env; python -c "import xgems"`).
+
+`libgemsbridge.so` is git-ignored and tied to the machine it was built on:
+
+- It is linked against the glibc 2.34 of the conda-forge sysroot (symbol
+  versions up to `GLIBC_2.34`), so it needs glibc >= 2.34 where it runs
+  (this workstation has 2.38).
+- It carries an RPATH into the local conda environment
+  (`/home/jan/opt/gems-env/lib`, `readelf -d`). It needs only libc and libm,
+  so the RPATH is harmless where that directory does not exist, but it names
+  this machine.
+- Elsewhere, e.g. on Merlin7, rebuild it there with
+  `build-gems3k-static.sh` and `make` (the same recipe, with that machine's
+  conda toolchain), rather than copying it.
 
 ## The PbI2–He system (`systems/`)
 
@@ -102,17 +120,24 @@ in `~/opt/gems-env` (`conda activate ~/opt/gems-env; python -c "import xgems"`).
 
 ## Next steps
 
-1. **Replace the mock** in `evaluateThermochemistry`.
-   - Pass (Su, Sp) plus a cell context (celli, ρ, Δt, wall-layer flag).
-   - Use HKS driven by p_i^eq from the bridge, via a call with the condensed
-     phases suppressed, which gives p_i/Ω.
-   - Keep an exact gas–solid mass balance.
-2. **Pb–Bi–I system.** Generate it, re-measure the cost, and reproduce the
-   Liu et al. (2025) speciation.
+1. **Done (M9):** the HKS law of `rhoFixedFlowFoam` takes p_eq from the
+   bridge (a call with the condensed phases suppressed gives p_i/Ω), with an
+   exact gas–solid mass balance; `equilibrium GEMS`, modes `frozen` and
+   `local`, plan sections 32 and 35.
+2. **Pb–Bi–I system** (M10). Generate it, re-measure the cost, and reproduce
+   the Liu et al. (2025) speciation. At high PbI2 mole fractions (x 0.05 to
+   0.73 at 1170-1240 K) GEMS3K does not converge (ERR_NOCONV) and its warm
+   calls cost about 4 ms instead of about 50 µs; the solver falls back to the
+   table there (plan section 35, item M).
 3. **Move the source generator and pv table** into the solver's case data;
    decide HSC vs open data with Prasianakis and Marinich.
-4. **Merlin7.** Build the bridge there with gcc 14.2 (same recipe) or reuse
-   this `.so`; it needs glibc ≥ 2.34.
+4. **Merlin7.** Build the bridge there with gcc 14.2 (same recipe): the
+   `.so` of this workstation needs glibc ≥ 2.34 and has an RPATH into its
+   conda environment (Building, above). For the tests that is another
+   bridge: `tests/Alltest M9` compares run/015's excerpt there in its
+   start-up and first step only (no GEMS3K call reaches them) and reports
+   the rest NOTRUN, since GEMS3K's results then differ in their last bits
+   (plan section 35, item V).
 
 ## Licences
 

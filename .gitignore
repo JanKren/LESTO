@@ -7,3 +7,5 @@
 applications/rhoFixedFlowFoam/Make/*/
 applications/rhoFixedFlowFoam/utilities/*/Make/*/
 applications/rhoFixedFlowFoam/tests/work/
+# rhoFixedFlowFoam with equilibrium GEMS: the per-rank GEMS3K logs of a run
+**/gemsLog/

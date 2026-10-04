@@ -43,8 +43,10 @@ Models
                              sqrt(M/(2 pi R T_e))  [s/m],
                        beta_c = rho_c R T_c/M (p_i = beta_c Y_c from the
                        carrier's actual rho) and p_eq from a table
-                       (vapourPressureTable.H); both directions where there
-                       is a condensate.
+                       (vapourPressureTable.H) or from GEMS3K
+                       (equilibrium GEMS, gemsEquilibrium.H; the sixth
+                       comment block); both directions where there is a
+                       condensate.
 
 Every element carries the affine law q_e = a_e - g_e*Y [kg/s] and the bounds
 lower_e <= q_e <= upper_e [kg/s] of the step (plan E3):
@@ -185,8 +187,14 @@ is refreshed in every step by balance(), before runTime.write())
   uniform/phaseChange/phaseChangeReservoirs  per rank: the reservoir Cs of
                    every sample element of every pair (inventory samples
                    only; third comment block)
+  uniform/phaseChange/phaseChangeEquilibrium  per rank, equilibrium GEMS
+                   in mode local only: the lagged state of the last update
+                   (p_eq, chi and the source of every element of every
+                   pair, and the counts of that update; the sixth comment
+                   block), so that a restart with updateInterval > 1
+                   repeats the continuous run up to its next update
 
-  The ledger (binaryGlobalIOList) and the three per-rank lists
+  The ledger (binaryGlobalIOList) and the per-rank lists
   (binaryIOList; binaryIOList.H) are registered AUTO_WRITE, so that every
   write of Time stores them with the fields (write times, and
   Time::writeNow()/writeAndEnd() of function objects between two steps),
@@ -199,20 +207,21 @@ is refreshed in every step by balance(), before runTime.write())
   the rank (their number and a 62-bit hash; elementsFingerprint()): the
   deposits list that of the wall elements (cells, patch faces and face
   centres, as exact scalars), the regimes list that of all elements, wall
-  and sample (equal to the wall fingerprint without inventory samples),
-  the reservoirs list that of the sample elements (cells, sample names and
-  cell centres).  They are restored only onto the same elements, not after
-  a re-decomposition or renumberMesh, and read only when the file handler
-  can read them for this run (perRankFile(): not a collated container of
-  another number of ranks, as reconstructPar or decomposePar leave it, and
-  only by the ranks of the container's IO group); otherwise mw_ and Cs_ are
-  re-read (below).  The per-rank lists lie in the subdirectory
-  uniform/phaseChange/, never in uniform/ itself: the master-reading file
-  handlers (masterUncollated, collated) take an object whose local
-  directory is exactly "uniform" for global data and resolve it to the
-  master's file on every rank, so every restart on the same decomposition
-  lost the exact state (review of M5, round 4).  decomposePar and
-  reconstructPar copy (or link) the subdirectory with uniform/.
+  and sample (equal to the wall fingerprint without inventory samples; the
+  equilibrium list too, as exact scalars), the reservoirs list that of the
+  sample elements (cells, sample names and cell centres).  They are
+  restored only onto the same elements, not after a re-decomposition or
+  renumberMesh, and read only when the file handler can read them for this
+  run (perRankFile(): not a collated container of another number of ranks,
+  as reconstructPar or decomposePar leave it, and only by the ranks of the
+  container's IO group); otherwise mw_ and Cs_ are re-read (below).  The
+  per-rank lists lie in the subdirectory uniform/phaseChange/, never in
+  uniform/ itself: the master-reading file handlers (masterUncollated,
+  collated) take an object whose local directory is exactly "uniform" for
+  global data and resolve it to the master's file on every rank, so every
+  restart on the same decomposition lost the exact state (review of M5,
+  round 4).  decomposePar and reconstructPar copy (or link) the
+  subdirectory with uniform/.
 
   mw_<condensate>  [kg/m2] volScalarField, output: its values on the
                    interface patches are the element deposits m''_e, per
@@ -601,6 +610,71 @@ rules.
 
 ------------------------------------------------------------------------------*/
 
+/*------------------------------------------------------------------------------
+
+interfaceExchange.H, continued: the GEMS3K backend of p_eq (milestone M9;
+plan E9 and section 32; the backend itself is gemsEquilibrium.H).
+
+  HKSCoeffs { equilibrium GEMS; speciation none; }   // or lagged
+  GEMSCoeffs { system ...; mode frozen; ... }         // or local
+  pairs { <gas> { ...; vapourPressure { ... } gems { gas; condensates;
+                                                       elements; } } }
+
+The HKS law of an element keeps its form; only p_eq (and, with speciation
+lagged, the partial pressure) changes:
+
+  a_e = A_e G'_e p_eq,e,   g_e = A_e G'_e chi_e beta_c,
+  G'_e = G_e, or with wallResistance halfCell G_e/(1 + G_e chi_e beta_c
+         d_e/(rhoD)_e) (hksCoefficients()),
+
+with G_e and the half cell stored per element at start-up (T is frozen).
+equilibrium table: p_eq,e = the table at T_e and chi_e = 1, with the
+arithmetic of M5 (the results of every table case are unchanged to the
+last bit).  The table of every pair stays required: it is the fallback and
+the validation of GEMS3K.
+
+  frozen   setCoefficients() takes p_eq,e from the GEMS table of the pair
+           (gemsEquilibrium::frozenPEq(), built at start-up), or from the
+           pair's table below minTemperature or outside the GEMS table; a
+           start-up line per pair counts the elements of each source and
+           gives the largest |dlog10 p_eq,e/p_eq,table| of the GEMS
+           elements.  Nothing changes per step.
+  local    setCoefficients() starts from the table; beginStep() updates
+           p_eq,e and chi_e of every element from GEMS3K at the start of
+           the steps of the schedule of the absolute time index n
+           (gemsEquilibrium::updateDue(): (n - 1) mod updateInterval = 0,
+           and a first step without a lagged state), before the correctors
+           (updateEquilibrium(): the cell's composition from Y at the start
+           of the step), and a_e, g_e with them.  A step thus uses one law
+           throughout its correctors, the guard and realise(); the regimes,
+           the bounds and the ledger are unaffected (the ledger books the
+           realised flows of whatever law).  The step report has a GEMS
+           line per pair after the exchange line (counts of calls and of
+           the sources, iterations, deviation; gemsEquilibrium::
+           stepReport()), end() the summary.  The lagged state of the last
+           update is per-rank restart state (uniform/phaseChange/
+           phaseChangeEquilibrium, first comment block): a restart onto the
+           same elements restores it (restoreEquilibrium()) and repeats
+           the continuous run bit for bit up to its next update; without
+           it the first step updates.
+
+The start-up refuses mode local with a carrier that is not a gas at its p
+and T (max |rho - p W/(R T)|/rho = max |T - p W/(R rho)|/T > 0.01, the
+carrier line; paper mode), unless GEMSCoeffs allowNonPhysicalCarrier yes,
+and speciation lagged without equilibrium GEMS in mode local.
+
+Output (GEMSCoeffs writeEquilibriumField yes): pEq_<gas> [Pa], the p_eq of
+the law, gemsSource_<gas>, the source of every element (0 GEMS3K, 1 below
+minTemperature, 2 below minMoleFraction, 3 outside the GEMS grid or
+table, 4 rejected, 5 failed; -1 the table before the first update), and
+with speciation lagged chi_<gas>: on the interface patches (layer
+faceCells) the value of the element of each face; in the cells of the
+elements the mean (the largest source) of their elements; elsewhere 0 (-1
+for the source).  Refreshed in balance(), written with the fields, never
+read.
+
+------------------------------------------------------------------------------*/
+
 #ifndef interfaceExchange_H
 #define interfaceExchange_H
 
@@ -618,6 +692,7 @@ rules.
 #include "axialProfiles.H"
 #include "phaseChangeKinetics.H"
 #include "vapourPressureTable.H"
+#include "gemsEquilibrium.H"
 
 namespace LESTO {
 
@@ -647,6 +722,27 @@ private:
 
     /* model HKS: the p_eq table of the pair (vapourPressure) */
     Foam::autoPtr<vapourPressureTable> table;
+
+    /* model HKS, per element (the law is a_e = A_e G'_e p_eq,e and g_e =
+       A_e G'_e chi_e beta_c; hksCoefficients()): the kinetic conductance
+       G_e [s/m], the half cell d_e/(rhoD)_e [m2 s/kg] of wallResistance
+       halfCell (-1: no diffusion to the wall), p_eq of the table at T_e
+       and the p_eq of the law [Pa] (the table, or GEMS3K), the speciation
+       factor chi_e (1 but with speciation lagged) and the source of p_eq
+       (gemsEquilibrium::sourceType; -1 for the table of equilibrium
+       table, or before the first update of mode local) */
+    Foam::scalarField conductance;
+    Foam::scalarField resistance;
+    Foam::scalarField pEqTable;
+    Foam::scalarField pEq;
+    Foam::scalarField chi;
+    Foam::labelList   source;
+
+    /* equilibrium GEMS with writeEquilibriumField: pEq_<gas> [Pa],
+       gemsSource_<gas> and, with speciation lagged, chi_<gas> (output) */
+    Foam::autoPtr<Foam::volScalarField> equilibriumField;
+    Foam::autoPtr<Foam::volScalarField> sourceField;
+    Foam::autoPtr<Foam::volScalarField> chiField;
 
     /* per element (wall elements, then sample elements) */
     Foam::scalarField a;               /* [kg/s] */
@@ -695,6 +791,14 @@ private:
                                              explicit source of the matrix
                                              (e.g. its face-flux
                                              correction, in source form) */
+    Foam::scalar      transportIdentity;  /* D = sum_c r_c + dM/dt + sum_b
+                                             (F_b + C_b) - sum_c E_c over
+                                             all ranks, summed exactly
+                                             [kg/s]: 0 in the flux form
+                                             (matrixDefect.H) */
+    Foam::scalar      identityTerms;      /* the magnitude of its terms
+                                             [kg/s] */
+    Foam::scalar      identityRelative;   /* |D|/identityTerms */
     Foam::scalar      clampedStep;     /* [kg] */
     Foam::scalar      projectedStep;   /* [kg] */
     Foam::scalar      evaporatedAboveWarningStep;  /* [kg] */
@@ -804,6 +908,10 @@ private:
   Foam::scalar      accommodation_;     /* sigma */
   Foam::scalar      Ce_;
   Foam::scalar      kineticScale_;
+
+  /* model HKS, equilibrium GEMS: the GEMS3K backend (GEMSCoeffs; sixth
+     comment block) */
+  Foam::autoPtr<gemsEquilibrium> gems_;
 
   /* interface layer */
   Foam::labelList   interfacePatches_;
@@ -922,8 +1030,9 @@ private:
   Foam::scalar      stepDeltaT_;
 
   /* ledger and the per-rank element state of uniform/: the fingerprints
-     of the wall elements (deposits), of all elements (regimes) and of the
-     sample elements (reservoirs) */
+     of the wall elements (deposits), of all elements (regimes, and the
+     lagged state of equilibrium GEMS, mode local) and of the sample
+     elements (reservoirs) */
   Foam::autoPtr<phaseChangeLedger>          ledger_;
   Foam::labelList                           fingerprint_;
   Foam::labelList                           elementsFingerprint_;
@@ -931,6 +1040,7 @@ private:
   Foam::autoPtr<binaryIOList<Foam::label>>  regimesIO_;
   Foam::autoPtr<binaryIOList<Foam::scalar>> depositsIO_;
   Foam::autoPtr<binaryIOList<Foam::scalar>> reservoirsIO_;
+  Foam::autoPtr<binaryIOList<Foam::scalar>> equilibriumIO_;
 
 
   /* construction steps */
@@ -978,6 +1088,24 @@ private:
   void checkPairedSpecies(pairData& pair);
   void setCoefficients(pairData& pair) const;
   void readState();
+
+  /* model HKS: a_e and g_e of element e from pair.pEq[e], pair.chi[e],
+     its conductance and its half cell (halfCell: wallResistance halfCell;
+     the same arithmetic as before M9, so equilibrium table is unchanged
+     to the last bit); returns the conductance G'_e with the half cell */
+  Foam::scalar hksCoefficients (
+    pairData&         pair,
+    const Foam::label e,
+    const bool        halfCell
+  ) const;
+
+  /* equilibrium GEMS, mode local: p_eq (and chi) of every element at the
+     composition of the start of the step, and a_e, g_e (beginStep()) */
+  void updateEquilibrium();
+
+  /* pEq_<gas>, gemsSource_<gas> and chi_<gas> from the elements of a pair
+     (writeEquilibriumField) */
+  void updateEquilibriumFields(pairData& pair) const;
 
   /*--------------------------------------------------------------------------
   Restart record in uniform/phaseChangeLayout (see "Restart record" above):
@@ -1092,10 +1220,10 @@ private:
   void updateDepositField(pairData& pair) const;
   void updateReservoirField(pairData& pair) const;
 
-  /* uniform/phaseChange/phaseChangeRegimes, phaseChangeDeposits and
-     phaseChangeReservoirs from the element regimes, deposits and
-     reservoirs, and recordUniformValues() (every step, before
-     runTime.write()) */
+  /* uniform/phaseChange/phaseChangeRegimes, phaseChangeDeposits,
+     phaseChangeReservoirs and phaseChangeEquilibrium from the element
+     regimes, deposits, reservoirs and lagged GEMS state, and
+     recordUniformValues() (every step, before runTime.write()) */
   void storeElementState();
 
   /* the fields a restart re-reads whose 'uniform' entries will be written
@@ -1142,6 +1270,20 @@ private:
     const Foam::IOobject& io,
     const Foam::word&     typeName,
     Foam::string&         why
+  );
+
+  /*--------------------------------------------------------------------------
+  equilibrium GEMS, mode local, on a restart: the lagged state of the last
+  update from uniform/phaseChange/phaseChangeEquilibrium (file and why as
+  perRankFile() found it at the start time startName), restored when it
+  belongs to these elements, with the law of every element recomputed from
+  it; otherwise a warning when the first step would not update by the
+  schedule (it then updates; gemsEquilibrium.H, mode local).  Collective.
+  --------------------------------------------------------------------------*/
+  void restoreEquilibrium (
+    const stateFile         file,
+    const Foam::string&     why,
+    const Foam::word&       startName
   );
 
 public:

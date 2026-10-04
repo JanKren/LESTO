@@ -371,6 +371,9 @@ LESTO::interfaceExchange::pairData::pairData (
   explicitRemainder(0),
   nExplicitRemainder(0),
   explicitSource(0),
+  transportIdentity(0),
+  identityTerms(0),
+  identityRelative(0),
   clampedStep(0),
   projectedStep(0),
   evaporatedAboveWarningStep(0),
@@ -448,6 +451,7 @@ LESTO::interfaceExchange::interfaceExchange (
   accommodation_(1),
   Ce_(1),
   kineticScale_(1),
+  gems_(),
   interfacePatches_(),
   layer_("faceCells"),
   layerDistance_(0),
@@ -503,7 +507,8 @@ LESTO::interfaceExchange::interfaceExchange (
   samplesFingerprint_(),
   regimesIO_(),
   depositsIO_(),
-  reservoirsIO_()
+  reservoirsIO_(),
+  equilibriumIO_()
 {
   /*--------------------------------------------------------------------------
   model mock, or no dictionary: nothing else is read or printed, so the
@@ -555,9 +560,14 @@ LESTO::interfaceExchange::interfaceExchange (
       ignored << ' ' << other;
     }
     if (model_ == modelType::temperature) {
+      if (dict_.found("GEMSCoeffs", keyType::LITERAL)) {
+        ignored << " GEMSCoeffs";
+      }
       for (const entry& e : dict_.subDict("pairs")) {
-        if (e.isDict() && e.dict().found("vapourPressure", keyType::LITERAL)) {
-          ignored << " pairs/" << e.keyword() << "/vapourPressure";
+        for (const word key : {"vapourPressure", "gems"}) {
+          if (e.isDict() && e.dict().found(key, keyType::LITERAL)) {
+            ignored << " pairs/" << e.keyword() << '/' << key;
+          }
         }
       }
     }
@@ -566,6 +576,26 @@ LESTO::interfaceExchange::interfaceExchange (
         << "Model " << model << " does not read" << ignored.str().c_str()
         << " (inputs of the other model) in constant/"
         << "thermochemistryProperties." << nl << endl;
+    }
+
+    /* model HKS with equilibrium table: the inputs of the GEMS3K backend
+       (M9) are not read either */
+    if (model_ == modelType::HKS && !gems_) {
+      OStringStream gemsInputs;
+      if (dict_.found("GEMSCoeffs", keyType::LITERAL)) {
+        gemsInputs << " GEMSCoeffs";
+      }
+      for (const entry& e : dict_.subDict("pairs")) {
+        if (e.isDict() && e.dict().found("gems", keyType::LITERAL)) {
+          gemsInputs << " pairs/" << e.keyword() << "/gems";
+        }
+      }
+      if (!gemsInputs.str().empty()) {
+        WarningInFunction
+          << "equilibrium table does not read" << gemsInputs.str().c_str()
+          << " (inputs of equilibrium GEMS) in constant/"
+          << "thermochemistryProperties." << nl << endl;
+      }
     }
   }
 
@@ -598,6 +628,20 @@ LESTO::interfaceExchange::interfaceExchange (
     FatalIOErrorInFunction(balanceDict)
       << "Require nGuard >= 0, guardTolerance >= 0 and "
       << "moleFractionWarning > 0." << exit(FatalIOError);
+  }
+
+  /*--------------------------------------------------------------------------
+  equilibrium GEMS (M9): the engine of every rank, checked against the
+  system; frozen builds the GEMS table of every pair from its table, local
+  sizes the warm states of the elements of the rank (gemsEquilibrium.H).
+  Before setCoefficients(), which takes p_eq from it.  Collective.
+  --------------------------------------------------------------------------*/
+  if (gems_) {
+    List<const vapourPressureTable*> tables(pairs_.size());
+    forAll(pairs_, pairi) {
+      tables[pairi] = pairs_[pairi].table.get();
+    }
+    gems_->start(elementCell_.size(), tables);
   }
 
   /*--------------------------------------------------------------------------
@@ -646,6 +690,62 @@ LESTO::interfaceExchange::interfaceExchange (
 
     Info<< "Carrier: max |T - p W/(R rho)|/T = " << maxDeviation
       << " (frozen T vs perfect gas)" << nl;
+
+    /*------------------------------------------------------------------------
+    equilibrium GEMS, mode local, evaluates GEMS3K at the composition of
+    every cell from the carrier's p/(R T): it needs a carrier that is a gas
+    at its p and T.  |T - p W/(R rho)|/T is |rho - p W/(R T)|/rho; above 1 %
+    (paper mode, rho = 1) the run stops unless allowNonPhysicalCarrier
+    (plan section 4).
+    ------------------------------------------------------------------------*/
+    if (gems_ && gems_->local() && maxDeviation > 0.01) {
+      if (!gems_->allowNonPhysicalCarrier()) {
+        FatalIOErrorInFunction(gems_->dict())
+          << "GEMSCoeffs mode local evaluates GEMS3K at the composition of "
+          << "every cell, from the carrier's p/(R T), but the frozen carrier "
+          << "is not a gas at its p and T: max |rho - p W/(R T)|/rho = "
+          << maxDeviation << " > 0.01 (paper mode has rho = 1)." << nl
+          << "Use mode frozen or equilibrium table, or set "
+          << "allowNonPhysicalCarrier yes to accept it." << exit(FatalIOError);
+      }
+      WarningInFunction
+        << "GEMSCoeffs allowNonPhysicalCarrier yes: mode local runs on a "
+        << "carrier that is not a gas at its p and T (max |rho - p W/(R T)|"
+        << "/rho = " << maxDeviation << " > 0.01); the composition of every "
+        << "cell is taken from p/(R T)." << nl << endl;
+    }
+  }
+
+  /*--------------------------------------------------------------------------
+  equilibrium GEMS with writeEquilibriumField: the output fields pEq_<gas>
+  [Pa], gemsSource_<gas> and, with speciation lagged, chi_<gas> (refreshed
+  in balance(), never read; the sixth comment block of interfaceExchange.H).
+  --------------------------------------------------------------------------*/
+  if (gems_ && gems_->writeEquilibriumField()) {
+    auto outputField = [this](const word& name, const dimensionSet& dims) {
+      return autoPtr<volScalarField> (
+        new volScalarField (
+          IOobject(name,
+                   mesh_.time().timeName(),
+                   mesh_,
+                   IOobject::NO_READ,
+                   IOobject::AUTO_WRITE),
+          mesh_,
+          dimensionedScalar(dims, Zero),
+          calculatedFvPatchScalarField::typeName
+        )
+      );
+    };
+    forAll(pairs_, pairi) {
+      pairData& pair = pairs_[pairi];
+      const word& gasName = speciesNames_[pair.gas];
+      pair.equilibriumField = outputField("pEq_" + gasName, dimPressure);
+      pair.sourceField = outputField("gemsSource_" + gasName, dimless);
+      if (gems_->speciation()) {
+        pair.chiField = outputField("chi_" + gasName, dimless);
+      }
+      updateEquilibriumFields(pair);
+    }
   }
 
   readState();
@@ -788,6 +888,17 @@ void LESTO::interfaceExchange::readPairs (
 
     if (model_ == modelType::HKS) {
       readVapourPressure(pair, pd);
+    }
+
+    /* equilibrium GEMS: the species of the pair in the GEMS3K system */
+    if (gems_) {
+      if (!pd.isDict("gems")) {
+        FatalIOErrorInFunction(pd) << "Pair " << gasName << ": equilibrium "
+          << "GEMS needs gems { gas \"<GEMS3K species>\"; condensates "
+          << "(...); elements { <element> <coefficient>; ... } } (optional: "
+          << "excess { <element> <relative excess>; })." << exit(FatalIOError);
+      }
+      gems_->addPair(gasName, pd.subDict("gems"), pair.molarMass);
     }
     ++pairi;
   }
@@ -1506,7 +1617,8 @@ Foam::string LESTO::interfaceExchange::readDistanceLayer (
 
 /*------------------------------------------------------------------------------
 layer distance: the values of the nearest faces at the elements (pull), and
-the sums of element values per face (push; plusEqOp)
+the sums of element values per face (push: pushToFaces(), its own elements
+first, then the other ranks in ascending rank order)
 ------------------------------------------------------------------------------*/
 
 Foam::tmp<Foam::scalarField> LESTO::interfaceExchange::nearestFaceValues (
@@ -1642,35 +1754,55 @@ void LESTO::interfaceExchange::readHKSModel() {
   }
 
   /*--------------------------------------------------------------------------
-  The GEMS3K backend (equilibrium GEMS, speciation lagged) belongs to
-  milestone M9: without the bridge requireBridge() gives the rebuild hint,
-  with it "not implemented yet".
+  The GEMS3K backend (M9; gemsEquilibrium.H).  Without the bridge
+  requireBridge() stops with the rebuild hint.  speciation lagged takes the
+  gas speciation of the local updates, so it needs equilibrium GEMS (and
+  mode local, checked by gemsEquilibrium).
   --------------------------------------------------------------------------*/
   if (equilibrium == "GEMS") {
     gemsEquilibrium::requireBridge(dict_.subDict("HKSCoeffs"));
   }
-  if (equilibrium != "table") {
+  if (equilibrium != "table" && equilibrium != "GEMS") {
     FatalIOErrorInFunction(dict_) << "HKSCoeffs: unknown equilibrium "
-      << equilibrium << ".  Choose table (or GEMS, milestone M9)."
-      << exit(FatalIOError);
+      << equilibrium << ".  Choose table or GEMS." << exit(FatalIOError);
   }
-  if (speciation == "lagged") {
-    FatalIOErrorInFunction(dict_) << "HKSCoeffs: speciation lagged belongs "
-      << "to the GEMS3K backend, which is not yet implemented (milestone M9 "
-      << "of doc/phase-change-plan.md).  Use speciation none."
-      << exit(FatalIOError);
-  }
-  if (speciation != "none") {
+  if (speciation != "none" && speciation != "lagged") {
     FatalIOErrorInFunction(dict_) << "HKSCoeffs: unknown speciation "
-      << speciation << ".  Choose none (or lagged, milestone M9)."
-      << exit(FatalIOError);
+      << speciation << ".  Choose none or lagged (equilibrium GEMS, "
+      << "GEMSCoeffs mode local)." << exit(FatalIOError);
+  }
+  if (speciation == "lagged" && equilibrium != "GEMS") {
+    FatalIOErrorInFunction(dict_) << "HKSCoeffs: speciation lagged takes the "
+      << "gas speciation from GEMS3K: it needs equilibrium GEMS with "
+      << "GEMSCoeffs mode local." << exit(FatalIOError);
+  }
+
+  if (equilibrium == "GEMS") {
+    if (!dict_.isDict("GEMSCoeffs")) {
+      FatalIOErrorInFunction(dict_) << "equilibrium GEMS needs GEMSCoeffs "
+        << "{ system \"<...>-dat.lst\"; mode frozen | local; carrier "
+        << "\"<GEMS3K gas species>\"; ... } (plan section 4)."
+        << exit(FatalIOError);
+    }
+    gems_.reset (
+      new gemsEquilibrium (
+        mesh_, dict_.subDict("GEMSCoeffs"), speciation == "lagged"
+      )
+    );
   }
 
   Info<< "HKS model: accommodation sigma = " << accommodation_ << ", Ce = "
     << Ce_ << ", kineticScale = " << kineticScale_
     << (kineticScale_ == 1 ? " (SI)" : "") << "; G = kineticScale Ce "
-    << "2 sigma/(2 - sigma) sqrt(M/(2 pi R T_e)), p_eq from the table of "
-    << "every pair" << nl;
+    << "2 sigma/(2 - sigma) sqrt(M/(2 pi R T_e)), p_eq from ";
+  if (gems_) {
+    Info<< "GEMS3K (equilibrium GEMS, mode "
+      << (gems_->local() ? "local" : "frozen") << "), with the table of "
+      << "every pair as its check and fallback; speciation " << speciation;
+  } else {
+    Info<< "the table of every pair";
+  }
+  Info<< nl;
 }
 
 
@@ -2386,6 +2518,23 @@ void LESTO::interfaceExchange::setCoefficients(pairData& pair) const {
     r[3] = -GREAT;  /* max Y_eq */
   }
 
+  /*--------------------------------------------------------------------------
+  The per-element data of the law (interfaceExchange.H, sixth comment
+  block): the kinetic conductance, the half cell, p_eq of the table and of
+  the law (equilibrium GEMS, mode frozen: the GEMS table of the pair; mode
+  local: the table until the first update), chi = 1.
+  --------------------------------------------------------------------------*/
+  const label nElements = elementCell_.size();
+  const bool frozenGems = gems_ && !gems_->local();
+  pair.conductance.resize(nElements, 0.0);
+  pair.resistance.resize(nElements, 0.0);
+  pair.pEqTable.resize(nElements, 0.0);
+  pair.pEq.resize(nElements, 0.0);
+  pair.chi.resize(nElements, 1.0);
+  pair.source.resize(nElements, label(-1));
+  pair.chi = 1.0;
+  pair.source = label(-1);
+
   forAll(elementCell_, e) {
 
     const label celli = elementCell_[e];
@@ -2400,8 +2549,14 @@ void LESTO::interfaceExchange::setCoefficients(pairData& pair) const {
 
     const scalar Te = elementT_[e];
     const scalar beta = rhoI[celli]*R*Tc[celli]/M;
-    const scalar pEq = table(Te);
-    scalar G = wall
+    pair.pEqTable[e] = table(Te);
+    pair.pEq[e] = frozenGems
+      ? gems_->frozenPEq(pairOfSpecies_[pair.gas], Te, pair.pEqTable[e],
+                         pair.source[e])
+      : pair.pEqTable[e];
+    const scalar pEq = pair.pEq[e];
+
+    pair.conductance[e] = wall
       ? hksConductance(M, Te, accommodation_, Ce_, kineticScale_)
       : hksConductance(M, Te, accommodation_, samples_[samplei].Ce,
                        samples_[samplei].kineticScale);
@@ -2409,11 +2564,10 @@ void LESTO::interfaceExchange::setCoefficients(pairData& pair) const {
     if (wall && deltaCoeffs) {
       bool conducting = false;
       const scalar resistance = halfCell(e, conducting);
-      G = conducting ? halfCellConductance(G, beta, resistance) : 0;
+      pair.resistance[e] = conducting ? resistance : -1;
     }
 
-    pair.a[e] = elementArea_[e]*G*pEq;
-    pair.g[e] = elementArea_[e]*G*beta;
+    const scalar G = hksCoefficients(pair, e, deltaCoeffs != nullptr);
 
     const scalar Yeq = pEq/beta;
     if (wall) {
@@ -2492,6 +2646,203 @@ void LESTO::interfaceExchange::setCoefficients(pairData& pair) const {
     Info<< "Sample " << s.name << ", HKS: lambda_s = sum g_e/(rho V) "
       << r[0]/max(r[1], VSMALL) << " 1/s (mean over its cells), Y_eq "
       << r[2] << "-" << r[3] << nl;
+  }
+
+  /*--------------------------------------------------------------------------
+  equilibrium GEMS, mode frozen: the elements of each source of p_eq, and
+  the largest deviation of the elements of the GEMS table from the pair's
+  table (plan section 6, M9 acceptance 2).
+  --------------------------------------------------------------------------*/
+  if (frozenGems) {
+    FixedList<label, gemsEquilibrium::nSourceTypes> nSource(label(0));
+    scalar maxDeviation = 0, TgemsMin = GREAT, TgemsMax = -GREAT;
+    forAll(elementCell_, e) {
+      if (e >= nWall_
+        && samples_[elementSample_[e - nWall_]].pair
+        != pairOfSpecies_[pair.gas]) {
+        continue;
+      }
+      ++nSource[pair.source[e]];
+      if (pair.source[e] == gemsEquilibrium::FROM_GEMS) {
+        maxDeviation = max (
+          maxDeviation,
+          mag(std::log10(pair.pEq[e]) - std::log10(pair.pEqTable[e]))
+        );
+        TgemsMin = min(TgemsMin, elementT_[e]);
+        TgemsMax = max(TgemsMax, elementT_[e]);
+      }
+    }
+    for (label& n : nSource) {
+      reduce(n, sumOp<label>());
+    }
+    reduce(maxDeviation, maxOp<scalar>());
+    reduce(TgemsMin, minOp<scalar>());
+    reduce(TgemsMax, maxOp<scalar>());
+
+    Info<< "Pair " << gasName << ", GEMS frozen on the elements: "
+      << nSource[gemsEquilibrium::FROM_GEMS] << " from the GEMS table";
+    if (nSource[gemsEquilibrium::FROM_GEMS] > 0) {
+      Info<< " (T_e " << TgemsMin << "-" << TgemsMax << " K; max |dlog10 "
+        << "p_eq/p_eq,table| " << maxDeviation << ")";
+    }
+    Info<< ", from the table " << nSource[gemsEquilibrium::BELOW_TEMPERATURE]
+      << " below minTemperature and "
+      << nSource[gemsEquilibrium::OUTSIDE_GRID] << " outside the GEMS "
+      << "table" << nl;
+  }
+}
+
+
+/*------------------------------------------------------------------------------
+HKS law of an element from its p_eq and chi (interfaceExchange.H, sixth
+comment block).  With chi = 1 the arithmetic is that of M5: (A G') p_eq and
+(A G') beta, G' = G/(1 + G beta d/(rhoD)) with the half cell (0 without
+diffusion to the wall), so equilibrium table gives the same doubles.
+------------------------------------------------------------------------------*/
+
+Foam::scalar LESTO::interfaceExchange::hksCoefficients (
+  pairData&   pair,
+  const label e,
+  const bool  halfCell
+) const {
+
+  const label celli = elementCell_[e];
+  const scalar beta = rho_.primitiveField()[celli]*universalGasConstant
+                    *thermo_.T().primitiveField()[celli]/pair.molarMass;
+  const scalar chiBeta = pair.chi[e]*beta;
+
+  scalar G = pair.conductance[e];
+  if (halfCell && e < nWall_) {
+    G = pair.resistance[e] >= 0
+      ? halfCellConductance(G, chiBeta, pair.resistance[e])
+      : 0;
+  }
+
+  pair.a[e] = elementArea_[e]*G*pair.pEq[e];
+  pair.g[e] = elementArea_[e]*G*chiBeta;
+  return G;
+}
+
+
+/*------------------------------------------------------------------------------
+equilibrium GEMS, mode local: the update of p_eq and chi of every element
+(beginStep(), at the start of the steps of the schedule of the time index:
+gemsEquilibrium::updateDue()).  The composition is that of the cell at the
+start of the step: the carrier p/(R T) and c_k = rho Y_k/M_k of every pair.
+A sample element belongs to its own pair only; every pair's gas enters the
+bulk.  The rank's elements are evaluated locally, the counts reduced at the
+end (collective).
+------------------------------------------------------------------------------*/
+
+void LESTO::interfaceExchange::updateEquilibrium() {
+
+  gemsEquilibrium& gems = gems_();
+  const label nPairs = pairs_.size();
+  const scalarField& rhoI = rho_.primitiveField();
+  const scalarField& pc = thermo_.p().primitiveField();
+  const bool halfCell = wallResistance_ == "halfCell";
+
+  scalarList c(nPairs), pEqTable(nPairs), pEq(nPairs), chi(nPairs);
+  labelList source(nPairs);
+  boolList active(nPairs);
+
+  gems.beginUpdate();
+
+  forAll(elementCell_, e) {
+
+    const label celli = elementCell_[e];
+    const label own =
+      e < nWall_ ? -1 : samples_[elementSample_[e - nWall_]].pair;
+
+    forAll(pairs_, k) {
+      const pairData& pair = pairs_[k];
+      active[k] = own < 0 || own == k;
+      c[k] = rhoI[celli]*species_[pair.gas][celli]/pair.molarMass;
+      pEqTable[k] = pair.pEqTable[e];
+      pEq[k] = pair.pEq[e];
+      chi[k] = pair.chi[e];
+      source[k] = pair.source[e];
+    }
+
+    gems.evaluate (
+      e, elementT_[e], pc[celli], carrierConcentration_[celli], c, active,
+      pEqTable, pEq, chi, source
+    );
+
+    forAll(pairs_, k) {
+      if (active[k]) {
+        pairData& pair = pairs_[k];
+        pair.pEq[e] = pEq[k];
+        pair.chi[e] = chi[k];
+        pair.source[e] = source[k];
+        hksCoefficients(pair, e, halfCell);
+      }
+    }
+  }
+
+  gems.endUpdate();
+}
+
+
+/*------------------------------------------------------------------------------
+pEq_<gas>, gemsSource_<gas> and chi_<gas> (writeEquilibriumField): the
+element of each face of the interface patches (layer faceCells), the mean
+(the largest source) of the elements of an exchange cell, 0 (source -1)
+elsewhere; processor patches from the neighbour cells
+------------------------------------------------------------------------------*/
+
+void LESTO::interfaceExchange::updateEquilibriumFields(pairData& pair) const {
+
+  const label pairi = pairOfSpecies_[pair.gas];
+  volScalarField& pEqField = pair.equilibriumField();
+  volScalarField& sourceField = pair.sourceField();
+  volScalarField* chiField = pair.chiField.get();
+
+  pEqField == dimensionedScalar(pEqField.dimensions(), Zero);
+  sourceField == dimensionedScalar(dimless, -1);
+  if (chiField) {
+    *chiField == dimensionedScalar(dimless, Zero);
+  }
+
+  forAll(exchangeCells_, k) {
+    const label celli = exchangeCells_[k];
+    scalar sumP = 0, sumChi = 0;
+    label n = 0, source = -1;
+    for (label e = cellStart_[k]; e < cellStart_[k+1]; ++e) {
+      if (e >= nWall_ && samples_[elementSample_[e - nWall_]].pair != pairi) {
+        continue;
+      }
+      sumP += pair.pEq[e];
+      sumChi += pair.chi[e];
+      source = max(source, pair.source[e]);
+      ++n;
+    }
+    if (n > 0) {
+      pEqField[celli] = sumP/n;
+      sourceField[celli] = source;
+      if (chiField) {
+        (*chiField)[celli] = sumChi/n;
+      }
+    }
+  }
+
+  for (label e = 0; e < nWall_; ++e) {
+    const label patchi = elementPatch_[e];
+    if (patchi < 0) {
+      continue;
+    }
+    const label facei = elementFace_[e];
+    pEqField.boundaryFieldRef()[patchi][facei] = pair.pEq[e];
+    sourceField.boundaryFieldRef()[patchi][facei] = pair.source[e];
+    if (chiField) {
+      chiField->boundaryFieldRef()[patchi][facei] = pair.chi[e];
+    }
+  }
+
+  pEqField.boundaryFieldRef().evaluateCoupled<processorFvPatch>();
+  sourceField.boundaryFieldRef().evaluateCoupled<processorFvPatch>();
+  if (chiField) {
+    chiField->boundaryFieldRef().evaluateCoupled<processorFvPatch>();
   }
 }
 
@@ -2733,6 +3084,19 @@ void LESTO::interfaceExchange::readState() {
       new binaryIOList<scalar> (
         stateObject("phaseChangeReservoirs", IOList<scalar>::typeName,
                     reservoirsFile, reservoirsWhy)
+      )
+    );
+  }
+
+  /* equilibrium GEMS, mode local: the lagged state of the last update
+     (restoreEquilibrium(); gemsEquilibrium.H, mode local) */
+  stateFile equilibriumFile = stateFile::ABSENT;
+  string equilibriumWhy;
+  if (gems_ && gems_->local()) {
+    equilibriumIO_.reset (
+      new binaryIOList<scalar> (
+        stateObject("phaseChangeEquilibrium", IOList<scalar>::typeName,
+                    equilibriumFile, equilibriumWhy)
       )
     );
   }
@@ -3057,6 +3421,10 @@ void LESTO::interfaceExchange::readState() {
            ).c_str()
         << ".  The first corrector counts every active element as a "
         << "regime change." << nl << endl;
+    }
+
+    if (equilibriumIO_) {
+      restoreEquilibrium(equilibriumFile, equilibriumWhy, startName);
     }
   }
 
@@ -4405,6 +4773,9 @@ void LESTO::interfaceExchange::beginStep() {
     pair.explicitRemainder = 0;
     pair.nExplicitRemainder = 0;
     pair.explicitSource = 0;
+    pair.transportIdentity = 0;
+    pair.identityTerms = 0;
+    pair.identityRelative = 0;
     pair.transport = 0;
     pair.clampedStep = 0;
     pair.projectedStep = 0;
@@ -4442,6 +4813,18 @@ void LESTO::interfaceExchange::beginStep() {
       pair.lower[e] = 0;
       pair.upper[e] = reservoirMass(pair, e)/dt;
     }
+  }
+
+  /*--------------------------------------------------------------------------
+  equilibrium GEMS, mode local (M9): p_eq (and chi) of every element from
+  GEMS3K at the composition of the start of the step, at the steps of the
+  schedule of the absolute time index n ((n - 1) mod updateInterval = 0;
+  also at the first step of a run without a lagged state;
+  gemsEquilibrium::updateDue()), and a_e, g_e with them; the step
+  then uses one law throughout.  Collective (the counts).
+  --------------------------------------------------------------------------*/
+  if (gems_ && gems_->local() && gems_->updateDue(runTime.timeIndex())) {
+    updateEquilibrium();
   }
 
   /*--------------------------------------------------------------------------
@@ -4753,8 +5136,10 @@ void LESTO::interfaceExchange::recordSolve (
   /* the explicit remainder E of the transport-only matrix (unbooked: the
      closure changes by dt sum_c E_c; 0 for the solver's schemes;
      matrixDefect.H) and the explicit source it is left of, sum_c |b - s|
-     (the face-flux correction, in source form), for the debug report.
-     Collective. */
+     (the face-flux correction, in source form), and the transport identity
+     D of the cell defects, summed exactly (0 in the flux form, the
+     double-precision residue of the correction's source form otherwise;
+     matrixDefect.H), for the debug report.  Collective. */
   if (reportMatrixResidual_) {
     pair.residualOF = gSum(eqn.residual());
     const scalarField& b = transportEqn.source();
@@ -4771,6 +5156,16 @@ void LESTO::interfaceExchange::recordSolve (
     pair.explicitRemainder = globalSum(explicitSum);
     pair.nExplicitRemainder = returnReduce(nExplicit, sumOp<label>());
     pair.explicitSource = globalSum(explicitSource);
+
+    long double D = 0, terms = 0;
+    transportIdentity (
+      transportEqn, tDdt().source(), oldMass, mass,
+      mesh_.time().deltaTValue(), Y, D, terms
+    );
+    pair.transportIdentity = static_cast<scalar>(D);
+    pair.identityTerms = static_cast<scalar>(terms);
+    pair.identityRelative =
+      terms > 0 ? static_cast<scalar>(std::fabs(D)/terms) : 0;
   }
 }
 
@@ -5183,6 +5578,11 @@ void LESTO::interfaceExchange::realise (
     << complementarity << " kg" << aboveTolerance(complementarity).c_str()
     << ", " << nComplementaritySignificant << " significant)" << nl;
 
+  /* equilibrium GEMS, mode local: the update of this step (M9) */
+  if (gems_ && gems_->local()) {
+    Info<< fieldName << ' ' << gems_->stepReport(pairi).c_str() << nl;
+  }
+
   Info<< fieldName << " transport [kg/s]:";
   forAll(ledger_->patchIds(), k) {
     Info<< ' ' << mesh_.boundary()[ledger_->patchIds()[k]].name() << ' '
@@ -5193,7 +5593,10 @@ void LESTO::interfaceExchange::realise (
     Info<< "; gSum(fvMatrix::residual()) " << pair.residualOF
       << " kg/s (not used); explicit remainder " << pair.explicitRemainder
       << " kg/s in " << pair.nExplicitRemainder << " cells (of an explicit "
-      << "source sum |b - s| " << pair.explicitSource << " kg/s)";
+      << "source sum |b - s| " << pair.explicitSource << " kg/s); "
+      << "transport identity " << pair.transportIdentity << " kg/s (|D| "
+      << pair.identityRelative << " of its terms, " << pair.identityTerms
+      << " kg/s)";
   }
   Info<< nl;
 
@@ -5309,6 +5712,11 @@ void LESTO::interfaceExchange::balance() {
         exchI[celli] /= V[celli];
       }
       exch.correctBoundaryConditions();
+    }
+
+    /* equilibrium GEMS with writeEquilibriumField: p_eq of the step (M9) */
+    if (pair.equilibriumField) {
+      updateEquilibriumFields(pair);
     }
   }
 
@@ -5454,6 +5862,97 @@ void LESTO::interfaceExchange::updateReservoirField(pairData& pair) const {
 
 
 /*------------------------------------------------------------------------------
+equilibrium GEMS, mode local: the lagged state of a restart (plan section
+35, item C).  uniform/phaseChange/phaseChangeEquilibrium holds the
+fingerprint of all elements (as exact scalars), then per pair the counts
+of the last update (gemsEquilibrium::lastUpdate(), nPairState values),
+then per pair and element p_eq [Pa], chi and the source of the element (-1
+for a sample element of another pair, which keeps a = g = 0).  Onto the
+same elements every element's law is recomputed from it as the update did
+(hksCoefficients(): the same doubles), so the steps up to the next update
+repeat the continuous run bit for bit.  With speciation none chi is 1
+whatever the file holds.
+------------------------------------------------------------------------------*/
+
+void LESTO::interfaceExchange::restoreEquilibrium (
+  const stateFile file,
+  const string&   why,
+  const word&     startName
+) {
+
+  gemsEquilibrium& gems = gems_();
+  const scalarList& state = *equilibriumIO_;
+  const label nPairs = pairs_.size();
+  const label nElements = elementCell_.size();
+  const label nHeader = elementsFingerprint_.size();
+  const label nCounts = nPairs*gemsEquilibrium::nPairState;
+  const label nState = nHeader + nCounts + 3*nPairs*nElements;
+
+  bool fits = state.size() == nState;
+  for (label i = 0; fits && i < nHeader; ++i) {
+    fits = state[i] == scalar(elementsFingerprint_[i]);
+  }
+  for (label i = nHeader + nCounts + 2; fits && i < nState; i += 3) {
+    fits = state[i] == std::floor(state[i]) && state[i] >= -1
+        && state[i] < scalar(gemsEquilibrium::nSourceTypes);
+  }
+
+  const label next = mesh_.time().timeIndex() + 1;
+  if (returnReduceAnd(fits)) {
+
+    gems.restoreLastUpdate(SubList<scalar>(state, nCounts, nHeader));
+    const bool halfCell = wallResistance_ == "halfCell";
+
+    forAll(pairs_, k) {
+      pairData& pair = pairs_[k];
+      forAll(elementCell_, e) {
+        const label own =
+          e < nWall_ ? -1 : samples_[elementSample_[e - nWall_]].pair;
+        if (own >= 0 && own != k) {
+          continue;
+        }
+        const scalar* v =
+          state.cdata() + nHeader + nCounts + 3*(k*nElements + e);
+        pair.pEq[e] = v[0];
+        pair.chi[e] = gems.speciation() ? v[1] : 1.0;
+        pair.source[e] = label(v[2]);
+        hksCoefficients(pair, e, halfCell);
+      }
+      if (pair.equilibriumField) {
+        updateEquilibriumFields(pair);
+      }
+    }
+
+    label update = next;
+    while (!gems.updateDueAt(update)) {
+      ++update;
+    }
+    Info<< "GEMS3K (mode local): the lagged state of the last update (p_eq"
+      << (gems.speciation() ? ", chi" : "") << " and the source of every "
+      << "element) restored from uniform/phaseChange/phaseChangeEquilibrium;"
+      << " the next update at the step of time index " << update << nl;
+
+  } else if (!gems.updateDueAt(next)) {
+
+    WarningInFunction
+      << "uniform/phaseChange/phaseChangeEquilibrium at time " << startName
+      << " is "
+      << (
+           file == stateFile::FOREIGN ? why
+         : file == stateFile::ABSENT ? string("missing")
+         : string("empty or written for other interface elements (another "
+             "decomposition or a renumbered mesh?)")
+         ).c_str()
+      << ": the first step updates p_eq of every element (equilibrium "
+      << "GEMS, mode local), although updateInterval "
+      << gems.updateInterval() << " schedules no update at the step of "
+      << "time index " << next << "; the schedule follows the time index "
+      << "from then on." << nl << endl;
+  }
+}
+
+
+/*------------------------------------------------------------------------------
 Per-rank element state of uniform/: the fingerprint, then the regimes
 (phaseChangeRegimes) or the deposits (phaseChangeDeposits, the fingerprint
 as exact scalars) of every element of every pair
@@ -5497,6 +5996,36 @@ void LESTO::interfaceExchange::storeElementState() {
       forAll(pair.reservoir, k) {
         reservoirs[nHeader + pairi*nSample + k] = pair.reservoir[k];
       }
+    }
+  }
+
+  /* equilibrium GEMS, mode local: the lagged state (restoreEquilibrium());
+     empty until the first update */
+  if (equilibriumIO_) {
+    scalarList& state = *equilibriumIO_;
+    if (gems_->lagged()) {
+      const label nAll = elementsFingerprint_.size();
+      const scalarList counts(gems_->lastUpdate());
+      const label nCounts = counts.size();
+      state.resize(nAll + nCounts + 3*pairs_.size()*nElements);
+      forAll(elementsFingerprint_, i) {
+        state[i] = scalar(elementsFingerprint_[i]);
+      }
+      forAll(counts, i) {
+        state[nAll + i] = counts[i];
+      }
+      forAll(pairs_, pairi) {
+        const pairData& pair = pairs_[pairi];
+        forAll(elementCell_, e) {
+          scalar* v =
+            state.data() + nAll + nCounts + 3*(pairi*nElements + e);
+          v[0] = pair.pEq[e];
+          v[1] = pair.chi[e];
+          v[2] = scalar(pair.source[e]);
+        }
+      }
+    } else {
+      state.clear();
     }
   }
 }
@@ -5761,5 +6290,10 @@ void LESTO::interfaceExchange::end() const {
         << " significant regime changes in final predictors";
     }
     Info<< nl;
+  }
+
+  /* equilibrium GEMS, mode local: the counts and the cost of the run */
+  if (gems_) {
+    gems_->summary();
   }
 }

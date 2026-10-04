@@ -51,15 +51,42 @@ closure does not change at all.  The source form b - s of round 2 left the
 correction in r_c as V_c (sum_f C_f/V_c) plus the rounding of the assembly
 s + c, whose sum over the cells telescopes only to round-off: on the
 non-orthogonal pipe of run/014 (up to about 30 degrees) the closure
-changed by about 1e-25 kg per step (review of M4, round 3; plan section
-29, item 2).  Now that residue, the difference between the source form of
-the correction and its face values, is part of R, i.e. of solverDefect.
-An interpolation scheme with an explicit correction (linearUpwind, LUST,
-...) adds it to the source only (gaussConvectionScheme::fvmDiv: fvm +=
-fvc::surfaceIntegrate(phi*correction)), without face values in the matrix:
-it stays in E, in source form, and the rounding of its cell sums reaches
-the closure (a few eps of the correction per step).  E is printed with
-balance { reportMatrixResidual yes; } (interfaceExchange).
+changed by typically 1e-25 to 8e-25, at most 1.7e-24 kg per step (the
+drift pipe of M4.15, 20 steps of 0.1 s; review of M4, round 3; plan
+section 29, item 2).  Now that residue, the difference between the source
+form of the correction and its face values, is part of R, i.e. of
+solverDefect.  An interpolation scheme with an explicit correction
+(linearUpwind, LUST, ...) adds it to the source only
+(gaussConvectionScheme::fvmDiv: fvm += fvc::surfaceIntegrate(phi*
+correction)), without face values in the matrix: it stays in E, in source
+form, and the rounding of its cell sums reaches the closure (a few eps of
+the correction per step).  E is printed with balance { reportMatrixResidual
+yes; } (interfaceExchange).
+
+The transport identity (debug report; plan section 33).  Summed over the
+cells of all ranks, the flux form gives
+
+  D = sum_c r_c + sum_c (m_c - m0_c)/deltaT + sum_b (F_b + C_b) - sum_c E_c
+    = 0,
+
+b the faces of the non-coupled patches: every internal face flux enters
+its two cells once with opposite signs and a processor face its
+antisymmetric mean, so they cancel exactly, not only to round-off.
+transportIdentity() evaluates D with the cell defects of cellDefectT
+accumulated in exactSum (each the exact sum of its terms to about 2^-128
+of their magnitudes) and every sum exact, the reduction over the ranks
+included: D is 0 to the rounding of the compensations in the flux form
+(on the drift pipe of M4.15, 4 ranks, 20 steps: |D| <= 2.4e-40 kg/s, at
+most 1.1e-36 of the magnitude of its terms, 2e-4 to 3e-4 kg/s, in both
+layer rules), while the source form of the correction (r_c with b_c - s_c
+and without the face values C_f, round 2) gives D = sum_c (fl(s_c + c_c) -
+s_c), the double-precision residue of V div(C) telescoping: 1.2e-24 to
+1.8e-23 kg/s, 5e-21 to 8e-20 of the terms, as measured by the negative
+control of criterion M4.18 (a copy of the sources with that form, on the
+same pipe with layer distance; plan section 35, item R).  E itself does
+not enter D (it is subtracted), so a scheme with an explicit correction
+gives D = 0 as well (the channel with linearUpwind, 10 steps: |D| <=
+3.7e-41 kg/s, at most 3.8e-38 of its terms).
 
 The faces:
   - internal face f (owner l, neighbour u): F_f + C_f with F_f = upper_f
@@ -140,12 +167,15 @@ couples = true), so its global sum is wrong in parallel (plan section 7).
 
 Collective: cellDefect exchanges the fluxes of the coupled faces (and
 evaluates the divergence of the correction, whose processor patches
-communicate), so it must be called on every rank.
+communicate), so it must be called on every rank; so must
+transportIdentity.
 
 ------------------------------------------------------------------------------*/
 
 #ifndef matrixDefect_H
 #define matrixDefect_H
+
+#include <cmath>
 
 #include "fvMatrices.H"
 #include "fvcDiv.H"
@@ -155,19 +185,120 @@ communicate), so it must be called on every rank.
 
 namespace LESTO {
 
-  /* the defect r_c of every local cell [kg/s], in long double, and the
-     explicit remainder E_c [kg/s] (header): eqn the transport-only
-     matrix, ddtSource the source of its ddt term, oldMass and mass the
-     inventory masses of the cells before and after the step [kg].
-     Collective. */
-  inline void cellDefect (
+  /*--------------------------------------------------------------------------
+  A long double sum that carries the rounding error of every addition
+  (Neumaier's two-sum of the larger and the smaller magnitude, exact in the
+  64-bit mantissa of x86-64's long double, accumulated in a second long
+  double) and the sum of the magnitudes of the values added.  It is the
+  accumulator of the transport identity: a cell's defect is then the sum
+  of its terms to about 2^-128 of their magnitudes, instead of being
+  rounded to long double at every face.  The compiler must not reassociate
+  floating-point operations (no -ffast-math; compensatedSum.H).
+  --------------------------------------------------------------------------*/
+  struct exactSum {
+
+    long double sum;            /* running sum */
+    long double compensation;   /* accumulated rounding errors of sum */
+    long double magnitude;      /* sum of |x| of the values added */
+
+    exactSum() : sum(0), compensation(0), magnitude(0) {}
+
+    exactSum& operator=(const long double x) {
+      sum = x;
+      compensation = 0;
+      magnitude = std::fabs(x);
+      return *this;
+    }
+
+    exactSum& operator+=(const long double x) {
+      const long double t = sum + x;
+      if (std::fabs(sum) >= std::fabs(x)) {
+        compensation += (sum - t) + x;
+      } else {
+        compensation += (x - t) + sum;
+      }
+      sum = t;
+      magnitude += std::fabs(x);
+      return *this;
+    }
+
+    exactSum& operator-=(const long double x) {
+      return *this += -x;
+    }
+
+    long double value() const {
+      return sum + compensation;
+    }
+  };
+
+  /*--------------------------------------------------------------------------
+  The face-flux correction C of a matrix (nullptr when it has none) and its
+  source contribution c = -V div(C), with the operations of
+  gaussLaplacianScheme (V times fvc::div), so that c holds the doubles the
+  matrix was assembled with.  The matrix offers no const access to C; it is
+  only read here.  Collective (the divergence evaluates the processor
+  patches).
+  --------------------------------------------------------------------------*/
+  inline const Foam::surfaceScalarField* faceFluxCorrection (
+    const Foam::fvScalarMatrix&  eqn,
+    const Foam::volScalarField&  psi,
+    Foam::scalarField&           correctionSource
+  ) {
+
+    using namespace Foam;
+
+    correctionSource.resize(psi.primitiveField().size());
+    correctionSource = Zero;
+    if (!eqn.hasFaceFluxCorrection()) {
+      return nullptr;
+    }
+    const surfaceScalarField* correction =
+      const_cast<fvScalarMatrix&>(eqn).faceFluxCorrectionPtr().get();
+    const tmp<volScalarField> tDiv(fvc::div(*correction));
+    const scalarField& divC = tDiv().primitiveField();
+    const scalarField& V = psi.mesh().V();
+    forAll(correctionSource, celli) {
+      correctionSource[celli] = -(V[celli]*divC[celli]);
+    }
+    return correction;
+  }
+
+  /* the explicit remainder E_c = b_c - fl(s_c + c_c) of a cell and its
+     storage rate (m_c - m0_c)/deltaT, in long double (header): the same
+     operations wherever they are needed */
+  inline long double cellRemainder (
+    const Foam::scalar  source,
+    const Foam::scalar  ddtSource,
+    const Foam::scalar  correctionSource
+  ) {
+    const Foam::scalar assembled = ddtSource + correctionSource;
+    return static_cast<long double>(source)
+         - static_cast<long double>(assembled);
+  }
+
+  inline long double cellStorageRate (
+    const Foam::scalar  mass,
+    const Foam::scalar  oldMass,
+    const long double   deltaT
+  ) {
+    return (static_cast<long double>(mass)
+            - static_cast<long double>(oldMass))/deltaT;
+  }
+
+  /* the defect r_c of every local cell [kg/s], accumulated in Acc (long
+     double for the ledger, exactSum for the transport identity), and the
+     explicit remainder E_c [kg/s] (header): eqn the transport-only matrix,
+     ddtSource the source of its ddt term, oldMass and mass the inventory
+     masses of the cells before and after the step [kg].  Collective. */
+  template<class Acc>
+  inline void cellDefectT (
     const Foam::fvScalarMatrix&  eqn,
     const Foam::scalarField&     ddtSource,
     const Foam::scalarField&     oldMass,
     const Foam::scalarField&     mass,
     const Foam::scalar           deltaT,
     const Foam::volScalarField&  psi,
-    Foam::List<long double>&     r,
+    Foam::List<Acc>&             r,
     Foam::scalarField&           remainder
   ) {
 
@@ -179,33 +310,20 @@ namespace LESTO {
     const scalarField& b = eqn.source();
     const ld dt = static_cast<ld>(deltaT);
 
-    /*------------------------------------------------------------------------
-    The face-flux correction C and its source contribution c = -V div(C),
-    with the operations of gaussLaplacianScheme (V times fvc::div), so that
-    c holds the doubles the matrix was assembled with.  The matrix offers
-    no const access to C; it is only read here.
-    ------------------------------------------------------------------------*/
-    const surfaceScalarField* correction = nullptr;
-    scalarField correctionSource(psiI.size(), Zero);
-    if (eqn.hasFaceFluxCorrection()) {
-      correction =
-        const_cast<fvScalarMatrix&>(eqn).faceFluxCorrectionPtr().get();
-      const tmp<volScalarField> tDiv(fvc::div(*correction));
-      const scalarField& divC = tDiv().primitiveField();
-      const scalarField& V = mesh.V();
-      forAll(correctionSource, celli) {
-        correctionSource[celli] = -(V[celli]*divC[celli]);
-      }
-    }
+    /* the face-flux correction C and its source contribution c */
+    scalarField correctionSource;
+    const surfaceScalarField* correction =
+      faceFluxCorrection(eqn, psi, correctionSource);
 
+    /* E - (m - m0)/deltaT, rounded once in long double as before */
     r.resize_nocopy(psiI.size());
     remainder.resize(psiI.size());
     forAll(r, celli) {
-      const scalar assembled = ddtSource[celli] + correctionSource[celli];
-      const ld E = static_cast<ld>(b[celli]) - static_cast<ld>(assembled);
+      const ld E =
+        cellRemainder(b[celli], ddtSource[celli], correctionSource[celli]);
       remainder[celli] = static_cast<scalar>(E);
-      r[celli] = E - (static_cast<ld>(mass[celli])
-                      - static_cast<ld>(oldMass[celli]))/dt;
+      r[celli] = E;
+      r[celli] -= cellStorageRate(mass[celli], oldMass[celli], dt);
     }
 
     /* internal faces: the flux out of the owner, once per face */
@@ -293,6 +411,115 @@ namespace LESTO {
         );
       }
     }
+  }
+
+  /* the defect r_c of every local cell [kg/s], in long double, and the
+     explicit remainder E_c [kg/s]: the ledger's form (header).
+     Collective. */
+  inline void cellDefect (
+    const Foam::fvScalarMatrix&  eqn,
+    const Foam::scalarField&     ddtSource,
+    const Foam::scalarField&     oldMass,
+    const Foam::scalarField&     mass,
+    const Foam::scalar           deltaT,
+    const Foam::volScalarField&  psi,
+    Foam::List<long double>&     r,
+    Foam::scalarField&           remainder
+  ) {
+    cellDefectT(eqn, ddtSource, oldMass, mass, deltaT, psi, r, remainder);
+  }
+
+  /*--------------------------------------------------------------------------
+  The transport identity D [kg/s] of the cell defects (header) over all
+  ranks, and the magnitude of its terms [kg/s] (the sum of |x| of every
+  value added to a cell defect and to D): the cell defects of cellDefectT
+  in exactSum, then
+
+    D = sum_c r_c + sum_c (m_c - m0_c)/deltaT + sum_b (F_b + C_b)
+      - sum_c E_c,
+
+  b the faces of the non-coupled patches, E and the storage rate recomputed
+  by the same operations and the face values of the non-coupled patches as
+  cellDefectT subtracts them.  Every rank's sum and compensation are split
+  into two doubles each (hi = x rounded to double, lo = x - hi, both exact)
+  and added in rank order into one exactSum on every rank, so the
+  reduction adds no rounding.  Debug report only (reportMatrixResidual).
+  Collective.
+  --------------------------------------------------------------------------*/
+  inline void transportIdentity (
+    const Foam::fvScalarMatrix&  eqn,
+    const Foam::scalarField&     ddtSource,
+    const Foam::scalarField&     oldMass,
+    const Foam::scalarField&     mass,
+    const Foam::scalar           deltaT,
+    const Foam::volScalarField&  psi,
+    long double&                 D,
+    long double&                 magnitude
+  ) {
+
+    using namespace Foam;
+    typedef long double ld;
+
+    List<exactSum> r;
+    scalarField remainder;
+    cellDefectT(eqn, ddtSource, oldMass, mass, deltaT, psi, r, remainder);
+
+    const scalarField& psiI = psi.primitiveField();
+    const scalarField& b = eqn.source();
+    const ld dt = static_cast<ld>(deltaT);
+    scalarField correctionSource;
+    const surfaceScalarField* correction =
+      faceFluxCorrection(eqn, psi, correctionSource);
+
+    exactSum local;
+    ld terms = 0;
+    forAll(r, celli) {
+      local += r[celli].sum;
+      local += r[celli].compensation;
+      local -=
+        cellRemainder(b[celli], ddtSource[celli], correctionSource[celli]);
+      local += cellStorageRate(mass[celli], oldMass[celli], dt);
+      terms += r[celli].magnitude;
+    }
+    forAll(psi.boundaryField(), patchi) {
+      const fvPatchScalarField& pf = psi.boundaryField()[patchi];
+      if (pf.coupled()) {
+        continue;
+      }
+      const labelUList& faceCells = pf.patch().faceCells();
+      const scalarField& ic = eqn.internalCoeffs()[patchi];
+      const scalarField& bc = eqn.boundaryCoeffs()[patchi];
+      forAll(faceCells, facei) {
+        local += static_cast<ld>(ic[facei]*psiI[faceCells[facei]] - bc[facei]);
+        if (correction) {
+          local += static_cast<ld>(correction->boundaryField()[patchi][facei]);
+        }
+      }
+    }
+    terms += local.magnitude;
+
+    /* the exact reduction over the ranks */
+    auto split = [](const ld x, scalar& hi, scalar& lo) {
+      hi = static_cast<scalar>(x);
+      lo = static_cast<scalar>(x - static_cast<ld>(hi));
+    };
+    List<FixedList<scalar, 5>> parts(Pstream::nProcs());
+    FixedList<scalar, 5>& mine = parts[Pstream::myProcNo()];
+    split(local.sum, mine[0], mine[1]);
+    split(local.compensation, mine[2], mine[3]);
+    mine[4] = static_cast<scalar>(terms);
+    Pstream::allGatherList(parts);
+
+    exactSum total;
+    ld allTerms = 0;
+    for (const FixedList<scalar, 5>& part : parts) {
+      for (label k = 0; k < 4; ++k) {
+        total += static_cast<ld>(part[k]);
+      }
+      allTerms += static_cast<ld>(part[4]);
+    }
+    D = total.value();
+    magnitude = allTerms;
   }
 }
 
