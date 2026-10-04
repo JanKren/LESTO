@@ -288,6 +288,13 @@ final solve.
     x >= 1e-6, T >= 500 K and rc in {OK, OK_RETRIED}; otherwise the table.
   - Optional speciation factor chi = p_i^GEMS/p_i, lagged and clipped to (0,1],
     applied to gamma. It is a separately reported modelling change, off by default.
+  (Implemented in M9, section 32: every condensed DC is suppressed; `frozen`
+  evaluates p_eq at the nodes of the pair's table in [max(minTemperature,
+  T_min), T_max] of the GEMS grid, cold, at the reference composition, and
+  interpolates that GEMS table (section 12, item 7); `local` also fails a
+  call whose element balance is off by more than 1e-6 and rejects a result
+  further than maxLog10Deviation from the table; chi = n_g/c, the fraction
+  of the formula units present as the gas species, clipped to [1e-12, 1].)
 
 ### E10 Profiles and T_dep
 
@@ -456,6 +463,11 @@ The exchange imposes no stability limit. Accuracy sets dt:
         allowNonPhysicalCarrier no;    // local mode refuses rho != pM/(RT) by more than 1 % (paper mode)
         logDirectory      "gemsLog";   // processorN/gemsLog in parallel
         logLevel          4;
+        // as implemented (section 32): defaults are the values above but
+        // for system, mode, carrier and (frozen) referenceComposition;
+        // new: referencePressure 101325 (frozen [Pa]),
+        // writeEquilibriumField no (pEq_<gas>, gemsSource_<gas>, chi_<gas>);
+        // the pair's gems block takes an optional excess { I 1e-6; }
     }
 
     samples
@@ -553,10 +565,10 @@ Per-case `0/Y_PbI2_g` settings:
 | `createPhaseChange.H` (new) | Constructs `phaseChange`; runs the start-up checks; prints the layer report (cells, faces, A_I, V_I, A_I/V_I, v_d, sample cells/volume). In mock mode prints nothing. |
 | `Make/files`, `Make/options` | Add the .C files. Opt-in conditional `ifneq (,$(wildcard $(LESTO_GEMSBRIDGE)/gemsbridge.h))` adds `-DLESTO_HAVE_GEMS -I...` and `-L... -lgemsbridge -Wl,-rpath,...`. No default path. |
 | `Allwmake` | Accept 2412/v2412/2606/v2606. Bridge-state stamp in `Make/$WM_OPTIONS/gems.state`: runs `wclean` on toggle; echoes the state. |
-| `tests/` | `testPhaseChange.C` and `testVapourPressureTable.C` (g++ only); `regress.sh` (filtered full log vs pristine build and vs `out_excerpt`); `cmpFields.sh` (binary cmp of written fields); `phaseChange/{closedBox,channel,pipe,restartAscii,parallel,graetzWedge,layerMesh}` with an `Allrun` that asserts the milestone thresholds; `graetz.py`, `gci.py`, `summarise.py`. |
+| `tests/` | `testPhaseChange.C` and `testVapourPressureTable.C` (g++ only); `regress.sh` (filtered full log vs pristine build and vs `out_excerpt`); `cmpFields.sh` (binary cmp of written fields); `phaseChange/{closedBox,channel,pipe,restartAscii,parallel,graetzWedge,layerMesh}` with an `Allrun` that asserts the milestone thresholds; `graetz.py`, `gci.py`, `summarise.py`. (As built: the verification of M7 is `tests/verification/`, section 33.) |
 | `utilities/setFrozenCarrier/` (new app) | Paper-mode carrier: rho = 1, parabolic u from Q/A with an optional facet-area rescale, phi exactly divergence-free, T from a wall table. Not solver logic. |
 | `thermochemistry/systems/make_pv_table.py` + `data/pv_PbI2_phases.csv`, `data/pv_PbI2_TFlows.csv` | Direct NASA-9 (Gurvich): per-phase cr/l columns every 5 K (270-1250 K) plus the T_m = 683 K node; T-Flows GEMS_VAPOR_PRESSURE at its 95 nodes (283.15 + 10k K, bar). |
-| `run/012-...` to `run/017-...` (new) | 012 temperature model (007 carrier, dev); 013 HKS inventory (dev); 014/015 paper-mode temperature/HKS (code-to-code); 016+ physical carriers (M8). Each has a readme and an `out_excerpt` baseline. 008-010 untouched; 011 is the coupled-mock case of the main branch (section 31). |
+| `run/012-...` to `run/017-...` (new) | 012 temperature model (007 carrier, dev); 013 HKS inventory (dev); 014/015 paper-mode temperature/HKS (code-to-code); 016+ physical carriers (M8). Each has a readme and an `out_excerpt` baseline. 008-010 untouched; 011 is the coupled-mock case of the main branch (section 31). (Amended in section 32, item 12: 015 is the GEMS case of M9, `run/015-hks-gems-local`; the paper-mode HKS case of M6 becomes 016, the physical carriers 017+.) |
 | `readme.md`, manuscript `04-numerics.tex` | Documentation: models, sign convention, balance line, outputs, restart, GEMS build, traps. Manuscript: replace "fvm::SuSp for the sign-changing HKS term" with "fvm::Sp + Su (affine law, Su, Sp >= 0)"; add the defect, guard and final-solve text. |
 
 ---
@@ -699,6 +711,11 @@ Acceptance:
    as the "units effect" figure.
 
 ### M7: Verification suite (3 d)
+(Implemented and tested by `tests/Alltest M7`, criteria M7.1a-o, part of
+`all`, and `tests/Alltest M7long`, criteria M7.2a-f, M7.3a-d, M7.5a-c,
+M7.3pa-pc and M7.6a-b, not part of `all`; sections 33 and 35.  The closed
+box of the deliverables is verified by the analytic closed boxes of M2.1
+and M5.1; section 35, item R.)
 Deliverables: closed box; Graetz-Robin (`graetz.py`, extended with axial
 diffusion) on 3 wedge meshes; GCI; halfCell vs none; h vs h/2 first-layer mesh;
 dt 4/2/1 ms; axial x2.
@@ -731,6 +748,8 @@ Science targets (reported, not a code gate): peak and onset within +-1 cm, and
 T_dep within +-15 K.
 
 ### M9: Optional GEMS3K backend (2-3 d)
+(Implemented and tested by `tests/Alltest M9`, criteria M9.0 to M9.14;
+sections 32 and 35.)
 Acceptance:
 1. Build without the bridge: `equilibrium GEMS` stops with a FatalIOError and a
    rebuild hint.
@@ -1965,7 +1984,9 @@ deviates from a statement above and needs the researcher's sign-off.
      kineticScale 1, equilibrium table, speciation none).  `equilibrium
      GEMS` calls `gemsEquilibrium::requireBridge` (rebuild hint without the
      bridge, "not implemented yet" with it: M9); `speciation lagged` stops
-     with "not yet implemented" (M9).
+     with "not yet implemented" (M9).  (Implemented in M9, section 32:
+     with the bridge `equilibrium GEMS` runs, without it the rebuild hint
+     stays; `speciation lagged` needs equilibrium GEMS in mode local.)
    - `vapourPressure` is required per pair for HKS, and so is its `units`
      (a wrong unit is a factor 1e5 or a misread logarithm, so there is no
      default); `interpolation` defaults to logInverseT, `outOfRange` to
@@ -5383,3 +5404,1523 @@ of section 5).
      789.2542 K, as before.  `tests/Alltest M4long` gives 30 PASS, 0 FAIL,
      0 NOTRUN; the other 13 runs are revalidated, with the wall-table links
      of run/014 resolving.
+
+---
+
+## 32. M9 implementation decisions (signed off by the researcher, 2026-10-04)
+
+M9 (the GEMS3K backend of the HKS law) is implemented on top of the
+integrated code of section 31 and tested by `tests/Alltest M9`
+(`tests/gems/Allrun`, criteria M9.0 to M9.10, and M9.11 to M9.14 since
+section 35; part of `all`).  The points
+below were decided during the implementation; each sharpens or deviates
+from a statement above (E9; sections 1, 4 and 5; section 6 M9; section 9,
+items 7-8; section 12, item 7) and needs the researcher's sign-off.
+Section 33 is reserved for the M7 integration that follows.
+
+1. **What a call computes (E9).**  One call per element serves every pair
+   of the element.  Every condensed species of the system is suppressed
+   (metastability bounds 0 and 0; also Pb(cr) and Pb(l), which belong to no
+   pair: the HKS law exchanges only the pair's condensate), so GEMS3K
+   returns the homogeneous gas of the bulk composition, and the dual
+   activity of a suppressed pure condensate is its log10 saturation ratio:
+   p_eq = p_g 10^(-max_phi log10 Omega_phi) over the pair's condensates.
+   For the ideal PbI2-He gas p_eq depends on T only and equals the table's
+   minimum over the phases to the G0 interpolation of GEMS3K on the 10 K
+   grid of its DCH file.  Scan of the bridge (`scan3`, cold calls, 500-1250
+   K, x = 1e-4 to 0.2): |dlog10 p| <= 6e-5; warm calls in strongly
+   supersaturated cells (T < 700 K, x >= 0.01) drift to 1e-3 decades,
+   about proportional to log10 Omega (after 1-2 iterations from the warm
+   state), well inside maxLog10Deviation; the largest deviation in all M9
+   runs is 3.8e-4 decades.
+
+2. **The dictionary (section 4).**  `GEMSCoeffs` as section 4, with the
+   values listed there as defaults for every key but `system`, `mode`,
+   `carrier` and, in mode frozen, `referenceComposition` (all required);
+   the start-up line prints the values used, and a key of the other mode
+   is named in a warning (section 35, items G and H: such a key is not
+   read either, and an unknown key stops the run).  New keys:
+   `referencePressure` (mode frozen, the pressure of its calls, default
+   101325 Pa) and `writeEquilibriumField` (item 7).  The pair's
+   `gems { gas; condensates; elements; }` block is checked against the
+   system: the gas species must be a gas, every
+   condensate a condensed species, and all of them must have the formula
+   of `elements` (the mass balance of a pair assumes one formula); the
+   molar mass of the gas species must equal the solver's `molarMass` to
+   1e-6.  `equilibrium GEMS` without `GEMSCoeffs` or without a pair's
+   `gems` block, and `speciation lagged` without equilibrium GEMS in mode
+   local, stop with a FatalIOError (M9.7, 9 refusals; 16 lines since
+   section 35, items H and I).  With model HKS and
+   equilibrium table, a `GEMSCoeffs` or `gems` block in the file is named
+   in a start-up warning (as the inputs of the other model, section 21,
+   item 6).
+
+3. **`excess` (a new key of the gems block).**  At the exact formula PbI2
+   (b_I = 2 b_Pb) the interior-point method of GEMS3K occasionally stalls
+   (thermochemistry/README.md, pitfall 3).  Scans of the bridge
+   (scratchpad of this round, `scan.cpp`, `scan2.cpp`): in a temperature
+   sweep (1250 to 270 K, x = 1e-6 to 0.3) 1 of 2364 warm calls failed in the
+   guarded range (x >= 1e-6, T >= 500 K) at the exact formula and none with
+   a relative iodine excess of 1e-6; outside the guards (x down to 1e-10,
+   T down to 270 K) 369 of 3940 failed at the exact formula and 1 with the
+   excess.  The prototypes and the frozen `referenceComposition` of
+   section 4 (I = 2.000002e-3) carry the same 1e-6.  `excess { I 1e-6; }`
+   adds nu_I 1e-6 c iodine to the bulk: p_eq of an ideal gas does not
+   change, the speciation by about 1e-6.  An explicit key, default none
+   (the exact formula), not a hidden constant; run/015 and the tests set
+   it.
+
+4. **mode frozen (section 12, item 7).**  Every rank creates an engine; the
+   master evaluates p_eq at the nodes of the pair's table that lie in
+   [max(minTemperature, T_min), T_max] of the GEMS3K grid (for the Gurvich
+   table 152 nodes in 500-1250 K: every 5 K and the melting point
+   683.000002 K), with cold calls at the reference composition and
+   pressure; a node whose call fails, or whose p_eq lies further than
+   maxLog10Deviation from the table, keeps the table's value (counted in
+   the start-up line).  The values form a table of one column, p_eq,
+   interpolated as the pair's table (the melting point is a node, so the
+   kink stays at a node), broadcast to every rank; the engines are then
+   destroyed.  An element below minTemperature or outside that range takes
+   the pair's table: the guards and the fallback of mode local.  Results:
+   152 nodes from GEMS3K, 0 failed, 0 rejected, max |dlog10 p| 5.7e-5 at
+   the nodes (section 35, item E: GEMSB_ERR_FATAL now re-creates the
+   engine here too); on the 1150 -> 450 K channel the 212 elements in 500-1100 K
+   lie within 5.6e-5 decades of the 5 K table (acceptance 2, limit 1e-3;
+   M9.2a), the 14 below 500 K on the table exactly.  Frozen is
+   deterministic: a restart is cmp-identical, and on 4 ranks the p_eq of
+   every element equals the serial one bit for bit (M9.2b).
+
+5. **mode local.**  One engine per rank for the whole run (RAII; the
+   engine of the bridge is created and destroyed with its owner).  At the
+   first step of a run and then every updateInterval steps, in
+   `beginStep()` before the correctors, every element (wall and sample; a
+   sample element for its own pair) is evaluated at its T_e, the pressure
+   of its cell and the composition of its cell at the start of the step:
+   the carrier p/(R T) (the frozen p and T, as the mole-fraction monitor
+   of section 29, item 4) times its formula, plus c_k = rho Y_k/M_k of
+   every pair times its formula (with its excess); a step thus uses one
+   law throughout its correctors, the guard and `realise()`, and the
+   ledger books the realised flows as before.  The guards in this order:
+   T_e < minTemperature, T_e or p outside the grid of the system, x_k =
+   c_k/(c_k + p/(R T)) < minMoleFraction (no gas: c <= 0), a failed call (a
+   status other than OK and OK_RETRIED, or an element balance off by more
+   than 1e-6 relative: the README's 'check both the status and the mass
+   balance'), a rejected result (|dlog10| > maxLog10Deviation); each gives
+   the table and is counted per kind.  Every element keeps its own warm
+   state (GEMSB_WARM_CELL); a failed or rejected element's state is
+   invalidated.  GEMSB_ERR_FATAL re-creates the engine: destroyed, created
+   from the system file, every condensed species suppressed again, every
+   warm state of the rank invalidated (section 12, item 7; M9.5 with a
+   fault-injecting bridge).  The warm states are not written: a restart
+   begins cold (section 8, risk 13); the restart from 0.2 of the ramp
+   channel is exact at its start and stays within 5.6e-8 of the
+   continuous run's inventories at 0.35 s (M9.9), while frozen restarts are
+   exact.  (Section 35, item C: the schedule of the updates follows the
+   time index, and the lagged state of the last update is written with
+   the per-rank state, so a restart with updateInterval > 1 repeats the
+   continuous run up to its next update.)
+
+6. **speciation lagged (E9).**  chi_e = n_g/c_k, the fraction of the pair's
+   formula units present as the gas species g in the GEMS3K state of the
+   last update (PbI2(g); the rest PbI, I, Pb, I2), clipped to [1e-12, 1]
+   (E9 wrote chi = p_i^GEMS/p_i: the same in the dilute limit; GEMS3K holds
+   the total pressure at the cell's p, while the solver's p_i = c R T comes
+   on top of the carrier's p, so the two differ by the factor 1 + x, and
+   the fraction of molecules is the quantity the law needs),
+   multiplies the partial pressure of the law, q = A G' (p_eq - chi beta
+   Y): g_e is multiplied by chi_e, and with wallResistance halfCell the
+   half cell enters with chi beta (G' = G/(1 + G chi beta d/(rhoD)), the
+   Robin form of the law with the speciated partial pressure).  An element
+   whose p_eq comes from the table has chi = 1.  mode local only (frozen
+   has no composition; refused).  The separate run of acceptance 4 (M9.4,
+   reported, not gated): on the ramp channel chi = 0.46 to 1 over the GEMS
+   elements; at 0.35 s the wall holds +7.6e-5 and the gas +4.0e-6 of the
+   inventory more than without speciation, the deposit profile differs by
+   1.2e-3 (L1), T_dep (fromInlet, wall) 900.15 against 900.13 K.  Scan of
+   chi at 1 atm (cold calls): 1 up to 700 K; at 1100 K 0.97 (x = 0.01),
+   0.91 (x = 1e-3), 0.36 (x = 1e-5); at 1200 K down to 0.06 (x = 1e-5):
+   the speciation matters only in the hot, dilute gas.
+
+7. **Output.**  The step report of mode local has, after the exchange line,
+   one line per pair: the update (calls: warm, retried, cold; iterations
+   per call; failures; engine re-creations) or 'no update this step', the
+   elements of each source, and the largest |dlog10 p_eq/p_eq,table| of
+   the GEMS elements (and with speciation the range of chi).  It holds no
+   timing, so excerpts compare (run/015).  `end()` prints the summary with
+   the totals and the mean times of a warm and of a cold call (all ranks;
+   64-bit counts since section 35, item A).
+   Every rank writes `<logDirectory>/gemsEquilibrium.log` below its case
+   directory (processorN in parallel; section 35, item D: also a directory
+   outside it is per rank): the engine, every update with its
+   counts and timing on the rank, every failure (element, T, p, x, status,
+   the message of GEMS3K; at most 20 per update), every re-creation;
+   GEMS3K's `ipmlog.txt` lies next to it (the log directory and level of
+   GEMS3K are set before the first engine).  With `writeEquilibriumField
+   yes`: `pEq_<gas>`, `gemsSource_<gas>` (0 GEMS3K, 1 below minTemperature,
+   2 below minMoleFraction, 3 outside the GEMS grid or table, 4 rejected, 5
+   failed; -1 elsewhere or before the first update) and, with speciation,
+   `chi_<gas>`, per element on the interface faces and per cell (the mean;
+   the largest source), refreshed in `balance()`, never read.  The fields
+   let the tests recompute every guard (M9.3a) and every frozen value
+   (M9.2a) independently.
+
+8. **allowNonPhysicalCarrier (section 4).**  The carrier line already gives
+   max |T - p W/(R rho)|/T, which is max |rho - p W/(R T)|/rho; above 0.01
+   mode local stops with a FatalIOError (paper mode, rho = 1: 0.95 on the
+   channel) unless `allowNonPhysicalCarrier yes` (a warning; the composition
+   of every cell comes from p/(R T)); mode frozen runs on any carrier
+   (M9.3e).
+
+9. **Cost (acceptance 3: <= 70 us per warm call).**  A warm call costs
+   about 20-30 us when consecutive calls share their temperature and about
+   35 us more when they do not, because GEMS3K re-interpolates G0(T) at
+   every new T (the bridge clamps Ttol to 1e-3 K against the Ttol trap of
+   the README); every element of the solver lies at its own T, so that is
+   the solver's case (`scan4`, load 17: 62 us against 28 us at one T).  On
+   the idle workstation the scan gave 42-45 us per call in that pattern;
+   the solver measured 65.7 and 60.9 us per warm call on the ramp channel
+   (56687 warm calls, 1.05 iterations per call) at a load of 17.4-17.6 (the
+   M7 study on 16-20 of the 20 physical cores, hyperthreads shared), and
+   73 us in the first 25 steps of run/015.  M9.3b gates the channel's
+   value, prints the load, and is NOTRUN, not FAIL, when it is slower on a
+   busy machine (a 1-minute load of 4 or more), as acceptance 3 asks for a
+   quiet moment.  Mode local adds about 0.05 s to a run/015 step of 2.3 s
+   in its first steps (700 calls).  Not done: ordering the calls by T (it
+   would create long runs of nearly equal temperatures, the trap the clamp
+   guards against), or keeping one engine per temperature.
+
+10. **The Ttol trap and the element order.**  Consecutive calls whose T
+    differ by less than 1e-3 K reuse G0 of the previous call (the clamp of
+    the bridge), and the reference temperature moves with every call, so a
+    long run of slightly increasing temperatures would accumulate an error.
+    The elements are called in their order (by cell), where neighbours
+    differ by kelvins or by round-off; any drift beyond maxLog10Deviation
+    would be rejected and counted.  The largest deviation in all M9 runs is
+    3.8e-4 decades (item 1).
+
+11. **The default build stays bridge-free (deliverable 5).**  The M9 tests
+    build a copy of the sources with the bridge into
+    `tests/work/<platform>/gems/bin` (keyed by the sources, the bridge and
+    the OpenFOAM installation; M9.0 checks every source compiled, 0
+    warnings, ldd and -help, and that the default solver has no bridge).
+    `tests/functions` unsets LESTO_GEMSBRIDGE; the bridge is
+    LESTO_GEMSBRIDGE_TEST or the repository's `thermochemistry/gemsbridge`
+    (its `libgemsbridge.so` is git-ignored: without one every criterion but
+    M9.0 and M9.1 is NOTRUN).  The dummy bridge of the build tests (M0.3)
+    is now a copy of the real header with `tests/build/dummyBridge.c`, which
+    defines all 30 functions: the solver calls the whole API since M9, so
+    the old one-function dummy no longer linked.  `makeCase` links a case's
+    `constant/gems` like its tables.
+
+12. **Case numbering (section 5).**  Section 5 had 015 for the paper-mode
+    HKS case of M6 and 016+ for the physical carriers; this round's task
+    gives 015 to the GEMS case, `run/015-hks-gems-local`, so M6's case
+    becomes 016 and the physical carriers 017+ (section 5 annotated).
+
+13. **run/015-hks-gems-local.**  run/013's set-up (the 007 carrier, the
+    boat, faceCells, SI, removal at 6 s) with `equilibrium GEMS`, mode
+    local, the guards of section 4, `excess { I 1e-6; }`, `constant/gems` a
+    link to `thermochemistry/systems/PbI2He`, and the final solve at
+    1e-14, the final tolerance of HKS cases of section 28, item 8 (the
+    solver defect of 25 steps 2.2e-16 instead of 3e-14; about 20 % more
+    time per step); run/013 itself keeps 1e-12 until the M7 integration.
+    Its `out_excerpt` holds 5 steps and, after a `...` line that ends the
+    compared block, the end-of-run summary, which holds timing (M9.8).
+    `**/gemsLog/` is git-ignored.
+
+14. **Tests (`tests/gems/Allrun`, `checks.py`, `faultBridge.c`).**  The
+    channel of M5 with the boat (1000 -> 400 K, a perfect-gas carrier) and
+    its own loose correctors with the Final solve at 1e-14: equilibrium
+    table and GEMS local for 350 steps; local on 4 ranks, with speciation,
+    written every step (30 steps), with updateInterval 3, with the
+    fault-injecting bridge (faults at the calls 150 and 600), restarted from
+    0.2, and with wallResistance halfCell (the default planned for physical
+    runs, section 28, item 6; with and without speciation) against the table
+    run with halfCell (M9.10: the half cell is stored per element and the
+    law recomputed with it at every update; without the half cell the
+    deposit differs by 4.6 % (L1), 15 times the gate, so a lost half cell
+    fails); the 1150 -> 450 K channel in mode frozen (serial, restarted, 4
+    ranks); paper mode; 9 refusals; run/015 for 25 steps.  Results of this
+    round (load 17, the M7 study alongside): M9.3a 0 failures in 350 steps,
+    the sources of all 240 elements in 30 steps equal to the guards
+    recomputed from the fields (0 differences; 34 wall elements below 500 K
+    in every step); M9.3c 4 engines, 4 logs, the calls of the rank logs =
+    the summary's, inventories within 1e-9 of serial; M9.3d the deposit
+    within 6.5e-5 (L1) and 1.7e-4 of the peak (bin) of the table run at
+    every profile time (limit 3e-3); closure <= 1.9e-16 and solverDefect <=
+    2.5e-13 in every run (corrected in section 35, item B: 2.6e-13 on 4
+    ranks, a run whose defect was not gated then; every run gates both
+    now).  `faultBridge.c` forwards every call to the real
+    bridge (dlopen) and is loaded through LD_LIBRARY_PATH over the RUNPATH
+    of the bridge build, so no second build is needed.
+
+15. **Negative evidence.**  `tests/gems/Allrun` with a bridge build of
+    the sources with five defects put in on purpose (`LESTO_GEMS_TEST_EXE`
+    names the executable to test; the build step is then skipped and the
+    first line of M9.0 is NOTRUN): (a) the engine re-created after
+    GEMSB_ERR_FATAL without suppressing the condensed species again, (b)
+    without invalidating the warm states, (c) the mole-fraction guard
+    checked before the temperature guard, (d) mode frozen without the
+    fallback below minTemperature, (e) paper mode accepted in mode local.
+    Results: M9.5 FAIL ('fault 1: 0 species suppressed on the new engine,
+    not 4; fault 1: 81 elements called warm after the re-creation', the
+    same for fault 2), M9.3a FAIL twice (1020 element-steps whose source
+    differs from the guards recomputed from the fields, while the log and
+    the fields agree with each other; 0 elements below minTemperature in
+    350 steps), M9.2a FAIL (14 elements below 500 K with the source 'outside
+    the GEMS table' instead of 'below minTemperature'), M9.3e FAIL (the run
+    on rho = 1 did not stop), M9.8 FAIL by construction (the excerpt's GEMS
+    lines count the guards differently); every other line PASS (M9.0 second
+    line, M9.1, M9.2b, M9.3b, M9.3c, M9.3d, M9.4, M9.6, the 9 refusals of
+    M9.7, the second line of M9.8, M9.9: the defects do not act there;
+    M9.10 was added after this run).
+    One-off (no criterion): the bridge build compiles and links against
+    the local v2606 Debug build with 0 warnings (every source compiled), and
+    its binary reproduces the balance file of 20 steps of the ramp channel
+    in mode local bit for bit (1836 GEMS3K calls, 0 failures).
+
+16. **Outside the files of this round.**  `thermochemistry/README.md`
+    still says that the bridge 'is not yet wired into the solver'; it is
+    not among the files implementers edit (section 13).  (Updated by the
+    cleanup, section 35, item L.)  M10 (Pb-Bi-I)
+    will need several pairs in one call (supported: one call serves every
+    pair of an element) and the qualification of the guards at trace
+    composition (section 8, risk 7).
+
+M9 status (written by the cleanup of section 35, as section 34, item 2
+asked, and brought up to date by its follow-up): M9 is implemented with the
+decisions above, signed off in section 34, and with the amendments of
+section 35, items A to M and V to Y (pending the sign-off): 64-bit counts;
+the closure and the solver defect of every run gated, and a ledger with a
+value that is not finite refused; an update schedule that follows the
+absolute time index, with the lagged state as restart state; a log
+directory per rank, decided alike on every rank and named in the start-up
+line; the engine re-created in mode frozen too; unusable results of
+converged calls counted as failures and logged with their values; only the
+keys of the mode read and unknown keys refused; run/015's excerpt compared
+exactly with the bridge that wrote it and, with another bridge, in its
+start-up and first step (the rest NOTRUN); a load sampler, and its test,
+that leave no process behind.  `tests/Alltest M9` records 44 lines,
+criteria M9.0 to M9.14 (two lines each of M9.0, M9.3a, M9.3b, M9.5 and
+M9.11, three of M9.6 and M9.8, sixteen of M9.7, one of the others); in the
+final `tests/Alltest -fresh all` of section 35 every line passed (M9.3b:
+64.2 us per warm call at a 1-minute load of 18.8; in the first round 42.9
+us at 2.5).  The default build stays bridge-free (M9.0); the bridge build
+compiles with 0 warnings (M9.0; v2606 one-off, item 15).  Open: M10
+(Pb-Bi-I: several pairs in one call, the guards at trace composition and
+in a gas that is not dilute, section 35, item M), and a bridge for Merlin7
+(section 35, item L; with it the first line of M9.8 compares run/015's
+start-up and first step only, item V).
+
+---
+
+## 33. M7 integration (signed off by the researcher, 2026-10-04)
+
+M7 (section 6) is integrated on top of M9 (section 32): the verification
+suite of the two isolated M7 studies (the first of 2026-10-01/02:
+Graetz-Robin, the time-step study on the 007 carrier and the refined pipe
+meshes; the second of 2026-10-03: the long runs on the paper-mode carrier)
+moved into `tests/verification/`, together with the decisions of section
+28 (items 6 and 8), the carry-overs of section 30 (item 14) and the
+corrections that the checker of the first study found in its reporting.
+`tests/Alltest M7` (part of `all`) runs the Graetz-Robin series, criteria
+M7.1a-m (and M7.1n-o since section 35); `tests/Alltest M7long` (not part
+of `all`; M7.6a-b since section 35) runs the refined meshes
+(M7.2a-b), the time-step study on the 007 carrier (M7.3a-d), the h vs h/2
+study (M7.2c-f), the axial x2 study (M7.5a-c) and the time-step study on
+the paper-mode carrier (M7.3pa-pc).  The points below were decided in the
+integration; each needs the researcher's sign-off.
+
+1. **The suite and its split.**
+   - Files (`tests/verification/`): `graetzRobin`, `graetz.py`,
+     `graetzChecks.py`, `graetzCase.py`, `graetzWedge/` and the test helper
+     `graetzCarrier/` (M7); `pipeMeshes`, `meshChecks.py`, the test helper
+     `pipeMeshFacts/`, `longStudies`, `longChecks.py` and `dtChecks.py`
+     (M7long).  The staged files were adapted, not applied: the case
+     numbers of section 31 (the first study's run/011 and run/012 are
+     run/012 and run/013), the Alltest of M9 (merged by hand), and the
+     corrections below.  The staged plan texts (numbered 25, 26 and 32 by
+     the studies) are this section; their decisions (a)-(e) of the first
+     study are those of section 28.
+   - `all` holds only the Graetz-Robin series, about 20 min on 4 cores.
+     Everything that runs on the pipe is in M7long (the second study's
+     decision f): the first study had put its time-step study on the 007
+     carrier into M7, which would have made `all` about 3 h.
+   - One driver for the long runs.  The first study's `dtStudy` is folded
+     into `longStudies` as a second family of runs, the edits of run/012
+     and run/013 on the 007 carrier (only `deltaT`, the writes every
+     second and a profiles dictionary with the native and the 1 cm bins
+     and profile times every 0.5 s differ from the cases).  So every long
+     run of M7 is keyed, kept with its binaries, reused, resumed and
+     revalidated by M4long's method (sections 26 and 27): the key holds
+     the sources and the inputs of the run's own case (run/012, 013 or
+     014, the linked carrier and tables included) without comments, the
+     md5 of its mesh, the set-up functions, its spec and the OpenFOAM
+     installation.  `dtChecks.py` keeps the measures of the time-step
+     studies (study, history, plot); its `runs` check is replaced by
+     `longChecks.py runs`, which reads segmented runs.
+   - Style: `pipeMeshFacts.C` is rewritten in the solver's style (a
+     PURPOSE header, 2-space indent, braces on the line of their
+     statement); `graetzCarrier.C` already was.
+   - The closed box of the deliverables (section 6) is verified before M7,
+     by the analytic closed boxes of M2.1 (the temperature model: Y^n =
+     Y0/(1 + lambda dt)^n to 1e-14 and closure <= 1e-15, also with halfCell,
+     interfaceTemperature wall, areaMultiplier 2, depositionVelocity and a
+     relaxation factor) and M5.1 (HKS at 700 K: the bare wall to 1e-14,
+     CAPPED with Y_s = 0 exactly, the ample condensate); M7 adds no
+     criterion of its own for it (added by section 35, item R).
+
+2. **graetzCarrier stays a test helper** (instead of a wedge option of
+   `setFrozenCarrier`).  On the Graetz wedges (vertices at (x, r, -+r
+   tan(theta/2))) u must be the parabola of the wedge's radius y: the
+   cells then have exactly the metrics of an axisymmetric scheme.
+   `setFrozenCarrier` evaluates the parabola at the distance from the
+   axis, sqrt(y^2 + z^2) = y/cos(theta/2) on the wedge planes: on these
+   wedges that is the axisymmetric problem with the wall at R
+   cos(theta/2), a fixed bias of the decay rate of +6.9e-5 (Bi 1) and
+   +2.3e-4 (Bi 50) at 2 degrees, larger than the GCI of halfCell (1e-6);
+   and its wall points lie at R/cos(1 deg), beyond the radius, which it
+   refuses unless `allowBackflow`.  A second velocity definition in the
+   utility of the T-Flows carrier was not worth it; the helper (230 lines)
+   is built into the work area, as `makeCarrier` of the M2 tests.
+
+3. **Acceptance 1, the Graetz-Robin series (M7.1a-m).**  The set-up of
+   the first study, unchanged (`graetzRobin` header): the extended Graetz
+   problem with the temperature law as a constant first-order uptake
+   (k (Tdep - T) = 100, so f = 1 exactly), R = 2.4 mm, T = 500 K, p = 1
+   atm, D = 7.6963e-5 m2/s, Pe 5, Bi 1 and 50, L = 24 R; the reference by
+   three methods (series, shooting, Chebyshev; bound 1.7e-12 and 4.5e-14);
+   wedges of 2 degrees, Nr 32/64/128/256 with dx = 2 dr; GAMG to 1e-13;
+   steady states by implicit Euler at dt = 1e6 s (Co 2e9 to 1.7e10).
+   Results of the integration run (25 PASS in 15.5 min on 4 cores, with
+   16 cores of M7long alongside); every one of the 44 fitted mu equals the
+   first study's bit for bit (its build of the M5 review, round 4, before
+   M4): the transport and the wall laws of the temperature model are
+   unchanged since.  mu_ref = 107.593854287 (Bi 1) and 273.173651541 1/m
+   (Bi 50); zeroGradient outlet:
+
+   | scheme | Bi | law | Nr | mu_fine [1/m] | p | mu_ext/mu_ref - 1 | GCI_fine |
+   |---|---|---|---|---|---|---|---|
+   | linear | 1 | halfCell | 64/128/256 | 107.594017088 | 2.0010 | +1.07e-9 | 1.9e-6 (0.00019 %) |
+   | linear | 1 | none | 64/128/256 | 107.728384521 | 1.0077 | +8.84e-6 | 1.55e-3 (0.155 %) |
+   | linear | 50 | halfCell | 64/128/256 | 273.173434995 | 1.9919 | +9.47e-9 | 1.0e-6 (0.0001 %) |
+   | linear | 50 | none | 64/128/256 | 273.923038744 | 1.0045 | +1.10e-5 | 3.41e-3 (0.341 %) |
+   | linear | 1 | halfCell | 32/64/128 | 107.594505599 | 2.0033 | +1.40e-8 | 7.6e-6 |
+   | linear | 1 | none | 32/64/128 | 107.863396655 | 1.0154 | +3.50e-5 | 3.08e-3 (0.308 %) |
+   | linear | 50 | halfCell | 32/64/128 | 273.17278248 | 1.9718 | +6.97e-8 | 4.1e-6 |
+   | linear | 50 | none | 32/64/128 | 274.674046307 | 1.0081 | +3.88e-5 | 6.78e-3 (0.678 %) |
+   | SuperBee | 1 | halfCell | 64/128/256 | 107.594218826 | 2.0024 | +4.68e-9 | 4.2e-6 |
+   | SuperBee | 1 | none | 64/128/256 | 107.728586999 | 1.0143 | +1.63e-5 | 1.54e-3 (0.154 %) |
+   | SuperBee | 50 | halfCell | 64/128/256 | 273.176516478 | 2.0104 | +6.44e-8 | 1.30e-5 |
+   | SuperBee | 50 | none | 64/128/256 | 273.926144881 | 1.0231 | +5.77e-5 | 3.36e-3 (0.336 %) |
+
+   The fixedValue outlet gives the same table to the digits shown (M7.1g:
+   mu within 3.5e-10).  M7.1a: the reference bound 1.69e-12 (limit
+   1e-10).  M7.1b: continuity of the carrier <= 1e-15 of the inflow on all
+   four meshes.  M7.1d: the window's profile changes by 1.1e-7 to 2.2e-7
+   between the first two steps and by exactly 0 after them.  M7.1e: every
+   mu_fit equals mu_h of the documented scheme to 7.1e-9 (Bi 50; the GAMG
+   tolerance at the window's small values), SuperBee to 6.2e-9 (M7.1l).
+   - Acceptance 1 holds for both laws, both Bi and both convection
+     schemes on Nr 64/128/256: GCI_fine at most 0.341 %; the
+     extrapolated mu within its allowance (halfCell 1e-9 to 6e-8 of the
+     reference, none 9e-6 to 6e-5); observed orders 2.00, 1.99 (halfCell;
+     SuperBee 2.00, 2.01) and 1.008, 1.005 (none; SuperBee 1.014, 1.023).
+     On 32/64/128 none at Bi 50 has GCI_fine 0.68 %, above 0.5 %, as the
+     discrete predictor said before the first study's runs (none is first
+     order with an error of 0.70 dr/R): that mesh is too coarse for the
+     first-order law, not a defect (in the table, not a gate).  Negative
+     evidence: `GRAETZ_MAIN="32 64 128" graetzRobin check` makes M7.1h
+     fail for exactly that line (and pass the 3 others).
+   - The corrections of the first study's reporting (its checker), made
+     here:
+     a. SuperBee's steady state.  The first study wrote 'then exactly 0
+        (SuperBee <= 2.2e-13)'.  In fact SuperBee's intermediate steps
+        change the window's profile by up to 1.1e-12 (Nr 128, Bi 1, steps 2
+        to 4, none and halfCell alike) and is 0 after them there; at Nr 256,
+        Bi 1, it changes by 8e-14 to 3.2e-13 in every step, and its last
+        step, which M7.1l tests (limit 1e-12), by at most 1.8e-13; at Bi
+        50 it is 0 after the first two steps.
+     b. The time-accurate control.  It was described as 'written every
+        0.05 s up to 1.5 s', but it wrote every 107 steps (0.05005 s), its
+        last write was at 1.4514 s and its final state (1.50009 s) was not
+        written.  Its steps are now rounded up to whole write intervals:
+        3210 steps of dx/u_max = 4.678e-4 s, 30 writes, the last at 1.5015
+        s with the final state.
+     c. The halfCell rate of M7.1c.  The checker found the agreement 'to
+        4.0e-14' only with d from OpenFOAM's centroids of the wall row
+        (3.7e-14), and 1.3e-13 with 'the exact analytic centroid'.  That
+        1.3e-13 is the centroid formula (2/3)(r2^3 - r1^3)/(r2^2 - r1^2)
+        evaluated in metres, whose difference of cubes loses digits: with
+        the centroid in exact arithmetic (mpmath) the rate agrees to
+        3.4e-14, with the formula on the unit radius times R (graetz.py,
+        the study's definition) to 4.0e-14, with OpenFOAM's centroids to
+        3.7e-14.  M7.1c states its definition (the unit radius; limit
+        1e-12) and prints the agreement with OpenFOAM's centroid too.
+     d. The insensitivity to the fit window (M7.1f).  The figures of the
+        first study (1.1e-9, 7.5e-9 with the fixedValue outlet) moved one
+        end of the window at a time; both ends moved give up to 2.2e-9 and
+        1.2e-8 (the checker).  The 8 variants are fitted now (one end or
+        both, -+1.5 R each) and the largest change of each kind printed:
+        7.5e-9 (one end) and 1.2e-8 (both ends), both with the fixedValue
+        outlet at Bi 1, 7.5e-11 (mixing cup) and 8.1e-10 (wall uptake), both
+        at Bi 50 (halfCell, Nr 256, with the fixedValue outlet; with
+        zeroGradient 7.52e-11 and 8.11e-10); limit 1e-7.  (Corrected in
+        section 35, item R: 'all with the fixedValue outlet at Bi 1', and
+        item Z: 'zeroGradient outlet'.)
+     e. M7.1k compares the time-accurate run with mu_h, the decay rate of
+        the discrete mode of its mesh, to 1e-9, not with the
+        pseudo-transient run to 1e-8.  The first study had set 1e-9 a
+        priori and raised it to 1e-8 after the first run measured 4.5e-9,
+        which the checker traced to the pseudo-transient run: the GAMG
+        tolerance 1e-13 at the small values of the Bi 50 window puts its
+        fit +4.5e-9 above mu_h, while the time-accurate run is within 7e-11
+        of it.  Measured now: +7.3e-11 (time-accurate; limit 1e-9) and
+        +4.5e-9 (pseudo-transient, printed).
+
+4. **Acceptance 2, h vs h/2 (M7.2c-f).**  The six runs of the second
+   study (revalidated, item 7): at 30 s, flux form with none, the onset
+   moves by -0.002 native bins (+0.005 K, dT_bin 2.44 K) and the largest
+   mDep_ by -0.024 % (limits 1 bin and 5 %); the volumetric form misses by
+   its peak (-32 %, onset +0.03 bins), as expected; halfCell moves the
+   onset by -0.002 bins and the peak by +0.006 %.  Decisions:
+   - 'T_dep shift <= 1 bin' is the shift of the interpolated 1 % onset
+     position in native bins (the width of the bin of the onset on h);
+     the shift in K is printed against dT_bin (second study, b).
+   - M7.2f (halfCell) is a gate with the limits of acceptance 2, as M7.2d:
+     halfCell is the wall law of the physical runs (item 9; second study,
+     c).
+   - M7.2e (the volumetric form) is reported: PASS when computed, its line
+     says whether it misses the limits (it does), as section 6 asks
+     ('reported, and expected to fail').
+
+5. **The axial x2 study (M7.5a-c): the criterion of the second study is
+   a gate** (`M7LONG_AXIAL_GATE` default yes; `=no` reports it): on the
+   axial x2 mesh, flux form, none and halfCell, at 30 s, T_dep shifts by
+   at most 1 native bin, the 1 cm peak height by at most 5 % and the L1
+   change of the 1 cm wall profiles is at most 1 %.  Measured: 0.21 bins,
+   7e-6 and 9.8e-4 (none), 0.21 bins, 6e-6 and 9.8e-4 (halfCell): margins
+   of 5, 7000 and 10.  Section 6 lists the study as a deliverable without
+   a criterion; a gate keeps it from regressing silently, with the limits
+   of acceptance 2 (the onset to its resolution, the peak) and 3 (the L1
+   norm).
+
+6. **Acceptance 3 (M7.3a-d on the 007 carrier, M7.3pa-pc on the
+   paper-mode carrier).**
+   - The 007 carrier: run/012 (temperature model) and run/013 (HKS, now
+     with the final tolerance 1e-14, item 8) at dt 4, 2 and 1 ms to 16 s,
+     made with the current sources (item 7), at 16 s:
+
+     | model | bins | L1(4, 2) | L1(2, 1) | order | Richardson at 1 ms | peak 2 -> 1 | centroid 2 -> 1 | T_dep 2 -> 1 |
+     |---|---|---|---|---|---|---|---|---|
+     | temperature | native | 5.11e-7 | 2.74e-7 | 0.90 | 3.2e-7 | -2.4e-7, same bin | -4.3e-6 mm | +3.5e-7 K |
+     | temperature | 1 cm | 4.41e-7 | 2.22e-7 | 0.99 | 2.2e-7 | -4.9e-8, same bin | -4.4e-6 mm | +1.5e-6 K |
+     | HKS | native | 8.89e-4 | 4.51e-4 | 0.98 | 4.6e-4 | -2.2e-5, same bin | -1.5e-2 mm | +8.5e-4 K |
+     | HKS | 1 cm | 8.69e-4 | 4.41e-4 | 0.98 | 4.5e-4 | -6.0e-5, same bin | -1.5e-2 mm | +1.7e-3 K |
+
+     Acceptance 3 holds for both models (limit 1 %; M7.3b, M7.3c).  The
+     gas of the temperature model has gone by 16 s (2e-14 to 4e-14 of the
+     release left); its deposit still depends on dt at first order
+     (observed 0.90 and 0.99), but weakly, L1(2 ms, 1 ms) 2.7e-7 (native)
+     and 2.2e-7 (1 cm), 1600 times less than that of HKS, which holds 3.6 %
+     of its inventory in the gas at 16 s and whose deposit carries the
+     first-order error of the transient (4.5e-4, order 0.98).  (Corrected
+     in section 35, item R: 'so its deposit no longer depends on dt'.)
+     The closure is at most 4.4e-16 of the reference in every step of the
+     six runs (gate 1e-14), the solverDefect at the end 5e-13 to 4e-12
+     (temperature) and 1.4e-10 to 5.4e-10 (HKS; gate 1e-8, M8's) of the
+     reference.
+
+   - The paper-mode carrier: run/014 as distributed (100.2 mL/min, layer
+     distance), dt 4, 2 and 1 ms to 30 s, the runs of the second study
+     (revalidated): L1(2 ms, 1 ms) 1.29e-7 (native) and 7.14e-8 (1 cm),
+     observed order 0.94 and 1.08.  Its 1 ms run reproduced the M4long run
+     fig9-tev15 bit for bit (profiles, fields, the balance file but its
+     booking columns).
+   - Reported, not gated (section 28, item 7): the time-step error while
+     gas is present, first order: on the paper-mode carrier 7.1e-3 at 5 s
+     (the largest L1(2 ms, 1 ms) with more than 1 % of the release
+     deposited), 1.2e-4 at 20 s (the tail of the cloud), the gas profile at
+     16 s 3.7e-4; on the 007 carrier the temperature model 7.4e-3 at 4 s
+     (the largest; 3.2 % of the release deposited), 1.3e-5 at 6 s (the end
+     of the release) and 6.2e-7 at 7 s, the gas profile at 7 s 5.4e-4,
+     observed orders 0.98 to 1.07.
+
+7. **Reuse and cost of the long runs.**
+   - The 11 runs of the second study (made with the frozen build of
+     5852f8d, binaries be159fab...) were imported into the work area (its
+     staging helper `importRecordedRuns`, not a repository file: copied
+     runs and binaries, the links of the mesh and the wall table
+     repointed, the meshes checked md5 for md5) and revalidated
+     (`M7LONG_REVALIDATE=yes`): for every run the set-up made now equals
+     its dictionaries without comments and its carrier bit for bit, and 5
+     steps from 29 s with the recording's binaries and the current ones
+     wrote the same 72 files, profiles and balance file, the booking
+     columns included (0 differing rows in all 11): the sources of M9
+     and of this integration do not change the runs of the temperature
+     model.  Cost: 2 min on 2 x 8 ranks.  Saved: about 4.5 h of wall
+     clock on 2 x 8 cores.
+   - The six runs on the 007 carrier were made again: the first study's
+     were made by its scripts with the build of the M5 review, round 4
+     (cd53250f, before M4), under no key of this driver, and the HKS
+     inputs changed (item 8).  Cost: 1 h 37 min of wall clock on 2 x 8
+     bound ranks, the two models side by side at each dt (47, 30 and 20
+     min at 1, 2 and 4 ms; 0.18, 0.23 and 0.29 s per step), 26
+     core-hours.
+   - A point of this machine (2 sockets x 10 cores, hyperthreading: 40
+     logical CPUs): two 8-rank runs started unbound (`mpirun --bind-to
+     none`, as every test) next to the four serial Graetz runs took about
+     1 s per step, with ranks on both hyperthreads of a core; the same runs
+     with the driver bound to 16 logical CPUs of distinct physical cores
+     (`taskset -c 0-15`) took 0.15 to 0.3 s.  `longStudies` binds itself
+     and its runs only on request, `M7LONG_CPUS=0-15` (it re-executes itself
+     under taskset), since the CPU list depends on the machine; the readme
+     and the usage of Alltest say so.
+
+8. **Section 28, item 8: the final tolerance of HKS cases.**
+   `Y_PbI2_gFinal` of run/013 is GAMG 1e-14 (was 1e-12), and its
+   `out_excerpt` was regenerated.  Token by token against the excerpt of
+   the M4 review, round 3: 61 of its 1656 tokens differ.  Not only the
+   solver-defect digits, as expected, but all at or below the residual of
+   the old final solve:
+   - the final solve's residual and iterations (the tolerance itself: 32
+     to 35 iterations to 7e-13, now 44 to 47 to 7e-15);
+   - `solver defect` and `solverDefect` (2.6e-16 instead of 3.0e-14 of
+     the inventory after 5 steps) and its relative value;
+   - the closure by one ulp of the inventory (9.2e-22 mol) in 3 of the 5
+     steps, and `clamped`, the rounding of the stored condensate;
+   - the INLET and OUTLET transport (1.6e-18 and 1e-60 kg/s, by up to
+     1e-3 relative) and the cumulative transport of the balance line;
+   - the minimum Y and the negative mass of the overshoot near the boat
+     (-6e-7 to -5e-9 in Y, by up to 2e-4 relative, i.e. up to 1e-12 in
+     Y).
+   Every other token is unchanged: the inventories (gas, wall, sample),
+   the max mole fraction and the cells above the warning, the maximum Y,
+   the regimes, the outer iterations and the residuals of the loose
+   correctors.  Per kind: 10 of the final solve (5 residuals, 5 iteration
+   counts), 10 of INLET and OUTLET, 5 of the solver defect, 5 of the
+   cumulative transport, 5 of `clamped`, 10 of `solverDefect` with its
+   relative value, 6 of the closure (value and relative, 3 steps), 8 of
+   the minimum Y (monitor and min/max lines), 2 of the negative mass.  All
+   61 come from the tolerance: the build of the cleanup run at the old
+   1e-12 reproduces the old excerpt (IDENTICAL, 111 lines; section 35,
+   item R, which also completes the readme of run/013).  The M5 criteria
+   that run run/013 (M5.2g, M5.2m, M5.3a-d) pass with it (item 12).  On the
+   007 carrier, after 16 s, the HKS
+   solverDefect is now 1.4e-10, 3.9e-10 and 5.4e-10 of the inventory at 1,
+   2 and 4 ms (2.2e-8 to 6.0e-8 with 1e-12,
+   above M8's gate of 1e-8).  The other HKS case of ours, run/015, has had
+   1e-14 since M9 (section 32, item 13); the test cases of tests/hks and
+   tests/gems keep the solvers they test.
+
+9. **Section 28, item 6: halfCell is the wall law of physical runs.**
+   Recorded as follows: the code default of `wallResistance` stays `none`,
+   the law of the paper and of T-Flows, so the code-to-code cases (run/014,
+   M4long, M6) and every case up to run/015 keep it, and a dictionary
+   without the key behaves as before; the physical cases of M8 (run/017
+   and later, section 32, item 12) set `wallResistance halfCell` in their
+   `thermochemistryProperties` (with `layer faceCells`, `areaMultiplier 1`
+   and `areaPerVolume cell`, which halfCell needs, section 17, item 12;
+   it is refused with layer distance, M4.8).  M7.2f and M7.5c gate its
+   mesh independence on the paper-mode carrier.  The readme (dictionary
+   and the half-cell paragraph) says so.
+
+10. **Section 30, item 14: the carry-overs of the M4 review.**
+    a. **A criterion that discriminates the face-flux correction of the
+       transport defect.**  M4.18 checked only the debug report (E = 0 in
+       every cell), which a defect formed differently can print as well.
+       `matrixDefect.H` now has the cell defect as a template of its
+       accumulator (`cellDefectT`; the ledger's `cellDefect` is its long
+       double instance, its results unchanged bit for bit: every
+       out_excerpt and the revalidation probes of item 7 reproduce), and
+       the debug report adds the transport identity
+
+         D = sum_c r_c + sum_c (m_c - m0_c)/dt + sum_b (F_b + C_b)
+             - sum_c E_c
+
+       over all ranks (b the faces of the non-coupled patches), with r_c
+       of `cellDefectT` accumulated in `exactSum` (a long double with the
+       exact rounding error of every addition, Neumaier) and every sum
+       exact, the reduction over the ranks included (each long double
+       split into two doubles).  In the flux form every internal face
+       flux enters its two cells once with opposite signs and a processor
+       face its antisymmetric mean, so D = 0 up to the rounding of the
+       compensations: on the drift pipe of M4.15 (4 ranks) |D| <= 2.4e-40
+       kg/s, at most 1.1e-36 of the magnitude of its terms (2e-4 kg/s), in
+       every step of both layer rules; the channel with linearUpwind (E in
+       2400 cells) up to 3.7e-41 kg/s, at most 3.8e-38 of its terms
+       (corrected in section 35, item R: 9e-42).  (The review suggested D
+       in long double.  With the ledger's long double cell defects (a
+       one-off build of that variant) D on the same pipe is 4e-27 to
+       3.7e-25 kg/s, the rounding of the cell sums: it overlaps the source
+       form's 3.4e-25 to 1.8e-23 kg/s over both layer rules and would not
+       separate the two in every step.  With the exact accumulation the
+       flux form lies 15 orders below.)  Negative control, built by the
+       test: a copy of the sources whose `cellDefectT` starts r_c from b_c
+       - s_c and leaves out the face values C_f, while the reported E is
+       unchanged (`checks.py sourceFormMutant`): it passes the check of E
+       (0 in 0 cells, the old M4.18) and violates the identity in every
+       step, the double-precision residue of V div(C) that the source form
+       left in the closure (section 29, item 2): with layer distance, as
+       the test runs it, |D| 1.2e-24 to 1.8e-23 kg/s, 5e-21 to 7.9e-20 of
+       its terms; with layer faceCells (measured once by the cleanup)
+       3.4e-25 to 7.8e-24 kg/s, 1.3e-21 to 3.3e-20.  (Corrected in section
+       35, item R: '3e-25 to 1.8e-23 kg/s, 1e-21 to 8e-20' was the union of
+       both rules, attributed to the control, which runs one.)  M4.18
+       gates |D| <= 1e-30 of the terms on both drift pipes and the
+       channel, and requires the
+       control to violate it; the copy is built into the work area when
+       the sources change (about 2 min) and runs the drift pipe with layer
+       distance (about 1 min).
+    b. **M4.14: the start-up count of the tetrahedral pipe** on 4 ranks is
+       gated (`checks.py mdepCount` with 21 and 0, as M4.7h), where it
+       only had to name some remote elements.
+    c. **Stale comments:** the M4.7g block of `tests/paperMode/Allrun`
+       (the sums are added in ascending rank order by `pushToFaces()`, not
+       in the order of a schedule); the section header of `nearestFaceSums`
+       in `interfaceExchange.C` ('push; plusEqOp'); the residue figure of
+       `matrixDefect.H` (typically 1e-25 to 8e-25, at most 1.7e-24 kg per
+       step, not 'about 1e-25'); the header of `setFrozenCarrier.C` (the
+       lines 670-683 belong to `Read_Controls_Mod/Boundary_Conditions.f90`,
+       and 'rows all' reaches 0.69 m).
+    d. **The readme's two-way statement**: with the build before and after
+       the fix of section 29, item 1, the fields, the per-rank state and
+       the profiles of those runs are identical but for mDep_ itself; the
+       balance files differ only in the booking columns (`solverDefect`,
+       `closure`) and the monitor `evaporatedAboveWarning` (it said 'every
+       other file of those runs is identical').
+
+11. **Other changes of this round.**
+    - `tests/paperMode/longRuns` (M4long) keeps a recorded run that ended
+      under another key and is not selected (NOTRUN, with the way to
+      revalidate it or to run it again), as M7long does (the second
+      study, g).  Before, an evaluation (`M4LONG_RUNS=ended`) after any
+      change of the sources without `M4LONG_REVALIDATE=yes` set every
+      recorded run up anew, i.e. deleted it: since M9 and this
+      integration change the sources, that would have discarded the 14
+      runs of M4long.  Table 2 (M4.5) no longer evaluates such a run as a
+      partial one.
+    - `tests/Alltest` expects M9.10 (recorded by `tests/gems/Allrun` since
+      M9, but not in the list of expected ids, so its absence would have
+      passed unnoticed).
+    - `longStudies` decomposes a prepared run again when the number of
+      ranks changed before its first write (found when the runs were
+      restarted pinned, item 7).
+
+12. **Quality.**
+    - Build: `wclean` and `Allwmake` with 0 warnings (BUILD); a copy
+      compiles and links against the local v2606 build with 0 warnings
+      (M4.6: OpenFOAM v2606, linux64GccDPInt32Debug, every source of the
+      solver and the utility compiled).  M0.4 (v2606 on Merlin7) is NOTRUN.
+    - `tests/Alltest -fresh all M7long` (one invocation, against the
+      pristine tag 0.1, with `LESTO_OPENFOAM_V2606` set, bound to the 20
+      physical cores with `taskset -c 0-19`): 299 passed, 0 failed, 1 not
+      run (M0.4) in 29 minutes at a load of 1 to 17.  `all`: 283 (the 258
+      of M9 and the 25 of M7.1); M7long: 16 (M7.2a-b and the 14 of the
+      long runs, every run reused: the six on the 007 carrier made with
+      the current sources, the 11 of the second study revalidated).  The
+      Graetz runs (made the same day) were reused as well: their key holds
+      the md5 of the solver binary, which the build from scratch reproduced
+      (38e51df0...; setFrozenCarrier f7c0df84...).
+    - M4long after M9 and this integration: its 14 recorded runs, last
+      revalidated after the rebase (section 31), revalidated under the
+      current sources (`M4LONG_REVALIDATE=yes M4LONG_RUNS=ended`, 2 min on
+      16 cores): every probe wrote the same files, profiles and balance
+      file, the booking columns included (0 differing rows); 17 passed,
+      M4.17 not run (no M4long run was made with the current sources; the
+      closure of runs made with them is gated by M7.3a).
+    - The tests leave the repository's files unchanged (the work area
+      `tests/work/`, git-ignored; checked by the md5 of every tracked and
+      untracked file before and after).
+    - Negative evidence: M4.18 (item 10a); the coarse triplet of none at
+      Bi 50 (item 3); M7.2e; the evaluation of the ended M7long runs with
+      impossible limits (`M7LONG_RUNS=ended`, closure 1e-17, solverDefect
+      1e-13, dt L1 1e-8, h vs h/2 0.001 bins and 0.001 %, axial L1 1e-5):
+      every gate fails (M7.3a-c, M7.2d, M7.2f, M7.5b-c, M7.3pb), the
+      reported and the listed criteria pass (M7.3d, M7.2e, M7.3pc; M7.2c,
+      M7.5a, M7.3pa, whose runs are revalidated).  The same-deposit check
+      of M7.2c (flux form against A on the base mesh, fixed limits 0.01
+      bins and 0.001 %) fails for none against halfCell on the base mesh
+      (`longChecks.py pair`: the peak -0.06 %).
+
+13. **Decisions needed.**
+    a. The split of M7 (item 1): Graetz-Robin in `all`, every pipe study
+       in M7long.
+    b. graetzCarrier as a test helper (item 2).
+    c. M7.1k against mu_h to 1e-9 (item 3e).
+    d. M7.2f a gate (item 4) and the axial criterion a gate (item 5).
+    e. The reading of 'T_dep shift <= 1 bin' (item 4).
+    f. The record of halfCell for physical runs (item 9).
+    g. The transport identity as the criterion of the carry-over (item
+       10a): exact sums and a limit of 1e-30 of the terms.
+    h. M4long keeps stale recorded runs (item 11).
+    i. Section 32 (M9) ends with 'M9 status: see the end of this section'
+       without the status: M9's own sign-off.
+
+---
+
+## 34. Researcher decisions of 2026-10-04 (signed off)
+
+Sections 32 (M9) and 33 (M7) are signed off as recommended, in particular:
+
+1. **M9 (section 32).**
+   - The `excess` entry of a pair's `gems` block (an iodine excess of
+     1e-6) against the GEMS3K stall at exact PbI2 stoichiometry.
+   - Lagged speciation as chi = n_g/c, instead of E9's p_i^GEMS/p_i.
+   - Mode frozen: the GEMS table at the nodes of the pair's table, computed
+     on the master and broadcast.
+   - M9.3b (at most 70 us per warm call) is NOTRUN rather than FAIL when
+     the machine is busy (1-minute load of 4 or more); on a quiet machine it
+     measured 42 us.
+   - Case numbering: run/015-hks-gems-local is the GEMS case; the HKS
+     code-to-code case of M6 becomes 016 and the physical carriers of M8
+     017 and later.
+2. **M7 (section 33, item 13 a-h).**  The split of M7 (Graetz-Robin in
+   `all`, the pipe studies in M7long); graetzCarrier as a test helper;
+   M7.1k against mu_h to 1e-9; M7.2f (halfCell, h vs h/2) and the axial
+   x2 criterion as gates; 'T_dep shift <= 1 bin' as the shift of the
+   interpolated onset in native bins; halfCell for physical runs through
+   the M8 cases, the code default staying `none`; the transport identity
+   with exact sums and a limit of 1e-30 of its terms as the criterion of
+   the face-flux correction; M4long keeping stale recorded runs.  Item 13i
+   (the status of section 32) is completed by the cleanup that follows.
+3. **A cleanup pass** for the minor findings of the M9 and M7 reviews
+   follows; its amendments are recorded in section 35.
+
+---
+
+## 35. Amendments from the M9 and M7 reviews: the cleanup (signed off by the researcher, 2026-10-04)
+
+The reviews and verifications of M9 (section 32) and M7 (section 33) left
+minor findings, items A to S below: A to M of M9 (`gemsEquilibrium`, its
+tests and documents), N to R of M7 (`tests/verification` and the
+documents), S the gates of the long runs.  Each was assessed first.  All
+were real, and M is a record with a decision.  Four came out otherwise in
+a detail when measured: A had a second defect behind it (OpenFOAM v2412
+writes an int64 as a label); F was more severe (a NaN log10 Omega stopped
+the run with a floating-point exception instead of being booked
+silently); in L the bridge is linked against glibc 2.34, not 2.38; in N
+'cannot be computed' already failed, and `__main__` did not catch
+exceptions, which is how a crash read as PASS.  Every fixed defect has a
+new or an extended
+criterion: M9.3b, M9.5, M9.6, M9.7 and M9.8 (more lines) and M9.11 to
+M9.13 (new) in M9; M7.1n and M7.1o in M7; M7.6a and M7.6b in M7long; and
+every run of the bridge build gates its closure and its solver defect
+(item B).  The sources before this pass are kept as the snapshot
+`pre-cleanup9-7` (scratch area of this pass); its bridge build fails
+every new or changed criterion of M9 whose defect is in the solver, and
+its scripts fail M7.1n, M7.6a and M7.6b (item T).
+
+A. **The counts of mode local are 64-bit integers (`gemsEquilibrium.H`,
+   `endUpdate()`, the reports).**
+   - Defect: the counts of an update and of the run (calls, warm, cold,
+     retried, failures, re-creations, IPM iterations, the sources of each
+     pair, the clipped chi) were labels, 32-bit in the Int32 builds.  A
+     production run overflows them (signed overflow, undefined behaviour)
+     and corrupts the summary: 60 s at 1 ms of the 15264 wall elements of
+     the pipe are 9e8 calls and, at about eight per call, 7e9 iterations.
+   - Fix: `std::int64_t`; per update one reduction of every integer count
+     in 64 bits (one list, one `MPI_Allreduce`), one of the seconds and
+     one of the extremes of the pairs (chiMin negated).  The test found a
+     second defect on the way out: OpenFOAM v2412 writes an `int64_t` to
+     an Ostream as `label(val)` (`int64IO.C`), i.e. truncated to 32 bits
+     in an Int32 build (v2606 writes it in full), so a rank log printed
+     690588672 for 7.8e10 iterations.  Every count is written through
+     `std::to_string` (`num()`), exact in both versions.
+   - Tests: M9.13 (new).  The fault bridge reports 1e9 IPM iterations for
+     every call (`LESTO_TEST_ITERATIONS`), 3 steps on 4 ranks: every update
+     line with calls and the summary print 1e+09 iterations per call, and
+     every update line of the 4 rank logs the total calls x 1e9 exactly
+     (up to 8e10, 37 times 2^31).  The snapshot: 8.85e+06 and 4.82e+06
+     per call, the summary 6.79e+06, and the rank logs 690588672 and
+     -1604378624.
+   - Documents: `gemsEquilibrium.H` (Logs, the counts), the readme.
+
+B. **The ledger of every GEMS run (`tests/gems/Allrun`).**  The closure and
+   the solver defect were gated in M9.2a, M9.3a(ii) and M9.8 only.  Every
+   run of the bridge build that ends now gates both at the M5 level, the
+   closure at most 1e-13 of the reference in every step and |solverDefect|
+   at most 1e-11 at the end (the helper `ledger`): the 30-step sources run
+   (M9.3a), 4 ranks (M9.3c), the table run (M9.3d), paper mode allowed and
+   frozen (M9.3e), speciation lagged (M9.4), both fault runs (M9.5), the
+   updateInterval run and its two restarts (M9.6), the restart from 0.2
+   (M9.9), the three halfCell runs (M9.10), the frozen restart and 4 ranks
+   (M9.2b), and the 1-step runs of M9.11 to M9.13.  Measured over the 28
+   runs of the bridge build in the run of this pass: the closure at most
+   1.9e-16 of the reference (the channel), |solverDefect| at most 2.60e-13
+   (the 4 ranks; the serial runs at most 2.49e-13, the frozen runs and the
+   short ones at most 9.8e-14).  The claim of section 32, item 14
+   ('closure <= 1.9e-16 and solverDefect <= 2.5e-13 in every run') held
+   for the runs it gated then, not for the 4 ranks, which it did not gate:
+   corrected there to 2.6e-13.  (The 1-step run of the bridge build in
+   M9.1 was the one run left without the ledger; it is gated since item
+   X.  The stand-in run of item V, run015-otherBridge, got its gate in the
+   last check of this pass: closure 1.9e-16, solverDefect 3.3e-16.)
+
+C. **The updates of mode local follow the time index, and their lagged
+   state is restart state (`gemsEquilibrium::updateDue()`,
+   `interfaceExchange::restoreEquilibrium()` and `storeElementState()`).**
+   - Defect: `start()` set `stepsSinceUpdate_ = updateInterval - 1` in every
+     run, so every run updated at its own first step and counted from
+     there, and p_eq, chi and the sources of the last update were not
+     written.  With updateInterval > 1 a restarted run applied other,
+     lagged values than the continuous one: the snapshot's restart from
+     0.004 of the updateInterval-3 channel updated at the steps 5, 8 and 11,
+     the continuous run at 1, 4, 7 and 10.
+   - Fix: an update is due at the steps whose time index n
+     (`Time::timeIndex()`, restored from `uniform/time` on a restart) has
+     (n - 1) mod updateInterval = 0, and at the first step of a run whose
+     elements hold no lagged state.  That state is written with the per-rank
+     state, `uniform/phaseChange/phaseChangeEquilibrium` (mode local only):
+     a binary list behind the fingerprint of all elements (as
+     `phaseChangeRegimes`), then per pair the counts of the last update for
+     its step line (`gemsEquilibrium::lastUpdate()`, 10 values) and per
+     pair and element p_eq, chi and the source.  A restart onto the same
+     elements restores it, the law of every element recomputed with
+     `hksCoefficients()` (the doubles of the update), and says so ('the
+     lagged state of the last update ... restored ...; the next update at
+     the step of time index 7').  Without it (missing, a collated container
+     of another number of ranks, other elements) the first step updates,
+     with a warning when the schedule has no update there.  With
+     speciation none chi is 1 whatever the file holds.  The warm states
+     are still not written (section 8, risk 13): the next update is cold.
+   - Tests: M9.6, now 3 lines, on the updateInterval-3 channel written every
+     step.  (ii) The restart from 0.004 updates at 7 and 10, not at 5 and
+     6; every file of 0.005 and 0.006 (32) is cmp-identical to the
+     continuous run's and their step lines equal its lines; the update at 7
+     is cold; at 0.012 the inventories lie within 2.6e-8 of the continuous
+     run.  (iii) Without the file: the warning, updates at 5, 7 and 10.  The
+     snapshot: updates at 5, 8 and 11 in both.
+   - Documents: `gemsEquilibrium.H` (mode local), `interfaceExchange.H` (the
+     state; the GEMS block), the readme, section 32 item 5 (annotated).
+
+D. **A log directory per rank (`gemsEquilibrium::logDirectory()`).**
+   - Defect: a `logDirectory` given absolute, as `<case>/...` or
+     `$FOAM_CASE/...`, or relative but leaving processorN with `..`, was
+     used as it was on every rank: all ranks appended to one
+     `gemsEquilibrium.log`, and the spdlog sink of GEMS3K's `ipmlog.txt` was
+     opened by several processes.
+   - Fix: the directory is expanded, made absolute against the rank's case
+     directory (`Time::path()`) and cleaned; in a parallel run one that does
+     not lie below processorN gets a subdirectory `processor<N>`.  The
+     start-up line names it ('logs in .../gemsLogCase/processor<N>'; the
+     default prints 'processor<N>/gemsLog' as before, so run/015's excerpt
+     is unchanged).
+   - Tests: M9.12 (new): 4 ranks with `"<case>/gemsLogCase"`,
+     `"$FOAM_CASE/gemsLogEnv"` and `"../gemsLogUp"`: every rank has its own
+     `gemsEquilibrium.log`, whose only rank line is its first, with
+     `ipmlog.txt` next to it, in a directory of its own.  The snapshot: one
+     log with the four rank lines in each case.
+   - Documents: `gemsEquilibrium.H` (Logs), the readme, section 32 item 7
+     (annotated).
+
+E. **Mode frozen re-creates the engine after GEMSB_ERR_FATAL
+   (`buildFrozenTables()`).**
+   - Defect: the failed node was logged, and the remaining nodes went on
+     with the same engine, against the contract of the bridge
+     (`GEMSB_ERR_FATAL`, GEMS3K's T_ERROR_GEM: the engine must be
+     re-created).
+   - Fix: as mode local: the engine destroyed and created again from the
+     system file, every condensed species suppressed again
+     (`createEngine()`); the calls of mode frozen are cold, so no warm
+     state survives.  The start-up line counts the re-creations ('..., 0
+     rejected (taken from the table), engine re-created 0 times; ...').
+     An unusable result of a converged call (item F) fails the node too.
+   - Tests: M9.5, a second line: the hot channel with the fault bridge
+     returning GEMSB_ERR_FATAL at the node call 20: the engine destroyed
+     and created again, the 4 species suppressed on the new one, every later
+     call on it, all 152 calls cold; the start-up line '151 from GEMS3K,
+     1 failed, 0 rejected, engine re-created 1 time'.  The snapshot: no
+     destroy and create after the fault.  The fault bridge now names the
+     engines by their creation number: in a trial run the re-created
+     engine had the address of the one destroyed before it.
+   - Documents: `gemsEquilibrium.H` (mode frozen), the readme, section 32
+     item 4 (annotated).
+
+F. **An unusable result of a converged call is a failure (`evaluate()`).**
+   - Defect: a call that converged and balanced but gave the pair p_g <= 0
+     or a max log10 Omega that is not finite was booked as source FAILED
+     but not counted among the failures and not logged.  Measured with the
+     snapshot and the fault bridge with `FOAM_SIGFPE=false`: 4 elements
+     'failed' in the step lines, 2 failures in the summary (the 2 fatal
+     ones), neither unusable result in the rank log.  With the default
+     floating-point trapping the snapshot stopped at the NaN with a
+     floating-point exception: Foam::max is (a > b) ? a : b, an ordered
+     comparison, which may raise FE_INVALID for a NaN, and OpenFOAM traps
+     it (`sigFpe`).
+   - Fix: such a call counts once as a failed call and is written to the
+     rank log ('converged and balanced (OK, 9 iterations), but PbI2_g p_g
+     0 Pa, max log10 Omega -0.035; the table'), its warm state
+     invalidated.  log10 Omega, p_g and the sums of the element balance are
+     compared only once they are known to be finite (`maxLog10Omega()`,
+     `positive()`, `balanced()`), in both modes.
+   - Tests: M9.5, first line, extended: besides the fatal faults at the
+     calls 150 and 600, the fault bridge reports p_g = 0 after the
+     converged call 50 and log10 Omega = NaN after the call 100: 4 failures
+     in the step lines and in the summary, 2 re-creations, the rank log
+     names 2 ERR_FATAL, 1 'p_g 0 Pa' and 1 'max log10 Omega nan', and the
+     next call of such an element is cold.  The snapshot: the run stops
+     (SIGFPE).
+   - Documents: `gemsEquilibrium.H` (FAILED), the readme.
+
+G. **Only the keys of the mode are read (the constructor).**
+   - Defect: every key was read and validated in both modes, so
+     referencePressure <= 0 stopped mode local, and minMoleFraction < 0 or
+     updateInterval 0 mode frozen, although the warning says that the mode
+     does not read them.
+   - Fix: the keys of both modes (system, mode, carrier, minTemperature,
+     maxLog10Deviation, logDirectory, logLevel, writeEquilibriumField) are
+     read and validated in both, the others in their mode only; those of
+     the other mode are named in the warning and never read.
+   - Tests: M9.11 (new), first line: mode local with referencePressure -1
+     and referenceComposition { He -1; }, mode frozen with minMoleFraction
+     -1, updateInterval 0 and allowNonPhysicalCarrier maybe run 1 step
+     each, with the warning naming them.  The snapshot stops both.
+
+H. **Unknown keys stop the run (`checkKeys()`).**
+   - Defect: the header said that the constructor 'refuses unknown or
+     inconsistent keys', but a misspelled key (minMolFraction) was ignored
+     and its default used.
+   - Fix: every key of GEMSCoeffs (13 known) and of a pair's gems block (4)
+     must be known; any other stops the run, naming it and the valid keys.
+   - Tests: two lines of M9.7: 'GEMSCoeffs: unknown key minMolFraction.
+     The valid keys are system mode carrier ...' and 'Pair PbI2_g, gems:
+     unknown key excesss.  The valid keys are gas condensates elements
+     excess.'  The snapshot runs both.
+
+I. **The untested start-up checks of section 32, item 2.**  Five more
+   lines of M9.7: the molar mass of the system against molarMass (0.4610
+   for 0.46100894, 1.9e-5 off), a condensed species as the pair's gas
+   (PbI2(cr)), a condensate of another formula ('Pb(cr) (Pb 1) has another
+   formula than PbI2(g)'), referencePressure 2e5 Pa in mode frozen ('lies
+   outside the pressure grid'), an unknown mode (lokal); and the warning of
+   equilibrium table about the inputs of equilibrium GEMS ('equilibrium
+   table does not read GEMSCoeffs pairs/PbI2_g/gems', M9.11, second line).
+   These checks were right (the snapshot passes the six); their negative
+   evidence is the input that triggers them.
+
+J. **The excerpt of run/015 without the numbers of GEMS3K (`regress.sh
+   -mask`).**
+   - Defect: M9.8 compared the iterations per call and the six digits of
+     the largest |dlog10 p_eq/p_eq,table| of the GEMS lines, numbers that
+     GEMS3K computes itself: a bridge built with another compiler or
+     GEMS3K version may print others while the solver is right.
+   - Fix: `regress.sh -mask <regex>` replaces every match in both files by
+     `<masked>`; M9.8 masks those two (`GEMS_MASK`, 10 tokens of the 116
+     lines); they stay printed.  A GEMS3K that gave another p_eq would
+     still change the solver's own numbers, which are compared.
+   - Tests: M9.8, a third line: the excerpt with those numbers replaced is
+     IDENTICAL with the mask and DIFFERENT without; with the gas inventory
+     of its first balance line changed as well, DIFFERENT with it.
+   - Documents: `regress.sh`, the readme of run/015.
+   - Superseded by item V: the mask does not make the comparison pass with
+     another bridge (GEMS3K's numbers change only together with its p_eq,
+     and then every round-off token of the later steps moves as well); the
+     mask and `-mask` were removed again.
+
+K. **The load sampler of M9.3b never outlives its script
+   (`startLoadSampler`, `stopLoadSampler` in `tests/functions`).**
+   - Defect: an endless background loop, killed only after the timing run
+     returned: an interrupted run left it running.
+   - Fix: the sampler checks every 2 s that its script lives and ends when
+     it does not (a KILL runs no trap); the EXIT, INT and TERM traps of the
+     script stop it.
+   - Tests: M9.3b, a second line (also without a bridge): a script that
+     samples, terminated (TERM) or killed (KILL), leaves no sampler 5 s
+     later, while the endless loop it replaced, as the control, outlives a
+     killed script (the test then stops it).
+
+L. **Documents of M9.**  The status of section 32 (written below its item
+   16, as section 34 asked); the test times of the readme (M9, M7 and all,
+   measured in this pass); section 6 (criteria M9.0 to M9.13, M9.14
+   since item X);
+   `thermochemistry/README.md` (the bridge is wired into the solver; its
+   next steps); `libgemsbridge.so` in the readme's Building and in
+   `thermochemistry/README.md`: it needs glibc >= 2.34 (it is linked against
+   the glibc 2.34 of the conda-forge sysroot, symbol versions up to
+   GLIBC_2.34; the 2.38 of the review is that of this workstation), it
+   carries an RPATH into the local conda environment, and elsewhere, e.g.
+   on Merlin7, it is rebuilt with `build-gems3k-static.sh`; run/015's
+   readme (step 1 makes no call, no element having gas at t = 0; 576 to 720
+   calls in the steps 2 to 5).
+
+M. **A known limit, recorded: GEMS3K in a gas that is not dilute.**
+   Reproduced on the channel from 1300 to 600 K (the boat at the hot end,
+   mode local, 10 steps): 37 calls fail with ERR_NOCONV, at x = 0.05 to
+   0.73 and 1170-1240 K, after 6 to 7452 IPM iterations (mean 2043); the
+   converged warm calls take about 4 ms there (1000-2000 iterations), and a
+   step 0.52 s against 0.006 s with the table (a failed call about 50 ms,
+   estimated from those times).  Every failed call takes the table and is
+   counted and logged, so the results stay correct.  Decision (my call,
+   for the sign-off): no guard now.  Such a gas lies outside the dilute,
+   passive-carrier assumption of the solver, which the mole-fraction
+   monitor already flags (cells above moleFractionWarning, 0.05); a
+   `maxMoleFraction` guard would add a source type and a column to every
+   GEMS line, and its threshold depends on the system, so it belongs to the
+   qualification of the guards with Pb-Bi-I in M10 (section 8, risk 7).
+   Recorded in the readme (GEMS section) and `thermochemistry/README.md`.
+
+N. **A crash of `longChecks.py` is not a PASS (`longStudies`,
+   `longChecks.py`).**
+   - Defect: the reported criteria (`pairCriterion` expectFail and report,
+     `axialCriterion` with `M7LONG_AXIAL_GATE=no`) accepted any exit status
+     up to 1, and an uncaught exception of python exits with 1, without a
+     verdict line.  ('Cannot be computed', exit 2, already failed.  The
+     review said that `__main__` catches exceptions; it did not, which is
+     how a crash came out as 1.)
+   - Fix: `longChecks.py` prints 'CRASHED: <exception>' last and exits with
+     3; a reported criterion needs `computed()`: the status 0 or 1 and its
+     verdict line ('OK: ...' or 'FAILED: ...') last.
+   - Tests: M7.6a (new, M7long, no run): the helpers with a stand-in
+     checker (met, not met, cannot, a crash with python's exit 1, a crash
+     reported with exit 3) in the 5 modes give the 25 expected verdicts,
+     and `longChecks.py` with a number it cannot read 'CRASHED:
+     ValueError', exit 3.  The snapshot's helpers give 3 of the 25 wrong
+     (a crash PASS in expectFail, report and the reported axial criterion),
+     its `longChecks.py` exit 1 without a verdict line.
+
+O. **A fit that is not finite fails M7.1e-g (`graetzChecks.py`).**
+   `discrete`, `windows` and `outlet` took the largest deviation with max(),
+   and max(0, nan) is 0: a NaN fit passed.  A deviation that is not finite
+   now fails the check, naming the run.  M7.1n (new, no run): the three
+   checks on stand-in fits, the finite ones met, the five with a NaN (mu,
+   a window variant, the wall uptake, the mixing cup) refused; the
+   snapshot's `graetzChecks.py` passes all five.
+
+P. **A resumed run of the 007 carrier starts from its latest write
+   (`runM7`).**  `setup007` copies run/012 or run/013, whose controlDict
+   says `startFrom startTime`, and `runParallel` passes no time option, so
+   a stopped run started again from t = 0.  `runM7` now sets `startFrom
+   latestTime` when it resumes (the revalidation leaves startFrom out of
+   the compared dictionaries, as endTime).  No recorded run was affected:
+   all 17 have one segment.  M7.6b (new, M7long): run/012 set up by
+   `setupM7` on 8 ranks, stopped at 0.008 s and resumed by `runM7` to 0.016
+   s: the second segment starts with 0.012 s, makes 2 steps, books its
+   balance from 0.008 s and restarts exactly (relative 0).  With the
+   snapshot's `runM7` (a copy of `longStudies` with it) the second segment
+   starts again from t = 0: its first step 0.004 s, 4 steps, no balance
+   from 0.008 s (M7.6b FAIL).
+
+Q. **The reuse keys of the Graetz runs follow their set-up
+   (`graetzRobin`).**  The keys held the executables, the template,
+   `graetz.py`, `graetzCase.py` and the options, but not the functions that
+   set the runs up: a changed dt, step or write-interval formula of
+   `transientCase`, or a changed command of `meshCase`, reused the old
+   runs.  The keys now hold the md5 of `declare -f meshCase runCase
+   transientCase meshKey runKey transientKey setupKey meshDir runDir
+   transientDir runSerial` (as M4.20 and `m7Key`).  M7.1o (new, no run):
+   with `meshCase` (the order of its postProcess functions), `runCase` (5
+   steps) or `transientCase` (a write every 0.1 s) changed in a subshell,
+   the keys of a mesh, a run and the time-accurate run change; the
+   snapshot's keys hold no function text and stay.
+
+R. **Documents of M7 (corrected in place, each annotated).**
+   - Section 33, item 3d: the largest mixing-cup (7.5e-11) and wall-uptake
+     (8.1e-10) changes are at Bi 50 (halfCell, Nr 256; the outlet
+     corrected by item Z: fixedValue, not zeroGradient); only the one-end
+     and both-ends maxima (7.5e-9, 1.2e-8) are at Bi 1, also with the
+     fixedValue outlet.
+   - The transport identity (`matrixDefect.H`, section 33 item 10a,
+     `tests/paperMode`, the readme): the linearUpwind channel measures up to
+     3.7e-41 kg/s (3.8e-38 of its terms), not 9e-42; the negative control
+     of M4.18 runs the drift pipe with layer distance (20 steps on 4
+     ranks): 1.2e-24 to 1.8e-23 kg/s, 5e-21 to 7.9e-20 of its terms.  The
+     figures given for it, 3e-25 to 1.8e-23 kg/s and 1e-21 to 8e-20, were
+     the union over both layer rules: the control with layer faceCells,
+     measured once in this pass, gives 3.4e-25 to 7.8e-24 kg/s, 1.3e-21 to
+     3.3e-20.  The long double variant of the review (4e-27 to 3.7e-25
+     kg/s, a one-off of the integration) overlaps that union, as section
+     33 said.
+   - The readme's row of M7.1c: the gate takes `graetz.half_cell`, the
+     centroid formula in double precision on the unit radius times R
+     (4.0e-14), not the exact centroid (3.4e-14); OpenFOAM's centroid gives
+     3.7e-14.
+   - run/013 (its readme, section 33 item 8): the 61 changed tokens per
+     kind, the cumulative transport of the balance line included, and all
+     from the tolerance: the build of this pass at the old final tolerance
+     1e-12 reproduces the old excerpt (IDENTICAL, 111 lines, 5 steps).
+   - The temperature model's final deposit (readme, section 33 item 6):
+     it still depends on dt at first order, but weakly: L1(2 ms, 1 ms)
+     2.7e-7 at 16 s on the 007 carrier (order 0.90) and 1.3e-7 at 30 s in
+     paper mode (0.94), 1600 times below the 4.5e-4 of HKS; not 'no longer
+     depends on dt'.
+   - The closed box of the deliverables of M7: verified by the analytic
+     closed boxes of M2.1 and M5.1 (section 33, item 1, and section 6).
+   - Stale statements: `longStudies` (M4long keeps such runs too since
+     section 33, item 11; M7long always runs pipeMeshes first), section 6
+     (M9.0 to M9.13, M9.14 since item X; M7.1a-o, M7.6a-b).
+
+S. **The gates of the long runs, live again (cost).**  This pass changes
+   compiled sources (items A to H), so every recorded run of M4long (14)
+   and of M7long (17) ended under another key, and M4.17 and M7.3a would
+   gate none.
+   - The cheapest run of each family was made again with the final
+     sources, each on 8 ranks bound to 8 physical cores:
+     temperature-dt4ms (M7long; 4000 steps of 4 ms, 17.4 min on cores 8-15,
+     alongside the run of `tests/Alltest -fresh all`) and T5_60-distance
+     (M4long; 6000 steps of 10 ms in two segments: the first, on cores 0-7,
+     ran about eight times slower than its record, since another user's
+     job pinned to one of those cores shared it with a rank, and was
+     stopped at 4.65 s after 11.7 min; `longRuns` resumed the run from its
+     write at 4 s on cores 12-19, 18.9 min); together 48 min of 8 ranks,
+     6.4 core-hours (about 5 without the contention).  Both reproduce
+     their records bit for bit: temperature-dt4ms every profile file (64),
+     every field of the last write on every rank (96 files at 16 s) and
+     the balance file, its booking columns included; T5_60-distance every
+     profile file (120), the 6000 rows of its balance file merged from the
+     two segments in every column, and every field at 60 s but OpenFOAM's
+     clock value in uniform/time (8 files: 59.9999999999966747 against
+     ...6632, the time accumulated from the restart at 4 s; the ledger
+     keeps its own exact clock).  The changes of this pass do not act on
+     the temperature model, as expected.
+   - The other 29 runs were revalidated (`M4LONG_REVALIDATE=yes
+     M4LONG_RUNS=ended M7LONG_REVALIDATE=yes M7LONG_RUNS=ended`, in the
+     final invocation; sections 26 and 27): the 13 of M4long and the 16 of
+     M7long, HKS included, each by 5 steps from its last write before its
+     end with the binaries it was made with and the current ones: every
+     probe wrote the same files (9 to 88), the same profiles and a balance
+     file identical in every column, the booking columns included (0
+     differing rows); none was refused.
+   - Results (`tests/Alltest M9 M4long M7long`, below): M4.17 gates
+     T5_60-distance, 7.9e-16 of the reference over its 6065 steps (the 65
+     of the stopped segment beyond 4 s counted once more), and lists the
+     13 revalidated runs; M4.5 for T5_60 with layer distance gives T_dep
+     789.2542 K as before; M7.3a gates temperature-dt4ms, closure 2.8e-16
+     and solverDefect 5.0e-13 of the reference, and lists the 5 others;
+     every criterion of M4long (18 lines) and M7long (18) passed.
+   - Made again after the follow-up, item Z: its item Y changed the
+     compiled sources once more.
+
+T. **Tests and negative evidence.**
+   - New: M9.11 (2 lines), M9.12 and M9.13 (M9); M7.1n and M7.1o (M7);
+     M7.6a and M7.6b (M7long).  Extended: M9.3b, M9.5 and M9.8 by a line
+     each, M9.6 by two, M9.7 by seven (16 lines); the closure and the
+     solver defect gated in every run of the bridge build (item B).
+     `tests/Alltest` expects them and says so in its usage text;
+     `tests/gems/checks.py` has `frozenFault`, `restartSchedule`,
+     `rankLogs`, `iterations` and an extended `fault`;
+     `tests/gems/faultBridge.c` injects the unusable results and the
+     iterations and names the engines by their creation number;
+     `regress.sh` has `-mask` (removed again, item V); `tests/functions`
+     the load sampler.
+   - Negative evidence, the snapshot `pre-cleanup9-7`: its bridge build
+     under the new `tests/gems/Allrun` (`LESTO_GEMS_TEST_EXE`, before the
+     line of item I's condensed gas was added) fails 9 of its 42 lines,
+     exactly those of its defects: M9.5 (both lines: the local fault run
+     stops with SIGFPE at the NaN; no re-creation in mode frozen), M9.6
+     (both restarts: updates at 5, 8 and 11), M9.7 (the two unknown keys:
+     the runs do not stop), M9.11 (the keys of the other mode stop both
+     runs), M9.12 (one shared log per directory) and M9.13 (the 32-bit
+     totals);
+     the other 32 pass and 1 is NOTRUN (M9.0: the given executable), as
+     the changes of items B, I, J and K act in the scripts.  Its scripts:
+     `graetzChecks.py` passes the five NaN fits of M7.1n; its criterion
+     helpers give 3 of the 25 verdicts of M7.6a wrong, and its
+     `longChecks.py` exits 1 without a verdict at a crash; its `runM7`
+     restarts the resumed run of M7.6b from 0 (item P); its keys of
+     `graetzRobin` hold no set-up function (M7.1o, item Q).  With the
+     fault bridge and `FOAM_SIGFPE=false` its fault run counts 2 failures
+     for 4 unused results (item F).
+   - Build: 0 warnings (BUILD, M0.3, the bridge build of M9.0); a copy with
+     the bridge compiles and links against the local v2606 Debug build
+     with 0 warnings, every source compiled (one-off; M4.6 compiles the
+     default build and passed).  A header comment was reflowed after the
+     build of the run of `all`: the executables rebuilt from the final
+     sources are bit-identical to those it tested (rhoFixedFlowFoam
+     bd7c343f..., setFrozenCarrier f7c0df84..., unchanged).
+   - The test runs leave the repository unchanged: the md5 of every
+     tracked and untracked file (417) before and after the run of `all`
+     differ only in the six documents edited during it (this plan, the
+     readme, `gemsEquilibrium.H`, `thermochemistry/README.md` and the
+     readmes of run/013 and run/015), with the same set of files; and
+     those of the final invocation `tests/Alltest M9 M4long M7long` are
+     identical before and after it (417 files, no edit during it).
+
+**The follow-up: the verification and the review of this cleanup.**  The
+verification of the cleanup above found two problems (the readme still
+said that the final deposit of the temperature model does not depend on
+dt; `tests/Alltest` did not expect the new criteria of M7) and four minor
+points (the outlet of the largest mixing-cup and wall-uptake changes in
+section 33; M9.1's run without the ledger, against item B; a NaN closure
+passing the ledger's checker; the start-up line of a log directory that
+comes back into processor0), its review three minor defects (the
+completeness lists again; the mask of item J does not do what it claims;
+the control of M9.3b(ii) is the endless loop that item K removed) and six
+nits.  Each was assessed: all are real, and all are fixed, the mask by
+the review's second option (the bridge's md5) with an exact comparison
+of what no GEMS3K call reaches.  Items U to Z.  The sources of the
+cleanup before this follow-up are kept as the snapshot `pre-cleanup9-7b`
+(scratch area), the negative evidence of the follow-up.
+
+U. **The completeness lists of `tests/Alltest`.**
+   - Defect: the lists still named M7.1a-m and M7.2a-M7.3pc only, so a
+     missing or duplicated line of M7.1n, M7.1o, M7.6a or M7.6b would not
+     have failed the run, although item T said that Alltest expects them.
+   - Fix: M7.1n:1 and M7.1o:1 in the list of M7, M7.6a:1 and M7.6b:1 in
+     that of M7long, M9.14:1 in that of M9 (item X); the usage text names
+     them.  And the converse check, so that a new criterion cannot be left
+     out again: the criterion LIST (every invocation) requires every
+     criterion id recorded with PASS or NOTRUN to be in the invocation's
+     expected list (`unexpectedResults`), with a stand-in id added to the
+     results as its control, which it must name.
+   - Negative evidence: `missingResults` with the lists of the first round
+     over the results of its own verification without the lines of M7.1n
+     and M7.1o (of M7.6a and M7.6b) reports nothing missing; with the new
+     lists it reports M7.1n:1 and M7.1o:1 (M7.6a:1 and M7.6b:1), and over
+     the complete results nothing.  `unexpectedResults` with the lists of
+     the first round over the complete results of its verification names
+     M7.1n and M7.1o (`all`) and M7.6a and M7.6b (M7long); with the new
+     lists nothing.
+
+V. **run/015's excerpt with another bridge (M9.8; replaces the mask of
+   item J).**
+   - Defect (review): masking the numbers that GEMS3K computes itself does
+     not make M9.8(i) pass with a bridge built elsewhere, as item J
+     claimed.  Those numbers change only when GEMS3K's results (or its
+     inputs) change, and then every round-off token of the solver in the
+     later steps moves with them: the final residuals of GAMG, the solver
+     defect, clamped, solverDefect, min Y and the negative mass.
+     Measured with the stand-in below (every p_g scaled by 1 + 4.4e-16, 2
+     ulp): 22 of the 116 lines of the excerpt differ, all in the steps
+     2-5, and 19 with the mask of item J (the first round's M9.8(i): a
+     FAIL); the start-up and step 1 are IDENTICAL.
+   - Fix: the md5 of the `libgemsbridge.so` with which the excerpt was
+     written is recorded with the test (`EXCERPT_BRIDGE_MD5` in
+     `tests/gems/Allrun`: fb67103e..., `thermochemistry/gemsbridge` of
+     this workstation, built on 2026-09-23).  With that bridge the whole
+     excerpt, the start-up and 5 steps, is compared exactly (PASS or FAIL,
+     as before item J).  With another bridge only what no GEMS3K call
+     reaches is compared exactly, the start-up and step 1 (no element has
+     gas at t = 0, so the update of step 1 makes no call): DIFFERENT is a
+     FAIL, the solver's own; IDENTICAL leaves the steps 2-5 NOTRUN, naming
+     both bridges.  On Merlin7, where the bridge is built anew (item L),
+     M9.8(i) is thus NOTRUN unless the start-up or step 1 differ (an
+     excerpt written there again needs its bridge's md5).  The
+     mask is gone: `regress.sh` is the committed version again, and
+     `GEMS_MASK` and the third line of item J were removed.  The md5
+     names the bridge, not its arithmetic: libm is a dependency too, so a
+     glibc of other numerics under the same bridge would still fail the
+     exact comparison (none was seen: the excerpt of 2026-10-03 has been
+     reproduced bit for bit since).
+   - Tests: M9.8, its first line as above (here: PASS, the whole excerpt
+     IDENTICAL, 116 lines), its third line replaced: run/015 for 5 steps
+     with the fault bridge scaling every p_g by 1.0000000000000004
+     (`LESTO_TEST_PGAS_SCALE`), a stand-in for another bridge: the verdict
+     NOTRUN (the start-up and step 1 IDENTICAL, 59 lines), and FAIL with
+     the gas inventory of step 1 changed in the excerpt; the whole excerpt
+     against its log is printed (DIFFERENT, 22 lines).
+   - Documents: the header of `tests/gems/Allrun`, `tests/Alltest` (the
+     usage text, its NOTRUN cases), `faultBridge.c`, the readme (M9.8),
+     run/015's readme, `thermochemistry/README.md` (Merlin7); decision e.
+
+W. **The sampler test leaves no orphan (M9.3b, second line).**
+   - Defect (review): its control was the endless loop of item K, started
+     without a check of its parent: a test interrupted while the control
+     ran left the loop running and appending to the work area.
+     Reproduced with the first round's test: an INT to its process group
+     21 s in, during the control, and the loop kept sampling (10 samples,
+     14 four seconds later) until stopped by hand.
+   - Fix: the control is bounded to 30 s (it still outlives a killed
+     script by more than the 5 s of the check, which is what it shows),
+     the scripts wait 60 s instead of 300 s, and the test's own EXIT, INT
+     and TERM traps stop the scripts, samplers and controls it started
+     (`samplerCleanup`), each by its recorded PID and only while its
+     command line names the test's script, so that a PID taken over by
+     another process is never touched (the bounded sleeps end by
+     themselves).
+   - Tests: M9.3b(ii) as before (TERM, KILL and the control: 'sampler
+     alive 5 s after its script ended: control'); by hand (one-off), an
+     INT and a TERM to the test's process group 21 s in leave none of its
+     processes 3 s later.
+
+X. **A value that is not finite fails the gates (`tests/phaseChange/
+   checks.py`, `graetzChecks.py`; M9.14, M7.1n, M9.1).**
+   - Defects: (verification) the ledger of item B gates with
+     `tests/phaseChange/checks.py`, whose closure is a max() over the
+     steps, which passes over a NaN that is not the first value: a balance
+     file with the closure NaN in its second row passed, so did one with
+     the gas inf (the reference inf, the ratio 0), and `logClosure` passed
+     a NaN closure in a later Balance line.  The steady check of the
+     Graetz runs (M7.1d) took its closure the same way; item O had left it
+     out.  (Review) M7.1n compared exit statuses only, and a crash of the
+     checker is exit status 1 as well: a checker that crashes at a NaN
+     passed it.  (Verification, review) M9.1's run of the bridge build was
+     the one run without the ledger, against item B's claim.
+   - Fix: `readBalance` refuses a balance file with a value that is not
+     finite (SystemExit naming the column, the time and the file, exit
+     status 1 without a verdict line; it serves every subcommand that
+     reads a balance file and the checkers that import it, among them
+     `longChecks.py`, whose cmdRuns reports it as 'cannot be computed');
+     `logClosure` and `steady` refuse a closure that is not finite and name
+     the run ('not finite: <run>').  So every gate of the ledger refuses
+     it: the ledger of the M9 runs, the closure and solverDefect gates of
+     M2 to M5, M4.17 (`paperMode/checks.py closureRuns`) and M7.3a
+     (`longChecks.py runs`).  M7.1n requires the refusal text, and covers
+     steady; M9.1's run is gated by the ledger (printed in its line:
+     closure 0, solverDefect 1.1e-16).  Not changed (outside the
+     findings): the comparisons of fields and profiles in the other
+     checkers aggregate with max() as well, e.g. the mDep_ check of
+     `paperMode/checks.py` with its own reader of the balance file.
+   - Tests: M9.14 (new; no run, also without a bridge): `ledger` on
+     stand-in balance files with the header of the channel: finite met;
+     the closure NaN in the second of three rows, the solverDefect NaN in
+     the last, the gas inf in the first refused ('Not finite: ...');
+     `logClosure` on a log with a NaN closure in its second Balance line
+     refused, on its finite twin met.  M7.1n extended: 10 calls (steady
+     met and refused besides the 8 of item O), and the control,
+     `graetzChecks.py` with `math.isfinite` raising at a NaN, told apart
+     in each of the 6 calls with a NaN (exit status 1, but no 'not
+     finite').
+   - Negative evidence: the first round's `tests/phaseChange/checks.py`
+     gives 4 of the 6 verdicts of M9.14 wrong (the closure NaN and the gas
+     inf pass the ledger, the NaN log passes logClosure, the solverDefect
+     NaN is refused without naming it); its `graetzChecks.py` passes the
+     NaN closure of steady (M7.1n: 'steady ... exit 0'); its M7.1n passes
+     the crashing checker in all 8 calls.  One-off: the gate of the long
+     runs (`longChecks.py runs`, M4.17 and M7.3a) on a stand-in run whose
+     balance file has the closure NaN in its second row: the first round
+     'OK: ... largest |closure|/reference 1.5e-16', now 'Not finite:
+     closure nan at t = 0.002 ...' and 'cannot be computed' (exit 2).
+
+Y. **The solver: two log lines and two comments (`gemsEquilibrium`).**
+   - Mode frozen (review): the test of an unusable node was `!positive(p_g)
+     || !maxLog10Omega(...)`, which short-circuits, so a node with p_g <= 0
+     was logged with the start value of its max log10 Omega, -VGREAT
+     ('max log10 Omega -1e+300').  It is now computed first, as evaluate()
+     does in mode local, and the line names the real value.
+   - The log directory (verification): "../processor0/gemsLog" lies below
+     processor0 for rank 0 only, so rank 0 wrote into it and the ranks 1-3
+     into subdirectories processor<N> of it, and the master's line ('logs
+     in processor<N>/gemsLog') named rank 0's directory only.  The decision
+     is collective now (`returnReduceOr`): a directory outside processorN
+     on any rank gives every rank its subdirectory processor<N>, and the
+     line names the directory of every rank ('logs in
+     .../processor0/gemsLogBack/processor<N>'); the default and the cases
+     of item D are unchanged.
+   - Comments (review): `counts::failed` ('failed calls: ...; a rejected
+     result, not used either, is counted per pair, in REJECTED'); the
+     schedule of mode local is that of the absolute time index: a run that
+     starts from a time whose uniform/time holds an index k without a
+     lagged state updates at k + 1 and then at the schedule's next, so its
+     first interval may be shorter (the header, the readme and two
+     comments of `interfaceExchange` said 'the first step of a fresh run
+     and then every updateInterval steps'; those comments keep their line
+     count, so no __LINE__ of an error message moves, and the executables
+     rebuilt from them are bit for bit those tested).
+   - Tests: M9.5(ii) extended: besides GEMSB_ERR_FATAL at the node call 20,
+     p_g = 0 at 30 and log10 Omega = NaN at 40: 149 nodes from GEMS3K, 3
+     failed, 1 re-creation, the rank log naming the real max log10 Omega
+     of the first (1.40542) and nan for the second.  M9.12: a fourth
+     directory, "../processor0/gemsLogBack", and `rankLogs` checks that
+     the start-up line names the directory of every rank.
+   - Negative evidence: the first round's sources built with the bridge,
+     under the new `tests/gems/Allrun` (`LESTO_GEMS_TEST_EXE`): 40 PASS,
+     2 FAIL, 2 NOTRUN (M9.0 by design, and M9.3b at a load of 23), the
+     two FAILs exactly the defects: M9.5(ii) ('the p_g 0 nodes with max
+     log10 Omega -1e+300') and M9.12 ('rank 1 writes in
+     processor0/gemsLogBack/processor1, the line names
+     processor1/gemsLogBack', the same for ranks 2 and 3).
+   - These change compiled sources (rhoFixedFlowFoam 92589e36... instead
+     of bd7c343f...): the gates of the long runs need runs of the final
+     sources again (item Z).  Build: 0 warnings (BUILD, M0.3, the bridge
+     build of M9.0, M4.6 on v2606); one-off, a copy with the bridge
+     compiles and links against the local v2606 Debug build with 0
+     warnings, every source compiled (`returnReduceOr` and the frozen path
+     on v2606 too).
+
+Z. **Documents of M7, and the long runs again.**
+   - The readme's paragraph of acceptance 3 on the 007 carrier said that
+     the final deposit of the temperature model does not depend on dt
+     (item R had corrected the plan's twin only): now L1(2 ms, 1 ms)
+     2.7e-7 at order 0.90, 1600 times below HKS.
+   - Section 33, item 3d (and item R): the largest mixing-cup and
+     wall-uptake changes, 7.536e-11 and 8.129e-10, are at Bi 50, halfCell,
+     Nr 256 with the fixedValue outlet, not zeroGradient (7.524e-11 and
+     8.112e-10); the one-end and both-ends maxima at Bi 1 with the
+     fixedValue outlet too (recomputed from the fits of the runs).
+   - The readme's row of `graetzRobin`: the reuse keys hold the shell
+     functions that set the runs up (item Q).
+   - The long runs (item S again, cost).  Item Y changed compiled
+     sources, so every recorded run of M4long and M7long ended under
+     another key again, and the cheapest run of each family was made again
+     with the final sources (rhoFixedFlowFoam 92589e36...), each on 8 ranks
+     bound to 8 physical cores of one socket (0-2, 4-6, 8 and 9), one after
+     the other, on a workstation loaded by other users' jobs (a 1-minute
+     load of 26 to 38): T5_60-distance (M4long; 6000 steps of 10 ms, one
+     segment) in 38.1 minutes and temperature-dt4ms (M7long; 4000 steps of
+     4 ms) in 27.1; together 65 minutes of 8 ranks, 8.7 core-hours, and
+     about 0.7 more for two starts of temperature-dt4ms stopped before
+     their first write (the first beside T5_60-distance on the
+     hyperthreads of its cores, the second on hyperthreads of the other
+     socket that other users' jobs shared, 4 steps per minute; each later
+     start removed what the stopped one had left, `runM7`'s path 'prepared
+     before').  Both reproduce their records bit for bit:
+     temperature-dt4ms every file (1408 field files and 128 uniform/time
+     files of the 8 ranks at 16 times, 64 profile files, the 4000 rows of
+     the balance file); T5_60-distance every field of every rank at its
+     60 write times (5280 files), the 120 profile files and the 6000 rows
+     of the balance file (the record's two segments merged), and
+     OpenFOAM's clock value in uniform/time up to 4 s (from 5 s on the
+     record carries the clock of its restart at 4 s, item S:
+     59.9999999999966747 against 59.999999999996632 at 60 s).  The changes
+     of the follow-up do not act on these runs, as expected.  Results
+     (`tests/Alltest M4long M7long` with the revalidation, below): M4.17
+     gates T5_60-distance, 7.9e-16 of the reference over its 6000 steps,
+     and lists the 13 revalidated runs; M4.5 for T5_60 with layer distance
+     gives T_dep 789.2542 K as before; M7.3a gates temperature-dt4ms,
+     closure 2.8e-16 and solverDefect 5.0e-13 of the reference, and lists
+     the 5 others; the other 29 runs (13 of M4long, 16 of M7long) were
+     revalidated by their 5-step probes, every probe the same files,
+     profiles and balance rows, the booking columns included; every
+     criterion of M4long (18 lines) and M7long (18) passed.
+
+M9 and M7 after the cleanup: `tests/Alltest -fresh all` (M0 to M5, M7 and
+M9; with `LESTO_OPENFOAM_V2606`, bound to the 20 physical cores with
+`taskset -c 0-19`) gives 300 PASS, 0 FAIL, 1 NOTRUN (M0.4, the compile on
+v2606 on Merlin7: no remote access; M4.6 compiles a copy against the
+local v2606) in 41 minutes at a load of 2 to 11 (the M7long run of item S
+alongside for 18 of them); M9 itself, 42 lines then, in 2 minutes (M9.3b:
+42.9 us per warm call at a load of 2.5), M7 in 10 (the Graetz runs made
+again: their key holds the solver binary); 0 warnings; the M0 gate
+identical to the tag 0.1.  After the line of item I was added (M9.7, 16
+lines), `tests/Alltest M9 M4long M7long` (`M4LONG_REVALIDATE=yes
+M4LONG_RUNS=ended M7LONG_REVALIDATE=yes M7LONG_RUNS=ended`, one
+invocation) gives 91 PASS, 0 FAIL, 0 NOTRUN in 10 minutes: BUILD, the
+M0 gate, SELF and CACHE, the 43 lines of M9, the 18 of M4long and the 18
+of M7long (M7.2a-b, M7.6a-b and the 14 of the long runs); of the 31 long
+runs of both, 2 were made with the final sources and 29 revalidated.  The
+branch is phase-change-rebased at 5852f8d, without commits or stashes.
+
+After the follow-up (items U to Z): `tests/Alltest -fresh all` (with
+`LESTO_OPENFOAM_V2606`; bound away from the 8 cores of the M7long run of
+item Z for the 22 minutes it ran alongside, then unbound; a 1-minute load
+of 18 to 30, mostly other users' jobs) gives 303 PASS, 0 FAIL, 1 NOTRUN
+(M0.4) in 49 minutes: the 300 lines of the first round, the line of item
+I, M9.14 and LIST.  M9 (44 lines) took about 3 minutes (M9.3b: 64.2 us
+per warm call at a load of 18.8), M7 (27 lines) 2, with the Graetz runs
+reused, made just before with the final sources (20 minutes on 4 cores at
+a load of 30: their key holds the solver binary); 0 warnings; the M0 gate
+identical to the tag 0.1; LIST names no criterion recorded but not
+expected.  A first start of this run, with the Alltest before LIST, was
+stopped in M1 and started again with the final one.  Then `tests/Alltest
+M4long M7long` (`M4LONG_REVALIDATE=yes M4LONG_RUNS=ended
+M7LONG_REVALIDATE=yes M7LONG_RUNS=ended`, bound to the 8 cores of the
+long runs and their hyperthreads) gives 49 PASS, 0 FAIL, 0 NOTRUN in 9
+minutes: BUILD, the M0 gate, SELF, CACHE and LIST, the 18 lines of M4long
+and the 18 of M7long (item Z).  Both invocations leave the repository
+unchanged (the md5 of its 414 files; during the first only this plan and
+the readme were edited), and the branch is still phase-change-rebased at
+5852f8d, without commits or stashes.
+Pending: the researcher's sign-off of this section.
+
+Decisions (signed off by the researcher on 2026-10-04, as proposed):
+a. The schedule of mode local by the time index, and its lagged state as
+   per-rank restart state (item C).
+b. Unknown keys of GEMSCoeffs and gems stop the run (item H).
+c. A log directory outside processorN gets a subdirectory per rank (item
+   D), rather than a refusal; on every rank when it lies outside on any
+   (item Y).
+d. No `maxMoleFraction` guard now; the limit recorded (item M).
+e. The comparison of run/015's excerpt: exact with the bridge that wrote
+   it, its start-up and step 1 with another bridge and the rest NOTRUN
+   (item V; it replaces the masked comparison of item J).
