@@ -20,12 +20,15 @@
 #     repository's thermochemistry/gemsbridge if it holds gemsbridge.h and
 #     libgemsbridge.so (the .so is git-ignored and absent in a fresh clone),
 #     otherwise a dummy bridge;
-#   - a dummy bridge is a throw-away gemsbridge.h with one plain-C
-#     declaration and a libgemsbridge.so built from it with the C compiler.
-#     No bridge symbol is used before the GEMS backend exists, so the
+#   - a dummy bridge is a copy of the repository's gemsbridge.h (tracked,
+#     present in every clone) with the declaration of one more function,
+#     and a libgemsbridge.so built with the C compiler from
+#     tests/build/dummyBridge.c, which defines every function of the
+#     header without GEMS3K.  Since the GEMS3K backend (milestone M9) the
+#     solver calls the whole API, so the dummy must provide it; the
 #     plumbing (stamp, wclean, gemsConfig.H, -lgemsbridge, rpath, ldd) is
-#     tested just as well.  M0.3f always uses a dummy, because it edits the
-#     bridge header.
+#     tested just as well as with the real library.  M0.3f always uses a
+#     dummy, because it edits the bridge header.
 #   - the xGEMS installation of M0.3j-l is always a dummy (an xGEMS built
 #     with the compiler of this OpenFOAM is not available here): the
 #     header include/xGEMS/ChemicalEngine.hpp with the members that the
@@ -114,28 +117,29 @@ copySources() {
     --exclude="./utilities/*/Make/$WM_OPTIONS" .) | tar -x -C "$1"
 }
 
-# makeDummyBridge <dir> [extra declaration]: gemsbridge.h and libgemsbridge.so
+# makeDummyBridge <dir> [extra declaration]: gemsbridge.h, a copy of the
+# repository's header with the declarations of gemsb_dummy_version and the
+# extra one before its last line, and libgemsbridge.so from dummyBridge.c
 makeDummyBridge() {
   local dir=$1 extra=${2:-}
   mkdir -p "$dir"
-  cat > "$dir/gemsbridge.h" <<EOF
-/* Dummy GEMS3K bridge of tests/build/Allrun: no GEMS3K inside. */
-#ifndef GEMSBRIDGE_H
-#define GEMSBRIDGE_H
-#ifdef __cplusplus
-extern "C" {
-#endif
-int gemsb_dummy_version(void);
-$extra
-#ifdef __cplusplus
-}
-#endif
-#endif
-EOF
-  printf '#include "gemsbridge.h"\nint gemsb_dummy_version(void) { return 0; }\n' \
-    > "$dir/gemsbridge.c"
-  "${WM_CC:-gcc}" -shared -fPIC -Wall -I"$dir" -o "$dir/libgemsbridge.so" \
-    "$dir/gemsbridge.c"
+  awk -v extra="$extra" '
+    /^#endif \/\* GEMSBRIDGE_H \*\/$/ {
+      print "/* dummy of tests/build/Allrun (tests/build/dummyBridge.c) */"
+      print "#ifdef __cplusplus"
+      print "extern \"C\" {"
+      print "#endif"
+      print "int gemsb_dummy_version(void);"
+      if (extra != "") print extra
+      print "#ifdef __cplusplus"
+      print "}"
+      print "#endif"
+    }
+    { print }
+  ' "$REPO_BRIDGE/gemsbridge.h" > "$dir/gemsbridge.h" \
+    && grep -q '^int gemsb_dummy_version(void);' "$dir/gemsbridge.h" \
+    && "${WM_CC:-gcc}" -shared -fPIC -Wall -Wextra -I"$dir" \
+         -o "$dir/libgemsbridge.so" "$TESTS_DIR/build/dummyBridge.c"
 }
 
 hasBridge() {

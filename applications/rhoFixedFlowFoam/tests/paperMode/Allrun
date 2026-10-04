@@ -281,9 +281,11 @@ echo "== M4 paper-mode carrier and layer distance (work directory $PM_DIR)"
 #          and recomputed from the mesh (checks.py exactLayer), and the
 #          serial state restarted on the 4 ranks exact; areaIntegrate of
 #          mDep_ = the wall inventory to 1e-12 in serial and on the 4 ranks,
-#          whose maps run both ways (21 elements with their nearest face on
-#          another rank, 0 faces with elements of two or more other ranks;
-#          the build before the review of M4, round 3: +0.92 %, 14 faces)
+#          whose maps run both ways: the start-up count exactly 21 elements
+#          with their nearest face on another rank and 0 faces with
+#          elements of two or more other ranks (checks.py mdepCount, as
+#          M4.7h; the build before the review of M4, round 3: +0.92 %, 14
+#          faces; gated since the M7 integration, plan section 33)
 #   M4.15  the closure does not drift (review of M4, round 2; plan section
 #          27, item 1): the pipe of run/014 with its own solver settings, a
 #          background Y = 0.1 and 20 steps of 0.1 s on 4 ranks (simple (4 1
@@ -297,12 +299,23 @@ echo "== M4 paper-mode carrier and layer distance (work directory $PM_DIR)"
 #          ranks, print with reportMatrixResidual an explicit remainder of 0
 #          kg/s in 0 cells in every step, while the explicit source sum |b -
 #          s| (the non-orthogonal correction of the laplacian, 1e-6 kg/s)
-#          is not 0: the correction enters the defect by its face values and
-#          the closure changes by exactly 0 for it (the build before:
-#          sum_c (b - s)_c dt, up to 1.7e-24 kg per step, unbooked; no such
-#          report); positive control: the channel with Gauss linearUpwind,
-#          whose explicit correction OpenFOAM adds to the source only, leaves
-#          a remainder in some cells
+#          is not 0, and a transport identity D = sum_c r_c + dM/dt + sum_p
+#          F_p - sum_c E_c of the cell defects, summed exactly, of at most
+#          1e-30 of its terms in every step (measured at most 1.1e-36; plan
+#          section 33): the correction enters the defect by its face values,
+#          each internal face once with opposite signs, and the closure
+#          changes by exactly 0 for it (the build before: sum_c (b - s)_c
+#          dt, up to 1.7e-24 kg per step, unbooked; no such report);
+#          positive control: the channel with Gauss linearUpwind, whose
+#          explicit correction OpenFOAM adds to the source only, leaves a
+#          remainder in some cells, D still 0; negative control (the
+#          criterion discriminates the defect itself, not only its report;
+#          M4 review carry-over, plan section 30, item 14): a copy of the
+#          sources whose cell defect keeps the correction in source form
+#          (checks.py sourceFormMutant; the report of E unchanged), built
+#          into the work area, passes the check of the explicit remainder on
+#          the drift pipe but violates the identity (measured 5e-21 to 8e-20
+#          of its terms, 1.2e-24 to 1.8e-23 kg/s, in every step)
 #   M4.19  the passive-carrier monitor in paper mode (review of M4, round 3;
 #          plan section 29, item 4): the max mole fraction printed for the
 #          last step of the serial pipe of M4.7c equals max c/(c + p/(R T)),
@@ -973,8 +986,10 @@ check M4.9 "profiles in distance mode (channel): distance: $out1; faceCells:\
 # communication mapDistribute added them in the order in which the receives
 # completed, so mDep_ could differ in its last bit between two identical
 # runs (timing-dependent: the build before the fix may pass by chance); now
-# in the order of the map's schedule.  Two runs on the same decomposition
-# write the same files bit for bit, and agree with serial.
+# pushToFaces() adds them in ascending rank order, after the face's own
+# elements (review of M4, round 3; plan section 29, item 1).  Two runs on
+# the same decomposition write the same files bit for bit, and agree with
+# serial.
 #------------------------------------------------------------------------------
 THREE='  layer distance;\n  distance 5.5e-4;'
 CH3=$PM_DIR/channel-distance3
@@ -1202,10 +1217,12 @@ check M4.7f "the serial pipe of M4.7c restarted from 0.02 (deposits of\
 # for M4.18.
 #------------------------------------------------------------------------------
 
-# driftPipe <case> <layer>: the pipe of run/014 with a background Y = 0.1,
-# 20 steps of 0.1 s on 4 ranks (simple (4 1 1)), the debug report on
+# driftPipe <case> <layer> [<executable>]: the pipe of run/014 with a
+# background Y = 0.1, 20 steps of 0.1 s on 4 ranks (simple (4 1 1)), the
+# debug report on; run with the solver under test unless another
+# executable is given (the negative control of M4.18)
 driftPipe() {
-  local c=$1 layer=$2
+  local c=$1 layer=$2 exe=${3:-$SOLVER_EXE}
   copyCase "$C014" "$c" && rm -f "$c/dynamicCode" \
     && ln -s "$DYNAMIC_CODE_DIR" "$c/dynamicCode" \
     && edit "$c/0/Y_PbI2_g" "s/^internalField +uniform 0;/internalField   uniform 0.1;/" \
@@ -1219,7 +1236,7 @@ driftPipe() {
     && setControl "$c" writeControl timeStep \
     && setControl "$c" writeInterval 20 \
     && decomposeWith "$c" 4 "method simple; coeffs { n (4 1 1); }" \
-    && runParallel "$c" "$SOLVER_EXE" 4
+    && runParallel "$c" "$exe" 4
 }
 DRIFT=$PM_DIR/pipe-drift
 driftPipe "$DRIFT" distance || echo "the drift pipe failed ($DRIFT/log)"
@@ -1245,7 +1262,49 @@ check M4.15 "the closure does not drift: the pipe of run/014, background Y =\
 # to about 30 degrees); positive control: Gauss linearUpwind on the channel,
 # whose explicit correction OpenFOAM adds to the source only (no face
 # values in the matrix), leaves a remainder.
+#
+# The report of E alone cannot see how the defect itself is formed (M4
+# review carry-over, plan section 30, item 14; section 33).  The transport
+# identity D = sum_c r_c + dM/dt + sum_p F_p - sum_c E_c, with the cell
+# defects of the ledger's own code accumulated and summed exactly
+# (matrixDefect.H transportIdentity), is 0 to the rounding of exact sums in
+# flux form and the double-precision residue of V div(C) in source form.
+# Negative control: a copy of the sources whose cell defect keeps the
+# correction in source form while the report of E is unchanged (checks.py
+# sourceFormMutant), built into the work area when the sources change
+# (about 2 min) and run on the drift pipe with layer distance: it passes
+# the check of E but violates the identity.
 #------------------------------------------------------------------------------
+MUTANT_DIR=$PM_DIR/sourceFormMutant
+MUTANT_EXE=$MUTANT_DIR/bin/rhoFixedFlowFoam
+
+# buildSourceFormMutant: the copy (without tests, doc, utilities and build
+# objects), its matrixDefect.H edited, built with wmake into MUTANT_DIR/bin;
+# reused while the sources, checks.py and OpenFOAM are unchanged
+buildSourceFormMutant() {
+  local key
+  key=$({ echo "$WM_PROJECT_DIR"; md5sum < "$PM_SRC/checks.py"
+          (cd "$SOLVER_DIR" && find . -path ./tests -prune -o -path ./doc \
+             -prune -o -path ./utilities -prune -o -path './Make/linux*' \
+             -prune -o -type f -print | LC_ALL=C sort | xargs md5sum); } \
+        | md5sum | cut -d' ' -f1)
+  if [ -x "$MUTANT_EXE" ] \
+    && [ "$(cat "$MUTANT_DIR/bin/key" 2>/dev/null)" = "$key" ]
+  then
+    return 0
+  fi
+  rm -rf "$MUTANT_DIR"
+  mkdir -p "$MUTANT_DIR/src" "$MUTANT_DIR/bin"
+  (cd "$SOLVER_DIR" && tar -c --exclude=./tests --exclude=./doc \
+    --exclude=./utilities --exclude="./Make/linux*" .) \
+    | tar -x -C "$MUTANT_DIR/src" \
+    && $CHECKS sourceFormMutant "$MUTANT_DIR/src/matrixDefect.H" \
+         > "$MUTANT_DIR/log.sourceFormMutant" 2>&1 \
+    && (cd "$MUTANT_DIR/src" && FOAM_USER_APPBIN=$MUTANT_DIR/bin wmake) \
+         > "$MUTANT_DIR/log.wmake" 2>&1 \
+    && [ -x "$MUTANT_EXE" ] && echo "$key" > "$MUTANT_DIR/bin/key"
+}
+
 DRIFTF=$PM_DIR/pipe-drift-faceCells
 driftPipe "$DRIFTF" faceCells || echo "the drift pipe failed ($DRIFTF/log)"
 CHLU=$PM_DIR/channel-linearUpwind
@@ -1258,15 +1317,44 @@ channel "$CHLU" "$DISTANCE" && setControl "$CHLU" endTime 0.01 \
        '^  reportMatrixResidual yes;' \
   && runSerial "$CHLU" "$SOLVER_EXE" \
   || echo "the channel with linearUpwind failed ($CHLU/log)"
+DRIFTM=$PM_DIR/pipe-drift-sourceFormMutant
+mutantOk=false
+if buildSourceFormMutant
+then
+  mutantOk=true
+  driftPipe "$DRIFTM" distance "$MUTANT_EXE" \
+    || echo "the drift pipe of the negative control failed ($DRIFTM/log)"
+else
+  echo "the negative control could not be built ($MUTANT_DIR)"
+fi
+IDENTITY_LIMIT=1e-30
 out1=$($CHECKS explicitRemainder "$DRIFT/log" 20); s1=$?
 out2=$($CHECKS explicitRemainder "$DRIFTF/log" 20); s2=$?
 out3=$($PCCHECKS closure "$DRIFTF/$BALANCE" 2e-15); s3=$?
 out4=$($CHECKS explicitRemainder "$CHLU/log" 1 nonzero); s4=$?
+out5=$($CHECKS transportIdentity "$DRIFT/log" 20 $IDENTITY_LIMIT); s5=$?
+out6=$($CHECKS transportIdentity "$DRIFTF/log" 20 $IDENTITY_LIMIT); s6=$?
+out7=$($CHECKS transportIdentity "$CHLU/log" 1 $IDENTITY_LIMIT); s7=$?
+if $mutantOk
+then
+  out8=$($CHECKS explicitRemainder "$DRIFTM/log" 20); s8=$?
+  out9=$($CHECKS transportIdentity "$DRIFTM/log" 20 $IDENTITY_LIMIT \
+           violated); s9=$?
+else
+  out8="the copy with the source form could not be made or built\
+ ($MUTANT_DIR/log.sourceFormMutant, log.wmake)"; s8=1
+  out9=""; s9=1
+fi
 check M4.18 "the face-flux correction of the transport matrix in flux form\
- (the drift pipe of M4.15, 4 ranks): layer distance: ${out1#OK: }; layer\
- faceCells: ${out2#OK: }, ${out3#*: }; positive control, the channel with\
- Gauss linearUpwind: ${out4#OK: }" \
-  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ]'
+ (the drift pipe of M4.15, 4 ranks): layer distance: ${out1#OK: };\
+ ${out5#OK: }; layer faceCells: ${out2#OK: }, ${out3#*: }; ${out6#OK: };\
+ positive control, the channel with Gauss linearUpwind: ${out4#OK: };\
+ ${out7#OK: }; negative control, the cell defect with the correction in\
+ source form and E reported as before (layer distance): ${out8#*: };\
+ ${out9#*: }" \
+  eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ] \
+    && [ $s5 -eq 0 ] && [ $s6 -eq 0 ] && [ $s7 -eq 0 ] && [ $s8 -eq 0 ] \
+    && [ $s9 -eq 0 ]'
 
 #------------------------------------------------------------------------------
 # M4.8: refusals
@@ -1590,17 +1678,17 @@ EOF
   # round 3: +0.92 % on the 4 ranks with the scheduled reverse distribute)
   out4=$($CHECKS mdep "$TET/$BALANCE" "$TET/$MDEP_DAT" 1e-12); s4=$?
   out5=$($CHECKS mdep "$TET4/$BALANCE" "$TET4/$MDEP_DAT" 1e-12); s5=$?
-  remote=$(grep -o '[0-9]* elements with their nearest wall face on another rank, [0-9]* interface faces with elements of two or more other ranks' \
-             "$TET4/log")
+  # the start-up count of the 4 ranks, exactly (as M4.7h; plan section 33)
+  out6=$($CHECKS mdepCount "$TET4/log" 21 0); s6=$?
   check M4.14 "a tetrahedral pipe (gmsh $(gmsh --version 2>&1 | head -1),\
  $(grep -a -o 'nCells:[0-9]*' "$TET/constant/polyMesh/owner" | head -1)),\
  layer 4e-4 m: serial '$cells1', 4 ranks (simple (1 2 2)) '$cells4';\
  ${out1#OK: }; serial vs 4 ranks: ${out2#*: }; the serial state at 0.001 on\
  the 4 ranks: ${out3#*: }; mDep_ in serial: ${out4#OK: }; on the 4 ranks\
- ($remote): ${out5#OK: }" \
+ (${out6#*: }): ${out5#OK: }" \
     eval '[ -n "$cells1" ] && [ "$cells1" = "$cells4" ] && [ $s1 -eq 0 ] \
       && [ $s2 -eq 0 ] && [ $s3 -eq 0 ] && [ $s4 -eq 0 ] && [ $s5 -eq 0 ] \
-      && [[ "$remote" != "0 elements"* ]] && [ -n "$remote" ]'
+      && [ $s6 -eq 0 ]'
 else
   result M4.14 NOTRUN "the tetrahedral pipe: gmsh is not installed (the\
  layer on 4 ranks and recomputed from the mesh)"

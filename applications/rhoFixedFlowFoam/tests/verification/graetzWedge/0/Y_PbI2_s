@@ -1,0 +1,8 @@
+FoamFile {version 2.0; format ascii; class volScalarField; object Y_PbI2_s;}
+dimensions    [0 0 0 0 0 0 0];
+internalField uniform 0;
+boundaryField {
+  "(INLET|OUTLET|WALL)" {type zeroGradient;}
+  "(FRONT|BACK)"        {type wedge;}
+  AXIS                  {type empty;}
+}

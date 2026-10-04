@@ -1,0 +1,650 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#
+# tests/verification/graetzRobin
+#
+# PURPOSE
+#
+# Graetz-Robin verification of milestone M7 of doc/phase-change-plan.md
+# (deliverables "Graetz-Robin (graetz.py, extended with axial diffusion) on
+# 3 wedge meshes; GCI; halfCell vs none"; acceptance 1: the fitted decay
+# rate mu has GCI_fine <= 0.5 %, the Richardson-extrapolated mu lies within
+# GCI plus the reference's own error bound, and halfCell is reported with
+# its observed order); 'tests/Alltest M7', part of 'all'.  Plan section 33
+# records the set-up, the results and the decisions.
+#
+# Problem.  Fully developed laminar pipe flow u = 2 U_b (1 - r^2/R^2) with
+# constant rho, T and p (frozen carrier written by graetzCarrier/), the
+# paired gas PbI2_g with the PbI2-He diffusivity (uniform at constant T and
+# p), Y = 1 at the inlet, and the temperature model as a constant
+# first-order wall uptake k_w = depositionVelocity (f(T) = 1 exactly,
+# areaPerVolume cell, areaMultiplier 1): the mass flux into the WALL is
+# rho k_w Y, i.e. the Robin condition D dY/dr = -k_w Y.  Far from the inlet
+# and the outlet Y = phi(r) exp(-mu x); graetz.py computes mu (the extended
+# Graetz problem, axial diffusion included) by three independent methods.
+# R = 2.4 mm, T = 500 K, p = 1 atm, D = 7.6963e-5 m2/s, Pe = U_b R/D = 5,
+# Bi = k_w R/D = 1 and 50, L = 24 R (graetzCase.py).
+#
+# The carrier is written by the test helper graetzCarrier (built into the
+# work area), not by utilities/setFrozenCarrier: on these wedges u must be
+# the parabola of the wedge's radius y, whose metrics are exactly
+# axisymmetric (graetzCarrier.C); setFrozenCarrier evaluates it at the
+# distance from the axis, sqrt(y^2 + z^2), which would bring back a fixed
+# bias of 7e-5 (Bi 1) to 2.3e-4 (Bi 50) in mu at 2 degrees, larger than
+# the GCI of halfCell.
+#
+# Meshes (blockMesh, graetzWedge/system/blockMeshDict): one wedge block of
+# 2 degrees, axis along x, the vertices at (x, r, -+r tan 1 deg), uniform
+# cells with dx = 2 dr, Nr = 32, 64, 128, 256 (GRAETZ_LEVELS), Nx = 12 Nr:
+# refinement ratio 2 in r and x.  The acceptance triplet is the finest
+# three (GRAETZ_MAIN, default 64 128 256); every other complete triplet is
+# reported (32/64/128 shows that wallResistance none at Bi = 50 needs the
+# finer triplet for the 0.5 % target, as graetz.py predicts).
+#
+# Runs (tests/work/<platform>/verification/graetz/run/..., never below
+# run/):
+#
+#   <outlet>/bi<Bi>/<law>/nr<Nr>
+#       every level x Bi x wallResistance none and halfCell, Gauss linear
+#       convection, with the outlet zeroGradient (the documented default)
+#       and fixedValue 0 (GRAETZ_OUTLET_LEVELS, default all levels)
+#   SuperBee/zeroGradient/bi<Bi>/<law>/nr<Nr>
+#       the production convection scheme on the acceptance triplet
+#       (GRAETZ_SUPERBEE, default yes)
+#   ../transient/bi50/halfCell/nr032
+#       the time-accurate control: Nr = 32, Bi = 50, halfCell, Gauss linear
+#       at Co = 1 (dt = dx/u_max = 4.678e-4 s), written every
+#       ceil(0.05 s/dt) = 107 steps (0.0500 s) with the profiles, from the
+#       start to the first write at or after GRAETZ_TRANSIENT_END (default
+#       1.5 s, 4.2 flow-through times L/U_b): 30 writes, 3210 steps, the
+#       last at 1.5015 s, so the final state is written
+#
+# GAMG to 1e-13 (relTol 0).  The steady state is reached by an implicit-
+# Euler march with dt = 1e6 s (Co = 2e9 to 1.7e10: each step solves the
+# steady equations up to a ddt term of relative size about 1e-9; the
+# steady state of implicit Euler does not depend on dt), 4 steps (SuperBee:
+# 6, for the lagged limiter), the axial profiles after every step and the
+# fields at the end.  A run whose log ends with 'End' and whose key is
+# unchanged is not repeated: the key holds the solver and the helper (md5
+# of the executables), the template and the scripts graetz.py and
+# graetzCase.py, the text of the shell functions that set the runs up
+# (meshCase, runCase, transientCase, the keys themselves, ...; plan section
+# 35, item Q: before, a changed formula of transientCase or a changed
+# command of meshCase reused the old runs) and the case options.  At most
+# GRAETZ_JOBS (default 4) serial runs at a time.
+#
+# Criteria
+#
+#   M7.1a  reference: mu R of Bi = 1 and 50 by the power series (mpmath),
+#          DOP853 shooting and Newton-refined Chebyshev collocation (N = 32,
+#          48) agree to <= 1e-10 relative (the reference's error bound)
+#   M7.1b  meshes: checkMesh OK, non-orthogonality 0, wedges of 1 degree
+#          per side, Nx x Nr cells, ratio 2 in r and x; the carrier: max
+#          |sum_f phi| per cell <= 1e-15 of the inflow, inlet mean velocity
+#          U_b to 1e-12
+#   M7.1c  set-up of every Gauss linear run (log): D uniform and equal to
+#          the PbI2-He correlation at (T, p) to 1e-15, v_d = k_w, f(T) = 1
+#          on every element; halfCell: the applied rate equals v' A_I/V_I
+#          with v' = 1/(1/k_w + d/D), d = R - y_last, to 1e-12, y_last the
+#          centroid (2/3)(r2^3 - r1^3)/(r2^2 - r1^2) of the wall row on the
+#          unit radius, times R (the agreement with OpenFOAM's centroid of
+#          the wall row is printed too; both are a few 1e-14, as with the
+#          centroid in exact arithmetic, while the formula in metres loses
+#          digits in r2^3 - r1^3: 1.3e-13)
+#   M7.1d  steady state of every Gauss linear run: the gas line density in
+#          the fit window changes by <= 1e-12 between the last two steps,
+#          the last outer loop converged, no guard pass and no significant
+#          projection or complementarity violation, |closure| <= 1e-13 in
+#          every step
+#   M7.1e  discrete consistency: the fitted mu of every Gauss linear run
+#          equals the decay rate mu_h of the developed discrete mode of the
+#          documented scheme (graetz.py discrete_mode) to 1e-7 relative,
+#          for both wall laws (the solver solves exactly the documented
+#          discretisation; the precision of mu_fit is about 1e-8, set by the
+#          GAMG tolerance at the small values of the Bi = 50 window)
+#   M7.1f  fit insensitivity: the window with one end or both ends moved
+#          by -+1.5 R (8 variants), the mixing-cup concentration and the
+#          wall uptake give mu within 1e-7 (the largest change of each kind
+#          is printed)
+#   M7.1g  outlet insensitivity: fixedValue 0 instead of zeroGradient at
+#          the outlet changes mu by <= 1e-8 (every level, Bi and law)
+#   M7.1h  GCI_fine <= 0.5 % on the acceptance triplet (4 lines: halfCell
+#          and none, Bi 1 and 50)
+#   M7.1i  |mu_ext - mu_ref| <= GCI_fine mu_fine + bound mu_ref (4 lines)
+#   M7.1j  observed order on the acceptance triplet, monotone convergence
+#          and |p - p_formal| <= 0.25 with p_formal = 2 for halfCell and 1
+#          for none (4 lines; the values are reported)
+#   M7.1k  the time-accurate run (Co = 1) reaches the decay rate mu_h of
+#          the developed discrete mode of its mesh (graetz.py) to 1e-9,
+#          with a profile change <= 1e-12 over its last write interval; the
+#          pseudo-transient march on the same mesh is printed against mu_h
+#          too (its fit sits about 5e-9 above it: the GAMG tolerance 1e-13
+#          at the small values of the Bi = 50 window, M7.1e)
+#   M7.1l  SuperBee runs: set-up, steady state and discrete consistency as
+#          M7.1c-e (mu_h of SuperBee's developed branch, where its limiter
+#          is psi = r: the linear-upwind face value)
+#   M7.1m  SuperBee, acceptance triplet: M7.1h-j together (4 lines)
+#   M7.1n  the checks of M7.1d-g fail on a fit or a closure that is not
+#          finite (plan section 35, items O and X; no run): graetzChecks.py
+#          discrete, windows, outlet and steady on stand-in runs, accepted
+#          when finite and refused, with 'not finite: <run>' naming the
+#          run, with mu, a window variant, the wall uptake, the mixing cup
+#          or a closure of the log NaN; a checker that crashes at a NaN
+#          (the control, exit status 1 like a refusal) is told apart
+#   M7.1o  the reuse keys follow the set-up (plan section 35, item Q; no
+#          run): the keys of a mesh, a run and the time-accurate run
+#          change when meshCase, runCase or transientCase is changed (the
+#          order of the postProcess functions, the steps, the write
+#          interval of 0.05 s)
+#
+# Usage: tests/verification/graetzRobin [check]
+#
+#   check   evaluate the existing runs only (no run is started)
+#
+#   GRAETZ_LEVELS ("32 64 128 256"; 32 is needed by M7.1k),
+#   GRAETZ_MAIN ("64 128 256"), GRAETZ_OUTLET_LEVELS (= GRAETZ_LEVELS),
+#   GRAETZ_SUPERBEE (yes), GRAETZ_JOBS (4), GRAETZ_TRANSIENT_END (1.5)
+#
+# Cost on the 40-core workstation: about 20 min with 4 serial runs at a
+# time (18 min at a load of about 25 on 2026-10-01); the Nr = 256 runs
+# (786432 cells, 1.5 GB, 2 to 5 min each) dominate.  Needs python3 with
+# numpy, scipy and mpmath.
+#
+# Exit status: 0 when every criterion was tested (whatever the results),
+# 1 when the script stopped early; Alltest reports that as a FAIL.
+#
+#------------------------------------------------------------------------------
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+
+GR_SRC=$TESTS_DIR/verification
+GR_DIR=$WORK_DIR/verification/graetz
+CHECKS="python3 $GR_SRC/graetzChecks.py"
+CASEPY="python3 $GR_SRC/graetzCase.py"
+TEMPLATE=$GR_SRC/graetzWedge
+CARRIER_EXE=$GR_DIR/bin/graetzCarrier
+REF=$GR_DIR/reference.json
+
+LEVELS=${GRAETZ_LEVELS:-32 64 128 256}
+MAIN=${GRAETZ_MAIN:-64 128 256}
+OUTLET_LEVELS=${GRAETZ_OUTLET_LEVELS:-$LEVELS}
+SUPERBEE=${GRAETZ_SUPERBEE:-yes}
+BIS="1 50"
+LAWS="none halfCell"
+MAX_JOBS=${GRAETZ_JOBS:-4}
+TRANSIENT_END=${GRAETZ_TRANSIENT_END:-1.5}
+CHECK_ONLY=no
+[ "${1:-}" = check ] && CHECK_ONLY=yes
+
+echo "== M7.1 Graetz-Robin (work directory $GR_DIR)"
+mkdir -p "$GR_DIR"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+
+
+#------------------------------------------------------------------------------
+# Helpers
+#------------------------------------------------------------------------------
+
+# the carrier helper, rebuilt when its source or OpenFOAM changes
+buildCarrier() {
+  local key
+  key="$WM_PROJECT_DIR $(cat "$GR_SRC"/graetzCarrier/graetzCarrier.C \
+    "$GR_SRC"/graetzCarrier/Make/files "$GR_SRC"/graetzCarrier/Make/options \
+    | md5sum | cut -d' ' -f1)"
+  if [ -x "$CARRIER_EXE" ] \
+    && [ "$(cat "$GR_DIR/bin/key" 2>/dev/null)" = "$key" ]
+  then
+    return 0
+  fi
+  rm -rf "${GR_DIR:?}/graetzCarrier" "${GR_DIR:?}/bin"
+  mkdir -p "$GR_DIR/bin"
+  # -L: copy the sources even where graetzCarrier is a link, so that wmake
+  # never builds inside the source tree
+  cp -rL "$GR_SRC/graetzCarrier" "$GR_DIR/graetzCarrier"
+  (cd "$GR_DIR/graetzCarrier" && FOAM_USER_APPBIN=$GR_DIR/bin wmake) \
+    > "$GR_DIR/log.graetzCarrier" 2>&1 || {
+      echo "Building graetzCarrier failed, see $GR_DIR/log.graetzCarrier" >&2
+      return 1
+    }
+  echo "$key" > "$GR_DIR/bin/key"
+}
+
+# the inputs every run depends on (solver, helper, template, scripts)
+inputsKey() {
+  { md5sum < "$SOLVER_EXE"; md5sum < "$CARRIER_EXE"
+    cat "$GR_SRC"/graetzCase.py "$GR_SRC"/graetz.py
+    find "$TEMPLATE" -type f | sort | xargs cat; } | md5sum | cut -d' ' -f1
+}
+
+# the shell functions that set the runs up and run them (header; plan
+# section 35, item Q, as the keys of M4long and M7long)
+setupKey() {
+  declare -f meshCase runCase transientCase meshKey runKey transientKey \
+    setupKey meshDir runDir transientDir runSerial | md5sum | cut -d' ' -f1
+}
+
+# the keys of a mesh (<Nr>), a run (<scheme> <outlet> <Bi> <law> <Nr>
+# <steps>) and the time-accurate run
+meshKey() { echo "$(inputsKey) $(setupKey) mesh $1"; }
+runKey() { echo "$(inputsKey) $(setupKey) $*"; }
+transientKey() { echo "$(inputsKey) $(setupKey) transient $TRANSIENT_END"; }
+
+# meshCase <Nr>: blockMesh, checkMesh, carrier, cell centres and volumes
+meshCase() {
+  local nr=$1 c=$GR_DIR/mesh/nr$(printf %03d "$1") key
+  key=$(meshKey "$nr")
+  if [ -f "$c/0/phi" ] && [ -f "$c/0/V" ] \
+    && [ "$(cat "$c/key" 2>/dev/null)" = "$key" ]
+  then
+    return 0
+  fi
+  $CASEPY "$TEMPLATE" "$c" --nr "$nr" --bi 1 --law none > /dev/null \
+    && (cd "$c" \
+        && blockMesh > log.blockMesh 2>&1 \
+        && checkMesh > log.checkMesh 2>&1 \
+        && "$CARRIER_EXE" > log.graetzCarrier 2>&1 \
+        && postProcess -funcs '(writeCellCentres writeCellVolumes)' \
+             -time 0 > log.postProcess 2>&1) \
+    || { echo "Setting up the mesh $c failed" >&2; return 1; }
+  echo "$key" > "$c/key"
+}
+
+meshDir() { echo "$GR_DIR/mesh/nr$(printf %03d "$1")"; }
+
+# runDir <scheme> <outlet> <Bi> <law> <Nr>
+runDir() {
+  local prefix=$GR_DIR/run
+  [ "$1" = linear ] || prefix=$GR_DIR/run/$1
+  echo "$prefix/$2/bi$3/$4/nr$(printf %03d "$5")"
+}
+
+# runCase <scheme> <outlet> <Bi> <law> <Nr>: set up and run (serial)
+# unless the same run has already ended
+runCase() {
+  local scheme=$1 outlet=$2 bi=$3 law=$4 nr=$5 c key steps=4
+  [ "$scheme" = linear ] || steps=6
+  c=$(runDir "$scheme" "$outlet" "$bi" "$law" "$nr")
+  key=$(runKey "$scheme" "$outlet" "$bi" "$law" "$nr" "$steps")
+  if [ "$(tail -1 "$c/log" 2>/dev/null)" = End ] \
+    && [ "$(cat "$c/key" 2>/dev/null)" = "$key" ]
+  then
+    return 0
+  fi
+  $CASEPY "$TEMPLATE" "$c" --nr "$nr" --bi "$bi" --law "$law" \
+    --outlet "$outlet" --scheme "$scheme" --steps "$steps" \
+    --mesh "$(meshDir "$nr")" > /dev/null || return 1
+  runSerial "$c" "$SOLVER_EXE" || {
+    echo "Run $c failed, see $c/log" >&2
+    return 1
+  }
+  echo "$key" > "$c/key"
+}
+
+# transientCase: Nr = 32, Bi = 50, halfCell at Co = 1 to TRANSIENT_END
+transientDir() { echo "$GR_DIR/transient/bi50/halfCell/nr032"; }
+transientCase() {
+  local c dt steps every key
+  c=$(transientDir)
+  key=$(transientKey)
+  if [ "$(tail -1 "$c/log" 2>/dev/null)" = End ] \
+    && [ "$(cat "$c/key" 2>/dev/null)" = "$key" ]
+  then
+    return 0
+  fi
+  # dt = dx/u_max (Co = 1), a write every ceil(0.05 s/dt) steps, and the
+  # steps to TRANSIENT_END rounded up to a whole number of write intervals,
+  # so that the last step is written
+  read -r dt steps every < <(python3 -c "
+import math, sys
+p = dict(l.split(None, 1) for l in open(sys.argv[1]))
+dt = float(p['dx'])/float(p['umax'])
+every = int(math.ceil(0.05/dt))
+steps = every*int(math.ceil(math.ceil(float(sys.argv[2])/dt)/every))
+print(repr(dt), steps, every)
+" "$(meshDir 32)/graetzParameters" "$TRANSIENT_END")
+  $CASEPY "$TEMPLATE" "$c" --nr 32 --bi 50 --law halfCell \
+    --mesh "$(meshDir 32)" --dt "$dt" --steps "$steps" \
+    --write-interval "$every" > /dev/null || return 1
+  runSerial "$c" "$SOLVER_EXE" || {
+    echo "Run $c failed, see $c/log" >&2
+    return 1
+  }
+  echo "$key" > "$c/key"
+}
+
+
+# checked <id> <text> <command ...>: runs a check of graetzChecks.py, prints
+# its lines (indented) and records the criterion with its last line, the
+# summary of the measured values
+checked() {
+  local id=$1 text=$2 out s
+  shift 2
+  out=$("$@" 2>&1)
+  s=$?
+  echo "$out" | sed 's/^/    /'
+  check "$id" "$text: $(echo "$out" | tail -1)" [ $s -eq 0 ]
+}
+
+
+#------------------------------------------------------------------------------
+# Reference, helper, meshes and runs
+#------------------------------------------------------------------------------
+checked M7.1a "reference: mu R of Bi = 1 and 50 by series, shooting and\
+ Chebyshev agree to 1e-10 ($REF)" \
+  $CHECKS reference "$REF" 5 24 1e-10 $BIS
+
+if [ "$CHECK_ONLY" = no ]
+then
+  buildCarrier || exit 1
+  for nr in $LEVELS
+  do
+    meshCase "$nr" || exit 1
+  done
+  for nr in $(echo $LEVELS | tr ' ' '\n' | sort -rn)   # largest first
+  do
+    for bi in $BIS
+    do
+      for law in $LAWS
+      do
+        startJob runCase linear zeroGradient "$bi" "$law" "$nr"
+        case " $OUTLET_LEVELS " in
+          *" $nr "*) startJob runCase linear fixedValue "$bi" "$law" "$nr" ;;
+        esac
+        if [ "$SUPERBEE" = yes ]
+        then
+          case " $MAIN " in
+            *" $nr "*)
+              startJob runCase SuperBee zeroGradient "$bi" "$law" "$nr" ;;
+          esac
+        fi
+      done
+    done
+  done
+  startJob transientCase
+  waitJobs || echo "Some runs failed; their criteria fail below" >&2
+fi
+
+meshes=()
+for nr in $LEVELS
+do
+  meshes+=("$(meshDir "$nr")")
+done
+runs=()
+outletPairs=()
+sbRuns=()
+for bi in $BIS
+do
+  for law in $LAWS
+  do
+    for nr in $LEVELS
+    do
+      runs+=("$(runDir linear zeroGradient "$bi" "$law" "$nr")")
+      case " $OUTLET_LEVELS " in
+        *" $nr "*)
+          runs+=("$(runDir linear fixedValue "$bi" "$law" "$nr")")
+          outletPairs+=("$(runDir linear zeroGradient "$bi" "$law" "$nr")"
+                        "$(runDir linear fixedValue "$bi" "$law" "$nr")") ;;
+      esac
+    done
+    if [ "$SUPERBEE" = yes ]
+    then
+      for nr in $MAIN
+      do
+        sbRuns+=("$(runDir SuperBee zeroGradient "$bi" "$law" "$nr")")
+      done
+    fi
+  done
+done
+
+checked M7.1b "meshes $LEVELS: checkMesh OK, orthogonal, ratio 2 in r and\
+ x; carrier continuity <= 1e-15 of the inflow" \
+  $CHECKS mesh 1e-15 "${meshes[@]}"
+
+checked M7.1c "set-up of ${#runs[@]} runs: uniform D, f = 1, v_d = k_w,\
+ the half-cell law of the mesh" \
+  $CHECKS setup "${runs[@]}"
+
+$CHECKS fit "$REF" "${runs[@]}" "${sbRuns[@]}" "$(transientDir)" \
+  > "$GR_DIR/log.fit" 2>&1 || echo "fit failed, see $GR_DIR/log.fit" >&2
+
+checked M7.1d "steady state of ${#runs[@]} runs (profile change <=\
+ 1e-12), converged, no guard/projection, closure <= 1e-13" \
+  $CHECKS steady 1e-12 "${runs[@]}"
+
+checked M7.1e "discrete consistency: mu_fit = mu_h of the documented\
+ scheme to 1e-7 (${#runs[@]} runs, none and halfCell)" \
+  $CHECKS discrete 1e-7 "${runs[@]}"
+
+checked M7.1f "fit window (one end or both moved by -+1.5 R), mixing cup\
+ and wall uptake within 1e-7" \
+  $CHECKS windows 1e-7 "${runs[@]}"
+
+checked M7.1g "outlet fixedValue 0 vs zeroGradient: mu within 1e-8\
+ (${#outletPairs[@]} runs)" \
+  $CHECKS outlet 1e-8 "${outletPairs[@]}"
+
+for bi in $BIS
+do
+  for law in halfCell none
+  do
+    triplet=()
+    for nr in $MAIN
+    do
+      triplet+=("$(runDir linear zeroGradient "$bi" "$law" "$nr")")
+    done
+    formal=1
+    [ "$law" = halfCell ] && formal=2
+    checked M7.1h "GCI_fine <= 0.5 %, $law, Bi $bi, Nr ${MAIN// //}" \
+      $CHECKS gci "$REF" gci 0.005 "${triplet[@]}"
+    checked M7.1i "mu_ext within GCI + reference bound, $law, Bi $bi" \
+      $CHECKS gci "$REF" extrapolation 0 "${triplet[@]}"
+    checked M7.1j "observed order of $law (formal $formal), Bi $bi" \
+      $CHECKS gci "$REF" order "$formal" "${triplet[@]}"
+  done
+done
+
+transientOk() {
+  python3 - "$(transientDir)" "$(runDir linear zeroGradient 50 halfCell 32)" \
+    <<'EOF'
+import json, sys
+a = json.load(open(sys.argv[1] + '/graetzFit.json'))
+b = json.load(open(sys.argv[2] + '/graetzFit.json'))
+dev = a['mu']/a['muH'] - 1
+print("transient (Co = 1, %d writes, the last at t = %s s): mu = %.15g,"
+      " mu_h of the discrete mode %.15g: relative %+.2e (limit 1e-9);"
+      " pseudo-transient mu = %.15g: %+.1e against mu_h, %+.1e against the"
+      " transient; profile change per write interval: %s"
+      % (len(a['times']), a['time'], a['mu'], a['muH'], dev, b['mu'],
+         b['mu']/b['muH'] - 1, b['mu']/a['mu'] - 1,
+         ' '.join('%.1e' % h for h in a['history'])))
+sys.exit(0 if abs(dev) <= 1e-9 and a['steady'] <= 1e-12 else 1)
+EOF
+}
+checked M7.1k "time-accurate run (Co = 1): mu equals mu_h of the\
+ discrete mode to 1e-9, the profile steady to 1e-12" transientOk
+
+if [ "$SUPERBEE" = yes ]
+then
+  # the three checks of M7.1c-e on the SuperBee runs, their summaries
+  # joined
+  sbText=""
+  sbStatus=0
+  for sub in "setup" "steady 1e-12" "discrete 1e-7"
+  do
+    out=$($CHECKS $sub "${sbRuns[@]}" 2>&1) || sbStatus=1
+    echo "$out" | sed 's/^/    /'
+    sbText+="${sbText:+; }$(echo "$out" | tail -1)"
+  done
+  check M7.1l "SuperBee (${#sbRuns[@]} runs): set-up, steady state and\
+ mu_fit = mu_h of the developed SuperBee branch to 1e-7: $sbText" \
+    [ $sbStatus -eq 0 ]
+  for bi in $BIS
+  do
+    for law in halfCell none
+    do
+      triplet=()
+      for nr in $MAIN
+      do
+        triplet+=("$(runDir SuperBee zeroGradient "$bi" "$law" "$nr")")
+      done
+      checked M7.1m "SuperBee, $law, Bi $bi: GCI_fine <= 0.5 %, mu_ext\
+ within GCI + bound, order within 0.25 of formal" \
+        $CHECKS gci "$REF" all 0.005 "${triplet[@]}"
+    done
+  done
+else
+  result M7.1l NOTRUN "SuperBee runs skipped (GRAETZ_SUPERBEE=$SUPERBEE)"
+  for k in 1 2 3 4
+  do
+    result M7.1m NOTRUN "SuperBee runs skipped (GRAETZ_SUPERBEE=$SUPERBEE)"
+  done
+fi
+
+#------------------------------------------------------------------------------
+# M7.1n: the checks of M7.1d-g on stand-in runs (graetzFit.json and a log of
+# fake runs below run/), finite and with a NaN of each kind (plan section 35,
+# items O and X: their largest deviation is a max(), which passes over a
+# NaN).  A refusal is exit status 1 with 'not finite: <run>' naming the run;
+# a crash is exit status 1 too, so the text tells them apart.  The control: a
+# checker that crashes at a NaN instead (graetzChecks.py with math.isfinite
+# raising) must be told apart in every call with a NaN.
+#------------------------------------------------------------------------------
+
+# nanCalls <checker command> <directory of the stand-in runs>: every call of
+# the table against its expected status and text; prints the calls that
+# differ ('-' when none) and, last, the number of calls
+nanCalls() {
+  local checker=$1 d=$2 expected text args call got wrong= n=0
+  while IFS='|' read -r expected text args
+  do
+    $checker $args > "$d/out" 2>&1
+    got=$?
+    n=$((n + 1))
+    call=${args//$d\/run\//}
+    if [ "$got" != "$expected" ]
+    then
+      wrong+="${wrong:+, }'$call' exit $got"
+    elif [ "$text" = - ] && grep -q 'not finite' "$d/out"
+    then
+      wrong+="${wrong:+, }'$call' refused a finite run"
+    elif [ "$text" != - ] && ! grep -q -F -- "$text" "$d/out"
+    then
+      wrong+="${wrong:+, }'$call' without '$text'"
+    fi
+  done <<EOF
+0|-|discrete 1e-7 $d/run/good
+1|not finite: muNaN|discrete 1e-7 $d/run/good $d/run/muNaN
+0|-|windows 1e-7 $d/run/good
+1|not finite: variantNaN start-1.5R,end+0.0R|windows 1e-7 $d/run/good $d/run/variantNaN
+1|not finite: wallNaN wall|windows 1e-7 $d/run/good $d/run/wallNaN
+1|not finite: cupNaN mixing|windows 1e-7 $d/run/good $d/run/cupNaN
+0|-|outlet 1e-8 $d/run/good $d/run/good2
+1|not finite: good vs muNaN|outlet 1e-8 $d/run/good $d/run/muNaN
+0|-|steady 1e-12 $d/run/good
+1|not finite: closureNaN|steady 1e-12 $d/run/good $d/run/closureNaN
+EOF
+  echo "${wrong:--} $n"
+}
+
+nanTest() {
+  local d=$GR_DIR/selftest/nan real control nWithout
+  rm -rf "$d"
+  python3 - "$d" <<'EOF' || return 1
+import json, os, sys
+d = sys.argv[1]
+good = dict(mu=100.0, muH=100.0, muWall=100.0, muCup=100.0,
+            variants={'start-1.5R,end+0.0R': 100.0,
+                      'start-1.5R,end-1.5R': 100.0},
+            steady=1e-14, steadyAll=1e-14, previous='9', time='10',
+            history=[1e-14])
+nan = float('nan')
+fits = {'good': {}, 'good2': {}, 'muNaN': {'mu': nan},
+        'variantNaN': {'variants': {'start-1.5R,end+0.0R': nan,
+                                    'start-1.5R,end-1.5R': 100.0}},
+        'wallNaN': {'muWall': nan}, 'cupNaN': {'muCup': nan},
+        'closureNaN': {}}
+# the lines of a log that steady reads; the closure of the second Balance
+# line NaN in closureNaN
+log = ('Y_PbI2_g exchange: implicit 0; outer iterations 1, converged '
+       '(initial residual 1e-20, tolerance 1e-12; regime changes 0\n'
+       'Balance PbI2_g [mol]: gas 1 closure 1e-30 (relative 1e-16)\n'
+       'Balance PbI2_g [mol]: gas 1 closure %s (relative %s)\n'
+       'Phase change summary Y_PbI2_g: 0 steps without outer convergence, '
+       '0 guard passes, 0 projected elements (0 significant), 0 '
+       'complementarity violations (0 significant)\n')
+for name, change in fits.items():
+    os.makedirs(os.path.join(d, 'run', name))
+    fit = dict(good, **change)
+    json.dump(fit, open(os.path.join(d, 'run', name, 'graetzFit.json'), 'w'))
+    bad = name == 'closureNaN'
+    open(os.path.join(d, 'run', name, 'log'), 'w').write(
+        log % (('nan', 'nan') if bad else ('1e-30', '1e-16')))
+EOF
+  # the control: the checker with math.isfinite raising at a NaN
+  cat > "$d/crashingChecks.py" <<EOF
+import math, sys
+sys.path.insert(0, '$GR_SRC')
+import graetzChecks
+class CrashingMath:
+    def __getattr__(self, name):
+        return getattr(math, name)
+    @staticmethod
+    def isfinite(x):
+        if x != x:
+            raise ValueError('a NaN')
+        return math.isfinite(x)
+graetzChecks.math = CrashingMath()
+sys.exit(graetzChecks.main(sys.argv))
+EOF
+  real=$(nanCalls "$CHECKS" "$d")
+  control=$(nanCalls "python3 $d/crashingChecks.py" "$d")
+  nWithout=$(echo "${control% *}" | grep -o "without 'not finite" | wc -l)
+  echo "${real##* } calls of discrete, windows, outlet and steady on stand-in\
+ runs: the finite ones met, every one with a NaN (mu, a window variant, the\
+ wall uptake, the mixing cup, a closure of the log) refused with 'not\
+ finite: <run>': ${real% *}; the control, a checker that crashes at a NaN\
+ (exit status 1 as well), told apart in $nWithout of the 6 calls with a\
+ NaN: ${control% *}"
+  [ "$real" = "- 10" ] && [ "$nWithout" -eq 6 ] \
+    && ! echo "${control% *}" | grep -q -e "' exit " -e 'refused a finite'
+}
+out=$(nanTest)
+s=$?
+check M7.1n "the checks of M7.1d-g fail on a fit or a closure that is not\
+ finite, naming the run (plan section 35, items O and X): $out" [ $s -eq 0 ]
+
+
+#------------------------------------------------------------------------------
+# M7.1o: the reuse keys follow the set-up functions (plan section 35, item
+# Q): each key with a function of its set-up changed (in a subshell)
+#------------------------------------------------------------------------------
+keyTest() {
+  local mesh run trans m2 r2 t2 fm fr ft
+  mesh=$(meshKey 32)
+  run=$(runKey linear zeroGradient 50 halfCell 32 4)
+  trans=$(transientKey)
+  fm=$(declare -f meshCase \
+         | sed 's/writeCellCentres writeCellVolumes/writeCellVolumes writeCellCentres/')
+  fr=$(declare -f runCase | sed 's/steps=4/steps=5/')
+  ft=$(declare -f transientCase | sed 's/0\.05/0.1/g')
+  m2=$(eval "$fm"; meshKey 32)
+  r2=$(eval "$fr"; runKey linear zeroGradient 50 halfCell 32 4)
+  t2=$(eval "$ft"; transientKey)
+  echo "keys (set-up part) of the mesh Nr 32 ${mesh:33:12}, with the\
+ postProcess functions of meshCase swapped ${m2:33:12}; of a run\
+ ${run:33:12}, with 5 steps in runCase ${r2:33:12}; of the time-accurate run\
+ ${trans:33:12}, with a write every 0.1 s in transientCase ${t2:33:12}"
+  [ "$fm" != "$(declare -f meshCase)" ] && [ "$fr" != "$(declare -f runCase)" ] \
+    && [ "$ft" != "$(declare -f transientCase)" ] \
+    && [ "$mesh" != "$m2" ] && [ "$run" != "$r2" ] && [ "$trans" != "$t2" ]
+}
+out=$(keyTest)
+s=$?
+check M7.1o "the reuse keys of the Graetz runs follow their set-up\
+ functions (plan section 35, item Q): $out" [ $s -eq 0 ]
+
+$CHECKS table "$REF" "$GR_DIR/table.md" "${runs[@]}" "${sbRuns[@]}" \
+  > "$GR_DIR/log.table" 2>&1
+echo "Summary table: $GR_DIR/table.md"
+
+exit 0

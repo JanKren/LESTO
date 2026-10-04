@@ -1,0 +1,23 @@
+/*------------------------------------------------------------------------------
+
+constant/thermophysicalProperties: helium, perfect gas (the frozen carrier
+uses rho = p M/(R T) with M = 4.0026e-3 kg/mol, graetzCarrier)
+
+------------------------------------------------------------------------------*/
+FoamFile {format ascii;  class dictionary;  object thermophysicalProperties;}
+
+thermoType {
+  type            hePsiThermo;
+  mixture         pureMixture;
+  transport       sutherland;
+  thermo          hConst;
+  equationOfState perfectGas;
+  specie          specie;
+  energy          sensibleInternalEnergy;
+}
+
+mixture {
+  specie         {molWeight 4.0026;}
+  thermodynamics {Cp 5193; Hf 0;}
+  transport      {As 1.4683e-06; Ts 83.40;}
+}

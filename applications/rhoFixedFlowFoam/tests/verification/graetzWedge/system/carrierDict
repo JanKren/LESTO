@@ -1,0 +1,9 @@
+/* frozen carrier of the Graetz wedge (graetzCarrier): fully developed
+   parabolic flow u = 2 U_b (1 - y^2/R^2), uniform T, p and rho */
+FoamFile {version 2.0; format ascii; class dictionary; object carrierDict;}
+
+R         @R@;
+Ub        @UB@;
+T         @T@;
+p         @P@;
+molarMass 4.0026e-3;

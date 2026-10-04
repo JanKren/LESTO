@@ -1,0 +1,236 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#
+# tests/verification/pipeMeshes
+#
+# PURPOSE
+#
+# The refined pipe meshes of milestone M7 of doc/phase-change-plan.md:
+# acceptance 2 (flux form, h vs h/2 first-layer mesh) and the axial x2
+# study, whose runs (tests/verification/longStudies, 'tests/Alltest
+# M7long') take the paper-mode carrier of milestone M4
+# (utilities/setFrozenCarrier) on each mesh.  This script generates and
+# checks the meshes; 'tests/Alltest M7long' runs it before longStudies.
+#
+#   base     the mesh of the tests (makeMesh: gmshToFoam of
+#            run/001-first-pipe-flow-simpleFoam/pipe.msh), copied (checkMesh
+#            may write sets, so the shared mesh is never used in place)
+#   wallH2   refineWallLayer '(WALL)' 0.5: the cell layer at WALL split in
+#            the middle (first layer h/2)
+#   axial2   refineMesh with directions (tan1), tan1 = (1 0 0), on the
+#            cellSet 'all' of every cell: every cell split in the middle of
+#            its axial edges.  Not 'refineMesh -all', which ignores the
+#            dictionary and refines in all three directions (x8)
+#
+# The sets of gmshToFoam and of the refinements are removed (stale after a
+# topology change), and so is the cellMap that refineMesh writes into
+# 0/polyMesh.  Every mesh is described by checkMesh and by the helper
+# pipeMeshFacts (tests/verification/pipeMeshFacts, built into the work
+# area): the interaction layer faceCells (A_I, V_I, A_I/V_I), the first
+# layer (wall-normal thickness from the cell points, the half-cell distance
+# 1/deltaCoeffs of wallResistance halfCell, V_c/|S_f|), the axial cells,
+# the cell rings counted from the wall, and the cells within 1e-4 m of the
+# wall by the centre distance R - r_c and by the patchWave distance, with
+# A_I/V_layer (the 'layer distance' of M4 uses the exact distance from the
+# nearest wall face, which selects the same cells on the base mesh).
+#
+# Meshes in tests/work/<platform>/verification/meshes/{base,wallH2,axial2},
+# regenerated when the base mesh or the OpenFOAM installation changes;
+# the table of their facts in .../meshes/facts.md.
+#
+# Measured (v2412):
+#
+#   mesh    cells   non-orth. skew.  aspect  1st layer  A_I/V_I  in 1e-4 m
+#   base    228960  30.0      0.511  28.7    57.240 um  17681.9  30528 (2)
+#   wallH2  244224  30.0      0.511  57.0    28.620 um  35150.8  45792 (3)
+#   axial2  457920  30.0      0.511  14.3    57.240 um  17681.9  61056 (2)
+#
+#   (non-orthogonality max in degrees; in 1e-4 m: the cells, and cell
+#   layers, whose centre distance R - r_c is at most 1e-4 m)
+#
+#   (A_I/V_layer of the distance layer 8533.68 1/m on all three; axial
+#   cells 424 of 1.627 mm, 848 of 0.814 mm on axial2)
+#
+# Criteria
+#
+#   M7.2a  wallH2: checkMesh 'Mesh OK'; cells = base + 15264 (one more
+#          layer); the same wall faces and area; the first-layer thickness
+#          half of the base's to 1e-9 in every element; A_I/V_I of layer
+#          faceCells 1.9 to 2.1 times the base's (1.98796); one more cell
+#          layer within 1e-4 m of the wall by both distances, with the same
+#          volume (the distance layer covers the same region); quality
+#          printed
+#   M7.2b  axial2: checkMesh 'Mesh OK'; cells, wall faces and axial cells
+#          twice the base's, half the axial extent; first layer, A_I/V_I
+#          and the distance layer's volume unchanged (1e-9)
+#
+# Usage: tests/verification/pipeMeshes
+#
+# Exit status: 0 when every criterion was tested (whatever the results),
+# 1 when the script stopped early; Alltest reports that as a FAIL.
+#
+#------------------------------------------------------------------------------
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+
+VM_DIR=$WORK_DIR/verification/meshes
+VF_SRC=$TESTS_DIR/verification
+FACTS=$WORK_DIR/verification/bin/pipeMeshFacts
+CHECKS="python3 $VF_SRC/meshChecks.py"
+
+echo "== M7 refined pipe meshes (work directory $VM_DIR)"
+mkdir -p "$VM_DIR"
+
+
+#------------------------------------------------------------------------------
+# Helpers
+#------------------------------------------------------------------------------
+
+# the helper pipeMeshFacts, rebuilt when its source or OpenFOAM changes
+buildPipeMeshFacts() {
+  local key dir=$WORK_DIR/verification
+  key="$WM_PROJECT_DIR $(cat "$VF_SRC"/pipeMeshFacts/pipeMeshFacts.C \
+    "$VF_SRC"/pipeMeshFacts/Make/* | md5sum | cut -d' ' -f1)"
+  if [ -x "$FACTS" ] && [ "$(cat "$dir/bin/key" 2>/dev/null)" = "$key" ]
+  then
+    return 0
+  fi
+  rm -rf "$dir/pipeMeshFacts" "$dir/bin"
+  mkdir -p "$dir/bin"
+  cp -r "$VF_SRC/pipeMeshFacts" "$dir/pipeMeshFacts"
+  (cd "$dir/pipeMeshFacts" && FOAM_USER_APPBIN=$dir/bin wmake) \
+    > "$dir/log.pipeMeshFacts" 2>&1 || {
+      echo "Building pipeMeshFacts failed, see $dir/log.pipeMeshFacts" >&2
+      return 1
+    }
+  echo "$key" > "$dir/bin/key"
+}
+
+# newMeshCase <dir>: an empty case with the dictionaries the mesh tools read
+newMeshCase() {
+  rm -rf "$1"
+  mkdir -p "$1/constant/polyMesh" "$1/system"
+  cat > "$1/system/controlDict" <<'EOF'
+FoamFile{version 2.0; format ascii; class dictionary; object controlDict;}
+
+application     none;
+startFrom       startTime;
+startTime       0;
+stopAt          endTime;
+endTime         0;
+deltaT          1;
+writeControl    timeStep;
+writeInterval   1;
+writeFormat     binary;
+writePrecision  17;
+timeFormat      general;
+timePrecision   6;
+EOF
+  cat > "$1/system/fvSchemes" <<'EOF'
+FoamFile{version 2.0; format ascii; class dictionary; object fvSchemes;}
+
+ddtSchemes           { default Euler; }
+gradSchemes          { default Gauss linear; }
+divSchemes           { default none; }
+laplacianSchemes     { default Gauss linear corrected; }
+interpolationSchemes { default linear; }
+snGradSchemes        { default corrected; }
+EOF
+  printf 'FoamFile{version 2.0; format ascii; class dictionary;%s\n' \
+    ' object fvSolution;}' > "$1/system/fvSolution"
+}
+
+# copyMesh <from polyMesh> <case>: the polyMesh files without the sets
+copyMesh() {
+  newMeshCase "$2"
+  find "$1" -maxdepth 1 -type f -exec cp {} "$2/constant/polyMesh/" \;
+}
+
+# describe <case>: checkMesh and pipeMeshFacts
+describe() {
+  (cd "$1" && checkMesh > log.checkMesh 2>&1 \
+     && "$FACTS" > log.pipeMeshFacts 2>&1)
+}
+
+makeRefinedMeshes() {
+  local key
+  key="$(cat "$MESH_DIR/mesh.md5") $WM_PROJECT_DIR $(md5sum < "$FACTS" \
+    | cut -d' ' -f1)"
+  if [ "$(cat "$VM_DIR/key" 2>/dev/null)" = "$key" ] \
+    && [ -f "$VM_DIR/axial2/log.pipeMeshFacts" ]
+  then
+    echo "Refined meshes up to date"
+    return 0
+  fi
+  rm -f "$VM_DIR/key"
+
+  echo "base: a copy of $MESH_DIR"
+  copyMesh "$MESH_DIR/constant/polyMesh" "$VM_DIR/base" \
+    && describe "$VM_DIR/base" || return 1
+
+  echo "wallH2: refineWallLayer '(WALL)' 0.5"
+  copyMesh "$MESH_DIR/constant/polyMesh" "$VM_DIR/wallH2" \
+    && (cd "$VM_DIR/wallH2" && refineWallLayer -overwrite '(WALL)' 0.5 \
+          > log.refineWallLayer 2>&1) \
+    && rm -rf "$VM_DIR/wallH2/constant/polyMesh/sets" "$VM_DIR/wallH2/0" \
+    && describe "$VM_DIR/wallH2" || return 1
+
+  echo "axial2: refineMesh, directions (tan1), every cell"
+  copyMesh "$MESH_DIR/constant/polyMesh" "$VM_DIR/axial2" || return 1
+  cat > "$VM_DIR/axial2/system/topoSetDict" <<'EOF'
+FoamFile{version 2.0; format ascii; class dictionary; object topoSetDict;}
+
+actions
+(
+  { name all; type cellSet; action new; source boxToCell;
+    box (-1 -1 -1) (2 1 1); }
+);
+EOF
+  cat > "$VM_DIR/axial2/system/refineMeshDict" <<'EOF'
+FoamFile{version 2.0; format ascii; class dictionary; object refineMeshDict;}
+
+// every cell (the cellSet 'all') is split in the middle of its axial edges
+set               all;
+coordinateSystem  global;
+globalCoeffs      { tan1 (1 0 0); tan2 (0 1 0); }
+directions        (tan1);
+useHexTopology    true;
+geometricCut      false;
+writeMesh         false;
+EOF
+  (cd "$VM_DIR/axial2" && topoSet > log.topoSet 2>&1 \
+     && refineMesh -dict system/refineMeshDict -overwrite \
+          > log.refineMesh 2>&1) \
+    && rm -rf "$VM_DIR/axial2/constant/polyMesh/sets" "$VM_DIR/axial2/0" \
+    && describe "$VM_DIR/axial2" || return 1
+
+  echo "$key" > "$VM_DIR/key"
+}
+
+
+#------------------------------------------------------------------------------
+# Meshes
+#------------------------------------------------------------------------------
+makeMesh || exit 1
+buildPipeMeshFacts || exit 1
+makeRefinedMeshes || {
+  echo "Generating the refined meshes failed" >&2
+  exit 1
+}
+$CHECKS table "$VM_DIR/base" "$VM_DIR/wallH2" "$VM_DIR/axial2" \
+  > "$VM_DIR/facts.md"
+sed 's/^/    /' "$VM_DIR/facts.md"
+
+
+#------------------------------------------------------------------------------
+# M7.2a, M7.2b
+#------------------------------------------------------------------------------
+out=$($CHECKS wallH2 "$VM_DIR/base" "$VM_DIR/wallH2")
+s1=$?
+check M7.2a "${out#*: }" eval '[ $s1 -eq 0 ]'
+
+out=$($CHECKS axial2 "$VM_DIR/base" "$VM_DIR/axial2")
+s1=$?
+check M7.2b "${out#*: }" eval '[ $s1 -eq 0 ]'
+
+exit 0

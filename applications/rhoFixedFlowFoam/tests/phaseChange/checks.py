@@ -81,6 +81,12 @@ subcommand prints one summary line and exits with 0 (criterion met) or 1.
       before the field was written; at least one such value is non-zero
 
 Balance-file columns are addressed by the names of its '#' header line.
+A balance file with a value that is not finite (nan, inf) is refused by
+every subcommand that reads one (readBalance: SystemExit naming the column,
+the time and the file, exit status 1, no verdict line), and logClosure
+refuses a printed closure that is not finite: their largest values are a
+max(), which passes over a NaN that is not the first value (max(0, nan) is
+0), so such a ledger passed (plan section 35, item X).
 """
 
 import math
@@ -105,6 +111,11 @@ def readBalance(path):
                 rows.append([parts[0]] + [float(x) for x in parts[1:]])
     if names is None or not rows:
         raise SystemExit(f'No header or no data in {path}')
+    for r in rows:
+        for name, value in zip(names[1:], r[1:]):
+            if not math.isfinite(value):
+                raise SystemExit(f'Not finite: {name} {value} at t = {r[0]} '
+                                 f'in {path}')
     return names, rows
 
 
@@ -467,10 +478,13 @@ def cmdLogClosure(log, tol):
     values = [float(m.group(1)) for m in
               (re.search(r'^Balance .* closure \S+ \(relative (\S+)\)', line)
                for line in open(log)) if m]
-    worst = max(map(abs, values)) if values else float('inf')
-    done(len(values) > 0 and worst <= float(tol),
+    finite = all(math.isfinite(v) for v in values)
+    worst = (max(map(abs, values)) if values and finite
+             else float('nan') if values else float('inf'))
+    done(len(values) > 0 and finite and worst <= float(tol),
          f'printed relative closure up to {worst:.3e} in {len(values)} '
-         f'Balance lines (limit {tol})')
+         f'Balance lines (limit {tol})'
+         + ('' if finite else '; a closure that is not finite'))
 
 
 def cmdSameAsColumn(dat, name, foDat, tol, factor='1'):

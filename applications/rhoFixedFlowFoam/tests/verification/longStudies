@@ -1,0 +1,1524 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#
+# tests/verification/longStudies
+#
+# PURPOSE
+#
+# The long runs of milestone M7 of doc/phase-change-plan.md ('tests/Alltest
+# M7long', not part of 'all'; plan section 33).  Two families:
+#
+# The 007 carrier (the development carrier of run/007 at 261, 28 mL/min):
+# copies of run/012-temperature-model (temperature model, A 220 1/s, k 8e-3
+# 1/K, Tdep 680 K, a release of 3.16e-5 mol over 0-6 s) and
+# run/013-hks-inventory (HKS in SI with the Gurvich table, an inventory of
+# 4.84e-6 mol in 144 cells removed at 6 s), run to their 16 s:
+#
+#   007 dt     acceptance 3 of M7 for both exchange models: dt = 4, 2 and
+#              1 ms; only deltaT, the writes (every second) and a profiles
+#              dictionary (native 424 bins and 1 cm bins, profile times
+#              every 0.5 s) differ from the cases (the first M7 study)
+#
+# The paper-mode carrier of milestone M4: copies of
+# run/014-paper-temperature-model (the temperature model of Lobresco et al.
+# (2026): A 220 1/s, k 8e-3 1/K, Tdep 680 K, 3.16e-5 mol released over
+# t_ev = 15 s) with their carrier written by utilities/setFrozenCarrier, run
+# to 2 t_ev = 30 s (the second M7 study):
+#
+#   h vs h/2   acceptance 2 of M7: the base pipe mesh and its h/2
+#              first-layer mesh (tests/verification/pipeMeshes: wallH2),
+#              106 mL/min, layer faceCells, the flux form (depositionVelocity
+#              = the v_d that A = 220 1/s gives on the base mesh, as the
+#              solver prints it) and the volumetric form (A), wallResistance
+#              none; the flux form with halfCell as well
+#   axial x2   the flux form (none and halfCell) on the axial x2 mesh
+#              (pipeMeshes: axial2) against the base mesh
+#   paper dt   acceptance 3 of M7 on the paper-mode carrier: run/014 as
+#              distributed (100.2 mL/min, layer distance, A) at dt = 4, 2 and
+#              1 ms
+#
+# The meshes are those of tests/verification/pipeMeshes (criteria M7.2a and
+# M7.2b; 'tests/Alltest M7long' runs it first).
+#
+# The runs are managed as those of M4long (tests/paperMode/longRuns, plan
+# sections 25 to 29): LONG_JOBS runs (default 2, M7LONG_JOBS) of LONG_RANKS
+# ranks (default 8, M7LONG_RANKS; 1 = serial) at a time, decomposed simple
+# (LONG_RANKS 1 1); a run whose key is unchanged and that ended is reused,
+# one that was stopped resumes from its latest second (re-decomposed when
+# the number of ranks changed: an exact restart in binary; its controlDict
+# is set to startFrom latestTime then, since run/012 and run/013 start from
+# startTime: plan section 35, item P).
+#
+# The key of a run (m7Key) hashes
+#   - the solver and the utility setFrozenCarrier, without comments;
+#   - the inputs of its run/ case (014, or 012 and 013 with the linked 007
+#     carrier) without comments (system, constant, 0);
+#   - the mesh of the run: the md5 of its polyMesh files (boundary, faces,
+#     neighbour, owner, points);
+#   - the shell functions that set a run up (declare -f setupM7 setup014
+#     setup007 profileTimes decomposeM7 decomposeWith carrier checkCarrier
+#     edit makeCase runCaseDir setControl);
+#   - the run's spec line and the OpenFOAM installation.
+#
+# Binaries.  The runs use copies of the solver and of setFrozenCarrier kept
+# in long/bin/<key of the binaries>/ (with their md5 sums, checked whenever
+# a run uses them), made from the installed executables after an
+# incremental ./Allwmake (as M4long; M7LONG_BUILD=no skips the build and
+# copies the installed executables as they are, e.g. in a harness whose
+# executables were built from these sources elsewhere).  The binaries a
+# run was made with stay available for its revalidation.
+#
+# Revalidation (opt-in, M7LONG_REVALIDATE=yes; the method of M4long, plan
+# sections 26 and 27): a run that ended under another key is reused when
+# the set-up of its spec made now gives its dictionaries (without comments
+# and endTime) and its carrier bit for bit, and when the binaries it was
+# made with and the current ones, each run for REVALIDATE_STEPS steps from
+# its state at its last write before its end, write the same files, the
+# same profiles and the same balance file but for the columns of the
+# ledger's booking.  Its criterion lines then name it.  The probe cannot
+# see a change that acts only before the run's last write, so it is off by
+# default: a run whose key changed is run again when it is selected
+# (M7LONG_RUNS), and kept as it is, its criteria NOTRUN, when it is not.
+#
+# M7LONG_RUNS selects the runs that may be run (default 'all'): a list of
+# run ids, or 'ended' for none (an evaluation of the runs that ended).  A
+# run that is neither selected nor ended is prepared (set up and
+# decomposed) and its criteria are NOTRUN with its cost.  A run that ended
+# under another key and is not selected is kept as it is (its criteria
+# NOTRUN, naming the way to revalidate it or to run it again), as in
+# M4long since the M7 integration (plan section 33, item 11): an
+# evaluation never discards a recorded run.  A file PAUSE in the work
+# directory holds the next run back until it is removed.
+#
+# This file is executed, not sourced.  Replace it only atomically (a copy
+# moved over it) while it runs: bash reads a script while executing it.
+#
+# Usage: tests/verification/longStudies [keys]
+#
+#   keys    print the key of every run and the key it was recorded with
+#           (nothing is run, prepared or changed)
+#
+#   M7LONG_RUNS (all), M7LONG_JOBS (2), M7LONG_RANKS (8), M7LONG_CPUS
+#   (none: a list of logical CPUs, e.g. 0-15, to which the driver and every
+#   run it starts are bound with taskset; on a machine with hyperthreading
+#   give CPUs of distinct physical cores: unpinned 'mpirun --bind-to none'
+#   runs shared cores and ran up to 5 times slower, readme), M7LONG_BUILD
+#   (yes), M7LONG_REVALIDATE (no), M7LONG_REVALIDATE_STEPS (5); the limits
+#   M7LONG_CLOSURE (1e-14), M7LONG_DEFECT (1e-8), M7LONG_PAIR_BINS (1),
+#   M7LONG_PAIR_PEAK (0.05), M7LONG_DT_LIMIT (0.01), and the criterion of
+#   the axial x2 study M7LONG_AXIAL_BINS (1), M7LONG_AXIAL_PEAK (0.05),
+#   M7LONG_AXIAL_L1 (0.01), a gate unless M7LONG_AXIAL_GATE=no (plan
+#   section 33)
+#
+# Criteria (the families above; 'run with the current sources' or the
+# record of a revalidation in every line)
+#
+#   M7.3a  the six runs on the 007 carrier end; closure <= M7LONG_CLOSURE
+#          of the reference in every step (runs made with the current
+#          sources; a revalidated run is listed, not gated) and
+#          |solverDefect| <= M7LONG_DEFECT at the end (M8's gate; HKS with
+#          its final tolerance 1e-14, plan section 28, item 8)
+#   M7.3b  acceptance 3, temperature model on the 007 carrier: the L1
+#          change of the wall deposit between dt = 2 and 1 ms at 16 s,
+#          relative to the deposit, below M7LONG_DT_LIMIT (1 %), native
+#          and 1 cm bins
+#   M7.3c  the same for HKS
+#   M7.3d  reported: between 2 and 1 ms at 16 s, the observed order of the
+#          L1 differences and its Richardson estimate, the peak, the
+#          centroid and T_dep (both search modes) of both models, and the
+#          intermediate-time error of the temperature model while gas is
+#          present (plan section 28, item 7)
+#   M7.2c  the six runs of the h vs h/2 study end, closure and solverDefect
+#          as M7.3a; the flux form uses the v_d that A gives on the base
+#          mesh as the solver prints it, and on the base mesh the flux and
+#          the volumetric form give the same deposit
+#   M7.2d  acceptance 2, flux form, wallResistance none: between the base
+#          mesh and the h/2 first-layer mesh at 30 s, the onset (T_dep
+#          fromInlet, 1 % of the peak of the wall column, native bins)
+#          moves by at most M7LONG_PAIR_BINS native bins and the largest
+#          mDep_ on the WALL faces by at most M7LONG_PAIR_PEAK
+#   M7.2e  reported: the same for the volumetric form (A 220 1/s, so v_d =
+#          A V_I/A_I halves on h/2), expected to miss them; the line says
+#          whether it does
+#   M7.2f  the same as M7.2d for the flux form with wallResistance halfCell
+#          (a gate: halfCell is the default of physical runs, plan section
+#          28, item 6)
+#   M7.5a  the two runs on the axial x2 mesh end, closure and solverDefect
+#          as M7.3a, the flux form's v_d
+#   M7.5b  axial x2 against the base mesh, flux form, none: T_dep shifts by
+#          at most M7LONG_AXIAL_BINS native bins, the 1 cm peak height by
+#          at most M7LONG_AXIAL_PEAK, the L1 change of the 1 cm wall
+#          profiles is at most M7LONG_AXIAL_L1 (the criterion proposed by
+#          the second M7 study; reported with M7LONG_AXIAL_GATE=no)
+#   M7.5c  the same with wallResistance halfCell
+#   M7.3pa the three runs of the time-step study on the paper-mode carrier
+#          end, closure and solverDefect as M7.3a
+#   M7.3pb acceptance 3 on the paper-mode carrier: L1(2 ms, 1 ms) of the
+#          wall deposit at 30 s below M7LONG_DT_LIMIT, native and 1 cm bins
+#   M7.3pc reported: the observed order and the Richardson estimate at 30
+#          s, and the intermediate-time error while gas is present (the
+#          largest L1(2 ms, 1 ms) over the profile times with a deposit
+#          above 1 % of the release, the values at t_ev and t_ev + 1, the
+#          gas at t_ev + 1)
+#   M7.6a  the verdicts of the criteria (plan section 35, item N; no run):
+#          the helpers of the gated and of the reported criteria (pair:
+#          gate, expectFail, report; axial: gate and reported) with a
+#          stand-in checker that meets the limits, misses them, cannot
+#          compute (exit 2), crashes after a partial output (python's exit
+#          1 without a verdict line) and crashes reported (exit 3): a crash
+#          or 'cannot be computed' is a FAIL in every mode; and
+#          longChecks.py itself reports a crash as 'CRASHED' with exit 3
+#   M7.6b  a stopped run of the 007 carrier resumes from its latest time
+#          (plan section 35, item P): run/012 set up as the long runs are
+#          (setupM7), 2 steps of 4 ms written at 0.008 s, then runM7
+#          resumes it to 0.016 s: the second segment starts at 0.008 s
+#          (its first step 0.012 s, 2 steps, its balance file from 0.008
+#          s, the restart exact) instead of at 0
+#
+# Exit status: 0 when every criterion was tested (whatever the results),
+# 1 when a run could not be set up or ended with an error.
+#
+#------------------------------------------------------------------------------
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+
+# M7LONG_CPUS: the driver again, bound to these CPUs (header)
+if [ -n "${M7LONG_CPUS:-}" ] && [ -z "${M7LONG_BOUND:-}" ]
+then
+  exec env M7LONG_BOUND=yes taskset -c "$M7LONG_CPUS" "$0" "$@"
+fi
+
+VF_SRC=$TESTS_DIR/verification
+VM_DIR=$WORK_DIR/verification/meshes
+LONG_DIR=$WORK_DIR/verification/long
+CHECKS="python3 $VF_SRC/longChecks.py"
+PM_CHECKS="python3 $TESTS_DIR/paperMode/checks.py"
+CARRIER_EXE=$FOAM_USER_APPBIN/setFrozenCarrier
+CASE014=$(runCaseDir 014) || exit 1
+LONG_RANKS=${M7LONG_RANKS:-8}
+LONG_JOBS=${M7LONG_JOBS:-2}
+
+mkdir -p "$LONG_DIR"
+
+
+#------------------------------------------------------------------------------
+# The runs (plan sections 6 M7 and 33 pin every value):
+#
+#   id  base  mesh  flow  layer  rate  wallResistance  dt [s]  end [s]
+#   times  bins
+#
+# base: the run/ case of which the run is an edit: 012 or 013 (the 007
+# carrier, linked; flow, layer, rate and wallResistance '-': the case's
+# own) or 014 (the paper-mode carrier, written by setFrozenCarrier on the
+# run's mesh).  mesh: base, wallH2 or axial2 (tests/verification/
+# pipeMeshes).  flow: 'Q:<m3/s>' or 'mL:<mL/min>' (setFrozenCarrierDict).
+# rate: 'A' (run/014's A 220 1/s, the volumetric form) or 'vd:<m/s>'
+# (depositionVelocity, the flux form: 0.0124421 m/s is the v_d that A
+# gives on the base mesh with layer faceCells, as the solver prints it;
+# criterion M7.2c checks it against the log of h-A-none).  times: the
+# profile times, separated by commas, or 'every:<s>' (every <s> seconds to
+# the end); profiles are also written every second, at the write times.
+# bins: '-' or 'cells:<n>', a bin set 'cells' of n bins over the pipe
+# besides run/014's 'native' (the 424 axial cells of the base mesh) and
+# 'gamma' (1 cm), for the axial cells of the axial x2 mesh; the runs of
+# 012 and 013 get both sets of run/014 in a profiles dictionary of their
+# own (the cases have none).
+#
+# The order is the order in which the runs start: the longest of the 007
+# carrier first, then the gates of the paper-mode carrier.
+#------------------------------------------------------------------------------
+VD_BASE=0.0124421
+LONG_RUNS=(
+  "temperature-dt1ms 012 base   -         -         -           -        1e-3 16 every:0.5 -"
+  "HKS-dt1ms         013 base   -         -         -           -        1e-3 16 every:0.5 -"
+  "temperature-dt2ms 012 base   -         -         -           -        2e-3 16 every:0.5 -"
+  "HKS-dt2ms         013 base   -         -         -           -        2e-3 16 every:0.5 -"
+  "temperature-dt4ms 012 base   -         -         -           -        4e-3 16 every:0.5 -"
+  "HKS-dt4ms         013 base   -         -         -           -        4e-3 16 every:0.5 -"
+  "h-flux-none       014 base   mL:106    faceCells vd:$VD_BASE none     1e-3 30 (16,30) -"
+  "h2-flux-none      014 wallH2 mL:106    faceCells vd:$VD_BASE none     1e-3 30 (16,30) -"
+  "dt1ms             014 base   Q:1.67e-6 distance  A           none     1e-3 30 (16,30) -"
+  "dt2ms             014 base   Q:1.67e-6 distance  A           none     2e-3 30 (16,30) -"
+  "dt4ms             014 base   Q:1.67e-6 distance  A           none     4e-3 30 (16,30) -"
+  "h2-A-none         014 wallH2 mL:106    faceCells A           none     1e-3 30 (16,30) -"
+  "x2-flux-none      014 axial2 mL:106    faceCells vd:$VD_BASE none     1e-3 30 (16,30) cells:848"
+  "x2-flux-halfCell  014 axial2 mL:106    faceCells vd:$VD_BASE halfCell 1e-3 30 (16,30) cells:848"
+  "h-flux-halfCell   014 base   mL:106    faceCells vd:$VD_BASE halfCell 1e-3 30 (16,30) -"
+  "h2-flux-halfCell  014 wallH2 mL:106    faceCells vd:$VD_BASE halfCell 1e-3 30 (16,30) -"
+  "h-A-none          014 base   mL:106    faceCells A           none     1e-3 30 (16,30) -"
+)
+
+
+#------------------------------------------------------------------------------
+# Set-up of a run (the functions in the key)
+#------------------------------------------------------------------------------
+
+# edit <file> <sed expression> <pattern that must match afterwards>
+edit() {
+  sed -i -E "$2" "$1" && grep -q -E "$3" "$1" \
+    || { echo "Editing $1 with '$2' failed" >&2; return 1; }
+}
+
+# decomposeWith <case> <n> <method and coeffs> [decomposePar options]
+decomposeWith() {
+  local c=$1 n=$2 method=$3
+  shift 3
+  requireCaseDir "$c" || return 1
+  cat > "$c/system/decomposeParDict" <<EOF
+FoamFile{version 2.0; format ascii; class dictionary; object decomposeParDict;}
+
+numberOfSubdomains $n;
+$method
+EOF
+  (cd "$c" && decomposePar -force "$@" > log.decomposePar 2>&1)
+}
+
+# decomposeM7 <case> [decomposePar options]: onto LONG_RANKS ranks (simple
+# slabs along x); one rank: nothing (a serial run)
+decomposeM7() {
+  local c=$1
+  shift
+  [ "$LONG_RANKS" -gt 1 ] || return 0
+  decomposeWith "$c" "$LONG_RANKS" \
+    "method simple; coeffs { n ($LONG_RANKS 1 1); }" "$@"
+}
+
+# carrier <case>: setFrozenCarrier into the start time
+carrier() {
+  requireCaseDir "$1" || return 1
+  (cd "$1" && "$CARRIER_EXE" > log.setFrozenCarrier 2>&1)
+}
+
+# checkCarrier <case>: the continuity of the carrier where the solver reads
+# it, on the decomposed case (setFrozenCarrier -check; plan section 26,
+# item 3: decomposePar may write a patch of equal values rounded)
+checkCarrier() {
+  local c=$1
+  requireCaseDir "$c" || return 1
+  if [ -d "$c/processor0" ]
+  then
+    (cd "$c" && timeout 900 mpirun -np "$(ls -d processor* | wc -l)" --bind-to none \
+       "$CARRIER_EXE" -check -parallel > log.checkCarrier 2>&1 < /dev/null)
+  else
+    (cd "$c" && "$CARRIER_EXE" -check > log.checkCarrier 2>&1)
+  fi && $PM_CHECKS continuity "$c/log.checkCarrier" 1e-15 > /dev/null
+}
+
+# profileTimes <times>: the profile times of a spec, separated by blanks
+# ('every:<s>': every <s> seconds to the end, given as the second argument)
+profileTimes() {
+  case "$1" in
+    every:*) awk -v step="${1#every:}" -v end="$2" 'BEGIN {
+               n = int(end/step + 0.5)
+               for (k = 1; k <= n; k++) printf "%s%.10g", (k > 1 ? " " : ""), k*step
+             }' ;;
+    *) echo "${1//,/ }" | tr -d '()' ;;
+  esac
+}
+
+# setup014 <case> <mesh> <flow> <layer> <rate> <wallResistance> <dt> <end>
+#          <times> <bins>: a copy of run/014 with its carrier written by
+# setFrozenCarrier on the run's mesh (header)
+setup014() {
+  local c=$1 mesh=$2 flow=$3 layer=$4 rate=$5 wall=$6 dt=$7 end=$8
+  local times=${9//,/ } bins=${10:--}
+  local poly=$VM_DIR/$mesh/constant/polyMesh
+
+  makeCase 014 "$c" || return 1
+  rm -f "$c/constant/polyMesh" "$c/dynamicCode"
+  ln -s "$poly" "$c/constant/polyMesh"
+  mkdir -p "$c/dynamicCode"
+
+  local d=$c/system/setFrozenCarrierDict
+  case "$flow" in
+    Q:*) edit "$d" "s/^flowRate +[^;]+;/flowRate         ${flow#Q:};/" \
+           "^flowRate +${flow#Q:};" ;;
+    mL:*) edit "$d" "s/^flowRate +[^;]+;/flowRateMLPerMin ${flow#mL:};/" \
+            "^flowRateMLPerMin ${flow#mL:};" ;;
+    *) echo "flow $flow: Q:<m3/s> or mL:<mL/min>" >&2; false ;;
+  esac || return 1
+
+  local t=$c/constant/thermochemistryProperties
+  edit "$t" "s/^(  layer +)[a-zA-Z]+;/\1$layer;/" "^  layer +$layer;" \
+    && edit "$t" "s/^(  wallResistance +)[a-zA-Z]+;/\1$wall;/" \
+         "^  wallResistance +$wall;" \
+    && edit "$t" "s/^(  times +)\([^)]*\);/\1$times;/" "^  times +\\(" \
+    || return 1
+  case "$rate" in
+    A) grep -q -E '^  A +220;' "$t" ;;
+    vd:*) edit "$t" "s|^  A +[^;]+;.*$|  depositionVelocity ${rate#vd:};  \
+/* m/s, the flux form (M7) */|" "^  depositionVelocity ${rate#vd:};" ;;
+    *) echo "rate $rate: A or vd:<m/s>" >&2; false ;;
+  esac || return 1
+  case "$bins" in
+    -) ;;
+    cells:*) edit "$t" "s|^(    gamma +\{[^}]*\}.*)$|\1\n    cells  { min 0; \
+max 0.69; nBins ${bins#cells:}; }  /* the axial cells of the mesh */|" \
+               "^    cells  \{ min 0; max 0.69; nBins ${bins#cells:}; \}" ;;
+    *) echo "bins $bins: - or cells:<n>" >&2; false ;;
+  esac || return 1
+
+  setControl "$c" endTime "$end" \
+    && setControl "$c" deltaT "$dt" \
+    && setControl "$c" writeControl runTime \
+    && setControl "$c" writeInterval 1 \
+    || return 1
+
+  carrier "$c" && decomposeM7 "$c" && checkCarrier "$c"
+}
+
+# setup007 <case> <012|013> <mesh> <dt> <end> <times>: a copy of run/012 or
+# run/013 with the linked 007 carrier (makeCase), a dynamicCode directory of
+# its own for the carrier's coded boundary conditions, writes every second
+# and the profiles dictionary of the first M7 study: run/014's bin sets
+# (native: the 424 axial cells; gamma: 1 cm), the default observable
+# (wallPlusGas), fraction and search modes (header)
+setup007() {
+  local c=$1 base=$2 mesh=$3 dt=$4 end=$5 times=$6
+  local poly=$VM_DIR/$mesh/constant/polyMesh
+
+  makeCase "$base" "$c" || return 1
+  rm -f "$c/constant/polyMesh" "$c/dynamicCode"
+  ln -s "$poly" "$c/constant/polyMesh"
+  mkdir -p "$c/dynamicCode"
+
+  local t=$c/constant/thermochemistryProperties
+  ! grep -q -E '^profiles' "$t" || {
+    echo "$t has a profiles dictionary already" >&2
+    return 1
+  }
+  cat >> "$t" <<EOF
+
+profiles {
+  bins {
+    native { min 0; max 0.69; nBins 424; }   // the axial cells
+    gamma  { min 0; max 0.69; width 0.01; }  // the 1 cm gamma-scan bins
+  }
+  times ($(profileTimes "$times" "$end"));
+}
+EOF
+
+  setControl "$c" endTime "$end" \
+    && setControl "$c" deltaT "$dt" \
+    && setControl "$c" writeControl runTime \
+    && setControl "$c" writeInterval 1 \
+    && decomposeM7 "$c"
+}
+
+# setupM7 <case> <spec ...>: the copy of the run's run/ case (header)
+setupM7() {
+  local c=$1 base=$3 mesh=$4
+  [ -f "$VM_DIR/$mesh/constant/polyMesh/owner" ] || {
+    echo "No mesh $VM_DIR/$mesh: run tests/verification/pipeMeshes first" >&2
+    return 1
+  }
+  case "$base" in
+    014) setup014 "$c" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" \
+           "${12}" ;;
+    012|013) setup007 "$c" "$base" "$4" "$9" "${10}" "${11}" ;;
+    *) echo "base $base: 012, 013 or 014" >&2; return 1 ;;
+  esac
+}
+
+
+#------------------------------------------------------------------------------
+# Keys
+#------------------------------------------------------------------------------
+
+# the md5 of source files or dictionaries without their comments and blank
+# lines, so that a change of a comment does not invalidate the long runs
+strippedSum() {
+  python3 - "$@" <<'EOF'
+import hashlib, re, sys
+h = hashlib.md5()
+for path in sys.argv[1:]:
+    text = open(path, errors='replace').read()
+    text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
+    text = re.sub(r'//[^\n]*', '', text)
+    lines = [l.strip() for l in text.splitlines() if l.strip()]
+    h.update(path.rsplit('/', 1)[-1].encode())
+    h.update('\n'.join(lines).encode())
+print(h.hexdigest())
+EOF
+}
+
+# the md5 of the polyMesh files of every mesh (boundary, faces, neighbour,
+# owner, points; empty when the mesh does not exist), computed once
+declare -A MESH_SUMS
+for m in base wallH2 axial2
+do
+  MESH_SUMS[$m]=$( (cd "$VM_DIR/$m/constant/polyMesh" 2>/dev/null \
+    && md5sum boundary faces neighbour owner points 2>/dev/null) \
+    | md5sum | cut -d' ' -f1)
+done
+meshSum() {
+  echo "${MESH_SUMS[$1]:-}"
+}
+
+# the inputs of the run/ cases without comments (system, constant and 0 with
+# the links followed: the 007 carrier of 012 and 013, the p_v table of 013,
+# the wall table of 014; not the linked mesh), computed once
+SOURCES_SUM=$(strippedSum "$SOLVER_DIR"/*.C "$SOLVER_DIR"/*.H \
+  "$SOLVER_DIR"/utilities/setFrozenCarrier/*.C)
+declare -A INPUTS_SUMS
+for n in 012 013 014
+do
+  INPUTS_SUMS[$n]=$(cd "$(runCaseDir $n)" && find -L system constant 0 \
+    -type f ! -path '*/polyMesh/*' | sort | while read -r f
+    do
+      echo "$f $(strippedSum "$f")"
+    done | md5sum | cut -d' ' -f1)
+done
+
+# m7Key <spec line>: the key of a run (header)
+m7Key() {
+  local spec=($1)
+  {
+    echo "sources $SOURCES_SUM"
+    echo "run/${spec[1]} ${INPUTS_SUMS[${spec[1]}]}"
+    echo "mesh $(meshSum "${spec[2]}")"
+    echo "set-up $(declare -f setupM7 setup014 setup007 profileTimes \
+      decomposeM7 decomposeWith carrier checkCarrier edit makeCase \
+      runCaseDir setControl | md5sum | cut -d' ' -f1)"
+    echo "$1 $WM_PROJECT_DIR"
+  } | md5sum | cut -d' ' -f1
+}
+
+
+# 'keys': print the key of every run and the key it was recorded with, and
+# stop (no run is started, prepared or changed, and no binary
+# is built or copied)
+if [ "${1:-}" = keys ]
+then
+  for spec in "${LONG_RUNS[@]}"
+  do
+    id=${spec%% *}
+    echo "$id $(m7Key "$spec") $(cat "$LONG_DIR/$id/m7key" 2>/dev/null \
+      || echo none) $([ -f "$LONG_DIR/$id/m7done" ] && echo ended)"
+  done
+  exit 0
+fi
+
+#------------------------------------------------------------------------------
+# The binaries of the runs (header)
+#------------------------------------------------------------------------------
+BIN_ROOT=$LONG_DIR/bin
+binKey=$(echo "$SOURCES_SUM $WM_PROJECT_DIR" | md5sum | cut -d' ' -f1)
+LONG_BIN=$BIN_ROOT/$binKey
+if [ "$(cat "$LONG_BIN/key" 2>/dev/null)" != "$binKey" ]
+then
+  if [ "${M7LONG_BUILD:-yes}" != no ]
+  then
+    (cd "$SOLVER_DIR" && ./Allwmake) > "$LONG_DIR/log.Allwmake" 2>&1 || {
+      echo "Building the solver and setFrozenCarrier failed (incremental" \
+           "./Allwmake; $LONG_DIR/log.Allwmake)" >&2
+      exit 1
+    }
+  fi
+  rm -rf "${LONG_BIN:?}"
+  mkdir -p "$LONG_BIN"
+  cp "$SOLVER_EXE" "$CARRIER_EXE" "$LONG_BIN/" || exit 1
+  (cd "$LONG_BIN" && md5sum rhoFixedFlowFoam setFrozenCarrier > md5sums) \
+    || exit 1
+  echo "$binKey" > "$LONG_BIN/key"
+  echo "  binaries of key $binKey kept in $LONG_BIN"
+fi
+if ! (cd "$LONG_BIN" && md5sum --status -c md5sums)
+then
+  echo "The binaries in $LONG_BIN differ from their md5sums: remove the" \
+       "directory to make them again" >&2
+  exit 1
+fi
+SOLVER_EXE=$LONG_BIN/rhoFixedFlowFoam
+CARRIER_EXE=$LONG_BIN/setFrozenCarrier
+
+
+#------------------------------------------------------------------------------
+# Running: reuse, resume, re-decompose
+#------------------------------------------------------------------------------
+
+# latestTime <case>: the latest written time of a run, decomposed or serial
+latestTime() {
+  if [ -d "$1/processor0" ]
+  then
+    timeDirs "$1/processor0" | tail -1
+  else
+    timeDirs "$1" | tail -1
+  fi
+}
+
+# the number of ranks a case is decomposed for (1: a serial case)
+ranksOf() {
+  local n
+  n=$(ls -d "$1"/processor* 2>/dev/null | wc -l)
+  echo $(( n > 0 ? n : 1 ))
+}
+
+# redecompose <case>: its latest time (and the carrier in 0) onto LONG_RANKS
+# ranks, or into the case for one rank (as M4long: decomposePar links
+# <time>/uniform of every processor to the case's, replaced by copies
+# before the case's time is removed)
+redecompose() {
+  local c=$1 latest d
+  latest=$(latestTime "$c")
+  if [ -d "$c/processor0" ]
+  then
+    (cd "$c" && reconstructPar -time "$latest" > log.reconstructPar 2>&1) \
+      || return 1
+    rm -rf "$c"/processor*
+  fi
+  [ "$LONG_RANKS" -gt 1 ] || return 0
+  decomposeM7 "$c" -time "0,$latest" || return 1
+  for d in "$c"/processor*/"$latest"
+  do
+    if [ -L "$d/uniform" ]
+    then
+      rm "$d/uniform" && cp -r "$c/$latest/uniform" "$d/uniform" || return 1
+    fi
+  done
+  [ -f "$c/processor0/$latest/uniform/phaseChangeBalance" ] \
+    && rm -rf "${c:?}/$latest"
+}
+
+# runM7 <spec line>: one run, reused when its key matches and it ended,
+# resumed from its latest written time when its key matches and it did not
+runM7() {
+  local spec=($1)
+  local id=${spec[0]} c=$LONG_DIR/${spec[0]} key segment=1
+  key=$(m7Key "$1")
+
+  if [ "$(cat "$c/m7key" 2>/dev/null)" = "$key" ] && [ -f "$c/m7done" ]
+  then
+    echo "  $id: reused ($c, key $key)"
+    return 0
+  fi
+
+  rm -f "$c/m7failed"
+  if [ "$(cat "$c/m7key" 2>/dev/null)" = "$key" ] \
+    && [ -n "$(latestTime "$c")" ]
+  then
+    segment=$(($(ls "$c"/log.[0-9]* 2>/dev/null | wc -l) + 1))
+    echo "  $id: resumed from $(latestTime "$c") s ($c)"
+    if [ "$(ranksOf "$c")" -ne "$LONG_RANKS" ]
+    then
+      echo "  $id: re-decomposed from $(ranksOf "$c") onto $LONG_RANKS ranks"
+      redecompose "$c" || { echo "  $id: re-decomposition failed" >&2
+                            return 1; }
+    fi
+    # the copies of run/012 and run/013 start from startTime (0): resume
+    # from the latest write (plan section 35, item P)
+    setControl "$c" startFrom latestTime \
+      || { echo "  $id: no startFrom in $c/system/controlDict" >&2
+           return 1; }
+  elif [ "$(cat "$c/m7key" 2>/dev/null)" = "$key" ] && [ -d "$c/0" ]
+  then
+    # prepared (or started and stopped before its first write): what an
+    # earlier start left is removed, and the case decomposed again when the
+    # number of ranks changed
+    echo "  $id: running, prepared before ($c)"
+    rm -rf "${c:?}/postProcessing" "$c"/log.[0-9]*
+    if [ "$(ranksOf "$c")" -ne "$LONG_RANKS" ]
+    then
+      echo "  $id: decomposed again from $(ranksOf "$c") onto $LONG_RANKS" \
+           "ranks"
+      rm -rf "$c"/processor*
+      decomposeM7 "$c" \
+        || { echo "  $id: decomposition failed" >&2; return 1; }
+    fi
+  else
+    echo "  $id: running ($c)"
+    rm -rf "$c"
+    setupM7 "$c" "${spec[@]}" \
+      || { echo "  $id: setup failed" >&2; return 1; }
+    echo "$key" > "$c/m7key"
+  fi
+  echo "$binKey" > "$c/m7bin"
+
+  if [ "$LONG_RANKS" -gt 1 ]
+  then
+    MPI_TIMEOUT=$((48*3600)) runParallel "$c" "$SOLVER_EXE" "$LONG_RANKS" \
+      "log.$segment"
+  else
+    runSerial "$c" "$SOLVER_EXE" "log.$segment"
+  fi || { echo "  $id: run failed ($c/log.$segment)" >&2; return 1; }
+  grep -q '^End' "$c/log.$segment" || {
+    echo "  $id: the run did not end ($c/log.$segment)" >&2
+    return 1
+  }
+  touch "$c/m7done"
+}
+
+# runM7Job <spec line>: runM7 in the background (startJob), leaving the
+# marker m7failed when it fails
+runM7Job() {
+  local id=${1%% *}
+  runM7 "$1" && return 0
+  mkdir -p "$LONG_DIR/$id" && touch "$LONG_DIR/$id/m7failed"
+  return 1
+}
+
+# prepareM7 <spec line>: the case of a run that is not run now, set up and
+# decomposed (kept when its key matches: also a partial run)
+prepareM7() {
+  local spec=($1)
+  local c=$LONG_DIR/${spec[0]} key
+  key=$(m7Key "$1")
+  [ "$(cat "$c/m7key" 2>/dev/null)" = "$key" ] && return 0
+  rm -rf "$c"
+  setupM7 "$c" "${spec[@]}" && echo "$key" > "$c/m7key"
+}
+
+# hold the next run back while the file PAUSE exists in the work directory
+waitWhilePaused() {
+  while [ -f "$LONG_DIR/PAUSE" ]
+  do
+    sleep 30
+  done
+}
+
+# selected <id>: the run is in M7LONG_RUNS (default all)
+selected() {
+  case " ${M7LONG_RUNS:-all} " in
+    *" all "*|*" $1 "*) return 0 ;;
+  esac
+  return 1
+}
+
+
+#------------------------------------------------------------------------------
+# Revalidation of a run that ended under another key (header; the method
+# and the exclusions of M4long, tests/paperMode/longRuns)
+#------------------------------------------------------------------------------
+REVALIDATE_STEPS=${M7LONG_REVALIDATE_STEPS:-5}
+REVALIDATE_EXCLUDE=(uniform/time mw_PbI2_s uniform/phaseChangeBalance)
+REVALIDATE_EXCLUDE_COLUMNS=(solverDefect clamped closure
+                            evaporatedAboveWarning)
+
+# stripped <file>: a dictionary without comments, blank lines, leading and
+# trailing blanks, and without the entries a run changes (endTime, and
+# startFrom, which a resumed run sets to latestTime)
+stripped() {
+  python3 - "$1" <<'EOF'
+import re, sys
+text = open(sys.argv[1], errors='replace').read()
+text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
+text = re.sub(r'//[^\n]*', '', text)
+lines = [l.strip() for l in text.splitlines() if l.strip()]
+print('\n'.join(l for l in lines
+                if not re.match(r'(endTime|startFrom)\s', l)))
+EOF
+}
+
+# sameSetup <run> <fresh set-up>: the dictionaries (stripped) and the
+# carrier of the run equal those of a fresh set-up of its spec
+sameSetup() {
+  local run=$1 fresh=$2 f
+  for f in $(cd "$fresh" && ls system/* constant/*Properties 0/Y_*)
+  do
+    [ "$f" = system/decomposeParDict ] && continue
+    cmp -s <(stripped "$run/$f") <(stripped "$fresh/$f") \
+      || { echo "$f differs (without comments and endTime)"; return 1; }
+  done
+  for f in rho U p T phi
+  do
+    cmp -s "$run/0/$f" "$fresh/0/$f" \
+      || { echo "the carrier field 0/$f differs"; return 1; }
+  done
+}
+
+# probeCase <run> <probe> <time>: a copy of the run's state at <time> (its
+# mesh, carrier and compiled dynamicCode linked), to run REVALIDATE_STEPS
+# steps and write the last one
+probeCase() {
+  local run=$1 probe=$2 t=$3 d f dt
+  rm -rf "${probe:?}"
+  mkdir -p "$probe/constant"
+  cp -a "$run/system" "$probe/" || return 1
+  for f in "$run"/constant/*
+  do
+    ln -s "$(readlink -f "$f")" "$probe/constant/$(basename "$f")"
+  done
+  ln -s "$(readlink -f "$run/0")" "$probe/0"
+  ln -s "$(readlink -f "$run/dynamicCode")" "$probe/dynamicCode"
+  if [ -d "$run/processor0" ]
+  then
+    for d in "$run"/processor*
+    do
+      mkdir -p "$probe/$(basename "$d")"
+      ln -s "$(readlink -f "$d/constant")" "$probe/$(basename "$d")/constant"
+      ln -s "$(readlink -f "$d/0")" "$probe/$(basename "$d")/0"
+      cp -a "$d/$t" "$probe/$(basename "$d")/" || return 1
+    done
+  else
+    cp -a "$run/$t" "$probe/" || return 1
+  fi
+  dt=$(sed -n 's/^deltaT *\([^;]*\);/\1/p' "$probe/system/controlDict")
+  setControl "$probe" startFrom latestTime \
+    && setControl "$probe" endTime \
+         "$(python3 -c "print(repr($t + $REVALIDATE_STEPS*$dt))")" \
+    && setControl "$probe" writeControl timeStep \
+    && setControl "$probe" writeInterval "$REVALIDATE_STEPS" \
+    && touch "$probe/case.foam"
+}
+
+# probeRun <probe> <executable> <ranks>
+probeRun() {
+  if [ "$3" -gt 1 ]
+  then
+    runParallel "$1" "$2" "$3" log.probe
+  else
+    runSerial "$1" "$2" log.probe
+  fi
+}
+
+# revalidate <spec line>: 0 when the run was revalidated (its m7key is then
+# the current key), 1 otherwise; the record in <run>/m7revalidated
+revalidate() {
+  local spec=($1)
+  local id=${spec[0]} c=$LONG_DIR/${spec[0]} key oldKey oldBin t ranks
+  local work=$LONG_DIR/revalidate/${spec[0]} x out tEnd excludes=()
+  key=$(m7Key "$1")
+  oldKey=$(cat "$c/m7key" 2>/dev/null)
+  oldBin=$(cat "$c/m7bin" 2>/dev/null)
+  record() {
+    echo "$(date '+%F %T') $*" >> "$c/m7revalidated"
+    echo "  $id: $*"
+  }
+  if [ -z "$oldBin" ] || [ ! -x "$BIN_ROOT/$oldBin/rhoFixedFlowFoam" ]
+  then
+    record "not revalidated: the binaries of key ${oldBin:-unknown} are" \
+      "not kept"
+    return 1
+  fi
+
+  rm -rf "${work:?}"
+  mkdir -p "$work"
+  if ! (LONG_RANKS=1 setupM7 "$work/setup" "${spec[@]}") \
+       > "$work/log.setup" 2>&1
+  then
+    record "not revalidated: the set-up failed ($work/log.setup)"
+    return 1
+  fi
+  if ! out=$(sameSetup "$c" "$work/setup")
+  then
+    record "not revalidated: the set-up differs: $out"
+    return 1
+  fi
+
+  if [ -d "$c/processor0" ]
+  then
+    t=$(timeDirs "$c/processor0" | tail -2 | head -1)
+  else
+    t=$(timeDirs "$c" | tail -2 | head -1)
+  fi
+  ranks=$(ranksOf "$c")
+  for x in old new
+  do
+    probeCase "$c" "$work/$x" "$t" || {
+      record "not revalidated: the probe case failed ($work/$x)"
+      return 1
+    }
+  done
+  if ! probeRun "$work/old" "$BIN_ROOT/$oldBin/rhoFixedFlowFoam" \
+         "$ranks" || ! probeRun "$work/new" "$SOLVER_EXE" "$ranks"
+  then
+    record "not revalidated: a probe run failed ($work/old/log.probe," \
+      "$work/new/log.probe)"
+    return 1
+  fi
+  for x in "${REVALIDATE_EXCLUDE[@]}"
+  do
+    excludes+=(-x "$x")
+  done
+  tEnd=$(latestTime "$work/new")
+  if ! out=$("$TESTS_DIR/cmpFields.sh" "${excludes[@]}" "$work/old" \
+               "$work/new" "$tEnd" 2>&1)
+  then
+    record "not revalidated: the probes from $t s differ: $out"
+    return 1
+  fi
+  local columns balance=
+  columns=$(IFS=,; echo "${REVALIDATE_EXCLUDE_COLUMNS[*]}")
+  for x in "$work"/old/postProcessing/phaseChangeBalance/*/*.dat
+  do
+    [ -f "$x" ] || continue
+    balance=$($PM_CHECKS sameBalance "$x" "$work/new/${x#$work/old/}" \
+                "$columns") || {
+      record "not revalidated: ${x#$work/old/} of the probes differs:" \
+        "${balance#*: }"
+      return 1
+    }
+  done
+  for x in "$work"/old/postProcessing/axialProfiles/*/*.dat
+  do
+    [ -f "$x" ] || continue
+    cmp -s "$x" "$work/new/${x#$work/old/}" || {
+      record "not revalidated: ${x#$work/old/} of the probes differs"
+      return 1
+    }
+  done
+
+  echo "$key" > "$c/m7key"
+  echo "$binKey" > "$c/m7bin"
+  record "revalidated: key $oldKey (binaries $oldBin) -> $key (binaries" \
+    "$binKey): the set-up of its spec equals the run's (dictionaries" \
+    "without comments and endTime; carrier bit for bit), and" \
+    "$REVALIDATE_STEPS steps from its state at $t s on $ranks rank(s) with" \
+    "both binaries write the same files (${out#IDENTICAL: }; profile files" \
+    "identical; left out: ${REVALIDATE_EXCLUDE[*]}; balance file:" \
+    "${balance#OK: })"
+  rm -rf "${work:?}"
+  return 0
+}
+
+
+#==============================================================================
+# The runs
+#==============================================================================
+
+for m in base wallH2 axial2
+do
+  [ -f "$VM_DIR/$m/constant/polyMesh/owner" ] || {
+    echo "No mesh $VM_DIR/$m: run tests/verification/pipeMeshes first" >&2
+    exit 1
+  }
+done
+
+echo "== M7long: the long runs of M7 on the 007 and the paper-mode carrier" \
+     "(work directory $LONG_DIR, $LONG_JOBS runs at a time, each on" \
+     "$LONG_RANKS rank(s))"
+
+if [ "${M7LONG_REVALIDATE:-no}" = yes ]
+then
+  MAX_JOBS=$LONG_JOBS
+  for spec in "${LONG_RUNS[@]}"
+  do
+    id=${spec%% *}
+    c=$LONG_DIR/$id
+    if [ -f "$c/m7done" ] && [ "$(cat "$c/m7key" 2>/dev/null)" != \
+         "$(m7Key "$spec")" ]
+    then
+      startJob revalidate "$spec"
+    fi
+  done
+  waitJobs
+  rmdir "$LONG_DIR/revalidate" 2>/dev/null
+fi
+
+MAX_JOBS=$LONG_JOBS
+for spec in "${LONG_RUNS[@]}"
+do
+  id=${spec%% *}
+  c=$LONG_DIR/$id
+  if selected "$id"
+  then
+    waitWhilePaused
+    startJob runM7Job "$spec"
+  elif [ "$(cat "$c/m7key" 2>/dev/null)" = "$(m7Key "$spec")" ] \
+    && [ -f "$c/m7done" ]
+  then
+    echo "  $id: reused ($c)"
+  elif [ -f "$c/m7done" ]
+  then
+    # a recorded run is never replaced by a run that is not selected
+    echo "  $id: ended under another key, kept ($c; M7LONG_REVALIDATE=yes" \
+         "revalidates it, M7LONG_RUNS='$id' runs it again)"
+  elif prepareM7 "$spec"
+  then
+    echo "  $id: not selected (M7LONG_RUNS), prepared ($c)"
+  else
+    echo "  $id: not selected (M7LONG_RUNS), preparing it failed" >&2
+    mkdir -p "$c" && touch "$c/m7failed"
+  fi
+done
+waitJobs
+
+declare -A STATE    # id: ended, stale, failed or prepared
+for spec in "${LONG_RUNS[@]}"
+do
+  id=${spec%% *}
+  c=$LONG_DIR/$id
+  if [ "$(cat "$c/m7key" 2>/dev/null)" = "$(m7Key "$spec")" ] \
+    && [ -f "$c/m7done" ]
+  then
+    STATE[$id]=ended
+  elif [ -f "$c/m7done" ]
+  then
+    STATE[$id]=stale
+  elif [ -f "$c/m7failed" ]
+  then
+    STATE[$id]=failed
+  else
+    STATE[$id]=prepared
+  fi
+  echo "  $id: ${STATE[$id]}"
+done
+
+#==============================================================================
+# Criteria
+#==============================================================================
+
+# secondsPerStep <mesh> <family>: the wall-clock seconds per step of the
+# runs of a mesh and a family (007: the runs of 012 and 013, named
+# temperature-* and HKS-*; paper: the others) that ended (all segments; a
+# default without such a run: 0.2 s on 8 ranks of a quiet machine for the
+# paper-mode carrier, twice that on axial2, and 0.2 s for the 007 carrier,
+# whose cases take more correctors and a tighter final solve)
+secondsPerStep() {
+  python3 - "$LONG_DIR" "$1" "$LONG_RANKS" "$2" <<'EOF'
+import glob, os, re, sys
+root, mesh, ranks, family = sys.argv[1], sys.argv[2], int(sys.argv[3]), \
+    sys.argv[4]
+steps, clock = 0, 0.0
+for done in glob.glob(os.path.join(root, '*', 'm7done')):
+    case = os.path.dirname(done)
+    target = os.path.realpath(os.path.join(case, 'constant', 'polyMesh'))
+    if os.sep + mesh + os.sep not in target + os.sep:
+        continue
+    name = os.path.basename(case)
+    if name.startswith(('temperature-', 'HKS-')) != (family == '007'):
+        continue
+    for log in glob.glob(os.path.join(case, 'log.[0-9]*')):
+        n, c = 0, 0.0
+        for line in open(log, errors='replace'):
+            if line.startswith('Time = '):
+                n += 1
+            m = re.search(r'ClockTime = (\S+) s', line)
+            if m:
+                c = float(m.group(1))
+        steps, clock = steps + n, clock + c
+default = (0.4 if mesh == 'axial2' else 0.2)*8/max(ranks, 1)
+print(f'{clock/steps:.3f}' if steps else f'{default:.3f}')
+EOF
+}
+
+# specOf <id>: the spec line of a run
+specOf() {
+  local s
+  for s in "${LONG_RUNS[@]}"
+  do
+    [ "${s%% *}" = "$1" ] && { echo "$s"; return 0; }
+  done
+  return 1
+}
+
+# notRunText <id>: the cost and the way to run a run that did not end
+notRunText() {
+  local id=$1 spec c=$LONG_DIR/$1 reached=0
+  spec=($(specOf "$id"))
+  [ -d "$c" ] && reached=$(latestTime "$c")
+  local family=paper
+  [ "${spec[1]}" = 014 ] || family=007
+  python3 - "$id" "${spec[8]}" "${spec[7]}" "${reached:-0}" \
+    "$(secondsPerStep "${spec[2]}" "$family")" "$LONG_RANKS" "$c" <<'EOF'
+import sys
+id_, end, dt, done, sps, ranks, case = sys.argv[1:]
+end, dt, done, sps = float(end), float(dt), float(done), float(sps)
+steps = max(end - done, 0.0)/dt
+text = f'{id_}: not run'
+if done > 0:
+    text += f' (stopped at {done:g} s; it resumes from there)'
+text += (f'; {steps:.0f} steps to go, about {steps*sps/3600:.1f} h on {ranks} '
+         f'ranks at {sps:g} s per step; ready to run: '
+         f"M7LONG_RUNS='{id_}' tests/Alltest M7long (prepared in {case})")
+print(text)
+EOF
+}
+
+# ended <id> ...: every run ended; else print what did not (the NOTRUN or
+# FAIL text) and return 1 (2 when one of them failed)
+ended() {
+  local id status=0
+  for id in "$@"
+  do
+    case "${STATE[$id]}" in
+      ended) ;;
+      failed) echo "$id: the run failed ($LONG_DIR/$id)"; status=2 ;;
+      stale) echo "$id: ended under another key (the sources, the inputs or" \
+               "the set-up changed since), kept in $LONG_DIR/$id: run" \
+               "M7LONG_REVALIDATE=yes tests/Alltest M7long to revalidate it," \
+               "or M7LONG_RUNS='$id' to run it again"
+             [ $status -eq 0 ] && status=1 ;;
+      *) notRunText "$id"; [ $status -eq 0 ] && status=1 ;;
+    esac
+  done
+  return $status
+}
+
+# notEnded <criterion> <text> <ids>: NOTRUN or FAIL for runs that did not end
+notEnded() {
+  local id=$1 text=$2 out s
+  shift 2
+  out=$(ended "$@")
+  s=$?
+  out=$(echo "$out" | sed ':a; N; $!ba; s/\n/; /g')
+  if [ $s -eq 2 ]
+  then
+    result "$id" FAIL "$text: $out"
+  else
+    result "$id" NOTRUN "$text: $out"
+  fi
+}
+
+# revalidatedNow <id>: the run was revalidated under its current key
+revalidatedNow() {
+  local c=$LONG_DIR/$1 key
+  key=$(cat "$c/m7key" 2>/dev/null)
+  grep -F 'revalidated: key' "$c/m7revalidated" 2>/dev/null \
+    | grep -q -F -- "-> $key "
+}
+
+# origin <id> ...: '(run with the current sources)' or the runs revalidated
+# under the current key, named so (as M4long)
+origin() {
+  local id c key line out revalidated=
+  for id in "$@"
+  do
+    c=$LONG_DIR/$id
+    key=$(cat "$c/m7key" 2>/dev/null)
+    line=$(grep -F 'revalidated: key' "$c/m7revalidated" 2>/dev/null \
+             | grep -F -- "-> $key " | tail -1)
+    [ -n "$line" ] || continue
+    out=$(echo "$line" | sed -n 's/^.* revalidated: key \([^ ]*\) .* and \([0-9]*\) steps from its state at \([^ ]*\) s on .*/\1 by a \2-step probe from \3 s/p')
+    revalidated+="${revalidated:+; }$id revalidated from key ${out:-unknown},"
+    revalidated+=" not run with the current sources"
+  done
+  if [ -n "$revalidated" ]
+  then
+    echo "($revalidated)"
+  else
+    echo "(run with the current sources)"
+  fi
+}
+
+# runArgs <id> ...: the run directories for 'longChecks.py runs', a
+# revalidated run marked '=listed' (its closure is listed, not gated: it
+# stands for the physics of the current sources, not for their ledger)
+runArgs() {
+  local id
+  for id in "$@"
+  do
+    if revalidatedNow "$id"
+    then
+      echo "$LONG_DIR/$id=listed"
+    else
+      echo "$LONG_DIR/$id"
+    fi
+  done
+}
+
+# the last line of a check's output without its OK:/FAILED: prefix
+verdict() {
+  echo "$1" | tail -1 | sed -E 's/^(OK|FAILED): //'
+}
+
+# runsCriterion <criterion> <text> <ids>: the runs ended, the closure in
+# every step at most CLOSURE_LIMIT of the reference (runs made with the
+# current sources, as M4.17) and |solverDefect| at most DEFECT_LIMIT at the
+# end (M8's gate); with the v_d check of the flux form when given VD_CHECK,
+# and with SAME_PAIR="<id a> <id b>" (named SAME_LABELS in the line) the
+# check that the two runs give the
+# same deposit at PAIR_TIME (onset within 0.01 native bins, peak mDep_
+# within 1e-5: the flux form with the printed v_d and the volumetric form
+# on the base mesh)
+CLOSURE_LIMIT=${M7LONG_CLOSURE:-1e-14}
+DEFECT_LIMIT=${M7LONG_DEFECT:-1e-8}
+runsCriterion() {
+  local id=$1 text=$2 out s vdOut= vs=0 sameOut= ss=0
+  shift 2
+  if ended "$@" > /dev/null
+  then
+    out=$($CHECKS runs "$CLOSURE_LIMIT" "$DEFECT_LIMIT" $(runArgs "$@"))
+    s=$?
+    echo "$out" > "$LONG_DIR/$id.txt"
+    echo "$out" | sed 's/^/    /'
+    if [ -n "${VD_CHECK:-}" ]
+    then
+      vdOut=$($CHECKS vd $VD_CHECK)
+      vs=$?
+      echo "$vdOut" >> "$LONG_DIR/$id.txt"
+      vdOut="; $(verdict "$vdOut")"
+    fi
+    if [ -n "${SAME_PAIR:-}" ]
+    then
+      sameOut=$($CHECKS pair $(for x in $SAME_PAIR; do echo "$LONG_DIR/$x"; \
+                done) "$PAIR_TIME" 0.01 1e-5 "the same deposit: $SAME_PAIR" \
+                $SAME_LABELS)
+      ss=$?
+      echo "$sameOut" >> "$LONG_DIR/$id.txt"
+      sameOut="; $(verdict "$sameOut")"
+    fi
+    check "$id" "$text: $(verdict "$out")$vdOut$sameOut $(origin "$@")" \
+      eval '[ $s -eq 0 ] && [ $vs -eq 0 ] && [ $ss -eq 0 ]'
+  else
+    notEnded "$id" "$text" "$@"
+  fi
+}
+
+# computed <status> <output>: the checker computed its verdict, i.e. it
+# exited with 0 (met) or 1 (not met) and its last line is that verdict
+# ('OK: ...' or 'FAILED: ...').  Not when it could not compute it (exit 2)
+# nor when it crashed: longChecks.py reports a crash with exit 3, and
+# python's own exit status of an uncaught exception, 1, comes without a
+# verdict line.  A reported criterion is PASS only when computed (plan
+# section 35, item N: such a crash read as PASS).
+computed() {
+  local last
+  last=$(echo "$2" | tail -1)
+  [ "$1" -le 1 ] && [[ "$last" == "OK: "* || "$last" == "FAILED: "* ]]
+}
+
+# pairCriterion <criterion> <gate|expectFail|report> <id h> <id h/2> <text>
+#   gate        PASS when acceptance 2 is met (longChecks.py pair exits 0)
+#   expectFail  reported: PASS when computed; says whether acceptance 2's
+#               limits are missed, as expected of the volumetric form
+#   report      reported: PASS when computed; says whether they are met
+PAIR_TIME=30
+PAIR_BINS=${M7LONG_PAIR_BINS:-1}
+PAIR_PEAK=${M7LONG_PAIR_PEAK:-0.05}
+pairCriterion() {
+  local id=$1 mode=$2 h=$3 h2=$4 text=$5 out s
+  if ended "$h" "$h2" > /dev/null
+  then
+    out=$($CHECKS pair "$LONG_DIR/$h" "$LONG_DIR/$h2" "$PAIR_TIME" \
+            "$PAIR_BINS" "$PAIR_PEAK" "$text")
+    s=$?
+    echo "$out" > "$LONG_DIR/$id.txt"
+    echo "$out" | sed 's/^/    /'
+    local how="was not computed (exit status $s)"
+    case "$mode" in
+      gate)
+        check "$id" "$(verdict "$out") $(origin "$h" "$h2")" [ $s -eq 0 ] ;;
+      expectFail)
+        if computed "$s" "$out"
+        then
+          how="misses the limits of acceptance 2, as expected"
+          [ $s -eq 0 ] && how="meets the limits of acceptance 2 (not expected)"
+        fi
+        check "$id" "reported (not a gate): $(verdict "$out"); it $how\
+ $(origin "$h" "$h2")" computed "$s" "$out" ;;
+      report)
+        if computed "$s" "$out"
+        then
+          how="misses the limits of acceptance 2"
+          [ $s -eq 0 ] && how="meets the limits of acceptance 2"
+        fi
+        check "$id" "reported (not a gate): $(verdict "$out"); it $how\
+ $(origin "$h" "$h2")" computed "$s" "$out" ;;
+    esac
+  else
+    notEnded "$id" "$text" "$h" "$h2"
+  fi
+}
+
+# axialCriterion <criterion> <id base> <id x2> <text>: the criterion of the
+# axial x2 study (proposed by the second M7 study, adopted as a gate
+# pending the researcher's sign-off, plan section 33: onset shift at most
+# AXIAL_BINS native bins, the 1 cm peak height within AXIAL_PEAK, L1 of the
+# 1 cm profiles at most AXIAL_L1); M7LONG_AXIAL_GATE=no reports it instead
+# (PASS when computed, with the verdict)
+AXIAL_BINS=${M7LONG_AXIAL_BINS:-1}
+AXIAL_PEAK=${M7LONG_AXIAL_PEAK:-0.05}
+AXIAL_L1=${M7LONG_AXIAL_L1:-0.01}
+axialCriterion() {
+  local id=$1 b=$2 x=$3 text=$4 out s
+  if ended "$b" "$x" > /dev/null
+  then
+    out=$($CHECKS axial "$LONG_DIR/$b" "$LONG_DIR/$x" "$PAIR_TIME" "$text" \
+            "$AXIAL_BINS" "$AXIAL_PEAK" "$AXIAL_L1")
+    s=$?
+    echo "$out" > "$LONG_DIR/$id.txt"
+    echo "$out" | sed 's/^/    /'
+    if [ "${M7LONG_AXIAL_GATE:-yes}" = yes ]
+    then
+      check "$id" "$(verdict "$out") $(origin "$b" "$x")" [ $s -eq 0 ]
+    else
+      check "$id" "reported (not a gate): $(verdict "$out") $(origin "$b" \
+        "$x")" computed "$s" "$out"
+    fi
+  else
+    notEnded "$id" "$text" "$b" "$x"
+  fi
+}
+
+#------------------------------------------------------------------------------
+# M7.6a: the verdicts of the criteria (plan section 35, item N; no run).  The
+# helpers above in a subshell, with a stand-in checker, the state of two
+# stand-in runs 'ended' and the results in a file of their own: every
+# outcome of the checker in every mode against the table of the expected
+# results (PASS: met in every mode, not met in the reported modes; FAIL:
+# everything else).  And longChecks.py itself reports a crash (a number it
+# cannot read) as 'CRASHED' with exit status 3.
+#------------------------------------------------------------------------------
+SELFTEST_DIR=$WORK_DIR/verification/selftest
+verdictTest() {
+  local d=$SELFTEST_DIR/verdicts kind mode expected got wrong= n=0 crash cs
+  rm -rf "$d"
+  mkdir -p "$d"
+  cat > "$d/checker.py" <<'EOF'
+import sys
+kind = sys.argv[1]
+print('details of the stand-in checker (' + kind + ')')
+if kind == 'met':
+    print('OK: the limits are met')
+    sys.exit(0)
+if kind == 'notMet':
+    print('FAILED: the limits are missed')
+    sys.exit(1)
+if kind == 'cannot':
+    print('FAILED: cannot be computed: a file is missing')
+    sys.exit(2)
+if kind == 'crashReported':
+    print('CRASHED: RuntimeError: a crash of the checker')
+    sys.exit(3)
+raise RuntimeError('a crash of the checker')    # python's exit status 1
+EOF
+  (
+    RESULTS=$d/results
+    : > "$RESULTS"
+    LONG_DIR=$d
+    STATE[standInA]=ended
+    STATE[standInB]=ended
+    for kind in met notMet cannot crash crashReported
+    do
+      CHECKS="python3 $d/checker.py $kind"
+      for mode in gate expectFail report
+      do
+        pairCriterion "$kind-$mode" "$mode" standInA standInB "stand-in pair"
+      done
+      M7LONG_AXIAL_GATE=yes axialCriterion "$kind-axialGate" standInA \
+        standInB "stand-in axial"
+      M7LONG_AXIAL_GATE=no axialCriterion "$kind-axialReport" standInA \
+        standInB "stand-in axial"
+    done
+  ) > "$d/log" 2>&1
+  for kind in met notMet cannot crash crashReported
+  do
+    for mode in gate expectFail report axialGate axialReport
+    do
+      expected=FAIL
+      case "$kind:$mode" in
+        met:*|notMet:expectFail|notMet:report|notMet:axialReport)
+          expected=PASS ;;
+      esac
+      got=$(awk -v id="$kind-$mode" '$2 == id {print $1}' "$d/results")
+      n=$((n + 1))
+      [ "$got" = "$expected" ] || wrong+="${wrong:+, }$kind-$mode $got"
+    done
+  done
+  crash=$(python3 "$VF_SRC/longChecks.py" pair "$d" "$d" 30 notANumber 0.05 \
+            label 2> /dev/null)
+  cs=$?
+  crash=$(echo "$crash" | tail -1)
+  echo "$n verdicts of the stand-in checker (met, not met, cannot be\
+ computed, crash with python's exit 1, crash reported with exit 3) in the\
+ modes gate, expectFail, report and axial gated and reported, against the\
+ table (PASS: met, and not met where reported; FAIL: the rest):\
+ ${wrong:-all as expected}; longChecks.py with a number it cannot read:\
+ '${crash:0:60}', exit status $cs"
+  [ -z "$wrong" ] && [ "$n" -eq 25 ] && [[ "$crash" == CRASHED:* ]] \
+    && [ "$cs" -eq 3 ]
+}
+
+
+#------------------------------------------------------------------------------
+# M7.6b: a stopped run of the 007 carrier resumes from its latest time (plan
+# section 35, item P).  run/012 set up by setupM7 as a long run of the 007
+# family (on LONG_RANKS ranks), 2 steps of 4 ms written at 0.008 s as a run
+# stopped there (writes every 0.008 s and endTime 0.008 for this segment),
+# then runM7 of its spec, which finds it under its key and resumes it to
+# 0.016 s.  Outside LONG_DIR, so that no evaluation counts it.
+#------------------------------------------------------------------------------
+resumeTest() {
+  local spec="resumeTest 012 base - - - - 4e-3 0.016 every:0.008 -"
+  local c=$SELFTEST_DIR/resumeTest first steps rows restart
+  (
+    LONG_DIR=$SELFTEST_DIR
+    rm -rf "$c"
+    mkdir -p "$SELFTEST_DIR"
+    setupM7 "$c" $spec || exit 1
+    m7Key "$spec" > "$c/m7key"
+    setControl "$c" writeInterval 0.008 && setControl "$c" endTime 0.008 \
+      || exit 1
+    if [ "$LONG_RANKS" -gt 1 ]
+    then
+      runParallel "$c" "$SOLVER_EXE" "$LONG_RANKS" log.1
+    else
+      runSerial "$c" "$SOLVER_EXE" log.1
+    fi || exit 1
+    setControl "$c" endTime 0.016 && runM7 "$spec"
+  ) > "$SELFTEST_DIR/log.resumeTest" 2>&1
+  first=$(grep -m1 '^Time = ' "$c/log.2" 2>/dev/null)
+  steps=$(grep -c '^Time = ' "$c/log.2" 2>/dev/null)
+  rows=$(grep -c -v '^#' \
+    "$c/postProcessing/phaseChangeBalance/0.008/PbI2_g.dat" 2>/dev/null)
+  restart=$(grep -o 'Restart of pair PbI2_g: the inventory re-read differs from the ledger by [^;]*' \
+    "$c/log.2" 2>/dev/null)
+  echo "run/012 on $LONG_RANKS rank(s), stopped at 0.008 s and resumed by\
+ runM7 to 0.016 s: segment 2 starts with '${first:-no step}', ${steps:-0}\
+ steps, ${rows:-0} rows in the balance file of 0.008 s;\
+ ${restart#Restart of pair PbI2_g: }; m7done $([ -f "$c/m7done" ] \
+ && echo yes || echo no) ($c)"
+  [ "$first" = "Time = 0.012" ] && [ "$steps" = 2 ] && [ "$rows" = 2 ] \
+    && [[ "$restart" == *"(relative 0"* ]] && [ -f "$c/m7done" ]
+}
+
+verdicts=$(verdictTest)
+vs=$?
+check M7.6a "the verdicts of the criteria: a crash or 'cannot be computed'\
+ is a FAIL in every mode (plan section 35, item N): $verdicts" [ $vs -eq 0 ]
+
+resumed=$(resumeTest)
+rs=$?
+check M7.6b "a stopped run of the 007 carrier resumes from its latest time\
+ (plan section 35, item P): $resumed" [ $rs -eq 0 ]
+
+
+#------------------------------------------------------------------------------
+# M7.3a-d: acceptance 3 on the 007 carrier (run/012 and run/013 at dt 4, 2
+# and 1 ms to 16 s; the measures of dtChecks.py)
+#------------------------------------------------------------------------------
+DT_LIMIT=${M7LONG_DT_LIMIT:-0.01}
+T007_RUNS=(temperature-dt4ms temperature-dt2ms temperature-dt1ms)
+H007_RUNS=(HKS-dt4ms HKS-dt2ms HKS-dt1ms)
+runsCriterion M7.3a "the six runs of the time-step study on the 007\
+ carrier (run/012, temperature model, and run/013, HKS with its final\
+ tolerance 1e-14; dt 4, 2 and 1 ms to 16 s)" "${T007_RUNS[@]}" \
+  "${H007_RUNS[@]}"
+
+dtc="python3 $VF_SRC/dtChecks.py"
+summaries=""
+computed=0
+for model in temperature HKS
+do
+  id=M7.3b
+  [ $model = HKS ] && id=M7.3c
+  text="acceptance 3, $model model on the 007 carrier: L1 change of the\
+ wall deposit between dt = 2 and 1 ms at 16 s, native and 1 cm bins"
+  runs=("$LONG_DIR/$model-dt4ms" "$LONG_DIR/$model-dt2ms"
+        "$LONG_DIR/$model-dt1ms")
+  if ended "$model-dt4ms" "$model-dt2ms" "$model-dt1ms" > /dev/null
+  then
+    out=$($dtc study "$model" 16 "$DT_LIMIT" "${runs[@]}" native gamma)
+    s=$?
+    echo "$out" > "$LONG_DIR/$id.txt"
+    echo "$out" | grep -v -E '^(computed|summary) ' | sed 's/^/    /'
+    check "$id" "$(verdict "$out") $(origin "$model-dt4ms" "$model-dt2ms" \
+      "$model-dt1ms")" [ $s -eq 0 ]
+    for set in native gamma
+    do
+      $dtc history "$set" "${runs[@]}" \
+        > "$LONG_DIR/history-$model-$set.txt" 2>&1
+    done
+    $dtc plot "$LONG_DIR/wall-$model-gamma.png" 16 gamma "${runs[@]}" \
+      "$model, 007 carrier, 1 cm bins" > /dev/null 2>&1
+    computed=$((computed + $(grep -c -E '^computed .*: yes$' \
+                             "$LONG_DIR/$id.txt")))
+    summaries+="$(sed -n 's/^summary //p' "$LONG_DIR/$id.txt"); "
+  else
+    notEnded "$id" "$text" "$model-dt4ms" "$model-dt2ms" "$model-dt1ms"
+  fi
+done
+
+text="reported (not a gate): the measures of the time-step study on the 007\
+ carrier between 2 and 1 ms at 16 s, and the intermediate-time error of the\
+ temperature model (plan section 28, item 7)"
+if ended "${T007_RUNS[@]}" "${H007_RUNS[@]}" > /dev/null
+then
+  hist=$($CHECKS dtHistory "$LONG_DIR/temperature-dt4ms" \
+           "$LONG_DIR/temperature-dt2ms" "$LONG_DIR/temperature-dt1ms" 6)
+  hs=$?
+  echo "$hist" > "$LONG_DIR/M7.3d.txt"
+  check M7.3d "$text: ${summaries}temperature model: $(verdict "$hist")\
+ (tables: $LONG_DIR/M7.3b.txt, M7.3c.txt, M7.3d.txt, history-*.txt)\
+ $(origin "${T007_RUNS[@]}" "${H007_RUNS[@]}")" \
+    eval '[ "$computed" -eq 4 ] && [ $hs -eq 0 ]'
+else
+  notEnded M7.3d "$text" "${T007_RUNS[@]}" "${H007_RUNS[@]}"
+fi
+
+#------------------------------------------------------------------------------
+# M7.2c-f: h vs h/2 (acceptance 2)
+#------------------------------------------------------------------------------
+H_RUNS=(h-flux-none h2-flux-none h-A-none h2-A-none h-flux-halfCell
+        h2-flux-halfCell)
+VD_CHECK="$VD_BASE $LONG_DIR/h-A-none $LONG_DIR/h-flux-none\
+ $LONG_DIR/h2-flux-none $LONG_DIR/h-flux-halfCell $LONG_DIR/h2-flux-halfCell" \
+SAME_PAIR="h-flux-none h-A-none" SAME_LABELS="flux A" \
+runsCriterion M7.2c "the six runs of the h vs h/2 study (106 mL/min, layer\
+ faceCells, to 30 s: the flux form, the volumetric form A and the flux form\
+ with halfCell on the base and the h/2 mesh)" "${H_RUNS[@]}"
+
+pairCriterion M7.2d gate h-flux-none h2-flux-none "acceptance 2, flux form\
+ (depositionVelocity $VD_BASE m/s), wallResistance none, h vs h/2 at\
+ ${PAIR_TIME} s"
+pairCriterion M7.2e expectFail h-A-none h2-A-none "volumetric form (A 220\
+ 1/s: v_d = A V_I/A_I halves on h/2), wallResistance none, h vs h/2 at\
+ ${PAIR_TIME} s"
+pairCriterion M7.2f gate h-flux-halfCell h2-flux-halfCell "acceptance 2\
+ with wallResistance halfCell (the default of physical runs, plan section\
+ 28, item 6), flux form, h vs h/2 at ${PAIR_TIME} s"
+
+#------------------------------------------------------------------------------
+# M7.5a-c: axial x2
+#------------------------------------------------------------------------------
+X_RUNS=(x2-flux-none x2-flux-halfCell)
+VD_CHECK="$VD_BASE - $LONG_DIR/x2-flux-none $LONG_DIR/x2-flux-halfCell" \
+runsCriterion M7.5a "the two runs on the axial x2 mesh (106 mL/min, layer\
+ faceCells, the flux form, wallResistance none and halfCell, to 30 s)" \
+  "${X_RUNS[@]}"
+
+axialCriterion M7.5b h-flux-none x2-flux-none "axial x2 vs the base mesh,\
+ flux form, wallResistance none, at ${PAIR_TIME} s"
+axialCriterion M7.5c h-flux-halfCell x2-flux-halfCell "axial x2 vs the base\
+ mesh, flux form, wallResistance halfCell, at ${PAIR_TIME} s"
+
+#------------------------------------------------------------------------------
+# M7.3pa-pc: acceptance 3 on the paper-mode carrier (run/014 as
+# distributed at dt 4, 2 and 1 ms); the measures of dtChecks.py (as M7.3b-d)
+#------------------------------------------------------------------------------
+DT_RUNS=(dt4ms dt2ms dt1ms)
+runsCriterion M7.3pa "the three runs of the time-step study on the\
+ paper-mode carrier (run/014 as distributed: 100.2 mL/min, layer distance,\
+ A; dt 4, 2 and 1 ms to 30 s)" "${DT_RUNS[@]}"
+
+text="acceptance 3 on the paper-mode carrier: L1 change of the wall deposit\
+ between dt = 2 and 1 ms at ${PAIR_TIME} s, native and 1 cm bins"
+if ended "${DT_RUNS[@]}" > /dev/null
+then
+  dtc="python3 $VF_SRC/dtChecks.py"
+  out=$($dtc study paper-mode "$PAIR_TIME" "$DT_LIMIT" \
+          "$LONG_DIR/dt4ms" "$LONG_DIR/dt2ms" "$LONG_DIR/dt1ms" native gamma)
+  s=$?
+  echo "$out" > "$LONG_DIR/M7.3pb.txt"
+  echo "$out" | grep -v -E '^(computed|summary) ' | sed 's/^/    /'
+  check M7.3pb "$(verdict "$out") $(origin "${DT_RUNS[@]}")" [ $s -eq 0 ]
+  for set in native gamma
+  do
+    $dtc history "$set" "$LONG_DIR/dt4ms" "$LONG_DIR/dt2ms" \
+      "$LONG_DIR/dt1ms" > "$LONG_DIR/history-$set.txt" 2>&1
+  done
+  $dtc plot "$LONG_DIR/wall-dt-gamma.png" "$PAIR_TIME" gamma \
+    "$LONG_DIR/dt4ms" "$LONG_DIR/dt2ms" "$LONG_DIR/dt1ms" \
+    "paper mode, 1 cm bins" > /dev/null 2>&1
+  computed=$(grep -c -E '^computed .*: yes$' "$LONG_DIR/M7.3pb.txt")
+  summary=$(sed -n 's/^summary //p' "$LONG_DIR/M7.3pb.txt")
+  hist=$($CHECKS dtHistory "$LONG_DIR/dt4ms" "$LONG_DIR/dt2ms" \
+           "$LONG_DIR/dt1ms" 15)
+  hs=$?
+  echo "$hist" > "$LONG_DIR/M7.3pc.txt"
+  check M7.3pc "reported (not a gate; plan section 28, item 7): ${summary}; \
+$(verdict "$hist") (tables: $LONG_DIR/M7.3pb.txt, M7.3pc.txt,\
+ history-*.txt) $(origin "${DT_RUNS[@]}")" \
+    eval '[ "$computed" -eq 2 ] && [ $hs -eq 0 ]'
+else
+  notEnded M7.3pb "$text" "${DT_RUNS[@]}"
+  notEnded M7.3pc "reported: the observed order and the intermediate-time\
+ error of the time-step study" "${DT_RUNS[@]}"
+fi
+
+for id in "${!STATE[@]}"
+do
+  [ "${STATE[$id]}" = failed ] && exit 1
+done
+exit 0

@@ -102,12 +102,14 @@
 #          another rank, a tetrahedral pipe (gmsh) in serial and on 4
 #          ranks; the closure without drift on the pipe at large steps; the
 #          face-flux correction of the transport matrix in flux form (no
-#          explicit remainder on the pipe, both layer rules); the
-#          mole-fraction monitor from the carrier's p/(R T); the exactly
+#          explicit remainder on the pipe, both layer rules, and the
+#          transport identity of the cell defects at exact zero, a copy of
+#          the sources with the source form built as its negative control);
+#          the mole-fraction monitor from the carrier's p/(R T); the exactly
 #          rescaled inflow of a wedge with sectorAngle; run/014's
 #          out_excerpt; the provenance of its T-Flows inputs; the v2606
-#          compile of the solver and the utility; plan sections 25 to 27
-#          and 29; about 25-35 min) and the gate
+#          compile of the solver and the utility; plan sections 25 to 27,
+#          29 and 33; about 25-35 min) and the gate
 #   M4long the code-to-code runs of acceptance 3-5 (Fig. 9 identity, the
 #          solid profiles of t_ev 6 and 15 s, Table 2 for both layer
 #          rules with the gate restated by the researcher, max(2 K,
@@ -123,8 +125,61 @@
 #          lines); a run that did not end is NOTRUN with its cost and is
 #          left prepared; tests/paperMode/longRuns) and the gate; not part
 #          of 'all'
-#   all    every milestone implemented so far: M0 M1 M2 M3 M4 M5 (not
-#          M4long)
+#   M9     the GEMS3K backend of the HKS law (tests/gems: a copy of the
+#          sources built with the bridge in the work area, the default
+#          solver staying bridge-free; equilibrium GEMS refused without
+#          the bridge; mode frozen on the 1150 -> 450 K channel against the
+#          5 K table per element, deterministic in a restart and on 4
+#          ranks; mode local on the 1000 -> 400 K ramp channel: the guards
+#          of every element recomputed from the fields, 0 failures, the
+#          cost of a warm call with the load (and a load sampler that never
+#          outlives its script), 4 ranks with 4 engines and 4 logs, the
+#          deposit profile against the table run, paper mode refused unless
+#          allowNonPhysicalCarrier; speciation lagged as a separate run;
+#          with a fault-injecting bridge the engine re-created after
+#          GEMSB_ERR_FATAL in both modes and unusable results of converged
+#          calls counted as failures; updateInterval and its restarts,
+#          which keep the schedule of the time index and restore the
+#          lagged state; start-up refusals and warnings (unknown keys, the
+#          keys of the other mode); run/015 and its out_excerpt, exactly
+#          with the bridge that wrote it, with another bridge its start-up
+#          and step 1 (the rest NOTRUN); a restart in mode local; per-rank
+#          log directories, named for every rank; 64-bit counts; the
+#          closure and the solver defect of every run, and a ledger with a
+#          value that is not finite refused; plan sections 32 and 35; 2 min
+#          on a quiet machine, about 10 on a busy one) and the gate
+#   M7     verification (tests/verification; plan sections 6 M7 and 33):
+#          the Graetz-Robin problem of acceptance 1 (graetzRobin: the
+#          extended Graetz problem with a first-order wall uptake on
+#          blockMesh wedges of 32 to 256 radial cells, wallResistance none
+#          and halfCell, Bi 1 and 50, Gauss linear and SuperBee; GCI,
+#          observed orders, the discrete mode of the documented scheme and
+#          a time-accurate control; about 20 min on 4 cores; runs reused
+#          while the solver, the helper, the scripts and the functions that
+#          set them up are unchanged; and, without runs, the checks of a
+#          fit or a closure that is not finite, told apart from a crash,
+#          and the keys of the runs) and the gate
+#   M7long the long runs of M7 (tests/verification: pipeMeshes, the h/2
+#          first-layer and the axial x2 meshes of the test mesh, and
+#          longStudies): acceptance 3 on the 007 carrier (run/012 and run/013
+#          at dt 4, 2 and 1 ms to 16 s), acceptance 2 on the paper-mode
+#          carrier (h vs h/2 at 106 mL/min, layer faceCells: the flux form
+#          with none and with halfCell gated, the volumetric form reported),
+#          the axial x2 study (gated by the criterion the second M7 study
+#          proposed, M7LONG_AXIAL_GATE=no reports it), and acceptance 3 on
+#          run/014 (dt 4, 2 and 1 ms to 30 s; the intermediate-time error
+#          reported); hours on 16 cores: M7LONG_JOBS runs of M7LONG_RANKS
+#          ranks, default 2 x 8 (on a machine with hyperthreading bind
+#          them to distinct physical cores, e.g. M7LONG_CPUS=0-15; readme);
+#          runs keyed, reused, resumed; M7LONG_RUNS
+#          selects runs ('ended' only evaluates); a run that ended under
+#          older sources is kept, and run again when selected or revalidated
+#          by a probe only with M7LONG_REVALIDATE=yes (then named so in its
+#          criterion lines); the driver's own mechanics (the verdicts of
+#          its criteria with a stand-in checker; a resumed run of the 007
+#          carrier, about 2 min); and the gate; not part of 'all'
+#   all    every milestone implemented so far: M0 M1 M2 M3 M4 M5 M7 M9 (not
+#          M4long, M7long)
 #
 #   -fresh re-run the cached pristine reference cases too
 #
@@ -137,15 +192,25 @@
 # stops early (e.g. the pristine build or decomposePar failed) is reported
 # as a FAIL, and every criterion id this invocation must produce is checked
 # at the end: a missing one is a FAIL too.  The criterion SELF tests exactly
-# this mechanism, with a gate whose pristine revision does not exist.
+# this mechanism, with a gate whose pristine revision does not exist.  The
+# criterion LIST checks the converse: every criterion id recorded (PASS or
+# NOTRUN) is one this invocation expects, so that a new criterion cannot
+# be left out of the lists below (plan section 35, item U: M7.1n, M7.1o,
+# M7.6a and M7.6b were recorded but not expected, and their absence would
+# not have failed the run).
 #
 # Exit status: 0 when every expected criterion was recorded and none
 # failed, 1 otherwise, 2 on a usage or environment error.  A NOTRUN
 # criterion (M0.4, compile on v2606, under another OpenFOAM version; M5.4b,
 # the tables from their sources, on a machine without thermo.inp or the
 # pinned T-Flows revision; M4.6 without LESTO_OPENFOAM_V2606, M4.12
-# without the T-Flows revision; the M4long runs that did not end) does not
-# fail the run but is listed in the summary.
+# without the T-Flows revision; the M4long and M7long runs that did not
+# end; M9.3b, the cost of a warm GEMS3K call, when it is slower than 70 us
+# on a busy machine (a 1-minute load of 4 or more); the first line of M9.8,
+# run/015's out_excerpt, with a bridge other than the one that wrote it
+# (its start-up and step 1 compared, the rest NOTRUN); every M9 criterion
+# but M9.0, M9.1, M9.14 and the second line of M9.3b without a GEMS3K
+# bridge) does not fail the run but is listed in the summary.
 #
 #------------------------------------------------------------------------------
 source "$(dirname "${BASH_SOURCE[0]}")/functions"
@@ -161,8 +226,8 @@ for arg in "$@"
 do
   case "$arg" in
     -fresh) fresh=-fresh ;;
-    M0|M1|M2|M3|M4|M4long|M5) milestones+=("$arg") ;;
-    all) milestones+=(M0 M1 M2 M3 M4 M5) ;;
+    M0|M1|M2|M3|M4|M4long|M5|M7|M7long|M9) milestones+=("$arg") ;;
+    all) milestones+=(M0 M1 M2 M3 M4 M5 M7 M9) ;;
     -h|-help|--help) usage ;;
     *) echo "Unknown milestone or option: $arg" >&2; usage ;;
   esac
@@ -190,7 +255,8 @@ echo "rhoFixedFlowFoam acceptance tests: ${milestones[*]}" \
 #------------------------------------------------------------------------------
 # Criterion ids every invocation must record, with their number of lines
 #------------------------------------------------------------------------------
-expected=(BUILD:1 M0.1a:4 M0.1b:1 M0.1c:2 M0.1d:1 M0.2:1 SELF:1 CACHE:1)
+expected=(BUILD:1 M0.1a:4 M0.1b:1 M0.1c:2 M0.1d:1 M0.2:1 SELF:1 CACHE:1
+          LIST:1)
 if want M0
 then
   expected+=(M0.0:1 M0.3a:1 M0.3b:1 M0.3c:1 M0.3d:1 M0.3e:1 M0.3f:1 M0.3g:1
@@ -248,6 +314,24 @@ then
   # the carry-over (c) of the M3 sign-off belongs to M5 (plan section 20,
   # item 15); tests/Alltest M3 runs it with the other M3 criteria
   want M3 || expected+=(M3.2c:1)
+fi
+if want M7
+then
+  expected+=(M7.1a:1 M7.1b:1 M7.1c:1 M7.1d:1 M7.1e:1 M7.1f:1 M7.1g:1
+             M7.1h:4 M7.1i:4 M7.1j:4 M7.1k:1 M7.1l:1 M7.1m:4 M7.1n:1
+             M7.1o:1)
+fi
+if want M7long
+then
+  expected+=(M7.2a:1 M7.2b:1 M7.3a:1 M7.3b:1 M7.3c:1 M7.3d:1
+             M7.2c:1 M7.2d:1 M7.2e:1 M7.2f:1 M7.5a:1 M7.5b:1 M7.5c:1
+             M7.3pa:1 M7.3pb:1 M7.3pc:1 M7.6a:1 M7.6b:1)
+fi
+if want M9
+then
+  expected+=(M9.0:2 M9.1:1 M9.2a:1 M9.2b:1 M9.3a:2 M9.3b:2 M9.3c:1 M9.3d:1
+             M9.3e:1 M9.4:1 M9.5:2 M9.6:3 M9.7:16 M9.8:3 M9.9:1 M9.10:1
+             M9.11:2 M9.12:1 M9.13:1 M9.14:1)
 fi
 
 #------------------------------------------------------------------------------
@@ -329,6 +413,22 @@ then
   want M3 || runScript "$TESTS_DIR/profiles/Allrun" M3.2c
 fi
 
+if want M7
+then
+  runScript "$TESTS_DIR/verification/graetzRobin"
+fi
+
+if want M7long
+then
+  runScript "$TESTS_DIR/verification/pipeMeshes" \
+    && runScript "$TESTS_DIR/verification/longStudies"
+fi
+
+if want M9
+then
+  runScript "$TESTS_DIR/gems/Allrun"
+fi
+
 #------------------------------------------------------------------------------
 # Every milestone: self-test of the completeness check.  The gate is run
 # with a pristine revision that does not exist, into a separate results
@@ -408,6 +508,45 @@ cacheTest() {
 check CACHE "the cache keys of the pristine runs and the dynamicCode seed\
  change with a copied dictionary and with the linked carrier of run/008-011"\
  cacheTest
+
+#------------------------------------------------------------------------------
+# Every milestone: every criterion id recorded (PASS or NOTRUN; a FAIL fails
+# the run anyway, and a script that stops early records one named after its
+# directory) is in the expected list of this invocation (plan section 35,
+# item U).  unexpectedResults <results file> <id>:<count> ... prints those
+# ids; the check runs it on the results of this invocation and, as its own
+# control, on a stand-in file with one id more (M7.9z), which it must name.
+#------------------------------------------------------------------------------
+unexpectedResults() {
+  local file=$1 id found=
+  shift
+  for id in $(awk '$1 != "FAIL" {print $2}' "$file" | sort -u)
+  do
+    case " $* " in
+      *" $id:"*) ;;
+      *) found+="${found:+ }$id" ;;
+    esac
+  done
+  echo "$found"
+}
+
+listTest() {
+  local dir=$WORK_DIR/listtest unexpected control
+  rm -rf "$dir"
+  mkdir -p "$dir"
+  unexpected=$(unexpectedResults "$RESULTS" "${expected[@]}")
+  { cat "$RESULTS"; echo "PASS   M7.9z      a criterion of no list"; } \
+    > "$dir/results"
+  control=$(unexpectedResults "$dir/results" "${expected[@]}")
+  echo "recorded but not expected: ${unexpected:-none}; the control with\
+ M7.9z added: ${control:-none}"
+  [ -z "$unexpected" ] && [ "$control" = "M7.9z" ]
+}
+
+listOut=$(listTest)
+listStatus=$?
+check LIST "every criterion id recorded is expected by this invocation\
+ (plan section 35, item U): $listOut" [ $listStatus -eq 0 ]
 
 #------------------------------------------------------------------------------
 # Summary: every expected criterion recorded, none failed

@@ -1,0 +1,11 @@
+/* PbI2_g with the PbI2-He correlation: uniform T and p give a uniform D
+   (createVariableDiffusivity.H; D(500 K, 1 atm) = 7.6963204441542405e-05
+   m2/s) */
+FoamFile {version 2.0; format ascii; class dictionary; object speciesTransportProperties;}
+
+pressureUnit atm;
+
+species (PbI2_g PbI2_s);
+
+PbI2_g {state gas; diffusivityModel PbI2He; molarMass 0.46100894;}
+PbI2_s {state solid;}

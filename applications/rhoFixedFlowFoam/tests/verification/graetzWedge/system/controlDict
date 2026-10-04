@@ -1,0 +1,38 @@
+/*------------------------------------------------------------------------------
+
+system/controlDict of tests/verification/graetzWedge (filled by graetzCase.py)
+
+  Pseudo-transient march to the steady state (default): implicit Euler
+  with a time step far above every time scale of the case (Co >> 1), so
+  that each step solves the steady equations up to a ddt term of relative
+  size 1/(lambda_min dt); the steady state of implicit Euler does not
+  depend on dt.  The fields are written (ascii, 17 digits) at the end only,
+  the axial profiles after every step (profile times of
+  thermochemistryProperties).  The time-accurate control run (Co = 1)
+  writes the fields and the profiles every write interval instead (107
+  steps of dx/u_max, 0.0500 s), its last step included (graetzRobin).
+
+------------------------------------------------------------------------------*/
+FoamFile {version 2.0; format ascii; class dictionary; object controlDict;}
+
+application       rhoFixedFlowFoam;
+startFrom         startTime;
+startTime         0;
+stopAt            endTime;
+endTime           @ENDTIME@;
+deltaT            @DT@;
+writeControl      timeStep;
+writeInterval     @WRITEINTERVAL@;
+purgeWrite        0;
+writeFormat       ascii;
+writePrecision    17;
+writeCompression  off;
+timeFormat        general;
+timePrecision     6;
+runTimeModifiable false;
+
+speciesTransport {
+  tolerance          @OUTERTOL@;
+  nCorr              @NCORR@;
+  writeFrozenFields  no;
+}

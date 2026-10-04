@@ -232,6 +232,51 @@ waitJobs() {
 
 
 #------------------------------------------------------------------------------
+# Load sampler: the 1-minute load average sampled in the background while a
+# timing run goes on (M9.3b)
+#
+#   startLoadSampler <file>   appends /proc/loadavg's 1-minute load to
+#                             <file> every 2 s; SAMPLER is its PID
+#   stopLoadSampler           stops it (and its traps)
+#
+# The sampler must never outlive its script (plan section 35, item K; it
+# was an endless loop killed only after the timing run returned, so an
+# interrupted run left it running): the script's EXIT, INT and TERM traps
+# stop it, and the sampler checks every 2 s that the script still lives,
+# so that it ends by itself also when the script is killed (KILL runs no
+# trap).  A trap is run when the command in the foreground ends: run the
+# timing run in the foreground, as runSerial does.
+#------------------------------------------------------------------------------
+
+SAMPLER=
+
+startLoadSampler() {
+  local file=$1 parent=$$
+  (
+    trap - EXIT INT TERM
+    while kill -0 "$parent" 2>/dev/null
+    do
+      cut -d' ' -f1 /proc/loadavg >> "$file"
+      sleep 2
+    done
+  ) &
+  SAMPLER=$!
+  trap 'stopLoadSampler' EXIT
+  trap 'stopLoadSampler; exit 130' INT
+  trap 'stopLoadSampler; exit 143' TERM
+}
+
+stopLoadSampler() {
+  trap - EXIT INT TERM
+  [ -n "$SAMPLER" ] || return 0
+  kill "$SAMPLER" 2>/dev/null
+  wait "$SAMPLER" 2>/dev/null
+  SAMPLER=
+  return 0
+}
+
+
+#------------------------------------------------------------------------------
 # Mesh: gmshToFoam of run/001.../pipe.msh, once, into tests/work/mesh.
 # The stamp holds the checksum of pipe.msh, so a changed mesh is converted
 # again.  The polyMesh format is the same for v2412 and v2606, so the mesh
@@ -268,10 +313,11 @@ makeMesh() {
 #
 #   makeCase <run case number> <destination>
 #     copies system/, the constant/*Properties files and the non-linked 0/
-#     files of run/<number>-*; links the carrier fields and the tables
-#     constant/*.csv and constant/*.dat (absolute links to their targets,
-#     e.g. the p_v table of run/013, the wall table of run/014), the mesh
-#     and the shared dynamicCode directory.
+#     files of run/<number>-*; links the carrier fields, the tables
+#     constant/*.csv and constant/*.dat and the GEMS3K system constant/gems
+#     (absolute links to their targets, e.g. the p_v table of run/013, the
+#     wall table of run/014, thermochemistry/systems/PbI2He of run/015),
+#     the mesh and the shared dynamicCode directory.
 #
 #   caseInputsSum <run case number> ...
 #     checksum of everything makeCase takes from those run/ cases (the
@@ -305,7 +351,7 @@ makeCase() {
 
   cp "$src"/system/* "$dst/system/"
   cp "$src"/constant/*Properties "$dst/constant/"
-  for f in "$src"/constant/*.csv "$src"/constant/*.dat
+  for f in "$src"/constant/*.csv "$src"/constant/*.dat "$src"/constant/gems
   do
     [ -e "$f" ] && ln -s "$(readlink -f "$f")" "$dst/constant/$(basename "$f")"
   done

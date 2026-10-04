@@ -1,0 +1,8 @@
+FoamFile {version 2.0; format ascii; class volScalarField; object T;}
+dimensions    [0 0 0 1 0 0 0];
+internalField uniform @T@;
+boundaryField {
+  "(INLET|OUTLET|WALL)" {type calculated; value uniform @T@;}
+  "(FRONT|BACK)"        {type wedge;}
+  AXIS                  {type empty;}
+}

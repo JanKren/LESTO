@@ -69,7 +69,12 @@
 # run ids, or 'ended' for none (an evaluation of the runs that ended).  A
 # run that is neither selected nor ended is prepared (set up, decomposed,
 # ready to run) and its criteria are NOTRUN with its cost, measured here
-# in wall-clock seconds per step of the runs that ended.
+# in wall-clock seconds per step of the runs that ended.  A run that ended
+# under another key and is not selected is kept as it is, its criteria
+# NOTRUN with the way to revalidate it or to run it again (as M7long; plan
+# section 33): before, it was prepared anew, so an evaluation after a
+# change of the sources without M4LONG_REVALIDATE=yes discarded every
+# recorded run.
 #
 # This file is executed, not sourced, so that tests/paperMode/Allrun can be
 # edited while the runs go on.  Replace this file only atomically (a copy
@@ -738,6 +743,11 @@ do
     && [ -f "$c/m4done" ]
   then
     echo "  $id: reused ($c)"
+  elif [ -f "$c/m4done" ]
+  then
+    # a recorded run is never replaced by a run that is not selected
+    echo "  $id: ended under another key, kept ($c; M4LONG_REVALIDATE=yes" \
+         "revalidates it, M4LONG_RUNS='$id' runs it again)"
   elif prepareLong "$spec"
   then
     echo "  $id: not selected (M4LONG_RUNS), prepared ($c)"
@@ -748,7 +758,7 @@ do
 done
 waitJobs
 
-declare -A STATE    # id: ended, failed or prepared
+declare -A STATE    # id: ended, stale, failed or prepared
 for spec in "${LONG_RUNS[@]}"
 do
   id=${spec%% *}
@@ -757,6 +767,9 @@ do
     && [ -f "$c/m4done" ]
   then
     STATE[$id]=ended
+  elif [ -f "$c/m4done" ]
+  then
+    STATE[$id]=stale
   elif [ -f "$c/m4failed" ]
   then
     STATE[$id]=failed
@@ -828,6 +841,11 @@ ended() {
     case "${STATE[$id]}" in
       ended) ;;
       failed) echo "$id: the run failed ($PM_DIR/long/$id)"; status=2 ;;
+      stale) echo "$id: ended under another key (the sources, the inputs or" \
+               "the set-up changed since), kept in $PM_DIR/long/$id: run" \
+               "M4LONG_REVALIDATE=yes tests/Alltest M4long to revalidate it," \
+               "or M4LONG_RUNS='$id' to run it again"
+             [ $status -eq 0 ] && status=1 ;;
       *) notRunText "$id"; [ $status -eq 0 ] && status=1 ;;
     esac
   done
@@ -964,7 +982,9 @@ table2() {
       continue
     fi
     time=$(lastProfileTime "$c" 2>/dev/null)
-    if [ "${STATE[$case-$rule]}" != failed ] && [ -n "$time" ]
+    # a run of the current key that has not ended (not one that failed, nor
+    # a recorded run of another key: stale)
+    if [ "${STATE[$case-$rule]}" = prepared ] && [ -n "$time" ]
     then
       out=$($CHECKS tdepDecided "$c" "$time" "$tEnd" "$expected" 2 \
               "$case, layer $rule (the run has not ended)")

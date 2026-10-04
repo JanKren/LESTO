@@ -142,6 +142,24 @@ al. (2026).  Every subcommand prints one summary line and exits with 0
       present and enters the defect by its face values: matrixDefect.H),
       in at least <min lines> lines; with 'nonzero', the positive control:
       some line has n > 0 (a correction in source form, e.g. linearUpwind)
+  transportIdentity <log> <min lines> <limit> [violated]
+      the transport identity of the same report (matrixDefect.H, plan
+      section 33): every 'transport identity <D> kg/s (|D| <r> of its
+      terms, <T> kg/s)' has r <= <limit>, in at least <min lines> lines:
+      the cell defects in flux form telescope exactly, so D is 0 to the
+      rounding of exact sums (measured at most 1.1e-36 of the terms); with
+      'violated', the negative control: some line has r > <limit> (a cell
+      defect with the face-flux correction in source form leaves its
+      double-precision residue, measured 5e-21 to 8e-20 of the terms)
+  sourceFormMutant <matrixDefect.H>
+      edits a COPY of matrixDefect.H (the negative control of M4.18) so that
+      cellDefectT builds the cell defect with the face-flux correction in
+      source form, as round 2 did: r_c starts from b_c - s_c (the
+      correction's source contribution c_c included) instead of E_c, and
+      the face values C_f of internal, coupled and non-coupled faces are
+      left out, while the reported explicit remainder E is unchanged; it
+      stops (exit 1) unless every edited statement is found exactly once
+      (twice for the two boundary corrections)
   moleFraction <case> <time> <log> [<tol>]
       the passive-carrier monitor: the 'max mole fraction' of the step of
       <time> in the log equals the maximum over the cells of c/(c + p/(R
@@ -1082,6 +1100,55 @@ def cmdExplicitRemainder(log, minLines, mode='zero'):
          'lines, with an explicit source > 0)')
 
 
+def cmdTransportIdentity(log, minLines, limit, mode='hold'):
+    pattern = re.compile(r'transport identity (\S+) kg/s \(\|D\| (\S+) of '
+                         r'its terms, (\S+) kg/s\)')
+    found = [(float(d), float(r), float(t)) for d, r, t in
+             pattern.findall(open(log, errors='replace').read())]
+    if not found:
+        done(False, f'{log}: no transport identity in the transport lines')
+    limit = float(limit)
+    above = [f for f in found if f[1] > limit]
+    worstD = max(abs(d) for d, _, _ in found)
+    rels = [r for _, r, _ in found]
+    terms = [t for _, _, t in found]
+    summary = (f'{log}: {len(found)} transport lines: |D| up to {worstD:.2e} '
+               f'kg/s, {min(rels):.2e} to {max(rels):.2e} of its terms '
+               f'({min(terms):.3g} to {max(terms):.3g} kg/s); {len(above)} '
+               f'lines above {limit:g}')
+    if mode == 'violated':
+        done(len(above) > 0, summary + ' (negative control: the identity '
+             'violated in some line)')
+    done(len(found) >= int(minLines) and not above,
+         summary + f' (required: none above {limit:g}, in at least '
+         f'{minLines} lines)')
+
+
+def cmdSourceFormMutant(path):
+    text = open(path).read()
+    try:
+        a = text.index('inline void cellDefectT (')
+        b = text.index('inline void cellDefect (', a)
+    except ValueError:
+        done(False, f'{path}: no cellDefectT followed by cellDefect')
+    body = text[a:b]
+    edits = [
+        ('      r[celli] = E;\n',
+         '      r[celli] = cellRemainder(b[celli], ddtSource[celli], 0);\n', 1),
+        ('    if (correction) {\n', '    if (false && correction) {\n', 1),
+        ('if (Cp) {', 'if (false && Cp) {', 2),
+    ]
+    for old, new, count in edits:
+        if body.count(old) != count:
+            done(False, f'{path}: the statement {old.strip()!r} occurs '
+                 f'{body.count(old)} times in cellDefectT, not {count}: '
+                 'update sourceFormMutant to the source')
+        body = body.replace(old, new)
+    open(path, 'w').write(text[:a] + body + text[b:])
+    done(True, f'{path}: cellDefectT edited into the source form of the '
+         'face-flux correction (r_c from b_c - s_c, no face values C_f)')
+
+
 def cmdMoleFraction(case, time, log, tol='1e-5'):
     pc = phaseChangeChecks()
     R, M = 8.314462618, 0.46100894
@@ -1157,6 +1224,8 @@ COMMANDS = {
     'sameBalance': cmdSameBalance,
     'mdepCount': cmdMdepCount,
     'explicitRemainder': cmdExplicitRemainder,
+    'transportIdentity': cmdTransportIdentity,
+    'sourceFormMutant': cmdSourceFormMutant,
     'moleFraction': cmdMoleFraction,
     'inflowExact': cmdInflowExact,
 }

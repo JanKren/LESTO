@@ -1,0 +1,40 @@
+/*------------------------------------------------------------------------------
+
+system/blockMeshDict of tests/verification/graetzWedge (filled by graetzCase.py)
+
+  Axisymmetric wedge of a pipe: axis along x (0 <= x <= L), radius along y
+  (0 <= y <= R), wedge planes z = -+y tan(theta/2).  The vertices lie at
+  (x, r, -+r tan(theta/2)) as in OpenFOAM's wedge tutorials (SandiaD_LTS),
+  so that the WALL faces lie at y = R and the cell metrics are those of an
+  axisymmetric scheme in the radius y for any theta (graetzCarrier.C).
+  One block, uniform spacing: NX cells along x, NR along y, 1 in z; the
+  axis edge is collapsed (mergeType points; AXIS has no faces).
+
+  @SUMMARY@
+
+------------------------------------------------------------------------------*/
+FoamFile {version 2.0; format ascii; class dictionary; object blockMeshDict;}
+
+mergeType points;   // wedge geometry: merge points, not topology
+
+scale 1;
+
+vertices (
+  (0      0    0)       // 0 axis, inlet
+  (@L@    0    0)       // 1 axis, outlet
+  (@L@    @R@  @MRT@)   // 2 wall, outlet, back
+  (0      @R@  @MRT@)   // 3 wall, inlet, back
+  (@L@    @R@  @RT@)    // 4 wall, outlet, front
+  (0      @R@  @RT@)    // 5 wall, inlet, front
+);
+
+blocks (hex (0 1 2 3 0 1 4 5) (@NX@ @NR@ 1) simpleGrading (1 1 1));
+
+boundary (
+  INLET  {type patch; faces ((0 0 5 3));}
+  OUTLET {type patch; faces ((1 2 4 1));}
+  WALL   {type patch; faces ((3 5 4 2));}
+  BACK   {type wedge; faces ((0 3 2 1));}
+  FRONT  {type wedge; faces ((0 1 4 5));}
+  AXIS   {type empty; faces ((0 1 1 0));}
+);

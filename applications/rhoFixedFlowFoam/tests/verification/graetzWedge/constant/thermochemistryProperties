@@ -1,0 +1,50 @@
+/*------------------------------------------------------------------------------
+
+constant/thermochemistryProperties of tests/verification/graetzWedge
+
+  Temperature model as a constant first-order wall uptake: k (Tdep - T) =
+  100 gives f(T) = 1 - exp(-100) = 1 in double precision, so the wall
+  flux into the WALL is rho k_w Y with k_w = depositionVelocity [m/s]
+  (wallResistance none: Y of the wall cell; halfCell: the Robin face value,
+  v' = 1/(1/k_w + d/D)).  areaMultiplier 1 and areaPerVolume cell (needed
+  by halfCell).  Profiles: one bin per axial cell, after every
+  step of the pseudo-transient march (times).
+
+  @SUMMARY@
+
+------------------------------------------------------------------------------*/
+FoamFile {version 2.0; format ascii; class dictionary; object thermochemistryProperties;}
+
+model temperature;
+
+pairs {
+  PbI2_g { condensed PbI2_s; }
+}
+
+interface {
+  patches              (WALL);
+  layer                faceCells;
+  areaPerVolume        cell;
+  areaMultiplier       1;
+  interfaceTemperature cell;
+  wallResistance       @LAW@;
+}
+
+temperatureCoeffs {
+  depositionVelocity @KW@;
+  k                  1;
+  Tdep               @TDEP@;
+}
+
+balance {
+  nGuard          3;
+  guardTolerance  1e-12;
+}
+
+profiles {
+  axis       (1 0 0);
+  origin     (0 0 0);
+  bins       { native { min 0; max @L@; nBins @NX@; } }
+  times      (@PTIMES@);
+  observable wall;
+}
