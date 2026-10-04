@@ -1,0 +1,119 @@
+/*------------------------------------------------------------------------------
+
+constant/thermochemistryProperties
+
+  - gas/condensate exchange model (mock | temperature | HKS)
+  - pairs: gas species, their condensate, the vapour-pressure table (the
+    check and the fallback of GEMS3K) and the species of the pair in the
+    GEMS3K system
+  - interaction layer and wall law options
+  - Hertz-Knudsen-Schrage coefficients (SI), p_eq from GEMS3K
+  - the GEMS3K backend: mode local (per step and element, warm started)
+  - samples (the boat: an inventory of solid PbI2 that evaporates)
+  - mass-balance controls
+
+------------------------------------------------------------------------------*/
+FoamFile{version 2.0;  format ascii;  class dictionary; object thermochemistryProperties;}
+/*----------------------------------------------------------------------------*/
+
+model HKS;
+
+pairs {
+
+  PbI2_g {
+    condensed  PbI2_s;
+
+    vapourPressure {                /* Gurvich (1991) via NASA-9, phase
+                                       resolved: p_eq = min(cr, l); the
+                                       check and fallback of GEMS3K */
+      file           "<constant>/pv_PbI2_phases.csv";
+      phases         ("PbI2(cr)" "PbI2(l)");
+      units          log10Pa;
+      interpolation  logInverseT;   /* log10 p linear in 1/T */
+      outOfRange     extrapolate;
+    }
+
+    gems {                          /* the pair in the GEMS3K system */
+      gas          "PbI2(g)";
+      condensates  ("PbI2(cr)" "PbI2(l)");  /* p_eq over the most stable */
+      elements     { Pb 1; I 2; }   /* the formula, checked against the
+                                       system */
+      excess       { I 1e-6; }      /* a slightly iodine-rich bulk: the
+                                       interior-point method of GEMS3K
+                                       occasionally stalls at the exact
+                                       PbI2 stoichiometry */
+    }
+  }
+}
+
+interface {
+
+  patches               (WALL);
+  layer                 faceCells;  /* one layer: the cells at the wall */
+  areaPerVolume         cell;       /* A_e = |S_f| (flux form) */
+  areaMultiplier        1;
+  interfaceTemperature  cell;       /* T_e = T of the wall cell */
+  wallResistance        none;
+}
+
+HKSCoeffs {
+
+  accommodation  1;                 /* sigma */
+  Ce             1;
+  kineticScale   1;                 /* SI */
+  equilibrium    GEMS;              /* p_eq from GEMS3K (GEMSCoeffs) */
+  speciation     none;              /* lagged: a separate modelling change */
+}
+
+GEMSCoeffs {
+
+  system             "<constant>/gems/PbI2He-dat.lst";  /* link to
+                                       thermochemistry/systems/PbI2He */
+  mode               local;         /* every element, every step, warm
+                                       started, at the composition of its
+                                       cell */
+  carrier            "He(g)";
+  minMoleFraction    1e-6;          /* below it the table (GEMS3K errs by
+                                       decades at trace composition) */
+  minTemperature     500;           /* [K] below it the table (no
+                                       convergence at 300-490 K) */
+  maxLog10Deviation  0.01;          /* a result further from the table is
+                                       rejected: the table */
+  updateInterval     1;             /* steps between updates */
+  allowNonPhysicalCarrier  no;      /* the 007 carrier is a gas at its p,
+                                       T (0.3 %); paper mode is refused */
+  logDirectory       "gemsLog";     /* per rank: processorN/gemsLog */
+  logLevel           4;             /* GEMS3K logging: errors only */
+  writeEquilibriumField  no;        /* yes: pEq_PbI2_g, gemsSource_PbI2_g */
+}
+
+samples {
+
+  boat {
+    pair           PbI2_g;
+    selection {                     /* in memory: 144 cells */
+      boat {
+        action  use;
+        source  cylinder;
+        point1  (0.04 0 0);
+        point2  (0.05 0 0);
+        radius  4.8e-4;             /* between the rings of cell centres
+                                       at 0.458 and 0.5 mm (run/013) */
+      }
+    }
+    mode           inventory;
+    amount         4.84e-6;         /* mol (T106_6: 2.23 mg) */
+    areaPerVolume  4000;            /* 1/m, 2/R_sample */
+    kineticScale   1;
+    Ce             1;
+    removeTime     6;               /* s: the boat is pulled out */
+  }
+}
+
+balance {
+
+  nGuard               3;
+  guardTolerance       1e-12;      /* relative to the pair inventory */
+  moleFractionWarning  0.05;       /* passive-carrier validity monitor */
+  writeFile            yes;        /* postProcessing/phaseChangeBalance */
+}

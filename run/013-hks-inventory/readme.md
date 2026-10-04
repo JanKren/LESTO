@@ -83,8 +83,14 @@ As case 012: `dt = 1 ms`, implicit Euler (required), `Gauss SuperBee`,
 outer loop `nCorr 10`, `tolerance 1e-5` (a step is converged when the
 initial residual is below the tolerance and the regime changes carry no
 significant mass), loose correctors (`Y_PbI2_g`: GAMG 1e-8, relTol 0.1)
-and one tight final solve (`Y_PbI2_gFinal`: 1e-12, relTol 0), no
+and one tight final solve (`Y_PbI2_gFinal`: 1e-14, relTol 0), no
 relaxation, `writeFormat binary` (exact restarts, also across the removal).
+The final tolerance 1e-14 is that of HKS cases (plan section 28, item 8;
+1e-12 until the M7 integration, plan section 33): with 1e-12 the booked
+solver defect grew by about -2e-18 kg per step once the boat was empty,
+to 2e-8 to 6e-8 of the inventory after 16 s (the residual of the final
+solve, one sign); 1e-14 cuts it a hundred times, for about 20 % more time
+per step.
 
 ## Output
 
@@ -113,14 +119,25 @@ the gas outside the boat cells).
 ## Tests
 
 `out_excerpt` holds the first 5 steps written on OpenFOAM v2412 by the
-build of the M4 review, round 3 (the solver defect of the transport-only
-matrix in flux form, its face-flux correction included, plus the realised
-exchange; the mole fraction of the monitor from the carrier's p/(R T): the
-earlier builds wrote other round-off digits of the solver defect,
-`clamped`, `solverDefect` and the closure, and a max mole fraction up to
-1.5e-4 higher in relative terms, plan section 29, item 4); `tests/Alltest
-M5` (criterion M5.3b) checks that the current build reproduces it, and
-criterion M5.3a runs this case for 25
+build of the M7 integration (plan section 33), with the final tolerance
+1e-14.  Against the excerpt of the M4 review, round 3 (final tolerance
+1e-12), 61 of its 1656 tokens differ (the tokens that identify a run,
+dates and timings, aside), all at or below the residual of the old final
+solve: the final solve's residual and iterations (10 tokens), the INLET
+and OUTLET transport of the transport line (10; 1.6e-18 and 1e-60 kg/s,
+by up to 1e-3 relative), the solver defect of that line (5), the
+cumulative `transport` of the balance line (5), `clamped` (5; the
+rounding of the stored condensate), `solverDefect` and its relative value
+(10; 2.6e-16 instead of 3.0e-14 of the inventory after 5 steps), the
+closure and its relative value in 3 steps (6; by one ulp of the
+inventory), and the minimum Y of the monitor and min/max lines (8) and the
+negative mass (2) of the overshoot (-6e-7 to -5e-9, by up to 2e-4
+relative); the inventories, the max mole fraction and every other token
+are unchanged.  All 61 come from the tolerance: the build of the cleanup
+of plan section 35 run with the old final tolerance 1e-12 reproduces the
+old excerpt (`regress.sh -excerpt`: IDENTICAL, 111 lines, 5 steps; plan
+section 35, item R).  `tests/Alltest M5` (criterion M5.3b) checks that
+the current build reproduces it, and criterion M5.3a runs this case for 25
 steps of 4 ms with a background gas `Y = 0.1` (so that the wall deposits
 from the first step): closure below 1e-13, solver defect below 1e-11, no
 significant regime change in the deciding corrector or the final
