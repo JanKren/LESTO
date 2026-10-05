@@ -6924,3 +6924,1071 @@ d. No `maxMoleFraction` guard now; the limit recorded (item M).
 e. The comparison of run/015's excerpt: exact with the bridge that wrote
    it, its start-up and step 1 with another bridge and the rest NOTRUN
    (item V; it replaces the masked comparison of item J).
+
+---
+
+## 36. M10 (Pb-Bi-I) design (pending the researcher's sign-off)
+
+Section 6 gives M10 one paragraph: several pairs and samples, a balance per
+element, BiI3 and Bi tables, an optional operator-split re-speciation, and
+the qualification of the GEMS3K guards at trace composition, "5+ d".  The
+paper plan asks for more: per-cell GEMS3K for multi-species Pb-Bi-I.
+Section 35, item M, deferred a `maxMoleFraction` guard to this
+qualification.  This section is the design for that extension.  Nothing is
+implemented, and the repository (phase-change-rebased at 058e390) was only
+read.
+
+The design has three studies and a synthesis:
+- A, the data: a Pb-Bi-I-He dataset, the GEMS3K system, the p_v tables and
+  their validation, including Liu et al. (2025).
+- B, GEMS3K: its robustness and cost with that system.
+- C, the solver: the chemistry along the tube, the solver design and a
+  prototype re-speciation kernel.
+- The synthesis rechecked the key claims of all three with its own code
+  (items 36.2.3 and 36.3.8), and cross-checked them against each other
+  (item 36.2.5).
+
+Evidence is archived outside the repository, in
+`~/opt/gems-data/m10-design-2026-10-04/` (internal: its Bi-I data derive
+from HERACLES, i.e. Barin 1995; item 36.1):
+
+| study | directory | contents | rebuild |
+|---|---|---|---|
+| A | `thermo/` | `data/`, `PbBiIHe/`, `generator/`, `validation/` (logs, figures) | `make_all.sh`: 13 min serial; a rerun gives identical numbers |
+| B | `gems/` | `bridge/` (the extended bridge), `driver/`, `maps/`, `logs/`, `cost/`, `figures/` | `run_all.sh` |
+| C | `design/` | `notes.md`, `py/` (equilibrium, plug flow, GEMS3K scans), `kernel/` | — |
+| synthesis | `synth/` | `check_thermo.py`, `check_gems.py`, `bench_warm.cpp`, `split_bii.py`, with their outputs | — |
+
+The three studies used the same GEMS3K input files (md5 of DCH, IPM and
+DBR: 18cdd3b0..., 95b41906..., 3a9b2484...), so their results refer to one
+system.
+
+### 36.1 The data and their licences
+
+1. **The dataset: 19 species in two groups.**
+   - **Pb-I-He: 10 NASA-9 records (Gurvich 1991).** He, I, I2, Pb, PbI
+     and PbI2 (g); PbI2(cr, l); Pb(cr, l).  These are the records of
+     `systems/PbI2He`, unchanged.
+   - **Bi-I: 9 ThermoFun records** (`thermo/data/bi_i_m10-thermofun.json`).
+     - Bi(g), Bi2(g), BiI(g), BiI3(g), Bi(cr), Bi(l) and BiI(cr) come from
+       HERACLES-TDB v0.2.  Its numbers equal Barin (1995).  Their data are
+       unchanged.
+     - BiI3(cr) is HERACLES's record cut at T_fus = 680.85 K.  HERACLES
+       continues the crystal past 681.8 K through a zero-enthalpy
+       transition to the liquid heat capacity.
+     - BiI3(l) is constructed, since no open record exists:
+       - the crystal at T_fus;
+       - TKV's fusion enthalpy, 31.798 kJ/mol;
+       - Cp(l) = 150.624 J/(mol K), Barin's 36.0 cal/(mol K).  TKV's
+         vaporisation enthalpies imply 141.6 +- 15.6, which includes it.
+   - **Conventions and choices.**
+     - Every record uses G = H - T S from its own H298 and S298.
+       HERACLES's own G298 values disagree with that by 1.49 J/mol for
+       Bi(cr): 56.735 against 56.74 J/(mol K), so Bi melts at 544.58 K by
+       G and at 544.51 K by H and S.  With the one convention, the NASA
+       and HERACLES records mix exactly.
+     - Pb(g) is NASA's.  HERACLES's Pb(g) carries the heat capacity of
+       condensed Pb and is 3.9 kJ/mol off at 1000 K.
+     - Molar volumes [m3/mol]: Bi 2.1368e-5 and BiI3 1.0206e-4 (CRC
+       densities); BiI(cr) 4.826e-5 (an additive estimate).
+   - Source, licence and correction of every species are in
+     `thermo/data/provenance.csv`.
+2. **Licences.**
+   - **NASA CEA thermo.inp is Apache-2.0**: redistributable with
+     attribution, as the PbI2 table and the PbI2He system already are.
+   - **HERACLES** lies in a GPL-3.0 repository, but its numbers are
+     Barin's copyrighted compilation.  Everything derived from it stays
+     internal until PSI confirms its provenance and licence: the dataset,
+     the GEMS3K system PbBiIHe, the Bi, Bi2, BiI and BiI3 tables, and
+     BiI3(l).
+   - **TKV** is view-only.  Its values are cited individually and never
+     copied.  The primary reference of the BiI3 fusion data (31.8 +- 4.2
+     kJ/mol) was not retrieved: a gap.
+   - **JANAF, Burcat and HSC** served only as internal checks: PbI2
+     deposition temperatures and a BiI(g) test variant.
+   - **Consequence:** the repository gets code, generator changes and
+     tests, never the Bi data (decision 1).  Tests that need those data
+     are NOTRUN without them, as M5.4b is without thermo.inp.
+3. **The BiI3 data against TKV.**
+   - Vapour pressure, log10(p/Pa): -2.987 at 400 K, 0.440 at 500 K, 2.682
+     at 600 K and 3.984 at 680.85 K, as the research report gives them.
+   - Triple point: log10 p = 3.9845, against TKV's 0.089 atm (3.9551):
+     +0.029 decades.
+   - **Normal boiling point: 799-801 K, not TKV's 815 +- 1 K.**
+     - BiI3 monomer alone: 800.91 K.
+     - Whole congruent vapour (96.4 % BiI3): 798.63 K.
+     - GEMS3K: 798.76 K.
+
+     The cause is Barin's sublimation enthalpy at 680.85 K, 124.44 kJ/mol
+     against TKV's 117.36.  The liquid's Cp does not matter (120-170
+     J/(mol K) give 798.1-802.8 K).  Reaching 815 K would need a fusion
+     enthalpy of 39.3 kJ/mol, outside TKV's +-4.2.  The liquid's p_v is
+     +0.095 decades high at 815 K.  It matters only where BiI3 condenses
+     above 681 K, i.e. at more than 9 kPa (decision 10).
+4. **BiI(g): the datum that decides the iodine carrier.**
+   - Barin and TKV give 74.6 kJ/mol.
+   - Liu et al.'s HSC data behave as if BiI(g) were 29-30 kJ/mol less
+     stable (item 36.2.4).
+     - Burcat's record (a PM3 estimate, dfH 102.80 kJ/mol) comes close.
+     - TKV's own D0(BiI) = 238.5 +- 25 kJ/mol covers the difference.
+   - The primary measurements were not read: Cubicciotti (1961), J. Phys.
+     Chem. 65:521; Oppermann et al. (1991), Z. anorg. allg. Chem. 601:83;
+     Cubicciotti and Keneshea (1959).
+   - Item 36.2.5 shows that this one value flips the predicted PbI2/BiI3
+     split (decision 2).
+5. **BiI(cr) is a data problem.**
+   - In these data, 3 BiI(cr) -> 2 Bi + BiI3 (all condensed) has dG = +25
+     to +32 kJ/mol up to 1000 K, so BiI(cr) never disproportionates.
+     Real BiI decomposes near 603 K into BiI3 and a Bi-rich liquid (Liu).
+   - With BiI(cr) allowed, a Bi-rich gas deposits 92-95 % of its iodine as
+     BiI(cr) (C, plug flow).  Liu found none.
+   - **Off by default; an option for sensitivity runs.**
+6. **Gaps.**
+   - Missing from every open source: Pb2I4(g), Bi4(g), PbBi(g) and
+     BiI2(g).
+   - KI is not in the system, but took about 7 % of Liu's iodine (a K
+     impurity).
+   - Left out by choice: Pb2(g) (only HERACLES has it), PbI3(g), PbI4(g)
+     and I2(cr, l).
+   - The iodine activity in LBE rests on unpublished activity
+     coefficients (Liu, citing Aerts 2017).
+   - No melt models: neither a Bi-BiI3 liquid nor an LBE phase with
+     dissolved iodine.  The ideal Pb-Bi variant
+     (`thermo/validation/variants/PbBiIHe-LBE`) is a test system only, and
+     it fails in 1-3 of 80 calls at 870-940 C.
+   - The diffusivities of BiI3, BiI, PbI, Pb, Bi, Bi2, I and I2 in He are
+     estimates; no measurement was found.
+7. **The p_v tables** (`thermo/data/`, in the repository's format):
+
+   | table | phases | melting point [K] | largest interpolation error [decades] |
+   |---|---|---|---|
+   | `pv_BiI3_phases.csv` | cr, l (198 nodes) | 680.850000 | 6.1e-5 |
+   | `pv_Bi_phases.csv` | cr, l | 544.512416 | 1.0e-5 |
+   | `pv_Bi2_phases.csv` | over 2 Bi(cr, l) | 544.512416 | 3.1e-5 |
+   | `pv_BiI_phases.csv` | one phase | — | 9.6e-6 |
+   | `pv_Pb_phases.csv` (extra; NASA, redistributable) | cr, l | 600.650043 | 1.2e-5 |
+
+   - The errors are those of interpolation as the solver does it; the
+     limit is 2e-3.
+   - Reference files sample every 0.25 K.
+   - The BiI table is meaningful only below about 600 K (item 5).
+8. **GEMS3K's gas constant** is R = 8.31451 (`ms_multi_format.cpp:36`),
+   not the solver's 8.314462618.
+   - The difference puts GEMS3K up to 1.0e-4 decades (BiI3) and 1.3e-4
+     decades (PbI2) off the tables at 300 K.
+   - Its 10 K temperature grid itself is exact to 2e-8 decades.
+   - Not compensated: scaling G0 would change PbI2He's PbI2 by up to
+     1.3e-4 decades, which the "PbI2 unchanged" criterion forbids
+     (decision 11).
+
+### 36.2 The GEMS3K system and its validation
+
+1. **PbBiIHe** (`thermo/PbBiIHe/`).
+   - Size: 4 elements (Bi, He, I, Pb), 19 species, 10 phases (an ideal gas
+     and 9 pure condensates).
+   - Grid and solver settings are those of PbI2He:
+     - temperature 270-1250 K every 10 K (99 nodes);
+     - pressure 0.8, 1.0 and 1.2 bar;
+     - pa_DK 1e-5, pa_DHB 1e-10, pa_PSTALL 0, pa_IIM 7000.
+   - The 10 shared species are bit-identical to PbI2He: G0, H0, S0, Cp0,
+     V0 and molar masses.
+   - The extended generator reads ThermoFun records as well as NASA-9.
+     - It agrees with the ThermoFun engine to 1.2e-10 J/mol.
+     - It still writes the repository's PbI2He system (11 files) and
+       `pv_PbI2_phases.csv` byte for byte; `make_all.sh` checks both on
+       every run.
+     - Diff: `thermo/generator/make_gems3k_input.diff`.
+2. **Validation through the solver's bridge** (A, `thermo/validation/logs/`).
+   - BiI3 vapour pressure: the report's table to <= 0.0045 decades.
+   - log10 Kp of the Bi-I reactions:
+     - HERACLES data alone reproduce the report to <= 0.004.
+     - With NASA's I and I2 (the M10 mix):
+       - BiI3(g) = BiI(g) + I2(g) differs by <= 0.003;
+       - 3 BiI(g) = 2 Bi(l) + BiI3(g) does not change;
+       - BiI(g) = Bi(g) + I(g) differs by +0.02, because NASA's I(g) is
+         0.40 kJ/mol more stable than Barin's.
+     - GEMS3K's gas speciation gives the same K to <= 2.5e-4 decades.
+   - PbI2 unchanged, against PbI2He:
+     - the solver's method: <= 2.9e-5 decades;
+     - the dual-based values: identical to 1.8e-15.
+   - ThermoFun mode (-o) against the DCH grid (-t): <= 1.2e-4 decades.  A
+     +1000 J/mol change in `-fun.json` moves K by exactly exp(1000/RT), so
+     -o really evaluates ThermoFun at run time.
+3. **Rechecked here with independent code** (`synth/`).  The code
+   integrates the ThermoFun cp_ft records itself and reads NASA-9 directly
+   from thermo.inp; none of the studies' code is used.
+
+   **Thermodynamics** (`check_thermo.out`; every value equals A's to the
+   digits A gives):
+   - BiI3(l) meets BiI3(cr) at 680.85 K with dH = 31798.000 J/mol and
+     dG = 0.
+   - Triple point: 680.8500 K, log10 p = 3.9845.
+   - log10 p_v: -2.9868 at 400 K, 0.4402 at 500 K, 2.6824 at 600 K.
+   - Boiling point: 800.910 K (monomer); 798.628 K for the congruent
+     vapour (BiI3, BiI, Bi, Bi2, I, I2), with 96.44 % BiI3.
+   - log10 Kp [bar]:
+
+     | reaction | 700 K | 900 K | 1000 K | 1200 K |
+     |---|---|---|---|---|
+     | BiI3(g) = BiI(g) + I2(g) | -4.8772 | -2.3933 | -1.5297 | -0.2419 |
+     | BiI(g) = Bi(g) + I(g) | | | -7.7099 | -5.5828 |
+     | 3 BiI(g) = 2 Bi(l) + BiI3(g) | +2.8286 | -0.5762 | -1.7476 | |
+
+     The last reaction changes sign at 858.10 K.
+
+   **GEMS3K** (`check_gems.py`, `check_gems.out`).  Five cold calls with
+   PbBiIHe through a copy of the repository's bridge (md5 fb67103e...),
+   each against an exact ideal-gas equilibrium of the same records:
+
+   | call | T [K] | gas | condensed species | status, iterations | element balance | result |
+   |---|---|---|---|---|---|---|
+   | A | 500 | BiI3 1e-3 mol in 1 mol He | allowed | OK, 54 | 2e-16 | BiI3(cr) 9.727e-4 mol; p(BiI3) 2.75534 Pa, against p_v = 2.75532 Pa (+3.0e-6 decades); the dual activity +3.9e-5 |
+   | B | 500 | the same | suppressed | OK, 29 | 1.4e-16 | every species within 1.1e-4 decades of the exact solution with the solver's R, 3.5e-7 with GEMS3K's; M9's p_eq = p_g/Omega = 2.75557 Pa (+4.0e-5) |
+   | C | 1000 | the same | suppressed | OK, 26 | 2.2e-16 | every species within 1.5e-4 decades |
+   | D | 900 | BiI3 at 1e-7 | suppressed | OK, 22 | 2e-16 | see below |
+   | E | 900 | an LBE-I-like gas, x_I 4e-6 | suppressed | OK, 11 | 2.1e-16 | every species within 2.4e-4 decades |
+
+   In call D, BiI (99 % of the Bi) and I are right to 3e-6 decades.  The
+   minor species are off by 4.8e-4 (I2, x_g 1e-10) to 1.5e-3 decades (Bi2,
+   x_g 2e-13).  The species of the absent Pb, floored at 1e-15 by the
+   bridge, are off by 0.038 decades.
+   The study maxima of 36.3 are the worst cases over warm chains.  A
+   single cold call is usually much better.
+
+4. **Liu et al. (2025)** (A, `thermo/validation/logs/liu2025*.txt`, the
+   digitised figures in `liu_figs/`).
+   - **Their inputs.**
+     - A He molar volume of 24.465 L/mol (25 C, 1 atm) reproduces all 17
+       of their Eq. (3) values: max 0.5 K, rms 0.33 K.  So 100 mL/min for
+       3 h is 0.7357 mol He, and 45 mL/min is 0.3311 mol.
+     - Their "Calc. T_dep (GEM)" is the temperature at which half of the
+       substance has evaporated.  Complete evaporation comes 11-15 K
+       higher.
+   - **Deposition temperatures with the open data** (50 % points, against
+     Liu's GEM):
+     - BiI3: +0.7 to +1.3 K, so HSC's BiI3 equals Barin's.
+     - PbI2: -5.0 to -6.3 K, because Gurvich's PbI2 is more volatile.
+       JANAF's (an internal check only) gives +1.6 to +3.0 K.
+   - **Fig. 3 (PbI2):** the gas speciation agrees species by species.  For
+     example at 900 C (1e-5 mol, HSC/ours): PbI2 0.351/0.352, I
+     1.897/1.932, PbI 0.597/0.573, Pb 0.651/0.681.
+   - **Figs. 5, 6 and 9 differ completely, and one record explains it:
+     BiI(g).**
+     - With Barin's BiI(g), the rms of (ours - HSC)/input is 0.270, 0.317
+       and 0.368 for the three figures.
+     - With BiI(g) raised by 29 kJ/mol it is 0.021, 0.014 and 0.047.  The
+       best shift is 30 kJ/mol for Fig. 5 and 29 kJ/mol for Figs. 6 and 9
+       (`liu2025_bii.txt`; A's summary said 30 for all three).
+     - So with the open data BiI(g) carries the iodine from LBE above
+       about 400 C.  With HSC's data PbI2(g) carries it up to 650 C.
+   - **Fig. 9 used 3.0e-6 mol I**, twice the experiment's 1.504e-6 mol
+     (x_I 9.04e-4 of 346.0 mg; Table 5: 0.191 mg).  The iodine dissolved
+     in LBE in that figure cannot be reproduced (unpublished activity
+     coefficients).
+5. **The chemistry along the tube** (C, `design/notes.md` section 4; the
+   plug flow is equilibrium with fractional condensation, 1 K steps, the
+   limit of fast wall kinetics, so it gives onsets, not peaks).
+   - **Dissociated in the hot zone, recombined where it deposits.**  At
+     x_I = 1e-6 and 1 atm:
+     - PbI2(g) carries 0.06 % of the Pb at 1173 K, 26 % at 1000 K and
+       99.8 % at 800 K;
+     - BiI3(g) carries 4.6e-9 of the Bi at 1000 K, 39 % at 600 K and 96 %
+       at 500 K.
+
+     At the deposition temperatures the formula units carry >= 99.9 %
+     (PbI2) and >= 99.5 % (BiI3) of their metal.  Below 350 K they carry
+     >= 99.9 % at every x_I >= 1e-9.
+   - **Given the deposited amounts as the source, two independent pairs
+     reproduce Liu.**
+     - The onsets of four LBE-I runs and two pure-compound runs lie within
+       0-7 K of Liu's Eq. 3.  For example, LBE-I_SS_II gives PbI2 293 C
+       (Eq. 3: 297) and BiI3 177 C (176).
+     - Measured PbI2 lies within its uncertainty.
+     - Measured BiI3 lies 23-40 K below the onset in all five runs with
+       BiI3.  Liu's T_dep is the temperature of the peak, not of the
+       onset.
+   - **The release rate moves the deposition temperatures** by ln(10) R
+     T^2/dH_sub per decade of partial pressure: about 40 K for PbI2 and
+     30 K for BiI3.  Liu's release profile in time is unknown.
+   - **New in this synthesis: the BiI(g) value flips the split.**
+     C's plug flow was run again (`synth/split_bii.py`, `split_bii.out`),
+     with LBE metal vapour at the boat (ideal LBE, 1173 K, 1 %, 10 % and
+     100 % of saturation, BiI(cr) excluded).  The share of iodine that
+     deposits as PbI2:
+
+     | BiI(g) | 1 % of saturation | 10 % | 100 % |
+     |---|---|---|---|
+     | Barin | 5.3 % (BiI3 94.7 %) | 5.3 % | 5.3 % |
+     | +29 kJ/mol | 98.1 % (BiI3 1.9 %) | 98.1 % | 98.1 % |
+     | +30 kJ/mol | 98.9 % | 98.9 % | 98.9 % |
+     | Liu, measured | 13-66 % | | |
+
+     With the shift, the PbI2 onset moves from 537 to 585 K.  With the
+     measured split as the source (no metal vapour), the onsets do not
+     move: 566/450 K (SS_II) and 500/412 K (SiO2_II) with either BiI(g).
+     - So the validation of deposition temperatures is robust to the
+       BiI(g) question.
+     - The prediction of the split is not: equilibrium with metal vapour
+       gives all or nothing, and the measured split lies between the two
+       data sets.
+     - Without metal vapour the split cannot change at all: each formula
+       unit keeps its metal-to-iodine ratio.
+     - A split between the extremes needs transport separation and finite
+       wall kinetics.  These are what the CFD adds, and a science target
+       of M10e, not something to validate against.
+
+### 36.3 GEMS3K: robustness, guards and cost
+
+1. **Maps** (B, `gems/driver/gmap.cpp`, `gems/maps/`).
+   - **321,480 calls per run:**
+     - 8 element mixes in PbBiIHe, plus PbI2 in PbI2He;
+     - x (trace formula units per formula units plus He) from 1e-12 to
+       0.32, in quarter decades;
+     - 95 temperatures, 304-1244 K;
+     - per point one cold call, then 3 warm calls, each on a per-cell
+       state with the composition changed by 1e-3 and a new T, as in the
+       solver;
+     - two modes: (a) condensed species suppressed, M9's mode for HKS
+       p_eq; (b) condensed species allowed.
+   - **Reference:** every call is compared with the exact equilibrium of
+     GEMS3K's own G0, checked by an independent KKT certificate.
+   - **Deterministic:** two complete runs gave the same status and
+     iteration counts.
+2. **Failures, mode (a), at T >= 500 K, by decade of x:**
+
+   | mix | 1e-4 | 1e-3 | 1e-2 | 1e-1 |
+   |---|---|---|---|---|
+   | BiI3 | 0.1 % | 6 % | 25 % | 42 % |
+   | PbI2 + BiI3 (Liu's deposit ratio) | | 3.1 % | 22.6 % | 35.7 % |
+   | iodine-rich | | | 8.9 % | 30.4 % |
+   | metal-rich (LBE vapour with I) | | | | 73-100 % |
+   | PbI2 in PbBiIHe | | | 0.3 % | 1 % |
+   | PbI2 in PbI2He (from 1060 K; section 35 M) | | | 0.2 % | 0.7 % |
+
+   - **The Bi-iodide region is new.**  It is hot (>= 750 K) and not
+     dilute (x >= 1e-3).
+   - **The cause:** the Dikin criterion stalls at 7e-5 to 1e-4, above
+     pa_DK 1e-5, while G has converged to 1e-12 relative.  The call then
+     runs until pa_IIM is spent: 7000 iterations, about 45 ms.
+   - **Warm starts are worse than cold ones there.**  BiI3 at x 1e-2,
+     904 K:
+     - cold: 27 iterations;
+     - warm after a 1e-3 change of composition: 7158 iterations (46 ms);
+     - warm after a 1e-6 change: 1 iteration.
+   - **The failures are speckled.**  I/Bi = 3.00155 fails, while 3.0015
+     converges in 22 iterations.
+3. **Mode (b): condensed species allowed.**
+   - It adds stalls at trace composition along the saturation boundaries:
+     29-51 % of the calls below 500 K for Bi:I 1:1 and metal-rich gas at
+     x <= 1e-6.
+   - The condensed amounts are silently wrong by 30-99 % of their element
+     budget at x <= 1e-7.
+   - Liu's source compositions (38 temperatures, 4 calls each):
+
+     | composition | failed calls | remark |
+     |---|---|---|
+     | the inputs of Figs. 3, 5 and 6 | 3-7 each, all at 304-454 K | |
+     | LBE source (Fig. 9) | 0 | warm calls up to 3530 iterations, mean 0.45-0.62 ms |
+     | boat cell, BiI3 x = 0.5 | 49 of 152, at 854-1229 K | mean 6.3 ms |
+
+4. **The element balance is never wrong.**  None of the 311,976
+   converged calls is off by more than 1e-10.  Every error is either a
+   reported failure or silent, so M9's balance check cannot catch the
+   silent ones.
+5. **Silent errors follow the species' own mole fraction x_g, not the
+   cell's x.**
+   - Mode (a), largest error over the maps: <= 4e-4 decades for x_g >=
+     1e-6; 1e-3 at 1e-7; 0.04 at 1e-8; 0.2 at 1e-9; >= 1 below 1e-11.
+     Mode (b) needs x_g >= 1e-4 for <= 8e-4 decades.
+   - **M9's p_eq** (primal p_g times 10^-max log10 Omega) is off by:
+     - 0.33 decades at x 1e-8 and 1.2 at 1e-9 (PbI2He);
+     - inside the guards, up to 1.05 decades for the BiI3 pair of a Bi:I
+       1:1 gas.  maxLog10Deviation (0.01) rejects such results, so they
+       cost calls but not correctness.
+   - **The dual p_eq** (the fugacity from the element potentials) is exact
+     to <= 1e-9 decades in every converged call.
+   - **chi of a minor pair inside the M9 guards** is off by up to 1.9
+     decades (LBE source mix).  M9 never checks chi.
+   - **At Liu's dilution** (x_I 1e-7 to 4e-6; C,
+     `design/py/gems_trace_scan*.out`):
+     - the minor species are off by 0.04-0.64 decades;
+     - a tighter pa_DK (1e-8 or 1e-10) makes 33-100 % of the calls fail;
+     - a rescaled carrier (He reduced, P' >= 20 Pa) reaches 4e-4 decades,
+       but needs a DCH pressure grid down to 1 Pa.  One call with P' below
+       the grid but inside its Ptol hung.
+   - These are consistent: at x_I = 1e-6 the minor species have x_g of
+     1e-10 to 1e-8.
+6. **Remedies tried** (B; at T >= 504 K and x >= 1e-7 unless stated):
+   - **A warm iteration cap of 200, then a cold retry:** BiI3 warm
+     iterations fall from 35.8 to 8.6.  The failures stay.
+   - **pa_DK 1e-4:** about 2 iterations per call.  But failures rise to
+     30-108 per 5100 calls for the PbI2, iodine-rich and metal-rich mixes,
+     and speciation errors reach 1.3 decades.  A found 44 balance failures
+     per 1000 warm calls of PbI2 with a condensate.  Rejected.
+   - **Polish:** Newton from GEMS3K's result.  It makes 311,966 of 311,976
+     converged results exact to <= 3.8e-8 decades, in 2.1 iterations on
+     average, at +12.8 us.
+   - **An IPM-free exact solver with GEMS3K's G0** (`gemsb_ideal_equilibrate`,
+     `gems/bridge/idealgem.hpp`):
+     - 0 failures in 321,480 warm-chain calls;
+     - 0 failures in 54,720 cold calls with a KKT certificate: mass
+       balance <= 1.9e-13, gas chemical potentials <= 1.1e-13, absent
+       condensates never supersaturated.
+   - **C's gas-only kernel** (`design/kernel/gasSpeciation.H`), at 432
+     points: 8.4e-11 from the Python reference, element balance 1.6e-14,
+     0 failures.  Rebuilt and rerun here: the same accuracy, and 16.2 us
+     cold and 8.9 us warm at a load of 27 (C: 13.2 and 7.6 at 3.8).
+7. **Guards, if GEMS3K's interior-point method stays in use** (B,
+   `gems/logs/guard_table.txt`).
+   - **Keep:** minTemperature 500 K and minMoleFraction 1e-6.
+   - **New maxMoleFraction** on the total of the trace formula units.  At
+     T >= 500 K and x >= 1e-6, for gas with Bi iodides:
+
+     | maxMoleFraction | failed calls | slow warm calls | mean warm iterations |
+     |---|---|---|---|
+     | 3.2e-4 | 0 | 0.05 % | 3.4 |
+     | 1e-3 | 0.05 % | 0.8 % | 21.6 |
+     | 1e-2 | 1.4 % | 6.4 % | 174 |
+     | none | 8.5 % | 13 % | 534 |
+
+     - PbI2 fails 0 times up to 1e-2.
+     - The metal-rich gas fails 0 times up to 1e-3, and 12 % without the
+       guard.
+     - **Proposal:** 3e-4 (strict) or 1e-3 with Bi iodides, 1e-2 for Pb-I
+       only.  This answers section 35, item M: with Bi the guard is
+       needed.
+   - **New:** use chi only if x_g >= 1e-7 (mode a).
+   - **New:** a warm iteration cap of 200, then a cold retry.
+   - **New:** p_eq from the duals.
+8. **Cost per warm call** (single thread; B's benchmark, 64 cells at
+   600-1000 K, a new T every call, x = 1e-4):
+
+   | engine | PbBiIHe [us] | PbI2He [us] |
+   |---|---|---|
+   | GEMS3K | 90.8 | 57.2 |
+   | GEMS3K, H0/S0/Cp0 grids dropped (lean) | 62.6 | |
+   | GEMS3K, one T for all calls | 42.3 | |
+   | exact solver | 17.0 | |
+   | exact solver, the cell's G0 given | 7.5 | 3.6 |
+
+   - **Rechecked here** (`synth/bench_warm.cpp`): an independent driver
+     with only the 30 original functions, on the copy of the repository's
+     bridge.  On a physical core whose sibling was idle:
+     - GEMS3K: 91.9-93.4 us (PbBiIHe) and 51.5-55.3 us (PbI2He), with
+       0 failures and element balance <= 9.6e-11;
+     - B's benchmark, rerun: exact solver 17.5 and 7.8 us.
+   - **On a hyperthread whose sibling ran another job, the same calls
+     took 196.8 and 136.1 us: 2.1-2.5 times as long.**  Production runs
+     need whole cores (on Merlin7, `--hint=nomultithread`).
+   - **A fit of the cost:** about 80 us plus 6.4 us per interior-point
+     iteration.
+   - **With Bi iodides at x >= 1e-3,** warm calls cost 1.3-3.5 ms (A).
+9. **The cost model** (B, `gems/cost/`): the paper pipe, 60 s at 1 ms
+   (60,000 steps), with run/007's temperature field.
+   - **Calls per step** come from 228,960 cells, 15,264 wall faces (10,908
+     of them above 500 K) and 98,280 cells above 700 K.
+   - **CPU-hours:**
+
+     | engine | (a) wall elements | (b) walls + cells > 700 K | (c) every cell |
+     |---|---|---|---|
+     | GEMS3K as M9, PbI2-like gas | 17 | 173 | 363 |
+     | GEMS3K, PbI2 + BiI3 (with failures) | 32 | 319 | 669 |
+     | GEMS3K, BiI3-rich gas | 94 | 936 | 1960 |
+     | exact solver | 3.2 | 32 | 67 |
+     | exact solver, G0 cached per cell | 1.4 | 13.7 | 28.6 |
+
+   - **For comparison,** transport costs 40 CPU-h per paired species and
+     360 CPU-h for 9 species.
+   - **Checked:** for example (c) = 228,960 x 60,000 x 95.2 us = 363 h.
+   - **Re-speciation at C's minTemperature 350 K** covers 212,760 cells
+     (93 % of the pipe), so it is close to (c): 27-60 CPU-h with the
+     exact solver, 340-620 CPU-h with GEMS3K's IPM.
+   - **The model's temperature field reaches only 1000 K**; Liu's furnace
+     reaches 1173 K.
+   - **State per cell:** GEMS3K 76 doubles (139 MB for every cell of the
+     pipe); the exact solver 24 doubles (44 MB) plus a G0 cache of 19
+     (35 MB).
+10. **A surrogate table buys little** (B, `gems/logs/surrogate.txt`).
+    - A 2-D chi(T, log x) table for one pair: 0.03 us per lookup, 1.3e-2
+      decades of interpolation error.
+    - A 4-D Pb-Bi-I table: 109 MB, 0.79 us per lookup, >= 1e-2 decades.
+    - At the stoichiometric ridges, at 500-700 K the minor species change
+      10-1000 times across I/Pb = 2(1 +- 1e-4).
+    - The saving over the cached exact solver is about 26 CPU-h in (c).
+    - **Not recommended** for Pb-Bi-I.
+
+### 36.4 The solver design (recommended options)
+
+1. **Species and condensates** (decision 4).
+   - **Three sets:**
+     - **S-A:** PbI2_g and BiI3_g, with PbI2_s and BiI3_s.
+     - **S-B:** S-A plus PbI_g, Pb_g, BiI_g, Bi_g, I_g and I2_g, gas only
+       and re-speciated.
+     - **S-C:** S-B plus Bi2_g, which holds 60 % of the Bi of LBE vapour
+       at 1173 K, and Pb_s and Bi_s.
+   - BiI(cr) is an option, off by default.
+   - **New inputs per species:**
+     - `formula { Bi 1; I 3; }` in `speciesTransportProperties`, checked
+       against `molarMass` to 1e-6;
+     - a `ChapmanEnskog` diffusivity model with Lennard-Jones parameters
+       for every species but PbI2_g, which keeps `PbI2He`.
+2. **Pairs become channels** (C, `design/section36-draft.md` 36.3).
+   - **A channel** is a reactant gas r, a condensate c (nu_c mol per mol of
+     r) and co-products returned to the gas.  The law stays affine in Y_r:
+     q_e = A_e G_r (p_r* - beta Y_r).  So the predictor, the guard, the
+     defect and the bounds of sections 2-24 apply unchanged.
+   - **Three kinds:**
+     - **plain:** p_r* = p_eq(T), as now;
+     - **dimer:** Bi2_g -> 2 Bi_s;
+     - **reactive:** BiI_g -> 2/3 Bi_s + 1/3 BiI3_g, with p_r* =
+       (p_BiI3/K(T))^(1/3), where p_BiI3 is that of the cell at the start
+       of the step (lagged).
+   - **Rejected alternatives for Bi from BiI:**
+     - Bi_g channels after re-speciation are 1e8-1e9 times too slow: p_Bi
+       is about 1e-9 Pa at 500 K, while p_BiI is 0.1-1 Pa.
+     - Local equilibrium at the wall removes the HKS resistance.
+   - **Other rules:**
+     - per-pair HKS coefficients (`HKS { accommodation; Ce; }` overrides
+       `HKSCoeffs`);
+     - the channels into a shared condensate are bounded Gauss-Seidel over
+       the species order, so their total evaporation never exceeds the
+       deposit;
+     - co-products are added at the end of the step;
+     - reactive channels are irreversible by default.
+3. **Ledgers.**
+   - **The pair ledger keeps its format,** so every M2-M9 case and restart
+     state still reads and closes.
+   - **M10a:** the element ledger (mol of Pb, Bi, I) is the nu/M
+     combination of the pair ledgers.
+   - **From M10b:**
+     - every re-speciated species is solved by the paired path, with no
+       active element when it has no condensate;
+     - per-species ledgers (REACTION, COPRODUCT, EXCHANGED) and
+       per-condensate ledgers live in new lists (`uniform/phaseChangeSpecies`,
+       `uniform/phaseChangeElements`);
+     - a CONVERSION entry per element books the residue of every transfer
+       between stores, so the element closure stays at round-off without
+       drift, as solverDefect and clamped do (sections 21.1, 27.1).
+4. **Re-speciation: an operator split after the species loop**
+   (decision 3).
+   - Every cell above minTemperature gets the homogeneous ideal-gas
+     equilibrium of its element amounts, with the condensed species
+     suppressed; the HKS law does the condensation at the walls.
+   - It runs once per step after the loop (a Lie split), never inside a
+     corrector loop, so predictor, guard, Final solve and defect are
+     unchanged.
+   - The split error is first order in dt and scales with 1 - chi of the
+     depositing species where it deposits: below 0.1 % (PbI2) and 0.5 %
+     (BiI3) at Liu's dilution, more for the reactive channel.  A dt study
+     gates it.
+   - **Engines:**
+     - **`kernel`:** the exact solver in the solver itself,
+       `gasSpeciation.H`, standalone and g++-testable like
+       `phaseChangeKinetics.H`.  It works in the default build, which
+       stays bridge-free, with formation constants log10 K_f(T) from a
+       table made by the generator from the same sources.
+     - **`GEMS` mode `frozen`:** GEMS3K's G0 per cell, read once at
+       start-up (T is frozen) through a new getter (`gemsb_species_g0`,
+       9.3 us per cell), and the same kernel every step.  This is what
+       "per-cell GEMS3K" means in the recommended scope: GEMS3K's
+       thermodynamics in every cell, with an exact minimisation.  It
+       equals the per-step call (polished) to round-off and costs what
+       `kernel` costs.
+     - **`GEMS` mode `local`:** a warm GEMS3K call per cell and step,
+       guarded (item 36.3.7) and polished by the kernel, with the kernel
+       as the fallback.  This is the paper's "direct warm-started
+       GEMS3K", kept for the comparison of accuracy, failures and cost; it
+       is not the production engine.
+     - The engines differ only in the standard-state data: the open-data
+       table and GEMS3K's G0 differ by <= 3.1e-4 decades (C,
+       `kf_compare.out`).  In cost, `local` is about 10 times `kernel`.
+   - **Conservative:**
+     - amounts are exponentials of the converged potentials;
+     - absent elements are removed exactly, with no 1e-15 floor;
+     - cells with an element amount <= 0 are left alone and counted;
+     - a slightly negative Y comes out positive by an element-conserving
+       re-speciation, never by a clip.
+   - **Defaults:** minTemperature 350 K, updateInterval 1.  The kernel is
+     deterministic, so restarts repeat the run bit for bit.
+   - **The rule for `speciation lagged`:** re-speciation together with
+     HKSCoeffs `speciation lagged` stops the run.  The gas species are
+     then speciated already, and chi would count the speciation twice.
+5. **HKS p_eq of the pairs.**
+   - For an ideal gas over a pure condensate of the same formula, p_eq
+     depends on T only.  So the table is exact, and `equilibrium GEMS`
+     adds nothing to it (section 32, item 1).  M10 cases use `equilibrium
+     table`.
+   - If `equilibrium GEMS` is used with Bi present, M10c changes its call
+     (decision 6):
+     - p_eq comes from the duals, `gemsb_pair_peq`;
+     - maxMoleFraction joins the guards;
+     - chi needs x_g >= 1e-7;
+     - warm calls are capped at 200 iterations, then retried cold.
+6. **The source at the boat** (decision 5).
+   - **Q1:** prescribed release per species, e.g. Liu's deposited amounts
+     (Table 5) as PbI2_g and BiI3_g at the mean rate over the 3 h, which
+     is the basis of Eq. 3.  This validates the deposition temperatures.
+   - **Q3:** inventory samples of pure condensates for Liu's pure-compound
+     runs (mode inventory, as in run/013).
+   - **Q2:** elements released as monatomic gases, plus metal vapour at a
+     chosen fraction of saturation, speciated by the re-speciation of the
+     boat cells.  This predicts the split, or infers it.  It needs M10b
+     and M10d, and both BiI(g) data sets (item 36.2.5).
+   - **Q4:** equilibrium with liquid LBE.  It needs the iodine activity in
+     LBE, which is unpublished.  Not in M10.
+   - **Multi-species samples:**
+     - one sample may release several species: `amounts { PbI2_g ...;
+       BiI3_g ...; }` (one window) replaces `pair` and `amount`, whose
+       single-pair form stays valid;
+     - inventory samples of different pairs may share cells, with one
+       exchange cell per cell holding one sample element per pair;
+       `cellCoefficients` assigns Su and Sp per cell, so two exchange
+       cells on one cell would overwrite each other;
+     - samples of the same pair stay disjoint.
+7. **The bridge** (decision 7).
+   - **Add the functions M10 needs** from B's 22, which are ABI-compatible
+     (the 30 original functions bit-identical over 800 calls):
+     - `gemsb_species_g0`;
+     - `gemsb_element_potentials`;
+     - `gemsb_pair_peq` (dual);
+     - `gemsb_gas_mole_fractions`;
+     - `gemsb_suppress_condensed`;
+     - `gemsb_set_ipm_controls` and `gemsb_get_ipm_controls`;
+     - `gemsb_set_warm_iteration_limit`;
+     - `gemsb_balance_error`;
+     - optionally `gemsb_drop_property_grids` (the lean DCH, -28 us per
+       call; nothing in the solver reads the H0, S0 or Cp0 grids).
+   - **The bridge's own exact solver** (`gemsb_ideal_equilibrate`, which
+     handles condensates) stays in the test build as the oracle of the
+     kernel and of mode (b) studies.  The production kernel lives in the
+     solver, so the default build needs no bridge.
+   - **To update with the bridge:**
+     - `tests/build/dummyBridge.c`, which defines every function;
+     - the readme;
+     - `thermochemistry/README.md` ("30 gemsb_*");
+     - `make check`.
+8. **Tests without the licensed data.**
+   - A synthetic Bi-I data set (invented records with the structure and
+     magnitudes of the real ones, documented as such) lets every code gate
+     run in the repository: pairs, channels, kernel, ledgers.
+   - The HERACLES-based data serve only the science checks and the cases,
+     which are NOTRUN without them.  The open Pb-I data stay real.
+9. **Restart, parallel and outputs.**
+   - **Restart:**
+     - the layout records formulas, channels, the engine and its species,
+       and a restart with another set stops, naming the change (section
+       16, item 5: "this matters from M10");
+     - shared condensates keep their deposits per condensate;
+     - mode `frozen` recomputes its G0 at start-up;
+     - mode `local` warm states are not written, as in M9 (decision 13).
+   - **Parallel:**
+     - the re-speciation is local to the cell, with one reduction of the
+       counters per step;
+     - cells above 700 K are 43 % of the pipe, all upstream, so an axial
+       decomposition unbalances mode `local` by up to 2.3 times; `kernel`
+       and `frozen` cost 8-18 % of the transport of 9 species and matter
+       little.
+   - **Outputs:**
+     - element line densities: the iodine profile is the 126I gamma-scan
+       observable;
+     - T_peak per condensate, by Liu's definition (the temperature of the
+       maximum deposit, from a parabola through three bins), besides the
+       onset;
+     - deposition-rate profiles;
+     - a re-speciation line per step: cells, calls, iterations, failures
+       and the largest element residue;
+     - the E11 monitor over all ledgered species.
+10. **Dictionary** (a sketch; values illustrative):
+
+        // constant/speciesTransportProperties (new keys per species)
+        BiI3_g { state gas; molarMass 0.58969381; formula { Bi 1; I 3; }
+                 diffusivityModel ChapmanEnskog;
+                 ChapmanEnskogCoeffs { sigma 6.0e-10; epsilonByK 800; } }
+        BiI3_s { state solid; molarMass 0.58969381; formula { Bi 1; I 3; } }
+
+        // constant/thermochemistryProperties
+        model HKS;
+        pairs {
+          PbI2_g { condensed PbI2_s; vapourPressure { ... } }
+          BiI3_g { condensed BiI3_s;
+                   vapourPressure { file "<constant>/pv_BiI3_phases.csv";
+                     phases ("BiI3(cr)" "BiI3(l)"); units log10Pa; }
+                   HKS { accommodation 1; Ce 1; } }          // optional
+          Bi2_g  { condensed Bi_s; stoichiometry 2; vapourPressure { ... } } // M10d
+        }
+        wallReactions {                                           // M10d
+          BiI_disproportionation {
+            stoichiometry { BiI_g -3; Bi_s 2; BiI3_g 1; }
+            equilibrium { file "<constant>/logK_BiI_disp.csv"; column logK; }
+            reversible no;
+          }
+        }
+        respeciation {                                            // M10b/c
+          engine         kernel;          // none (default) | kernel | GEMS
+          species        (PbI2_g PbI_g Pb_g BiI3_g BiI_g Bi_g Bi2_g I_g I2_g);
+          formationConstants "<constant>/log10Kf_PbBiI.csv";  // engine kernel
+          minTemperature 350;             // [K]
+          updateInterval 1;
+          // engine GEMS: GEMSCoeffs as in M9, plus GEMS { mode frozen; }
+          // (G0 per cell at start-up) or { mode local; maxMoleFraction
+          // 3e-4; warmIterationLimit 200; } (a polished call per step)
+        }
+        samples { boat { selection { ... } mode release;
+                  amounts { PbI2_g 2.408e-7; BiI3_g 3.069e-7; }  // [mol]
+                  startTime 0; duration 10800; } }
+        profiles { ... elements (I Pb Bi); peak yes; rate yes; }
+
+### 36.5 Milestones, cases and effort
+
+Every milestone ends with `tests/Alltest <milestone>` and the M0 gate.  The
+code gates use the synthetic Bi data (item 36.4.8); criteria marked (data)
+are NOTRUN without the HERACLES-based files.
+
+#### M10a: several pairs of different formulas (3-4 d)
+**Deliverables:**
+- `formula` per species;
+- per-pair HKS coefficients;
+- the element ledger derived from the pair ledgers;
+- multi-species samples, for release and inventory;
+- the Chapman-Enskog diffusivity;
+- the extended generator and `make_pv_tables.py` in the repository, with
+  no Bi data;
+- the BiI3, Bi, Bi2 and Pb tables read from outside the repository;
+- element profiles and T_peak;
+- run/030.
+
+**Acceptance:**
+1. Two pairs against two single-pair runs, each pair's fields, balance
+   files and profiles cmp-identical to its single-pair run.
+   - Cases: (a) PbI2_g plus an identical pair on a second sample; (b)
+     PbI2_g plus BiI3_g.
+   - Settings: table and temperature model, serial and 4 ranks.
+2. Element closure (Pb, Bi, I) <= 1e-14 of its reference in every step, and
+   equal to the nu/M combination of the pair closures to 1e-15.
+3. Tables (data):
+   - the nodes exact;
+   - the crossings at 680.85 +- 0.1 K (BiI3), 544.51 (Bi) and 600.65 (Pb);
+   - within 2e-3 decades of the records over 300-1250 K (6.1e-5 measured).
+4. A channel from 1000 to 350 K with PbI2 and BiI3 released in the ratio of
+   LBE-I_SS_II (x_I 3.9e-6) (data):
+   - each condensate's onset (1 %, fromInlet) within 10 K of the plug flow
+     (566 K and 450 K), the difference printed;
+   - released = n0 M of each species to 1e-14.
+5. Inventory samples of two pairs on the same cells: the bounded law of
+   both recomputed from the fields; closure <= 1e-13.
+6. Every earlier criterion unchanged, the excerpts of run/012-015
+   reproduced, and the default build bridge-free.
+
+#### M10b: re-speciation with the kernel (4-5 d)
+**Deliverables:**
+- `gasSpeciation.H` and `tests/testSpeciation.C`;
+- the log10 K_f table and its generator;
+- ledgered gas-only species;
+- the re-speciation step;
+- the species and condensate ledgers;
+- the element ledger with CONVERSION;
+- the refusal of `speciation lagged` with re-speciation;
+- run/031.
+
+**Acceptance:**
+1. Kernel (g++):
+   - the stored reference points to 1e-9 relative (species above 1e-10 of
+     the largest element), element balance <= 1e-14, 0 failures, and a
+     second call changes nothing above 1e-15;
+   - with a bridge (data): equal to the bridge's KKT-certified exact
+     solver over the 160,740 gas-mode calls of B's maps (36.3.1) to 1e-9.
+2. Closed box at uniform T (450 and 1000 K), with no wall and no
+   transport:
+   - any initial split reaches the equilibrium of its element amounts in
+     one step;
+   - element inventories constant to 1e-15 relative per step;
+   - the REACTION entries cancel per element to 1e-15.
+3. Equivalences, bit for bit: engine none equals M10a; a case entirely
+   below minTemperature equals engine none.
+4. The channel of M10a.4 from 1173 K, with the source as formula units:
+   - (a) element closure <= 1e-14 in every step;
+   - (b) with one diffusivity for every species, the deposits within 1 %
+     (L1, 1 cm bins) of M10a's run, since recombination precedes
+     deposition;
+   - (c) the speciation of every cell above minTemperature equals the
+     kernel recomputed from the written fields to 1e-12;
+   - (d) dt 4, 2 and 1 ms: L1(2 ms, 1 ms) of the deposits <= 1 %.
+5. Restart cmp-identical (binary; serial and 4 ranks); 4 ranks equal serial
+   to 1e-9 with a converged loop.
+6. Kernel cost <= 20 us per cold call, printed.  NOTRUN on a busy machine,
+   as M9.3b; measured 13-16 us cold and 7.6-8.9 us warm.
+
+#### M10c: GEMS3K per cell (4-5 d; 2-3 d without mode local)
+**Deliverables:**
+- the bridge extension of item 36.4.7, with the dummy bridge and the
+  documents;
+- `respeciation { engine GEMS; }` in mode frozen (G0 per cell, collective
+  as M9's frozen tables) and mode local (warm calls, guards, polish, the
+  kernel as fallback);
+- for pairs with `equilibrium GEMS`: p_eq from the duals, maxMoleFraction,
+  the x_g gate of chi, and the warm cap;
+- a reduced qualification map as a test;
+- run/032.
+
+**Acceptance:**
+1. Bridge:
+   - the 30 original functions bit-identical to the old .so (800 calls:
+     status, iterations, amounts, log10 activities);
+   - `make check` lists the new exports and only libc/libm;
+   - the dummy bridge defines every function;
+   - 0 warnings.
+2. Qualification (data; no solver run), on 3 mixes x 24 T x 13 x in both
+   modes:
+   - failures and the largest |dlog10| per decade of x_g recorded;
+   - the polished result equal to the exact equilibrium of the same G0 to
+     1e-9 at every converged point (gate);
+   - GEMS3K's K_f within 1e-3 decades of the open-data table (3.1e-4
+     measured).
+3. Element closure <= 1e-14 in both modes.
+4. The channel of M10b.4:
+   - frozen within 1e-3 (L1 of the deposits) of engine kernel;
+   - local (polished) within 1e-9 of frozen;
+   - every failure taken by the kernel and counted.
+5. Pairs with `equilibrium GEMS` and Bi present:
+   - the dual p_eq within 1e-3 decades of the table at every GEMS element;
+   - the maxMoleFraction and x_g guards recomputed from the fields (as
+     M9.3a).
+6. Cost printed: the start-up of frozen, and the warm call of local with
+   its polish, <= 150 us at x <= 1e-4 (NOTRUN on a busy machine).
+7. Restart: frozen exact; local within 1e-12 of the continuous run's
+   inventories.
+
+#### M10d: metal vapour, shared condensates, the reactive channel (4-5 d)
+**Deliverables:**
+- per-condensate deposits shared by channels, with Gauss-Seidel bounds;
+- the dimer and reactive channels (irreversible) and co-products;
+- the Q2 source;
+- BiI(cr) as an option;
+- run/033.
+
+**Acceptance:**
+1. Box, supersaturated Bi and Bi2 over a bare wall at 700 K:
+   - the implicit-Euler closed forms of both channels to 1e-14;
+   - Bi_s gains the Bi of both.
+2. Box, BiI over a bare wall at 500 K: Bi_s gains 2/3 and BiI3_g 1/3 of the
+   BiI taken up, to 1e-15 per step, with no evaporation through the
+   channel.
+3. A small Bi deposit evaporating through Bi_g and Bi2_g:
+   - the total <= the deposit;
+   - CAPPED to exactly 0, with the residue booked;
+   - the species order permuted: the end state within 1e-3.
+4. The channel with LBE vapour at 1 % of saturation (data):
+   - onsets of Pb(l), Bi(l), PbI2, Bi(cr) and BiI3 within 10 K of the plug
+     flow, with both BiI(g) data sets;
+   - element closure <= 1e-14.
+5. M10a-c unchanged.
+
+#### M10e: the Liu (2025) cases (4-6 d + compute)
+**Needs:**
+- Liu's measured T(x), digitised or from the authors;
+- the carriers of M8 (rhoSimpleFoam, mass-flow inlet), at 45 and 100
+  mL/min;
+- a 2-D axisymmetric wedge of the column: 1.25 m, R 2.4 mm, about 18.5k
+  cells.
+
+**Runs:**
+- PbI2_SS and BiI3_SiO2_800 (Q3 or Q1);
+- LBE-I_SS_II and LBE-I_SiO2_I with the measured split (Q1, S-A);
+- the same with the LBE source (Q2, S-C; metal vapour at 1e-3 to 1e-1 of
+  saturation) for both BiI(g) data sets;
+- each run over a quasi-steady window at the mean rate.
+
+Then the validation table and run/034.
+
+**Acceptance (code gates):**
+- every run ends with element closure <= 1e-12 and solverDefect <= 1e-8 of
+  the element reference;
+- the table is generated: T_peak per condensate, the iodine profile against
+  the gamma scan, the split.
+
+**Science targets** (reported, not gated):
+- T_peak of PbI2 within +-20 K of Liu, and of BiI3 within +-40 K (their
+  uncertainties are +-9 to +-39 K);
+- whether HKS and transport move the BiI3 peak 23-40 K below the
+  equilibrium onset, as measured;
+- the split under Q2 against 13-66 %, for both BiI(g) data sets.
+
+**Cases.**  015 is the GEMS case, 016 M6's, and 017 onwards are M8's
+carriers.  M10 takes a block that cannot collide: 030-pbi2-bii3-pairs,
+031-pbbii-respeciation, 032-pbbii-gems, 033-lbe-metal-vapour and
+034-liu2025.  Each has a readme and an `out_excerpt`; the Bi data are
+linked from outside the repository.
+
+**Effort.**
+
+| scope | milestones | days |
+|---|---|---|
+| pairs only | M10a | 3-4 |
+| recommended | M10a-e, M10c with both modes | 19-25 + compute |
+| without the per-step GEMS3K engine | M10a-e, M10c in mode frozen only | 17-23 + compute |
+
+Section 6's "5+ d" covered about M10a.
+
+**Compute:**
+- **Liu wedge** (9 species, 60 s at 2 ms): about 16 h serial with the
+  kernel and 23 h with mode local, or 2-4 h on 8 ranks (C).
+- **Paper pipe** (9 species, 60 s at 1 ms): 25-35 h on 16 ranks if the hot
+  cells are balanced.  Merlin7, whole cores.
+
+**External dependencies:** PSI's confirmation of the data (decision 1),
+Liu's T(x) (decision 15), and M8's carrier tooling.
+
+### 36.6 Risks
+
+1. **The data.**
+   - Bi-I comes from HERACLES = Barin only, with its provenance
+     unconfirmed.
+   - BiI(g) is uncertain by about 30 kJ/mol, which flips the predicted
+     split (36.2.5).
+   - BiI3(l) misses TKV's boiling point by 14 K.
+   - BiI(cr) is doubtful.
+   - Pb2I4, Bi4, PbBi, BiI2 and KI are missing.
+2. **The source.**
+   - The iodine release from LBE (an unpublished activity) and its time
+     profile are unknown, and T_dep moves 30-40 K per decade of rate.
+   - The metal vapour level and the BiI(g) data together decide the split.
+3. **Local gas-phase equilibrium.**  At x_I about 1e-6 three-body
+   recombination takes about 1 s, comparable with the residence time in
+   the hot zone.  Not checked: no rate data were read.
+4. **GEMS3K's interior-point method,** if it is used:
+   - failures of 6-42 % in hot (>= 750 K), non-dilute (x >= 1e-3)
+     Bi-iodide gas;
+   - silent errors at x_g < 1e-7;
+   - erratic convergence in the composition: the M9 guards leave 0.13 %
+     failures for BiI3 (at up to 119 ms each); maxMoleFraction 3.2e-4
+     removed all of them on the maps, but the failures are speckled;
+   - another compiler or GEMS3K build, e.g. on Merlin7, moves the failures
+     elsewhere.
+5. **The exact solvers are prototypes.**
+   - B's (about 630 lines; Levenberg-Marquardt, watchdog and simplex
+     steps) was tuned on these failures.
+   - C's kernel assumes that no species holds both Pb and Bi: PbBi(g)
+     would need a 3-D Newton.
+   - Both need regression tests before they enter the code.  They solve an
+     ideal gas with pure condensates only; non-ideal phases (an LBE melt)
+     still need GEMS3K.
+6. **The split error** of the operator split with stiff exchange (lambda
+   dt 1e3-6e3) is large for the reactive channel.  It is gated by dt
+   studies.
+7. **Cost and machines.**
+   - The timings come from a 40-core workstation at a load of 27-30:
+     - absolute microseconds are uncertain by 20-30 %;
+     - a shared hyperthread doubles them;
+     - the counts of iterations and failures are deterministic.
+   - The pipe with 9 species needs Merlin7 and a balanced decomposition.
+8. **Liu's measured T(x)** exists only in figures, and the boat is 3-D.
+9. **Not modelled:**
+   - homogeneous nucleation in the supersaturated metal vapour (Liu's grey
+     deposit is particulate);
+   - PbI2-BiI3 and Pb-Bi solid solutions;
+   - the transport reaction 2 Bi + BiI3 -> 3 BiI.
+10. **Non-dilute gas** near a boat of pure compound: the E11 monitor flags
+    it, and GEMS3K fails there (BiI3 x = 0.5: 49 of 152 calls).
+11. **The diffusivities** of eight new species are estimates.
+
+### 36.7 Decisions needed (recommendation first)
+
+1. **Bi-I data source and licence.**
+   - **Recommended:** task A's dataset (HERACLES = Barin 1995 for Bi-I,
+     NASA/Gurvich for Pb-I-He) for development, kept outside the
+     repository.
+   - Ask PSI, which maintains HERACLES (and Liu's co-authors Neuhausen and
+     Eichler), to confirm its provenance and licence before any Bi-I file
+     enters the repository.
+   - Cite TKV values individually, and find the primary reference of the
+     BiI3 fusion data.
+   - Alternative: wait for a licensed source before M10a's data
+     criteria.
+2. **BiI(g).**
+   - **Recommended:** Barin = TKV (74.6 kJ/mol) as the default, and an
+     HSC-like variant (+29-30 kJ/mol) as a required sensitivity in M10d
+     and M10e: two systems and tables from the same generator.
+   - Ask PSI which BiI(g) HSC's MainDB holds, and read Cubicciotti (1961)
+     and Oppermann et al. (1991), before any prediction of the split is
+     published.
+3. **Scope against the paper plan's per-cell wish.**
+   - **Recommended:** independent pairs plus operator-split re-speciation
+     with the exact kernel, and GEMS3K's thermodynamics per cell (engine
+     GEMS, mode frozen) as what "per-cell GEMS3K" means in the paper.  The
+     per-step interior-point call (mode local) is a polished, guarded
+     engine for the comparison only.
+   - Cost per 60 s of the pipe, every cell: the kernel 29-67 CPU-h, the
+     interior-point call 363-669 (up to 1960 in BiI3-rich gas), against
+     360 for the transport of 9 species.  The interior-point call also
+     fails in 6-42 % of hot, non-dilute Bi-iodide gas and errs silently at
+     trace.
+   - Alternatives:
+     - (a) pairs only (M10a, 3-4 d): this reproduces the deposition
+       temperatures with the measured split, but cannot predict the split;
+     - (b) the per-step GEMS3K call as the production engine: 5-23 times
+       the kernel's cost, the guards, and no exactness without the
+       polish.
+4. **Species set.**
+   - **Recommended:** S-A in M10a, S-B from M10b and S-C in M10d; BiI(cr)
+     off (an option).
+   - Not modelled: PbI3, PbI4, Pb2, I2(cr, l), and the species without
+     open data (Pb2I4, Bi4, PbBi, BiI2, KI).
+5. **Source model at the boat.**
+   - **Recommended:**
+     - Q1 (the measured amounts per species at the mean rate over 3 h)
+       for the validation of the deposition temperatures;
+     - Q3 for the pure-compound runs;
+     - Q2 (elements plus a metal-vapour fraction) as the prediction and
+       sensitivity of the split in M10d and M10e.
+   - Q4 (equilibrium with liquid LBE) is not in M10, until the iodine
+     activity in LBE is available.
+6. **GEMS3K guards and the M9 path with Bi.**
+   - **Recommended:**
+     - keep minTemperature 500 K and minMoleFraction 1e-6;
+     - add maxMoleFraction 3e-4 with Bi iodides (1e-2 for Pb-I only);
+     - chi only where x_g >= 1e-7;
+     - a warm cap of 200 iterations with a cold retry;
+     - p_eq from the duals.
+   - This closes section 35, item M.
+   - Alternative: 1e-3, which costs 0.05 % failures and 0.8 % slow calls.
+7. **The bridge.**
+   - **Recommended:** add the functions of item 36.4.7 to
+     `thermochemistry/gemsbridge`, with the dummy bridge and the documents.
+     The exact solver lives in the solver (`gasSpeciation.H`); the
+     bridge's `gemsb_ideal_equilibrate` serves as the test oracle only.
+   - The lean DCH (`gemsb_drop_property_grids`, -30 %) is optional.
+   - Report upstream to GEMS3K:
+     - warm starts that need thousands of iterations where a cold start
+       needs 20-40;
+     - the Dikin stall above pa_DK;
+     - IterDone 0 after some failed calls.
+8. **Synthetic Bi data for the code tests.**
+   - **Recommended:** yes, so that every code gate runs in the repository;
+     the licensed data are for the science checks and the cases only.
+9. **Order.**
+   - **Recommended:** M10a -> M10b -> M10c -> M10d -> M10e.
+   - Alternative: M10a, M10b and M10e (Q1, Q3) first, then M10c and M10d.
+10. **BiI3(l).**
+    - **Recommended:** keep TKV's fusion enthalpy, 31.8 kJ/mol (boiling
+      point 801 K), since it matters only above 9 kPa.
+    - Alternative: 39.3 kJ/mol (815 K), which lies outside TKV's +-4.2.
+11. **GEMS3K's R** (8.31451).
+    - **Recommended:** no compensation (1.3e-4 decades, documented), which
+      keeps PbI2He unchanged.
+12. **Case numbers.**
+    - **Recommended:** run/030-034.
+    - Alternative: the next numbers after M8's.
+13. **Defaults.**
+    - **Recommended:**
+      - re-speciation minTemperature 350 K;
+      - reactive channels irreversible;
+      - the warm states of mode local not persisted, as in M9 (restarts
+        exact for kernel and frozen).
+14. **Diffusivities.**
+    - **Recommended:** Chapman-Enskog with Lennard-Jones estimates, the
+      source and values recorded per species.  Which estimates to use is
+      the researcher's call.
+15. **Liu's inputs.**
+    - **Recommended:** ask the authors for the measured T(x) (digitising
+      is the fallback), a 2-D axisymmetric wedge, and M8's carrier tooling
+      at 45 and 100 mL/min.
