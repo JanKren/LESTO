@@ -1,0 +1,7 @@
+experiment,species,status,predicted_peak_K,measured_peak_K,difference_K,uncertainty_K,within_experimental_uncertainty,science_target_K,within_science_target
+PbI2_SS,PbI2,NOTRUN,,641.15,,18.0,,20,
+BiI3_SiO2_800,BiI3,NOTRUN,,479.15,,13.0,,40,
+LBE-I_SS_II,BiI3,NOTRUN,,427.15,,14.0,,40,
+LBE-I_SS_II,PbI2,NOTRUN,,561.15,,18.0,,20,
+LBE-I_SiO2_I,BiI3,NOTRUN,,400.15,,39.0,,40,
+LBE-I_SiO2_I,PbI2,NOTRUN,,579.15,,24.0,,20,

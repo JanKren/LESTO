@@ -1,0 +1,50 @@
+{
+  "input_sha256": {
+    "experiments.csv": "d613ee1108a2a7f66b43fb17f7345e3966e5b1ecd013b1453f7029ea7068f06f",
+    "targets.csv": "76e5b1354715b3d9644cf00c1bf17af1dd1c2b02f261db435cdd0242479de2e4",
+    "sublimation.csv": "a22aab18c074f9417fbec05232335f1766d21df479736d3faf70c169474cc368",
+    "prepare.py": "8dcd29b26b35857181b2b76af071174b9cac2364ffac37d5f23a139c442b8dc8"
+  },
+  "standalone_tests": {
+    "command": "python3 -m unittest discover -s thermochemistry/benchmarks/liu2025 -p 'test_*.py'",
+    "passed": 6,
+    "failed": 0
+  },
+  "openfoam_version": "v2412",
+  "mesh_checks": [
+    {
+      "experiment": "PbI2_SS",
+      "status": "PASS",
+      "cells": 18432,
+      "maximum_non_orthogonality_degrees": 0.0,
+      "maximum_skewness": 0.330796,
+      "maximum_aspect_ratio": 130.208
+    },
+    {
+      "experiment": "BiI3_SiO2_800",
+      "status": "PASS",
+      "cells": 18432,
+      "maximum_non_orthogonality_degrees": 0.0,
+      "maximum_skewness": 0.330796,
+      "maximum_aspect_ratio": 125.0
+    },
+    {
+      "experiment": "LBE-I_SS_II",
+      "status": "PASS",
+      "cells": 18432,
+      "maximum_non_orthogonality_degrees": 0.0,
+      "maximum_skewness": 0.330796,
+      "maximum_aspect_ratio": 130.208
+    },
+    {
+      "experiment": "LBE-I_SiO2_I",
+      "status": "PASS",
+      "cells": 18432,
+      "maximum_non_orthogonality_degrees": 0.0,
+      "maximum_skewness": 0.330796,
+      "maximum_aspect_ratio": 125.0
+    }
+  ],
+  "cfd_validation_status": "NOTRUN",
+  "reason": "Measured T(x), physical carriers and M10 Bi-species implementation/qualification are pending."
+}

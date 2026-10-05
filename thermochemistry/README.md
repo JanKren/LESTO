@@ -139,6 +139,16 @@ in `~/opt/gems-env` (`conda activate ~/opt/gems-env; python -c "import xgems"`).
    the rest NOTRUN, since GEMS3K's results then differ in their last bits
    (plan section 35, item V).
 
+## Preliminary M10 experimental benchmarks
+
+`benchmarks/liu2025/` contains the Liu (2025) experimental tables, a
+reproducible Eq. (3) baseline, and four preliminary mesh/source manifests.
+The silica and steel geometries are separate; the prescribed LBE sources
+retain the reported KI exclusions. The package reports missing inputs and
+does not claim CFD validation. See
+[`benchmarks/liu2025/README.md`](benchmarks/liu2025/README.md) for preparation,
+the flow-reference uncertainty, and comparison of future wall-deposit peaks.
+
 ## Licences
 
 - GEMS3K: LGPL-3.0.

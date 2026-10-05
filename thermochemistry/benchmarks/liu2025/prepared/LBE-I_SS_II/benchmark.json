@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "source_doi": "10.1007/s10967-025-10246-4",
+  "experiment": {
+    "experiment": "LBE-I_SS_II",
+    "sample_material": "LBE-I",
+    "sample_mass_mg": "346.0",
+    "iodine_mole_fraction": "0.000904",
+    "column_material": "SS316L",
+    "inner_diameter_m": "0.0048",
+    "column_length_m": "1.25",
+    "flow_ml_min": "45",
+    "duration_s": "10800",
+    "hot_zone_temperature_C": "900",
+    "total_deposited_iodine_mg": "0.191",
+    "primary_m10": "yes",
+    "source_table": "2;5",
+    "source_page": "5205;5213"
+  },
+  "ready_for_cfd": false,
+  "observable": "wall deposit peak temperature; not 1% onset",
+  "preliminary_source_model": "Q1: mean prescribed release over 10800 s; measured evaporation history unknown",
+  "physical_source_model": "Q2 element/metal-vapour source needed to predict species split",
+  "flow_reference_temperature_K": null,
+  "flow_reference_pressure_Pa": null,
+  "full_column_volume_flow_at_reference_m3_s": 7.499999999999999e-07,
+  "full_column_helium_mass_flow_kg_s": null,
+  "wedge_helium_mass_flow_kg_s": null,
+  "mesh": {
+    "axial_cells": 384,
+    "radial_cells": 48,
+    "cells": 18432,
+    "wedge_angle_deg": 5,
+    "full_column_fraction": 0.013888888888888888
+  },
+  "source_terms": [
+    {
+      "species": "BiI3",
+      "scope": "M10",
+      "formula": {
+        "Bi": 1,
+        "I": 3
+      },
+      "included_in_pbbii_model": true,
+      "mass_basis": "inferred_deposit",
+      "full_column_mass_kg": 1.81e-07,
+      "full_column_amount_mol": 3.069389519282897e-07,
+      "mean_release_mol_s": 2.842027332669349e-11,
+      "wedge_amount_mol": 4.263040999004023e-09,
+      "wedge_mean_release_mol_s": 3.9472601842629844e-13,
+      "measured_peak_K": 427.15,
+      "uncertainty_K": 14.0,
+      "published_iodine_yield_pct": 61.3
+    },
+    {
+      "species": "PbI2",
+      "scope": "M10",
+      "formula": {
+        "Pb": 1,
+        "I": 2
+      },
+      "included_in_pbbii_model": true,
+      "mass_basis": "inferred_deposit",
+      "full_column_mass_kg": 1.11e-07,
+      "full_column_amount_mol": 2.407762417796063e-07,
+      "mean_release_mol_s": 2.229409646107466e-11,
+      "wedge_amount_mol": 3.3441144691611985e-09,
+      "wedge_mean_release_mol_s": 3.096402286260369e-13,
+      "measured_peak_K": 561.15,
+      "uncertainty_K": 18.0,
+      "published_iodine_yield_pct": 32.1
+    },
+    {
+      "species": "KI",
+      "scope": "diagnostic",
+      "formula": {
+        "K": 1,
+        "I": 1
+      },
+      "included_in_pbbii_model": false,
+      "mass_basis": "inferred_deposit",
+      "full_column_mass_kg": 1.65e-08,
+      "full_column_amount_mol": 9.939591380386354e-08,
+      "mean_release_mol_s": 9.203325352209587e-12,
+      "wedge_amount_mol": 1.380498802831438e-09,
+      "wedge_mean_release_mol_s": 1.2782396322513316e-13,
+      "measured_peak_K": 709.15,
+      "uncertainty_K": 16.0,
+      "published_iodine_yield_pct": 6.6
+    }
+  ],
+  "excluded_KI_iodine_yield_pct": 6.6,
+  "modeled_full_column_element_amounts_mol": {
+    "Pb": 2.407762417796063e-07,
+    "Bi": 3.069389519282897e-07,
+    "I": 1.4023693393440817e-06
+  },
+  "modeled_wedge_element_amounts_mol": {
+    "Pb": 3.3441144691611985e-09,
+    "Bi": 4.263040999004023e-09,
+    "I": 1.9477351935334467e-08
+  },
+  "missing_inputs": [
+    "measured wall T(x) and its coordinate origin",
+    "boat axial position and source selection geometry",
+    "physical frozen helium carrier",
+    "raw deposition/gamma profiles",
+    "evaporation history",
+    "Bi-I data provenance confirmation and external tables (Bi cases)",
+    "M10 implementation/qualification (Bi cases)",
+    "confirm mass-flow-controller reference temperature and pressure"
+  ]
+}

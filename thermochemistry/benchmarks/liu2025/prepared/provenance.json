@@ -1,0 +1,19 @@
+{
+  "source_doi": "10.1007/s10967-025-10246-4",
+  "source_license": "CC-BY-4.0",
+  "input_sha256": {
+    "experiments.csv": "d613ee1108a2a7f66b43fb17f7345e3966e5b1ecd013b1453f7029ea7068f06f",
+    "targets.csv": "76e5b1354715b3d9644cf00c1bf17af1dd1c2b02f261db435cdd0242479de2e4",
+    "sublimation.csv": "a22aab18c074f9417fbec05232335f1766d21df479736d3faf70c169474cc368",
+    "prepare.py": "8dcd29b26b35857181b2b76af071174b9cac2364ffac37d5f23a139c442b8dc8"
+  },
+  "eq3_reproduction_molar_volume_L_mol": 24.465,
+  "eq3_flow_reference_note": "24.465 L/mol inferred from rounded published Eq. 3 values; not a verified flow calibration",
+  "args": {
+    "nx": 384,
+    "nr": 48,
+    "wedge_angle": 5,
+    "flow_reference_temperature_K": null,
+    "flow_reference_pressure_Pa": null
+  }
+}

@@ -1,0 +1,5 @@
+species,molar_mass_kg_mol,iodine_atoms,delta_H_J_mol,delta_S_J_mol_K,source_table,source_page
+PbI2,0.46100894,2,172213,184.716,1,5204
+BiI3,0.58969381,3,134306,183.703,1,5204
+BiI,0.33588487,1,129114,149.897,1,5204
+KI,0.1660028,1,202380,151.875,1,5204

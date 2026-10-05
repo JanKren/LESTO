@@ -1,0 +1,12 @@
+experiment,sample_material,sample_mass_mg,iodine_mole_fraction,column_material,inner_diameter_m,column_length_m,flow_ml_min,duration_s,hot_zone_temperature_C,total_deposited_iodine_mg,primary_m10,source_table,source_page
+PbI2_SiO2_I,PbI2,7.4,,SiO2,0.005,1.25,100,10800,,,no,2,5205
+PbI2_SiO2_II,PbI2,10.6,,SiO2,0.005,1.25,100,10800,,,no,2,5205
+PbI2_SS,PbI2,14.6,,SS316L,0.0048,1.25,100,10800,,,yes,2,5205
+BiI3_SiO2_550,BiI3,6.0,,SiO2,0.005,1.25,100,10800,550,,no,2,5205
+BiI3_SiO2_800,BiI3,19.2,,SiO2,0.005,1.25,100,10800,800,,yes,2,5205
+BiI_SiO2_550,BiI,72.5,,SiO2,0.005,1.25,100,10800,550,,no,2,5205
+BiI_SiO2_800,BiI,28.0,,SiO2,0.005,1.25,100,10800,800,,no,2,5205
+LBE-I_SS_I,LBE-I,288.2,0.000904,SS316L,0.0048,1.25,45,10800,900,0.159,no,2;5,5205;5213
+LBE-I_SS_II,LBE-I,346.0,0.000904,SS316L,0.0048,1.25,45,10800,900,0.191,yes,2;5,5205;5213
+LBE-I_SiO2_I,LBE-I,368.3,0.000904,SiO2,0.005,1.25,45,10800,900,0.203,yes,2;5,5205;5213
+LBE-I_SiO2_II,LBE-I,482.0,0.0000175,SiO2,0.005,1.25,45,10800,900,0.0052,no,2;5,5205;5213
