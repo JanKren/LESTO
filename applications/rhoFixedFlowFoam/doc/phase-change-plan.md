@@ -8345,3 +8345,30 @@ all five onsets within 10 K and ledgers within 1e-14. Default and optional
 builds have zero warnings. The SELF/CACHE/LIST framework checks did not run
 after the interrupted session; no completed aggregate Alltest or new v2606
 qualification is claimed. The eleven benchmark Python tests also pass.
+
+### 36.14 Full-size equilibrium convergence repair (2026-10-06)
+
+Six Q2 cases in the second full-size attempt stopped at 1.8–2.6 s with
+homogeneous equilibrium nonconvergence. The iodine Schur derivative could
+lose positivity through cancellation in strongly bound, nearly stoichiometric
+iodides; Newton steps could also cycle. Pairwise weighted variances now
+evaluate the derivative with nonnegative terms. Finite brackets bisect when
+steps fail to contract, and a failed double predictor falls back to a cold
+extended solve. All species and the 1e-14 element-residue gate are retained.
+
+The default v2412 build is warning-free. The 140 reference points, 24 tiny
+bulks and 54 new synthetic strong-binding cases pass; the first new fixture
+fails with the previous kernel. Local stress tests cover 600,000 inputs at
+the failed cells' constants (zero convergence/balance failures, worst residue
+5.03e-16) and 30,000 synthetic affinity sets. Targeted closed boxes,
+serial/four-rank comparisons, 4,800 written-field equilibrium points, exact
+binary restarts and shared-wall closed forms pass. Two full-size silica
+ten-step checks pass with zero re-speciation failures. This is targeted
+qualification, not a new aggregate Alltest or optional/v2606 build claim.
+
+Attempt two is archived; attempt three starts all fifteen available cases
+fresh with one private corrected binary, unchanged sources and thermodynamic
+tables, 18,432 cells, 60 s and 2 ms. One-second field/profile writes retain
+two field checkpoints. Final full-size conservation, refinement and
+experimental validation remain pending; no journal-ready physical validation
+is inferred from these numerical checks.

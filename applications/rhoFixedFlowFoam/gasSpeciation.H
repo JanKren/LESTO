@@ -90,24 +90,31 @@ public:
       dilute = dilute || (amount > 0 && static_cast<long double>(amount) < 1e-280L*scale);
     std::array<double,3> fastPi = pi;
     const int iterations = dilute ? 0 : solveImpl<double>(lnKf, scale, b, fastPi, c);
-    if (iterations < 0) return iterations;
+    // The double predictor is an accelerator, not a convergence gate.
+    // Nearly stoichiometric metal/iodine bulks can exhaust its iterations
+    // while the extended solve still converges from a cold start.
+    if (iterations < 0) fastPi = {NAN, NAN, NAN};
     std::array<long double,3> precisePi = {fastPi[0], fastPi[1], fastPi[2]};
-    const int refined = solveImpl<long double>(lnKf, scale, b, precisePi, c);
+    int refined = solveImpl<long double>(lnKf, scale, b, precisePi, c, iterations < 0);
+    if (refined < 0 && iterations >= 0) {
+      precisePi = {NAN, NAN, NAN};
+      refined = solveImpl<long double>(lnKf, scale, b, precisePi, c, true);
+    }
     pi = {double(precisePi[0]), double(precisePi[1]), double(precisePi[2])};
-    return refined < 0 ? refined : (dilute ? refined : iterations);
+    return refined < 0 ? refined : (dilute || iterations < 0 ? refined : iterations);
   }
 
 private:
-  template<class Real> static Real exponential(Real x) {
+  template<class Real> static Real exponential(Real x, const bool fullPrecision) {
     if (std::numeric_limits<Real>::digits > std::numeric_limits<double>::digits
-        && (x < -700 || x > 700)) return std::exp(x);
+        && (fullPrecision || x < -700 || x > 700)) return std::exp(x);
     const double base = static_cast<double>(x);
     return static_cast<Real>(std::exp(base))*(1 + (x-static_cast<Real>(base)));
   }
   template<class Real>
   int solveImpl(const double* lnKf, double scale,
                 const std::array<double,3>& b, std::array<Real,3>& pi,
-                double* c) const {
+                double* c, const bool fullPrecision = false) const {
     const Real NaN = std::numeric_limits<Real>::quiet_NaN();
     const bool hasPb = b[PB] > 0, hasBi = b[BI] > 0, hasI = b[I] > 0;
 
@@ -116,6 +123,7 @@ private:
     auto metal = [&](int E, Real piI, Real start, Real& dpi) {
       Real x = std::isfinite(start) ? start : std::log(static_cast<Real>(b[E])/scale);
       Real lo = -1e300, hi = 1e300;
+      Real previousStep = 1e300;
       for (int it = 0; it < 200; ++it) {
         Real s1 = 0, s2 = 0, sI = 0;
         for (int j = 0; j < size(); ++j) {
@@ -123,7 +131,7 @@ private:
           if (!nu) continue;
           const int nI = sp_[j].nI;
           const Real e =
-            exponential(Real(lnKf[j]) + nu*x + (nI && hasI ? nI*piI : 0.0))
+            exponential(Real(lnKf[j]) + nu*x + (nI && hasI ? nI*piI : 0.0), fullPrecision)
             *(nI && !hasI ? 0.0 : 1.0);
           s1 += nu*e; s2 += nu*nu*e; sI += nu*nI*e;
         }
@@ -133,30 +141,58 @@ private:
         if (dx > 30) dx = 30;
         if (dx < -30) dx = -30;
         Real xn = x + dx;
-        if (!(xn > lo && xn < hi) && lo > -1e299 && hi < 1e299) {
+        if (lo > -1e299 && hi < 1e299
+            && (!(xn > lo && xn < hi) || std::fabs(dx) > 0.5*previousStep)) {
           xn = 0.5*(lo + hi);
         }
         dpi = -sI/s2;
         if (std::fabs(f) < 2e-16L) break;      /* balance to round-off */
         const bool done = xn == x;
+        previousStep = std::fabs(xn - x);
         x = xn;
         if (done) break;
       }
       return x;
     };
 
-    auto gasI = [&](Real piI, Real piPb, Real piBi, Real dPb, Real dBi,
-                    Real& deriv) {
+    std::vector<Real> pressures(size());
+    auto gasI = [&](Real piI, Real piPb, Real piBi, Real& deriv) {
       Real s = 0, d = 0;
       for (int j = 0; j < size(); ++j) {
         const int nI = sp_[j].nI;
-        if (!nI) continue;
         const int nPb = sp_[j].nPb, nBi = sp_[j].nBi;
+        pressures[j] = 0;
         if ((nPb && !hasPb) || (nBi && !hasBi)) continue;
         const Real e = exponential(Real(lnKf[j]) + nI*piI + (nPb ? nPb*piPb : 0.0)
-                                  + (nBi ? nBi*piBi : 0.0));
+                                  + (nBi ? nBi*piBi : 0.0), fullPrecision);
+        pressures[j] = e;
         s += nI*e;
-        d += nI*e*(nI + nPb*dPb + nBi*dBi);
+        if (!nPb && !nBi) d += nI*nI*e;
+      }
+      // Evaluate each metal's Schur complement as a weighted variance:
+      // sum(j<k) p_j p_k (I_j E_k - I_k E_j)^2 / sum(j) p_j E_j^2.
+      // Every term is nonnegative. Subtracting Gram-matrix entries instead
+      // loses this property near a stoichiometric iodide and can reverse
+      // the Newton direction. Divide before multiplying to avoid underflow.
+      for (const int E : {PB, BI}) {
+        if (!(b[E] > 0)) continue;
+        Real denominator = 0;
+        for (int j = 0; j < size(); ++j) {
+          const int nu = nuOf(j, E);
+          denominator += nu*nu*pressures[j];
+        }
+        for (int j = 0; j < size(); ++j) {
+          const int nj = nuOf(j, E);
+          if (!nj) continue;
+          for (int k = j + 1; k < size(); ++k) {
+            const int nk = nuOf(k, E);
+            if (!nk) continue;
+            const Real cross = Real(sp_[j].nI)*nk - Real(sp_[k].nI)*nj;
+            if (cross == 0) continue;
+            d += (std::max(pressures[j], pressures[k])/denominator)
+                 *std::min(pressures[j], pressures[k])*cross*cross;
+          }
+        }
       }
       deriv = d;
       return s;
@@ -172,21 +208,24 @@ private:
       if (hasBi) piBi = metal(BI, NaN, piBi, d);
     } else {
       Real lo = -1e300, hi = 1e300;
+      Real previousStep = 1e300;
       for (outer = 1; outer <= 200; ++outer) {
         Real dPb = 0, dBi = 0, deriv = 0;
         if (hasPb) piPb = metal(PB, piI, piPb, dPb);
         if (hasBi) piBi = metal(BI, piI, piBi, dBi);
-        const Real s = gasI(piI, piPb, piBi, dPb, dBi, deriv);
+        const Real s = gasI(piI, piPb, piBi, deriv);
         const Real f = std::log(scale*s) - std::log(static_cast<Real>(b[I]));
         if (f > 0) hi = std::min(hi, piI); else lo = std::max(lo, piI);
         Real dx = -f*s/deriv;
         if (dx > 30) dx = 30;
         if (dx < -30) dx = -30;
         Real xn = piI + dx;
-        if (!(xn > lo && xn < hi) && lo > -1e299 && hi < 1e299) {
+        if (lo > -1e299 && hi < 1e299
+            && (!(xn > lo && xn < hi) || std::fabs(dx) > 0.5*previousStep)) {
           xn = 0.5*(lo + hi);
         }
         const bool done = std::fabs(f) < 4e-16L || xn == piI;
+        previousStep = std::fabs(xn - piI);
         if (!done) piI = xn;
         if (done) {
           if (hasPb) piPb = metal(PB, piI, piPb, dPb);
@@ -206,7 +245,7 @@ private:
       }
       c[j] = scale*exponential(Real(lnKf[j]) + (g.nPb ? g.nPb*piPb : 0.0)
                             + (g.nBi ? g.nBi*piBi : 0.0)
-                            + (g.nI ? g.nI*piI : 0.0));
+                            + (g.nI ? g.nI*piI : 0.0), fullPrecision);
     }
     return outer;
   }

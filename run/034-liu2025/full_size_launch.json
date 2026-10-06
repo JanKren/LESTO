@@ -1,8 +1,8 @@
 {
   "stage": "M10e full-size matrix execution",
-  "captured_utc": "2026-10-06T13:35:50.099106+00:00",
+  "captured_utc": "2026-10-06T15:20:04.027592+00:00",
   "status_at_capture": "RUNNING",
-  "started_utc": "2026-10-06T13:06:37.769919+00:00",
+  "started_utc": "2026-10-06T15:17:59.712969+00:00",
   "status_counts_at_capture": {
     "RUNNING": 15,
     "NOTRUN": 1
@@ -11,7 +11,7 @@
   "dt_s": 0.002,
   "end_time_s": 60,
   "independent_serial_jobs": 15,
-  "runner_pid_at_launch": 31749,
+  "runner_pid_at_launch": 28194,
   "scientific_validation_status": "PROVISIONAL_ONLY",
   "final_numerical_validation_status": "PENDING",
   "local_status_file": "run/034-liu2025/work/prepared/run_state.json",
@@ -20,7 +20,7 @@
   "local_final_peaks": "run/034-liu2025/work/prepared/cases/peaks.csv",
   "local_final_plot": "run/034-liu2025/work/prepared/cases/preliminary_profiles.png",
   "private_solver": "/home/jan/LESTO/run/034-liu2025/work/prepared/bin/rhoFixedFlowFoam",
-  "private_solver_sha256": "b50edaa89b20c5b9bf61d92768453ebaa0d0abce640c8641c86689f52bb6f9e9",
+  "private_solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
   "core_source_sha256": {
     "applications/rhoFixedFlowFoam/ChapmanEnskogDiffusivity.H": "f14361e39307fe99891caeb830d9ca3b45239b1dc1da980826bd757f4a2bc824",
     "applications/rhoFixedFlowFoam/PbI2HeDiffusivity.H": "894a8652374238fd4938de80c05c5ca72ff589dfb8430c0e4f78a1440e258e2c",
@@ -36,9 +36,9 @@
     "applications/rhoFixedFlowFoam/createVariableDiffusivity.H": "34477d38ff01d0e478371204f94bec6cc17456b93135f486cb7175e8ad2a32fe",
     "applications/rhoFixedFlowFoam/evaluateThermochemistry.C": "a742a2169e61acbbbc7d114eb903a60c54f8f6e7a44fbafcb164d71a75caa515",
     "applications/rhoFixedFlowFoam/evaluateThermochemistry.H": "cd88bcb17b0e28e5cfbc42e8734c3790e366eb98710c77ba3e366c4c57a0c1b7",
-    "applications/rhoFixedFlowFoam/gasRespeciation.C": "7e8c3a7fabb6c2941e0bf6e0533a8e5d10beae606b4e38af05577d97583f7d08",
+    "applications/rhoFixedFlowFoam/gasRespeciation.C": "83915441232a88227ebfa3140b1c3dfa33371ae9df8f0e78631475d6e45fc932",
     "applications/rhoFixedFlowFoam/gasRespeciation.H": "b320d0657985b598a447bfdc472904db79830334f6a0e018eac5da70aff7deb1",
-    "applications/rhoFixedFlowFoam/gasSpeciation.H": "6269739bf4bdc54ba4a752c1241ebfdff244757ee61057f03e4c8e1eb0e834c5",
+    "applications/rhoFixedFlowFoam/gasSpeciation.H": "caff9e28aa367b4c71c0f6bee4b4c392df6a6ffead7c42d2d9d096a7663212ca",
     "applications/rhoFixedFlowFoam/gemsEquilibrium.C": "d8bf4bb17e69a96036c237077c824dedf5cf9f29d093585dca9ddd7ce7dfd36a",
     "applications/rhoFixedFlowFoam/gemsEquilibrium.H": "d264a598669119c8ea054cc17d875fc5bf11f7685fd3d7437def3a9d73318bfd",
     "applications/rhoFixedFlowFoam/gemsGasSpeciation.H": "c61a89fcbf2ba828a11914ede2eeb25baed1bec5b783dc87518cc8cf35ab5dff",
@@ -60,21 +60,21 @@
     "applications/rhoFixedFlowFoam/wallChannels.H": "092ba6888ede5f91b78f3d3593ef4cac45de5cd8caf91360baeed87703782785"
   },
   "case_manifest_sha256": {
-    "LBE-I_SS_II_Q1_baseline": "3df87e204cfc00e3be167803ee96f12aa33e344eb9d052630efd32024631ac82",
-    "LBE-I_SS_II_Q2_baseline_sat0.001": "4ab764121f329842af1486e05cec8d790b71d0bd6cd45bfec652ae263da8bece",
-    "LBE-I_SS_II_Q2_baseline_sat0.01": "9d2fa81b791d8caab85c2eda517c0af348d96bd594b8585e50ebe8f429bb9ec7",
-    "LBE-I_SS_II_Q2_baseline_sat0.1": "e409235c5ff322a003e84e4c9fb2767fa06e8c0d061983df47456f533b261bef",
-    "LBE-I_SS_II_Q2_shift29k_sat0.001": "a82e59b4dd790f1b06bec239a09479b796560c656e1a37b1854e24cbfb43e51f",
-    "LBE-I_SS_II_Q2_shift29k_sat0.01": "cff009a86b52b4a4d124b7b8f82515ac48f808a3a7fc3ef71c59eac95888a6a5",
-    "LBE-I_SS_II_Q2_shift29k_sat0.1": "f6928c5cf23ab3b4bdb1570d1231d43b1e862bb605b005e5f174b4e1127b18aa",
-    "LBE-I_SiO2_I_Q1_baseline": "2d23cfea3dfe692dd2133cccfa4363108ba5f4d305c8bd02c77e64b7cf320d24",
-    "LBE-I_SiO2_I_Q2_baseline_sat0.001": "d19771320b25918cea6e281d2519520e959408fac6493d6ffa9a76f0c67469ce",
-    "LBE-I_SiO2_I_Q2_baseline_sat0.01": "bb684134801c357d97a89f99fb5cd699787530dae305cdecf0be1b12597e4442",
-    "LBE-I_SiO2_I_Q2_baseline_sat0.1": "61ee22aa033e7501b904f17f05abc818101ba35107253d722db7e8d85572a2b3",
-    "LBE-I_SiO2_I_Q2_shift29k_sat0.001": "70c6a7e4dd1739a4b6d0aeb5d9247051b548cf198cf9d9e3ea03c4b93e267803",
-    "LBE-I_SiO2_I_Q2_shift29k_sat0.01": "e13e000627a714999389b6f88302518afb42458de045f426411a31e1e595702a",
-    "LBE-I_SiO2_I_Q2_shift29k_sat0.1": "0bec3976bfd7cd3817888a7bc73bb2026d23b0edb2fd48ff41080a10ba4e1b2e",
-    "PbI2_SS_Q1_baseline": "4fb38a18a51edff3a227f2ecb4b6879b1e24338206c7310d02a8f21f159cda1d"
+    "LBE-I_SS_II_Q1_baseline": "1ab2a5c75efb123d69af9eb4100efabbfc91cb86b10e720059a7bcdf2361f9c4",
+    "LBE-I_SS_II_Q2_baseline_sat0.001": "0c7023fdbbf1d448c1366e0f62858790c25d4e72ad8011f0ac26820bab52d558",
+    "LBE-I_SS_II_Q2_baseline_sat0.01": "9d43cab9e359c74aca005cfbe2fc75a134bc80bb803ec314604919e65555e8df",
+    "LBE-I_SS_II_Q2_baseline_sat0.1": "7951b070f5129baf35982db41167fbcb740c4649717446fd1b11343344d05014",
+    "LBE-I_SS_II_Q2_shift29k_sat0.001": "0b59122ec4152b4421e677b3083f9cf2497069d62d9680f110d5f10efd08b77f",
+    "LBE-I_SS_II_Q2_shift29k_sat0.01": "ae418be83f837939a6a943ed7eca12c752d81ecdf51dcd3a6d1d06c820f72a20",
+    "LBE-I_SS_II_Q2_shift29k_sat0.1": "e8e965782e7c6e29108b31e0bc6cbfa19c109b50862608e7c23d22e6f0062d5a",
+    "LBE-I_SiO2_I_Q1_baseline": "9c29166a3ff5f8fe395dc2f32e5f2f12f6fa1133fab0884a796d0dbb1d0f57ff",
+    "LBE-I_SiO2_I_Q2_baseline_sat0.001": "f2111e0e59713872e0866622a667cf9dc22dbc96afbd72a5c5720c8d4f8ca271",
+    "LBE-I_SiO2_I_Q2_baseline_sat0.01": "b98e8c1c279e9f3c6d390e097b14492b9169e8254c6676af007ede51216139e0",
+    "LBE-I_SiO2_I_Q2_baseline_sat0.1": "3bcc73cc0f809f90fcb058621322329f18f2770b234f88c362166dd43d98bcf6",
+    "LBE-I_SiO2_I_Q2_shift29k_sat0.001": "a827f1cca44ac2c8782b7c1999dc7a5dafba35078d411877d6c328ab8d6a869a",
+    "LBE-I_SiO2_I_Q2_shift29k_sat0.01": "629e29b43941a61ba1b1de01358f05931dec6b98066a862434d18fc2011822d5",
+    "LBE-I_SiO2_I_Q2_shift29k_sat0.1": "00848d8ba76688673196b8aef09ccfd8220c70e7f9728567df76b1c9bc182608",
+    "PbI2_SS_Q1_baseline": "a33a76d6bffc1938c03af23819cdbf28e6ce09ed924081ff29f963656fcc54ae"
   },
   "matrix_sha256": "03b224b6df8ac9b25cd3999500cb3fe040c03981407f453e9157bec93c28e55a",
   "first_attempt": "run/034-liu2025/work/attempt-1-pressure-underflow",
@@ -92,7 +92,63 @@
       "max_relative_solver_defect": 4.598482324666322e-15
     }
   },
-  "regression": {
+  "python_tests": {
+    "PASS": 11,
+    "FAIL": 0,
+    "scope": "Previous preliminary package; unchanged Python benchmark source, not rerun for this C++ correction."
+  },
+  "unavailable_case": "BiI3_SiO2_800_Q1_baseline",
+  "experimental_limitations_reference": "run/034-liu2025/verification.json",
+  "simulated_time_range_s_at_capture": [
+    0.162,
+    0.374
+  ],
+  "source_tests_sha256": {
+    "applications/rhoFixedFlowFoam/tests/speciation/Allrun": "b0367fd7255a549508f7f39935c524f58cdc4f597cba14a720946519800a65a4",
+    "applications/rhoFixedFlowFoam/tests/speciation/testTinyBulk.C": "32c69f22e880f31a9932c4500e946eb929267a462accff5432482e16597e7d4a",
+    "applications/rhoFixedFlowFoam/tests/speciation/testStrongBinding.C": "1ed25aa2d29cecb5039e4be690960d0386b691fbb125cc33e03e2187dc87af23"
+  },
+  "attempt": 3,
+  "field_write_period_s": 1.0,
+  "retained_field_checkpoints": 2,
+  "second_attempt": {
+    "local_archive": "run/034-liu2025/work/attempt-2-equilibrium-nonconvergence",
+    "solver_sha256": "b50edaa89b20c5b9bf61d92768453ebaa0d0abce640c8641c86689f52bb6f9e9",
+    "status": "INTERRUPTED_FOR_CONVERGENCE_FIX",
+    "failed_cases": [
+      {
+        "case": "LBE-I_SS_II_Q2_shift29k_sat0.001",
+        "latest_logged_time_s": 2.618,
+        "reason": "Solver exit code 1"
+      },
+      {
+        "case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+        "latest_logged_time_s": 1.78,
+        "reason": "Solver exit code 1"
+      },
+      {
+        "case": "LBE-I_SS_II_Q2_shift29k_sat0.1",
+        "latest_logged_time_s": 1.776,
+        "reason": "Solver exit code 1"
+      },
+      {
+        "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+        "latest_logged_time_s": 2.6,
+        "reason": "Solver exit code 1"
+      },
+      {
+        "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01",
+        "latest_logged_time_s": 2.272,
+        "reason": "Solver exit code 1"
+      },
+      {
+        "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.1",
+        "latest_logged_time_s": 2.254,
+        "reason": "Solver exit code 1"
+      }
+    ]
+  },
+  "previous_binary_regression": {
     "status": "SELECTED_NUMERICAL_CHECKS_PASS_SUITE_INTERRUPTED",
     "command": "tests/Alltest M10b M10c M10d",
     "OpenFOAM": "v2412 linux64GccDPInt32Opt",
@@ -235,20 +291,48 @@
       "LIST"
     ],
     "build_warnings": 0,
-    "v2606_this_change": "NOTRUN"
+    "v2606_this_change": "NOTRUN",
+    "solver_sha256": "b50edaa89b20c5b9bf61d92768453ebaa0d0abce640c8641c86689f52bb6f9e9"
   },
-  "python_tests": {
-    "PASS": 11,
-    "FAIL": 0
-  },
-  "unavailable_case": "BiI3_SiO2_800_Q1_baseline",
-  "experimental_limitations_reference": "run/034-liu2025/verification.json",
-  "simulated_time_range_s_at_capture": [
-    1.388,
-    3.488
-  ],
-  "source_tests_sha256": {
-    "applications/rhoFixedFlowFoam/tests/speciation/Allrun": "b54353b670c7a1c484461fb99c3a10e3794f1ae82bf8e69072ff7ea0c730f2c0",
-    "applications/rhoFixedFlowFoam/tests/speciation/testTinyBulk.C": "32c69f22e880f31a9932c4500e946eb929267a462accff5432482e16597e7d4a"
+  "regression": {
+    "status": "TARGETED_CHECKS_PASS",
+    "scope": "Corrected default v2412 solver and standalone kernel; no new aggregate Alltest, optional build or v2606 qualification.",
+    "default_build_warnings": 0,
+    "reference_points": 140,
+    "reference_species_relative_error": 4.44089e-16,
+    "reference_max_relative_balance": 2.03342e-16,
+    "tiny_bulk_cases": 24,
+    "strong_binding_cases": 54,
+    "strong_binding_first_fixture_fails_previous_kernel": true,
+    "FPE_traps": true,
+    "local_thermodynamic_stress_inputs": 600000,
+    "local_stress_convergence_failures": 0,
+    "local_stress_balance_failures": 0,
+    "local_stress_max_relative_balance": 5.02745e-16,
+    "synthetic_affinity_inputs": 30000,
+    "synthetic_affinity_convergence_failures": 0,
+    "closed_boxes": "PASS: 450/1000 K, atomic/iodide initial fields",
+    "serial_four_rank": "PASS: relative species agreement below 1e-9; element closure below 1e-14",
+    "written_field_equilibrium_points": 4800,
+    "binary_restart": "PASS: byte-exact within each decomposition",
+    "shared_wall_closed_forms": "PASS: analytic equilibria, reactive channels, irreversible deposits and shared cap",
+    "full_size_smoke": {
+      "cases": [
+        "LBE-I_SiO2_I_Q1_baseline",
+        "LBE-I_SiO2_I_Q2_shift29k_sat0.1"
+      ],
+      "steps": 10,
+      "dt_s": 0.002,
+      "end_time_s": 0.02,
+      "status": "PASS",
+      "max_relative_element_closure": 6.383451864883079e-16,
+      "max_respeciation_failures": 0
+    },
+    "local_log_sha256": {
+      "lesto-m10e-convergence-build.log": "e110b9df8a98f69ba4df872c13943979518bca10e3923628755895782e70d1b9",
+      "lesto-m10e-convergence-closed-final.log": "3cc495d7f1d523c82e91aa6d85088a1486ba0f0ff09bff610a43f14f518aa901",
+      "lesto-m10e-convergence-channel-native.log": "e3278231e265e3b52d656153ff5678d36bf2b98245b40a8b324f55b16aa90865",
+      "lesto-m10e-convergence-wall-final.log": "bcf1414d73fd1ff9bf10c03b87ad90173c200e61515e8426e817b75cc36a1595"
+    }
   }
 }

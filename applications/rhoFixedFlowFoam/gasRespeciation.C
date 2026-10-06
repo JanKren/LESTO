@@ -293,7 +293,9 @@ void LESTO::gasRespeciation::apply() {
     // physical bulk and G0 as the warm polish, with no composition floors.
     if(polished && it>=0){pi={NAN,NAN,NAN};const int canonical=kernel_->solve(constants_[cell].data(),1e5/(8.314462618*thermo_.T()[cell]),b,pi,c.data());it=canonical<0?canonical:it+canonical;}
     if(charged)warmSeconds+=std::chrono::duration<double>(std::chrono::steady_clock::now()-cellBegan).count();
-    if (it<0) FatalErrorInFunction<<"Gas speciation failed in cell "<<cell<<exit(FatalError);
+    if (it<0) FatalErrorInFunction<<"Gas speciation failed in cell "<<cell
+      <<"; bulk Pb/Bi/I "<<b[0]<<" / "<<b[1]<<" / "<<b[2]
+      <<", T "<<thermo_.T()[cell]<<exit(FatalError);
     std::array<long double,3> after={0,0,0};
     forAll(ids_,i) { const auto& f=formulas_[i];
       if (!std::isfinite(c[i]) || c[i]<0) FatalErrorInFunction<<"Nonfinite gas equilibrium"<<exit(FatalError);

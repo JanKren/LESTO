@@ -182,3 +182,32 @@ was performed.
 [The launch record](full_size_launch.json) captures the configuration,
 source/binary hashes and regression evidence. It is a timestamped launch
 snapshot; consult the local `run_state.json` for live completion status.
+
+Six Q2 cases in that second attempt stopped at 1.8–2.6 s with equilibrium
+nonconvergence. Near a strongly bound iodide, subtraction in the iodine
+Schur derivative could make a positive derivative negative; Newton steps
+could also cycle between opposite sides of a root. The kernel now evaluates
+that derivative as nonnegative pairwise weighted variances, bisects finite
+brackets when steps fail to contract, and treats the double predictor as an
+accelerator with a cold extended-precision fallback. The element gate remains
+1e-14 and no species or positive bulk is removed.
+
+The revised default v2412 build has zero warnings. The unchanged 140-point
+Decimal reference and 24 tiny-bulk checks pass. A new 54-case synthetic
+strong-binding regression passes with FPE traps; its first case fails with
+the previous kernel. A local 600,000-input stress check using the six failed
+cells' thermodynamic constants has zero convergence or element-balance
+failures (maximum relative residue 5.03e-16); an additional 30,000 synthetic
+affinity cases converge. Closed-box checks, serial/four-rank agreement,
+4,800 written-field equilibrium points, exact binary restarts and analytical
+shared-wall checks pass. Two full-size silica cases pass ten steps with
+zero re-speciation failures and maximum relative element closure 6.39e-16.
+These are targeted checks, not a new complete `Alltest` invocation.
+
+The second attempt is preserved under
+`work/attempt-2-equilibrium-nonconvergence`. All fifteen cases were launched
+fresh for attempt three with one corrected private binary and identical
+thermodynamic tables, meshes, sources, end time and time step. Field/profile
+writes now occur every 1 s (500 steps), with the latest two field checkpoints
+retained; the case manifests record these execution overrides. The complete
+60 s numerical and experimental comparisons remain pending.

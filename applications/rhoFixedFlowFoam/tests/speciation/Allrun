@@ -13,7 +13,9 @@ buildKernel() {
     && g++ -O2 -std=c++17 -Wall -Wextra "$TESTS_DIR/speciation/testSpeciation.C" -o "$SPEC_DIR/testSpeciation" \
     && "$SPEC_DIR/testSpeciation" "$SPEC_DIR/reference.csv" \
     && g++ -O2 -std=c++17 -Wall -Wextra "$TESTS_DIR/speciation/testTinyBulk.C" -o "$SPEC_DIR/testTinyBulk" \
-    && "$SPEC_DIR/testTinyBulk"
+    && "$SPEC_DIR/testTinyBulk" \
+    && g++ -O2 -std=c++17 -Wall -Wextra "$TESTS_DIR/speciation/testStrongBinding.C" -o "$SPEC_DIR/testStrongBinding" \
+    && "$SPEC_DIR/testStrongBinding"
 }
 check M10b.0 'Synthetic Decimal reference: accuracy, absent elements, element balance and idempotence' buildKernel
 check M10b.1 '450/1000 K closed boxes: one-step equilibrium, element and reaction conservation' \
