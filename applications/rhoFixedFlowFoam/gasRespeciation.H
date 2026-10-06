@@ -4,6 +4,7 @@
 #ifndef gasRespeciationAdapter_H
 #define gasRespeciationAdapter_H
 #include "gasSpeciation.H"
+#include "gemsGasSpeciation.H"
 #include "interfaceExchange.H"
 #include "binaryIOList.H"
 #include "compensatedSum.H"
@@ -25,6 +26,7 @@ class gasRespeciation {
   std::vector<gasSpecies> formulas_;
   std::vector<std::vector<double>> constants_;
   Foam::autoPtr<gasSpeciation> kernel_;
+  Foam::autoPtr<gemsGasSpeciation> gems_;
   Foam::autoPtr<binaryGlobalIOList<Foam::scalar>> values_, elements_;
   Foam::autoPtr<binaryGlobalIOList<Foam::scalar>> condensates_;
   Foam::scalarList flux_, defect_;

@@ -1,0 +1,54 @@
+{
+  "local_calls": 5814420,
+  "mean_IPM_plus_polish_us": 132.23772718138667,
+  "PbI2_g": {
+    "frozen_vs_kernel_L1": 1.0331921316935701e-10,
+    "local_vs_frozen_L1": 0.0
+  },
+  "BiI3_g": {
+    "frozen_vs_kernel_L1": 1.0636450167990193e-07,
+    "local_vs_frozen_L1": 0.0
+  },
+  "maximum_element_relative_closure": 6.657954750327937e-16,
+  "reduced_map": {
+    "points": 936,
+    "max_species_relative_error": 6.81984e-10,
+    "max_element_relative_error": 5.02907e-16,
+    "max_GEMS_open_log10Kf_difference": 0.00036899209509044795,
+    "max_double_oracle_vs_Decimal_species_error": 1.1376667052864775e-08
+  },
+  "ABI": {
+    "original_functions": 30,
+    "extended_functions": 39,
+    "bit_identical_calls": 800
+  },
+  "acceptance": {
+    "milestones": [
+      "M0",
+      "M9",
+      "M10c"
+    ],
+    "OpenFOAM": "v2412",
+    "passed": 78,
+    "failed": 0,
+    "not_run": 2,
+    "M10c_gates_passed": 9,
+    "scientific_gate": "Rechecked completed three-mode study, including every-step element closure and deposit profiles",
+    "not_run_reasons": {
+      "M0.4": "Suite invoked under v2412; separate v2606 Debug optional-backend compile and executable startup passed with zero warnings",
+      "M9.8": "Historical run/015 excerpt requires the original bridge binary hash; 800 original-API calls independently match bit for bit"
+    },
+    "additional_restart_checks": {
+      "completed_cases": 8,
+      "relative_closure_limit": 1e-14,
+      "relative_inventory_limit": 1e-12,
+      "scope": "All output-time directories of saved native/extended, frozen/local, serial/four-rank restart cases"
+    }
+  },
+  "compilation": {
+    "bridge_warnings": 0,
+    "v2412_default_warnings": 0,
+    "v2412_optional_warnings": 0,
+    "v2606_Debug_optional_warnings": 0
+  }
+}

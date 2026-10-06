@@ -8,6 +8,8 @@
 #include <fstream>
 #include <sstream>
 #include <cstdint>
+#include <map>
+#include <chrono>
 using namespace Foam;
 namespace {
 scalar globalAmount(const LESTO::compensatedSum& local) {
@@ -53,8 +55,10 @@ LESTO::gasRespeciation::gasRespeciation(
       FatalErrorInFunction << "Re-speciation engine changed across restart" << exit(FatalError);
     return;
   }
-  if (engine != "kernel" || exchange.mock())
-    FatalIOErrorInFunction(dict) << "M10b requires respeciation engine kernel and a phase-change model"
+  const wordList known({"engine","species","formationConstants","minTemperature","updateInterval","GEMS"});
+  for(const Foam::entry& e:*rd)if(!known.found(e.keyword()))FatalIOErrorInFunction(*rd)<<"Unknown re-speciation key "<<e.keyword()<<exit(FatalIOError);
+  if ((engine != "kernel" && engine != "GEMS") || exchange.mock())
+    FatalIOErrorInFunction(dict) << "Re-speciation requires engine kernel or GEMS and a phase-change model"
       << exit(FatalIOError);
   if (dict.isDict("HKSCoeffs") && dict.subDict("HKSCoeffs").getOrDefault<word>("speciation","none") == "lagged")
     FatalIOErrorInFunction(dict) << "Re-speciation cannot be combined with HKSCoeffs speciation lagged"
@@ -103,11 +107,19 @@ LESTO::gasRespeciation::gasRespeciation(
     FatalIOErrorInFunction(*rd) << "Include every paired gas in respeciation species: " << names[si] << exit(FatalIOError);
   for(int e=0;e<3;++e) if(used[e]) exchange.includeElement(word(e==0?"Pb":e==1?"Bi":"I"));
   record.add("formulas",formulaRecord); record.add("molarMasses",massRecord);
-  fileName file(rd->get<fileName>("formationConstants"));
-  file.replaceAll("<constant>",mesh.time().globalPath()/mesh.time().constant()); file.expand();
-  std::ifstream raw(file.c_str()); if (!raw) FatalIOErrorInFunction(*rd) << "Cannot read " << file << exit(FatalIOError);
-  std::uint64_t hash=14695981039346656037ULL; char ch;
-  while(raw.get(ch)) { hash ^= static_cast<unsigned char>(ch); hash *= 1099511628211ULL; }
+  if(engine=="GEMS") {
+    dictionary cfg(dict.subOrEmptyDict("GEMSCoeffs"));
+    if(rd->isDict("GEMS"))cfg.merge(rd->subDict("GEMS"));
+    gems_.reset(new gemsGasSpeciation(mesh,cfg,selected,formulas_,masses_));
+    record.add("backendHash",gems_->signature());
+  }
+  fileName file(rd->getOrDefault<fileName>("formationConstants",fileName::null));
+  std::uint64_t hash=14695981039346656037ULL;
+  if(!file.empty()) {
+    file.replaceAll("<constant>",mesh.time().globalPath()/mesh.time().constant());file.expand();
+    std::ifstream raw(file.c_str());if(!raw)FatalIOErrorInFunction(*rd)<<"Cannot read "<<file<<exit(FatalIOError);
+    char ch;while(raw.get(ch)){hash^=static_cast<unsigned char>(ch);hash*=1099511628211ULL;}
+  } else if(engine=="kernel")FatalIOErrorInFunction(*rd)<<"Kernel requires formationConstants"<<exit(FatalIOError);
   record.add("formationHash",string(std::to_string(hash)));
   dictionary& layout = exchange.ledger().layout();
   if (exchange.ledger().restarted()) {
@@ -118,6 +130,7 @@ LESTO::gasRespeciation::gasRespeciation(
       && previous->get<string>("minTemperature")==string(phaseChangeLedger::exactDecimal(minT_))
       && previous->get<label>("updateInterval")==interval_
       && previous->get<string>("formationHash")==string(std::to_string(hash));
+    if(equal && gems_.valid())equal=previous->getOrDefault<string>("backendHash",string::null)==gems_->signature();
     if(equal) {
       equal=previous->isDict("molarMasses");
       if(equal)for(const word& n:selected)equal=equal && previous->subDict("molarMasses").get<string>(n)==massRecord.get<string>(n);
@@ -136,15 +149,35 @@ LESTO::gasRespeciation::gasRespeciation(
   layout.set("respeciation",record);
   std::vector<std::string> columns; for (const auto& n:selected) columns.push_back(n);
   try {
-    const vapourPressureTable table= vapourPressureTable::read(file,columns,vapourPressureTable::LOG10_PA,
-      vapourPressureTable::LOG_INVERSE_T,vapourPressureTable::FATAL);
+    autoPtr<vapourPressureTable> table;
+    if(!file.empty())table.reset(new vapourPressureTable(vapourPressureTable::read(file,columns,vapourPressureTable::LOG10_PA,
+      vapourPressureTable::LOG_INVERSE_T,vapourPressureTable::FATAL)));
     constants_.resize(mesh.nCells());
+    std::map<std::pair<scalar,scalar>,std::vector<double>> cache;
+    const auto began=std::chrono::steady_clock::now();
+    label misses=0;
     forAll(thermo.T(),c) if (thermo.T()[c]>=minT_) {
       constants_[c].resize(ids_.size());
-      forAll(ids_,i) constants_[c][i]=std::log(table.phase(i,thermo.T()[c]));
+      if(gems_.valid()) {
+        const auto key=std::make_pair(thermo.T()[c],thermo.p()[c]);
+        auto found=cache.find(key);
+        if(found==cache.end()) {
+          std::vector<double> data;
+          if(!gems_->constants(key.first,key.second,data)) {
+            ++misses;
+            if(!table.valid())throw std::runtime_error("Frozen T/P outside GEMS grid: provide formationConstants for the kernel fallback");
+            data.resize(ids_.size());
+            forAll(ids_,i)data[i]=std::log(table->phase(i,key.first));
+          }
+          found=cache.emplace(key,std::move(data)).first;
+        }
+        constants_[c]=found->second;
+      } else forAll(ids_,i)constants_[c][i]=std::log(table->phase(i,thermo.T()[c]));
       forAll(ids_,i) if (formulas_[i].nPb+formulas_[i].nBi+formulas_[i].nI==1 && std::fabs(constants_[c][i])>1e-12)
         throw std::runtime_error("monatomic formation constants must be zero");
     }
+    if(gems_.valid())Info<<"Gas GEMS standard states: "<<cache.size()<<" unique T/P states; grid fallbacks "<<misses
+      <<"; startup seconds "<<std::chrono::duration<double>(std::chrono::steady_clock::now()-began).count()<<nl;
   } catch (const std::exception& e) { FatalIOErrorInFunction(*rd) << e.what() << exit(FatalIOError); }
   kernel_.reset(new gasSpeciation(formulas_));
   values_.reset(new binaryGlobalIOList<scalar>(IOobject("phaseChangeSpecies",mesh.time().timeName(),
@@ -193,7 +226,7 @@ LESTO::gasRespeciation::gasRespeciation(
       elementFiles_[e]<<"# amounts [mol of atoms]; CONVERSION is the measured residue of gas transfers"<<nl
         <<"# columns time initial released transport removed clamped solverDefect restart gas wall sample held supplied closure pairClosure reference conversion reaction"<<nl; }
   }
-  Info<<"Re-speciation: engine kernel; species "<<selected<<"; minTemperature "<<minT_<<" K; updateInterval "<<interval_<<nl;
+  Info<<"Re-speciation: engine "<<engine<<"; species "<<selected<<"; minTemperature "<<minT_<<" K; updateInterval "<<interval_<<nl;
 }
 void LESTO::gasRespeciation::recordSolve(label si,const fvScalarMatrix& eqn) {
   const label i=index_[si]; const auto flux=eqn.flux(); compensatedSum boundary,defect;
@@ -210,7 +243,8 @@ void LESTO::gasRespeciation::apply() {
   if (!active_ || (mesh_.time().timeIndex()-1)%interval_!=0) return;
   std::vector<compensatedSum> reaction(ids_.size()),variation(ids_.size()); std::array<compensatedSum,3> conversion;
   std::vector<double> c(ids_.size()),before(ids_.size());
-  label calls=0,iterations=0,skipped=0; scalar largest=0;
+  label calls=0,iterations=0,skipped=0,ipmCalls=0,ipmIterations=0,failed=0,guarded=0; scalar largest=0;
+  scalar warmSeconds=0;
   forAll(thermo_.T(),cell) {
     if (constants_[cell].empty()) continue;
     std::array<long double,3> exact={0,0,0};
@@ -222,7 +256,23 @@ void LESTO::gasRespeciation::apply() {
     bool invalid=false; for (auto b:exact) invalid=invalid || b<0 || !std::isfinite(b);
     if (invalid) { ++skipped;continue; }
     std::array<double,3> b={double(exact[0]),double(exact[1]),double(exact[2])}, pi={NAN,NAN,NAN};
-    const int it=kernel_->solve(constants_[cell].data(),1e5/(8.314462618*thermo_.T()[cell]),b,pi,c.data());
+    const auto cellBegan=std::chrono::steady_clock::now();
+    bool polished=false,charged=false;
+    if(gems_.valid() && gems_->local()) {
+      scalar trace=0;forAll(ids_,i)trace+=max(rho_[cell]*fields_[ids_[i]][cell]/masses_[i],scalar(0));
+      int count=0;bool guard=false;
+      const bool ok=gems_->warm(cell,thermo_.T()[cell],thermo_.p()[cell],b,trace,pi,count,guard);
+      polished=ok;charged=!guard;
+      if(guard)++guarded;else {++ipmCalls;ipmIterations+=count;}
+      if(!ok){if(!guard)++failed;pi={NAN,NAN,NAN};}
+    }
+    int it=kernel_->solve(constants_[cell].data(),1e5/(8.314462618*thermo_.T()[cell]),b,pi,c.data());
+    if(it<0 && gems_.valid() && gems_->local()){++failed;pi={NAN,NAN,NAN};it=kernel_->solve(constants_[cell].data(),1e5/(8.314462618*thermo_.T()[cell]),b,pi,c.data());}
+    // Canonical final refinement prevents an unsaved IPM warm state from
+    // changing nearly exhausted minor gases in a restart. It uses the same
+    // physical bulk and G0 as the warm polish, with no composition floors.
+    if(polished && it>=0){pi={NAN,NAN,NAN};const int canonical=kernel_->solve(constants_[cell].data(),1e5/(8.314462618*thermo_.T()[cell]),b,pi,c.data());it=canonical<0?canonical:it+canonical;}
+    if(charged)warmSeconds+=std::chrono::duration<double>(std::chrono::steady_clock::now()-cellBegan).count();
     if (it<0) FatalErrorInFunction<<"Gas speciation failed in cell "<<cell<<exit(FatalError);
     std::array<long double,3> after={0,0,0};
     forAll(ids_,i) { const auto& f=formulas_[i];
@@ -246,6 +296,8 @@ void LESTO::gasRespeciation::apply() {
     const label p=exchange_.pairOfGas(ids_[i]); if(p>=0) exchange_.ledger().setReaction(p,value(i,REACTION)); }
   for(int e=0;e<3;++e) compensatedAdd((*elements_)[e],(*elements_)[3+e],globalAmount(conversion[e]));
   reduce(calls,sumOp<label>());reduce(iterations,sumOp<label>());reduce(skipped,sumOp<label>());reduce(largest,maxOp<scalar>());
+  if(gems_.valid() && gems_->local()){reduce(ipmCalls,sumOp<label>());reduce(ipmIterations,sumOp<label>());reduce(failed,sumOp<label>());reduce(guarded,sumOp<label>());reduce(warmSeconds,sumOp<scalar>());
+    Info<<"Gas GEMS local: calls "<<ipmCalls<<"; iterations "<<ipmIterations<<"; failures "<<failed<<"; guards "<<guarded<<"; mean call us "<<(ipmCalls?1e6*warmSeconds/ipmCalls:0)<<nl;}
   scalarList maximum(ids_.size(),0),negative(ids_.size(),0);
   forAll(ids_,i)forAll(thermo_.T(),cell) {
     const scalar Y=fields_[ids_[i]][cell];

@@ -103,6 +103,25 @@ int    gemsb_last_iterations(const gemsb_engine* e);
 double gemsb_last_seconds(const gemsb_engine* e);
 const char* gemsb_last_error(const gemsb_engine* e);
 
+/* M10c additions. All original signatures and default controls are retained. */
+void gemsb_suppress_condensed(gemsb_engine* e, int on);
+/* Standard G0/(RT) at the 1 bar gas standard state, interpolated on the DCH
+   grid. Returns GEMSB_OK or GEMSB_ERR_INPUT; output has num_species entries. */
+int gemsb_species_g0(gemsb_engine* e, double T_K, double P_Pa, double* g0RT);
+/* Dual element potentials u/(RT), and gas mole fractions of the last result. */
+void gemsb_element_potentials(const gemsb_engine* e, double* u);
+void gemsb_gas_mole_fractions(const gemsb_engine* e, double* x);
+/* Equilibrium pressure over the most stable listed pure condensate.
+   method 0 uses primal pressures; method 1 uses dual fugacities. */
+int gemsb_pair_peq(const gemsb_engine* e, int jgas, const int* jcond, int ncond,
+                  int method, double* p_eq_Pa, int* kbest);
+double gemsb_balance_error(const gemsb_engine* e, const double* b_mol, double rel_floor);
+/* Nonpositive values retain controls. A warm cap of 0 restores the IPM
+   file's limit; capped failed warm calls are retried cold at the full limit. */
+void gemsb_set_ipm_controls(gemsb_engine* e, double DK, double DHB, int IIM);
+void gemsb_get_ipm_controls(const gemsb_engine* e, double* DK, double* DHB, int* IIM);
+void gemsb_set_warm_iteration_limit(gemsb_engine* e, int n);
+
 #ifdef __cplusplus
 }
 #endif

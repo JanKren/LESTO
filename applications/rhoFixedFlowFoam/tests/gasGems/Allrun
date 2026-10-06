@@ -1,0 +1,111 @@
+#!/bin/bash
+# M10c: optional GEMS standard states, guarded warm calls and exact refinement.
+set -euo pipefail
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+GAS_DIR=$WORK_DIR/gasGems
+mkdir -p "$GAS_DIR/bin"
+BRIDGE=${LESTO_M10C_BRIDGE:-$REPO_DIR/thermochemistry/gemsbridge}
+if [ ! -f "$BRIDGE/libgemsbridge.so" ]
+then
+  for n in {0..8}; do result M10c.$n NOTRUN 'Production bridge unavailable; build thermochemistry/gemsbridge'; done
+  exit 0
+fi
+# Build a copy: every optional bridge call compiles, default executable stays bridge-free.
+SRC=$GAS_DIR/solver
+mkdir -p "$SRC/Make"
+cp "$SOLVER_DIR/"*.H "$SOLVER_DIR/"*.C "$SRC/"
+cp "$SOLVER_DIR/Make/files" "$SOLVER_DIR/Make/options" "$SOLVER_DIR/Make/"*.sh "$SRC/Make/"
+(cd "$SRC" && wclean && LESTO_GEMSBRIDGE=$BRIDGE FOAM_USER_APPBIN=$GAS_DIR/bin wmake) > "$GAS_DIR/log.build" 2>&1
+GAS_SOLVER=$GAS_DIR/bin/rhoFixedFlowFoam
+cp -r "$TESTS_DIR/phaseChange/makeCarrier" "$GAS_DIR/"
+(cd "$GAS_DIR/makeCarrier" && wclean && FOAM_USER_APPBIN=$GAS_DIR/bin wmake) > "$GAS_DIR/log.carrier" 2>&1
+CARRIER=$GAS_DIR/bin/makeCarrier
+buildAndABI() {
+  if grep -q 'warning:' "$GAS_DIR/log.build"; then return 1; fi
+  python3 "$REPO_DIR/thermochemistry/gemsbridge/check_abi.py" "$BRIDGE/libgemsbridge.so" "$BRIDGE/gemsbridge.h" || return 1
+  old=${LESTO_M10C_OLD_LIB:-}
+  if [ -z "$old" ]
+  then
+    mkdir -p "$GAS_DIR/originalBridge"
+    for f in gemsbridge.cpp gemsbridge.h gemsbridge.map Makefile
+    do git -C "$REPO_DIR" show "5b8815c:thermochemistry/gemsbridge/$f" > "$GAS_DIR/originalBridge/$f" || return 1
+    done
+    make -C "$GAS_DIR/originalBridge" > "$GAS_DIR/log.originalBridge" 2>&1 || return 1
+    old=$GAS_DIR/originalBridge/libgemsbridge.so
+  fi
+  python3 "$TESTS_DIR/gasGems/compatibility.py" "$old" "$BRIDGE/libgemsbridge.so" \
+    "$REPO_DIR/thermochemistry/systems/PbI2He/PbI2He-dat.lst"
+}
+check M10c.0 'Extended ABI exports/dependencies, zero solver warnings and 800 bit-identical original calls' buildAndABI
+check M10c.2 'Open Pb-I system: frozen/local serial/MPI closure and reproducible restarts' \
+  python3 "$TESTS_DIR/gasGems/cases.py" channel "$GAS_DIR/open" "$GAS_SOLVER" "$CARRIER" \
+    "$REPO_DIR/thermochemistry/systems/PbI2He/PbI2He-dat.lst" "$BRIDGE/libgemsbridge.so"
+check M10c.6 'Invalid modes/guards/caps/carriers/keys and changed-backend restart refused' \
+  python3 "$TESTS_DIR/gasGems/cases.py" inputs "$GAS_DIR/inputs" "$GAS_SOLVER" "$CARRIER" \
+    "$REPO_DIR/thermochemistry/systems/PbI2He/PbI2He-dat.lst" "$BRIDGE/libgemsbridge.so"
+mkdir -p "$GAS_DIR/fault"
+cp "$BRIDGE/gemsbridge.h" "$GAS_DIR/fault/"
+cc -Wall -Wextra -shared -fPIC -I"$GAS_DIR/fault" "$TESTS_DIR/gems/faultBridge.c" \
+  -ldl -o "$GAS_DIR/fault/libgemsbridge.so"
+check M10c.7 'Fatal and NaN dual faults counted, engine recreated, exact kernel fallback' \
+  python3 "$TESTS_DIR/gasGems/cases.py" fault "$GAS_DIR/faultCases" "$GAS_SOLVER" "$CARRIER" \
+    "$REPO_DIR/thermochemistry/systems/PbI2He/PbI2He-dat.lst" "$BRIDGE/libgemsbridge.so" "$GAS_DIR/fault"
+if [ -n "${LESTO_M10_DESIGN:-}" ]
+then
+  SYSTEM=$LESTO_M10_DESIGN/thermo/PbBiIHe/PbBiIHe-dat.lst
+  check M10c.3 'External Pb-Bi-I: both modes conservative, serial/MPI agreement and restarts' \
+    python3 "$TESTS_DIR/gasGems/cases.py" channel "$GAS_DIR/extended" "$GAS_SOLVER" "$CARRIER" \
+      "$SYSTEM" "$BRIDGE/libgemsbridge.so"
+else
+  result M10c.3 NOTRUN 'External PbBiIHe system unavailable (LESTO_M10_DESIGN)'
+fi
+if [ -n "${LESTO_M10_DESIGN:-}" ] && [ -n "${LESTO_M10_ORACLE_LIB:-}" ] \
+  && [ -n "${LESTO_M10_NASA:-}" ] && [ -n "${LESTO_M10_THERMOFUN:-}" ]
+then
+  reducedMap() {
+    GEMSBRIDGE_LIB=$LESTO_M10_ORACLE_LIB python3 "$TESTS_DIR/gasGems/qualification.py" \
+      "$LESTO_M10_DESIGN" "$BRIDGE/libgemsbridge.so" "$LESTO_M10_NASA" "$LESTO_M10_THERMOFUN" "$GAS_DIR/map.csv" \
+      && g++ -O2 -std=c++17 -Wall -Wextra "$TESTS_DIR/gasGems/testBackend.C" -o "$GAS_DIR/testBackend" \
+      && "$GAS_DIR/testBackend" "$GAS_DIR/map.csv"
+  }
+  check M10c.1 '3 mixes x 24 T x 13 dilutions: exact G0 equilibrium, open-table agreement and per-decade diagnostics' reducedMap
+else
+  result M10c.1 NOTRUN 'External system, oracle and thermodynamic inputs unavailable'
+fi
+if [ -n "${LESTO_M10_DESIGN:-}" ] && [ -n "${LESTO_M10_DATA:-}" ]
+then
+  check M10c.5 'Bi HKS: dual pressure vs table; upper mole-fraction and chi guards recomputed from fields' \
+    python3 "$TESTS_DIR/gasGems/cases.py" hks "$GAS_DIR/hks" "$GAS_SOLVER" "$CARRIER" "$SYSTEM" "$BRIDGE/libgemsbridge.so" "$LESTO_M10_DATA"
+else
+  result M10c.5 NOTRUN 'External Bi system/vapour tables unavailable'
+fi
+if [ -n "${LESTO_M10_DESIGN:-}" ] && [ -n "${LESTO_M10_NASA:-}" ] \
+  && [ -n "${LESTO_M10_THERMOFUN:-}" ] && [ -n "${LESTO_M10_DATA:-}" ]
+then
+  if [ -n "${LESTO_M10C_SCIENCE_RECHECK:-}" ]
+  then
+    science=$LESTO_M10C_SCIENCE_RECHECK
+    check M10c.4 'Recheck completed prescribed-source study: kernel/frozen/local deposit and closure gates' \
+      python3 "$TESTS_DIR/gasGems/scientific.py" --check "$science"
+  else
+    science=$GAS_DIR/scientific
+    check M10c.4 '1173 K prescribed source: frozen/kernel deposits <=1e-3, local/frozen <=1e-9 and element closure' \
+      python3 "$TESTS_DIR/gasGems/scientific.py" "$science" "$GAS_SOLVER" "$CARRIER" \
+        "$LESTO_M10_DATA" "$LESTO_M10_NASA" "$LESTO_M10_THERMOFUN" "$SYSTEM"
+  fi
+  if [ -f "$science/verification.json" ]
+  then
+    cost=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["mean_IPM_plus_polish_us"])' "$science/verification.json")
+    if python3 -c 'import sys; sys.exit(float(sys.argv[1])>150)' "$cost"
+    then result M10c.8 PASS "Mean IPM plus refinement $cost us (limit 150 us)"
+    elif python3 -c 'import os,sys; sys.exit(os.getloadavg()[0]<4)'
+    then result M10c.8 NOTRUN "Cost $cost us on a busy machine (load >=4)"
+    else result M10c.8 FAIL "Cost $cost us exceeds 150 us on an idle machine"
+    fi
+  else result M10c.8 FAIL 'Scientific run produced no timing report'
+  fi
+else
+  result M10c.4 NOTRUN 'External prescribed-source inputs unavailable'
+  result M10c.8 NOTRUN 'External local-engine timing case unavailable'
+fi

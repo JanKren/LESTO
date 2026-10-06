@@ -2876,8 +2876,7 @@ solve needs `relTol 0`; optional `<field>Final` entries are supported.
 The flux-form matrix defect is booked independently of the chemistry.
 They can enter through initial fields or boundaries; sample release still
 uses the existing condensate-pair sample interface. Combining re-speciation
-with `HKSCoeffs speciation lagged` is refused. `engine GEMS` belongs to
-M10c and is not accepted by this stage.
+with `HKSCoeffs speciation lagged` is refused. `engine GEMS` is implemented by the M10c backend described below.
 
 The existing pair ledger retains its binary layout and balance-file
 columns. Its supplied amount includes the reaction amount from a separate
@@ -2935,3 +2934,83 @@ v2412 build and the separate v2606 Debug compile had zero warnings.
 M0.4 was NOTRUN because this invocation used v2412; M4.6 tested the
 v2606 compilation. The hours-long M4long/M7long studies are separate
 invocations.
+
+
+## M10c: GEMS standard states and guarded local gas calls
+
+The optional bridge now supports `respeciation { engine GEMS; }`. Configure
+its backend in `respeciation/GEMS`; `GEMSCoeffs` can supply shared defaults:
+
+```foam
+respeciation
+{
+    engine GEMS;
+    species (Pb_g PbI_g PbI2_g Bi_g Bi2_g BiI_g BiI3_g I_g I2_g);
+    minTemperature 350;
+    updateInterval 1;
+    GEMS
+    {
+        mode frozen; // or local
+        system "<constant>/gems/PbBiIHe-dat.lst";
+        carrier "He(g)";
+        minMoleFraction 1e-12;
+        maxMoleFraction 3.2e-4;
+        warmIterationLimit 200;
+        logDirectory gasGemsLog;
+        logLevel 4;
+    }
+}
+```
+
+`frozen` caches GEMS standard-state formation constants at each distinct
+frozen cell T/P state, per rank, and uses the exact gas kernel every step.
+`local` also makes per-cell warm IPM calls where the temperature/pressure
+grid and total reactive-gas mole-fraction guards allow them. Valid duals
+start a kernel refinement against the physical, unfloored element amounts.
+A final cold refinement makes the fields independent of unsaved warm state,
+including nearly exhausted iodine. Rejected or failed calls use the same
+kernel and cached G0. Fatal calls recreate the engine and invalidate all
+warm states of the rank. Counts, guards, failures and the combined IPM plus
+refinement cost are reported every update.
+
+Gas names map automatically from `Pb_g` to `Pb(g)`; an optional `gases`
+dictionary maps custom solver names. Every reactive gas of the GEMS system
+must participate. Formula, molar mass, carrier, guard and control checks
+stop invalid configurations. Unknown keys are refused. Below the temperature
+threshold, transport values are retained. `formationConstants` is optional
+for this engine: provide an open-data table to allow a kernel fallback at
+frozen T/P states outside the GEMS grid; without it those states stop startup.
+
+The existing M10b species/condensate/element account layouts are retained.
+Restart metadata also fingerprints the backend mode, guards, cap, mapping,
+and every GEMS system document. Changed backend settings/data are refused.
+Frozen-mode binary restarts are exact in serial and on four ranks; local
+mode is qualified to the required 1e-12 inventory tolerance and has exact
+fields after the canonical refinement.
+
+For HKS pairs using `equilibrium GEMS` in a system containing Bi, equilibrium
+pressure comes from dual fugacities. `GEMSCoeffs/maxMoleFraction` (default
+3.2e-4) joins the guards, warm calls are capped at 200 iterations before
+cold retry, and `speciation lagged` requires the pair's gas mole fraction
+at least 1e-7. Upper-bound and minor-gas refusals use the existing REJECTED
+source code and table fallback. Original Pb-I HKS behavior is retained.
+Re-speciation and `speciation lagged` remain mutually exclusive.
+
+`tests/Alltest M10c` includes the original ABI comparison, open Pb-I and
+external Pb-Bi-I serial/MPI channels, restarts, invalid inputs, injected
+fatal/NaN-dual faults, the HKS guards, a 936-point reduced map and the
+prescribed-source deposit comparison. The map records raw IPM errors by
+species mole-fraction decade. A general 70-digit Decimal Newton solve
+refines the external oracle to the exact fixed-volume inputs: its double
+KKT residue alone is insufficient for some nearly exhausted minor iodine
+species. The gate compares both cold and warm kernel refinements with
+that independent reference, with a 1e-9 relative tolerance for species
+above 1e-10 of the largest element amount.
+
+The reproducible case is
+[`run/032-pbbi-gems-speciation`](../../run/032-pbbi-gems-speciation/readme.md).
+Its thermal ramp, diffusivity and prescribed source remain provisional.
+External inputs are selected using the M10 environment variables and
+`LESTO_M10_SYSTEM`. `LESTO_M10C_SCIENCE_RECHECK` explicitly rechecks an
+already completed three-mode channel study; the default test invocation
+runs the study afresh. The criterion identifies such a recheck.

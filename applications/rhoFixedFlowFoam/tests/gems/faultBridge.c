@@ -370,3 +370,23 @@ const char* gemsb_last_error(const gemsb_engine* e) {
   REAL(error_t, gemsb_last_error)
   return gemsb_last_error_real(e);
 }
+
+/* M10c additions retain the same fault-injecting engine and call counter. */
+typedef void (*engineInt_t)(gemsb_engine*, int);
+void gemsb_suppress_condensed(gemsb_engine* e,int on) { REAL(engineInt_t,gemsb_suppress_condensed) gemsb_suppress_condensed_real(e,on); }
+void gemsb_set_warm_iteration_limit(gemsb_engine* e,int n) { REAL(engineInt_t,gemsb_set_warm_iteration_limit) gemsb_set_warm_iteration_limit_real(e,n); }
+void gemsb_element_potentials(const gemsb_engine* e,double* u) { REAL(results_t,gemsb_element_potentials) gemsb_element_potentials_real(e,u);
+  long at[64];int n=callNumbers("LESTO_TEST_NAN_U_CALLS",at);
+  if(listed(at,n,nEquilibrate)){for(int i=0;i<gemsb_num_elements(e);++i)u[i]=NAN;note("nan potentials injected");}
+}
+void gemsb_gas_mole_fractions(const gemsb_engine* e,double* x) { REAL(results_t,gemsb_gas_mole_fractions) gemsb_gas_mole_fractions_real(e,x); }
+typedef int (*g0_t)(gemsb_engine*,double,double,double*);
+int gemsb_species_g0(gemsb_engine* e,double T,double P,double* g) { REAL(g0_t,gemsb_species_g0) return gemsb_species_g0_real(e,T,P,g); }
+typedef double (*balance_t)(const gemsb_engine*,const double*,double);
+double gemsb_balance_error(const gemsb_engine* e,const double* b,double floor) { REAL(balance_t,gemsb_balance_error) return gemsb_balance_error_real(e,b,floor); }
+typedef int (*peq_t)(const gemsb_engine*,int,const int*,int,int,double*,int*);
+int gemsb_pair_peq(const gemsb_engine* e,int g,const int* c,int n,int method,double* p,int* best) { REAL(peq_t,gemsb_pair_peq) return gemsb_pair_peq_real(e,g,c,n,method,p,best); }
+typedef void (*setControls_t)(gemsb_engine*,double,double,int);
+void gemsb_set_ipm_controls(gemsb_engine* e,double d,double h,int i) { REAL(setControls_t,gemsb_set_ipm_controls) gemsb_set_ipm_controls_real(e,d,h,i); }
+typedef void (*getControls_t)(const gemsb_engine*,double*,double*,int*);
+void gemsb_get_ipm_controls(const gemsb_engine* e,double* d,double* h,int* i) { REAL(getControls_t,gemsb_get_ipm_controls) gemsb_get_ipm_controls_real(e,d,h,i); }

@@ -322,6 +322,8 @@ private:
   Foam::scalarList referenceAmounts_;
   Foam::scalar    referencePressure_;
   Foam::scalar    minMoleFraction_;
+  Foam::scalar    maxMoleFraction_;
+  bool            dualPairs_ = false;
   Foam::scalar    minTemperature_;
   Foam::scalar    maxLog10Deviation_;
   Foam::label     updateInterval_;

@@ -83,5 +83,6 @@ See [the solver documentation](applications/rhoFixedFlowFoam/readme.md)
 and [the preliminary channel](run/030-pbi2-bii3-channel/readme.md).
 M10b adds bridge-free homogeneous gas re-speciation and reaction/element
 accounts; see [run/031](run/031-pbbi-gas-speciation/readme.md).
-GEMS standard-state engines and reactive/shared-condensate coupling remain
-for later M10 stages before experimental validation.
+M10c adds optional frozen/local GEMS gas engines; see
+[run/032](run/032-pbbi-gems-speciation/readme.md). Reactive/shared-condensate
+coupling remains for M10d before experimental validation.

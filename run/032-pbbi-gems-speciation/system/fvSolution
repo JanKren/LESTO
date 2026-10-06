@@ -1,0 +1,9 @@
+FoamFile {version 2.0; format ascii; class dictionary; object fvSolution;}
+solvers {Y_PbI2_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-18; relTol 0;} Y_PbI2_s {solver diagonal;} Y_BiI3_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-18; relTol 0;} Y_BiI3_s {solver diagonal;}Y_Pb_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-18; relTol 0;}
+Y_PbI_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-18; relTol 0;}
+Y_Bi_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-18; relTol 0;}
+Y_Bi2_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-18; relTol 0;}
+Y_BiI_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-18; relTol 0;}
+Y_I_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-18; relTol 0;}
+Y_I2_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-18; relTol 0;}
+}

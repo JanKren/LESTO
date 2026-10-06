@@ -585,7 +585,8 @@ LESTO::interfaceExchange::interfaceExchange (
        (M9) are not read either */
     if (model_ == modelType::HKS && !gems_) {
       OStringStream gemsInputs;
-      if (dict_.found("GEMSCoeffs", keyType::LITERAL)) {
+      if (dict_.found("GEMSCoeffs", keyType::LITERAL)
+        && !(dict_.isDict("respeciation") && dict_.subDict("respeciation").getOrDefault<word>("engine","none")=="GEMS")) {
         gemsInputs << " GEMSCoeffs";
       }
       for (const entry& e : dict_.subDict("pairs")) {

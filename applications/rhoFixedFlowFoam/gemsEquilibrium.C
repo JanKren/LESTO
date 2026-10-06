@@ -357,6 +357,7 @@ LESTO::gemsEquilibrium::gemsEquilibrium (
   referenceAmounts_(),
   referencePressure_(101325),
   minMoleFraction_(1e-6),
+  maxMoleFraction_(3.2e-4),
   minTemperature_(500),
   maxLog10Deviation_(0.01),
   updateInterval_(1),
@@ -406,7 +407,7 @@ LESTO::gemsEquilibrium::gemsEquilibrium (
       "system", "mode", "carrier", "referenceComposition",
       "referencePressure", "minMoleFraction", "minTemperature",
       "maxLog10Deviation", "updateInterval", "allowNonPhysicalCarrier",
-      "logDirectory", "logLevel", "writeEquilibriumField"
+      "logDirectory", "logLevel", "writeEquilibriumField", "maxMoleFraction"
     }),
     "GEMSCoeffs"
   );
@@ -440,6 +441,10 @@ LESTO::gemsEquilibrium::gemsEquilibrium (
       << "not " << minTemperature_ << ", " << maxLog10Deviation_ << ", "
       << logLevel_ << "." << exit(FatalIOError);
   }
+
+  maxMoleFraction_=dict.getOrDefault<scalar>("maxMoleFraction",3.2e-4);
+  if(!std::isfinite(maxMoleFraction_) || maxMoleFraction_<=0 || maxMoleFraction_>1)
+    FatalIOErrorInFunction(dict)<<"Require finite maxMoleFraction in (0,1]"<<exit(FatalIOError);
 
   /* the keys of the mode */
   if (mode_ == modeType::frozen) {
@@ -621,6 +626,7 @@ bool LESTO::gemsEquilibrium::createEngine(string& message) {
     return false;
   }
   gemsb_engine* h = engine_->handle();
+  if(gemsb_element_index(h,"Bi")>=0)gemsb_set_warm_iteration_limit(h,200);
   suppressed_.clear();
   for (int j = 0; j < gemsb_num_species(h); ++j) {
     if (!gemsb_species_is_gas(h, j)) {
@@ -655,6 +661,7 @@ void LESTO::gemsEquilibrium::readSystem() {
   for (label i = 0; i < nElements_; ++i) {
     elementNames_[i] = word(gemsb_element_name(h, int(i)));
   }
+  dualPairs_=elementNames_.found("Bi");
   speciesNames_.resize(nSpecies_);
   isGas_.resize(nSpecies_);
   stoichiometry_.resize(nSpecies_*nElements_);
@@ -881,6 +888,7 @@ void LESTO::gemsEquilibrium::start (
     << "  guards: minTemperature " << minTemperature_ << " K";
   if (local()) {
     Info<< ", minMoleFraction " << minMoleFraction_;
+    if(dualPairs_)Info<<", maxMoleFraction "<<maxMoleFraction_<<", dual p_eq, warm iteration cap 200";
   }
   Info<< ", maxLog10Deviation " << maxLog10Deviation_;
   if (local()) {
@@ -1059,7 +1067,15 @@ void LESTO::gemsEquilibrium::buildFrozenTables (
           }
           continue;
         }
-        const scalar lg = std::log10(pGas_[p.jGas]) - lgOmega;
+        scalar lg = std::log10(pGas_[p.jGas]) - lgOmega;
+        if(dualPairs_) {
+          std::vector<int> condensed;for(label j:p.jCondensates)condensed.push_back(int(j));
+          double pressure=0;int best=-1;
+          if(gemsb_pair_peq(h,int(p.jGas),condensed.data(),int(condensed.size()),1,&pressure,&best)!=GEMSB_OK || !positive(pressure)) {
+            source[i]=FAILED;lgp[i]=lgTable;continue;
+          }
+          lg=std::log10(pressure);
+        }
         if (!(mag(lg - lgTable) <= maxLog10Deviation_)) {
           source[i] = REJECTED;
           lgp[i] = lgTable;
@@ -1308,6 +1324,7 @@ void LESTO::gemsEquilibrium::evaluate (
       && !(c[k] > 0 && c[k]/(c[k] + cCarrier) >= minMoleFraction_)) {
       reason = BELOW_MOLE_FRACTION;
     }
+    if(reason==FROM_GEMS && dualPairs_ && c[k]/(c[k]+cCarrier)>maxMoleFraction_)reason=REJECTED;
     if (reason == FROM_GEMS) {
       source[k] = FROM_GEMS;
       call = true;
@@ -1434,7 +1451,16 @@ void LESTO::gemsEquilibrium::evaluate (
                 + " Pa, max log10 Omega " + text(lgOmega) + ";";
       continue;
     }
-    const scalar lg = std::log10(pg) - lgOmega;
+    scalar lg = std::log10(pg) - lgOmega;
+    if(dualPairs_) {
+      std::vector<int> condensed;for(label j:ps.jCondensates)condensed.push_back(int(j));
+      double pressure=0;int best=-1;
+      if(gemsb_pair_peq(h,int(ps.jGas),condensed.data(),int(condensed.size()),1,&pressure,&best)!=GEMSB_OK || !positive(pressure)) {
+        useTable(k,FAILED);valid=0;unusable+=" "+ps.gasName+" unusable dual pressure;";continue;
+      }
+      lg=std::log10(pressure);
+      if(speciation_ && pg/p<1e-7){useTable(k,REJECTED);valid=0;continue;}
+    }
     const scalar deviation = mag(lg - std::log10(pEqTable[k]));
     if (!(deviation <= maxLog10Deviation_)) {
       useTable(k, REJECTED);
@@ -1686,4 +1712,161 @@ void LESTO::gemsEquilibrium::summary() const {
     }
     Info<< nl;
   }
+}
+
+/* M10c homogeneous gas backend; no bridge symbols in the default build. */
+#include "gemsGasSpeciation.H"
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+
+struct LESTO::gemsGasSpeciation::implementation {
+  fileName system;
+  word mode;
+  string fingerprint;
+  scalar minimum=1e-12, maximum=3.2e-4;
+  label warmLimit=200;
+#ifdef LESTO_HAVE_GEMS
+  gemsb_engine* h=nullptr;
+  std::vector<int> gases, atoms;
+  int carrier=-1, nElements=0, nSpecies=0, stateSize=0;
+  std::vector<double> states, bulk, potentials;
+  std::vector<int> valid;
+  ~implementation() { if(h)gemsb_destroy(h); }
+  void create() {
+    char message[2048]={0};
+    h=gemsb_create_from_lst(system.c_str(),message,sizeof(message));
+    if(!h)FatalErrorInFunction<<"Cannot create gas GEMS engine: "<<message<<exit(FatalError);
+    gemsb_suppress_condensed(h,1);gemsb_set_warm_iteration_limit(h,int(warmLimit));
+  }
+#endif
+};
+
+LESTO::gemsGasSpeciation::gemsGasSpeciation(const fvMesh& mesh,const dictionary& cfg,
+  const wordList& names,const std::vector<gasSpecies>& formulas,const scalarList& masses)
+: impl_(new implementation) {
+  gemsEquilibrium::requireBridge(cfg);
+  auto& d=*impl_;
+  const wordList known({"system","mode","carrier","gases","minMoleFraction","maxMoleFraction","warmIterationLimit","logDirectory","logLevel",
+    "referenceComposition","referencePressure","minTemperature","updateInterval","allowNonPhysicalCarrier","writeEquilibriumField","maxLog10Deviation"});
+  for(const entry& e:cfg)if(!known.found(e.keyword()))
+    FatalIOErrorInFunction(cfg)<<"Unknown gas GEMS key "<<e.keyword()<<exit(FatalIOError);
+  d.mode=cfg.getOrDefault<word>("mode","frozen");
+  d.minimum=cfg.getOrDefault<scalar>("minMoleFraction",1e-12);
+  d.maximum=cfg.getOrDefault<scalar>("maxMoleFraction",3.2e-4);
+  d.warmLimit=cfg.getOrDefault<label>("warmIterationLimit",200);
+  if((d.mode!="frozen" && d.mode!="local") || !std::isfinite(d.minimum)
+    || !std::isfinite(d.maximum) || d.minimum<0 || d.maximum<=d.minimum
+    || d.maximum>1 || d.warmLimit<1 || d.warmLimit>32000)
+    FatalIOErrorInFunction(cfg)<<"Invalid gas GEMS mode, mole-fraction guards or warm iteration limit"<<exit(FatalIOError);
+  d.system=cfg.get<fileName>("system");
+  d.system.replaceAll("<constant>",mesh.time().globalPath()/mesh.time().constant());d.system.expand();
+  // Include every document named by the export list in the restart signature.
+  // Both JSON and key-value exports use quoted relative document filenames.
+  std::ifstream list(d.system.c_str());if(!list)FatalIOErrorInFunction(cfg)<<"Cannot read "<<d.system<<exit(FatalIOError);
+  std::ostringstream data;data<<list.rdbuf();const std::string lst=data.str();
+  std::istringstream tokens(lst);std::string token;
+  while(tokens>>std::quoted(token)) {
+    if(token.empty() || token[0]=='-')continue;
+    const fileName path=fileName(token).isAbsolute()?fileName(token):d.system.path()/fileName(token);
+    std::ifstream input(path.c_str());if(!input)FatalIOErrorInFunction(cfg)<<"Cannot read GEMS document "<<path<<exit(FatalIOError);
+    data<<'\0'<<input.rdbuf();
+  }
+  const word carrier=cfg.getOrDefault<word>("carrier","He(g)");
+  data<<'\0'<<d.mode<<'\0'<<std::setprecision(17)<<d.minimum<<' '<<d.maximum<<' '<<d.warmLimit<<' '<<carrier;
+#ifdef LESTO_HAVE_GEMS
+  fileName log=mesh.time().path()/cfg.getOrDefault<fileName>("logDirectory","gasGemsLog");
+  mkDir(log);gemsb_set_log_directory(log.c_str());gemsb_set_log_level(cfg.getOrDefault<label>("logLevel",4));
+  d.create();d.nElements=gemsb_num_elements(d.h);d.nSpecies=gemsb_num_species(d.h);
+  d.carrier=gemsb_species_index(d.h,carrier.c_str());
+  if(d.carrier<0 || !gemsb_species_is_gas(d.h,d.carrier))
+    FatalIOErrorInFunction(cfg)<<"GEMS carrier must be an inert gas species"<<exit(FatalIOError);
+  d.atoms={gemsb_element_index(d.h,"Pb"),gemsb_element_index(d.h,"Bi"),gemsb_element_index(d.h,"I")};
+  for(int a:d.atoms)if(a>=0 && gemsb_stoich(d.h,d.carrier,a)!=0)
+    FatalIOErrorInFunction(cfg)<<"Carrier contains a reactive element"<<exit(FatalIOError);
+  forAll(names,i) {
+    word gas;
+    if(cfg.isDict("gases"))gas=cfg.subDict("gases").get<word>(names[i]);
+    else { gas=names[i];if(gas.size()>2 && gas.substr(gas.size()-2)=="_g")gas=gas.substr(0,gas.size()-2)+"(g)"; }
+    const int j=gemsb_species_index(d.h,gas.c_str());
+    if(j<0 || !gemsb_species_is_gas(d.h,j) || std::find(d.gases.begin(),d.gases.end(),j)!=d.gases.end())
+      FatalIOErrorInFunction(cfg)<<"Invalid or duplicate mapped GEMS gas "<<gas<<exit(FatalIOError);
+    const auto& f=formulas[i];const int nu[]={f.nPb,f.nBi,f.nI};
+    for(int e=0;e<d.nElements;++e) {
+      int expected=0;for(int a=0;a<3;++a)if(d.atoms[a]==e)expected=nu[a];
+      if(gemsb_stoich(d.h,j,e)!=expected)FatalIOErrorInFunction(cfg)<<"GEMS formula differs for "<<gas<<exit(FatalIOError);
+    }
+    for(int a=0;a<3;++a)if(nu[a] && d.atoms[a]<0)
+      FatalIOErrorInFunction(cfg)<<"Missing GEMS element for "<<gas<<exit(FatalIOError);
+    if(std::fabs(gemsb_species_molar_mass(d.h,j)/masses[i]-1)>1e-6)
+      FatalIOErrorInFunction(cfg)<<"GEMS molar mass differs for "<<gas<<exit(FatalIOError);
+    d.gases.push_back(j);data<<'\0'<<gas;
+  }
+  // An omitted gas with reactive atoms would make the two engines solve
+  // different chemical systems. Refuse it instead of losing its inventory.
+  for(int j=0;j<d.nSpecies;++j)if(gemsb_species_is_gas(d.h,j) && j!=d.carrier
+      && std::find(d.gases.begin(),d.gases.end(),j)==d.gases.end())
+    FatalIOErrorInFunction(cfg)<<"Unmapped GEMS gas "<<gemsb_species_name(d.h,j)<<exit(FatalIOError);
+  d.stateSize=gemsb_state_size(d.h);d.bulk.resize(d.nElements);d.potentials.resize(d.nElements);
+  if(local()){d.states.resize(mesh.nCells()*d.stateSize);d.valid.resize(mesh.nCells(),0);}
+#else
+  (void)names;(void)formulas;(void)masses;
+#endif
+  std::uint64_t hash=14695981039346656037ULL;for(unsigned char c:data.str()){hash^=c;hash*=1099511628211ULL;}
+  d.fingerprint=std::to_string(hash);
+  Info<<"Gas GEMS: mode "<<d.mode<<"; system "<<d.system<<"; minMoleFraction "<<d.minimum
+      <<"; maxMoleFraction "<<d.maximum<<"; warmIterationLimit "<<d.warmLimit<<nl;
+}
+LESTO::gemsGasSpeciation::~gemsGasSpeciation()=default;
+bool LESTO::gemsGasSpeciation::local()const{return impl_->mode=="local";}
+string LESTO::gemsGasSpeciation::signature()const{return impl_->fingerprint;}
+bool LESTO::gemsGasSpeciation::constants(double T,double P,std::vector<double>& lnK)const {
+#ifdef LESTO_HAVE_GEMS
+  auto& d=*impl_;std::vector<double> g(d.nSpecies);
+  double tmin,tmax,pmin,pmax;gemsb_TP_range(d.h,&tmin,&tmax,&pmin,&pmax);
+  if(T<tmin || T>tmax || P<pmin || P>pmax)return false;
+  if(gemsb_species_g0(d.h,T,P,g.data())!=GEMSB_OK)return false;
+  lnK.resize(d.gases.size());
+  for(std::size_t i=0;i<d.gases.size();++i){double k=-g[d.gases[i]];
+    for(int a:d.atoms)if(a>=0){const char* element=gemsb_element_name(d.h,a);
+      const std::string atom=std::string(element)+"(g)";
+      const int j=gemsb_species_index(d.h,atom.c_str());
+      const double nu=gemsb_stoich(d.h,d.gases[i],a);
+      if(nu && j<0)return false;
+      if(nu)k+=nu*g[j];}
+    if(!std::isfinite(k))return false;
+    lnK[i]=k;}
+  return true;
+#else
+  (void)T;(void)P;(void)lnK;return false;
+#endif
+}
+bool LESTO::gemsGasSpeciation::warm(label cell,double T,double P,
+  const std::array<double,3>& b,double trace,std::array<double,3>& pi,
+  int& iterations,bool& guarded) {
+  iterations=0;guarded=false;
+#ifdef LESTO_HAVE_GEMS
+  auto& d=*impl_;const double carrier=P/(8.314462618*T);
+  const double x=trace/(carrier+trace);
+  double tmin,tmax,pmin,pmax;gemsb_TP_range(d.h,&tmin,&tmax,&pmin,&pmax);
+  if(x<d.minimum || x>d.maximum || T<tmin || T>tmax || P<pmin || P>pmax){guarded=true;return false;}
+  std::fill(d.bulk.begin(),d.bulk.end(),0);
+  for(int e=0;e<d.nElements;++e)d.bulk[e]=carrier*gemsb_stoich(d.h,d.carrier,e);
+  for(int a=0;a<3;++a)if(d.atoms[a]>=0)d.bulk[d.atoms[a]]+=b[a];
+  int& valid=d.valid[cell];
+  const int rc=gemsb_equilibrate(d.h,T,P,d.bulk.data(),GEMSB_WARM_CELL,
+                                d.states.data()+cell*d.stateSize,&valid);
+  iterations=gemsb_last_iterations(d.h);
+  if((rc!=GEMSB_OK && rc!=GEMSB_OK_RETRIED) || gemsb_balance_error(d.h,d.bulk.data(),1e-12)>1e-6){
+    valid=0;if(rc==GEMSB_ERR_FATAL){gemsb_destroy(d.h);d.h=nullptr;d.create();std::fill(d.valid.begin(),d.valid.end(),0);}return false;}
+  gemsb_element_potentials(d.h,d.potentials.data());
+  std::vector<double> g(d.nSpecies);if(gemsb_species_g0(d.h,T,P,g.data())!=GEMSB_OK){valid=0;return false;}
+  const char* atoms[]={"Pb(g)","Bi(g)","I(g)"};
+  for(int a=0;a<3;++a)if(b[a]>0 && d.atoms[a]>=0){const int j=gemsb_species_index(d.h,atoms[a]);
+    if(j<0 || !std::isfinite(d.potentials[d.atoms[a]]-g[j])){valid=0;return false;}
+    pi[a]=d.potentials[d.atoms[a]]-g[j];}
+  return true;
+#else
+  (void)cell;(void)T;(void)P;(void)b;(void)trace;(void)pi;return false;
+#endif
 }

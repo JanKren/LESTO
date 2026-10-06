@@ -137,3 +137,26 @@ double gemsb_last_seconds(const gemsb_engine* e) { (void)e; return 0; }
 const char* gemsb_last_error(const gemsb_engine* e) {
   (void)e; return "dummy GEMS3K bridge";
 }
+
+/* M10c extension: complete ABI for build plumbing without GEMS3K. */
+void gemsb_suppress_condensed(gemsb_engine* e, int on) { (void)e; (void)on; }
+int gemsb_species_g0(gemsb_engine* e, double T, double P, double* g) {
+  (void)e; (void)T; (void)P; (void)g; return GEMSB_ERR_INPUT;
+}
+void gemsb_element_potentials(const gemsb_engine* e, double* u) { (void)e; (void)u; }
+void gemsb_gas_mole_fractions(const gemsb_engine* e, double* x) { (void)e; (void)x; }
+int gemsb_pair_peq(const gemsb_engine* e, int j, const int* c, int n, int method,
+                   double* p, int* best) {
+  (void)e; (void)j; (void)c; (void)n; (void)method; (void)p; (void)best;
+  return GEMSB_ERR_INPUT;
+}
+double gemsb_balance_error(const gemsb_engine* e, const double* b, double f) {
+  (void)e; (void)b; (void)f; return 1;
+}
+void gemsb_set_ipm_controls(gemsb_engine* e, double d, double h, int i) {
+  (void)e; (void)d; (void)h; (void)i;
+}
+void gemsb_get_ipm_controls(const gemsb_engine* e, double* d, double* h, int* i) {
+  (void)e; if(d) *d=0; if(h) *h=0; if(i) *i=0;
+}
+void gemsb_set_warm_iteration_limit(gemsb_engine* e, int n) { (void)e; (void)n; }

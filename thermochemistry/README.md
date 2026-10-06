@@ -23,7 +23,7 @@ it, and `tests/Alltest M9` tests it.
   `undefined reference to __cxa_call_terminate@CXXABI_1.3.15`.
 - `libgemsbridge.so` avoids this:
   - GEMS3K, libstdc++ and libgcc are linked in statically and hidden.
-  - Only the 30 `gemsb_*` C functions in `gemsbridge.h` are exported.
+  - Only the 39 `gemsb_*` C functions in `gemsbridge.h` are exported.
   - The library depends on libc and libm only.
 - Engines are one per MPI rank; there is no MPI inside the bridge.
 
@@ -38,7 +38,7 @@ git clone https://github.com/gemshub/GEMS3K ~/src/GEMS3K   # v4.6.1 tested
 
 cd gemsbridge
 ./build-gems3k-static.sh     # static GEMS3K: no ThermoFun, hidden symbols
-make && make check           # expect "30 gemsb_*, 0 other" and only libc/libm
+make && make check           # expect "39 gemsb_*, 0 other" and libc/libm plus the dynamic loader
 
 cd ../tests/gemsPbI2Check    # with OpenFOAM v2412 sourced
 wmake
@@ -156,3 +156,23 @@ the flow-reference uncertainty, and comparison of future wall-deposit peaks.
 - HERACLES (ThermoHub): GPL-3.0. Not included here.
 - JANAF-derived files: internal use only, kept in `~/opt/gems-data`.
 - Data derived from HSC Chemistry (MainDB): not redistributable.
+
+
+## M10c gas-engine extensions
+
+The bridge adds nine C functions without changing the original 30 signatures
+or their default numerical controls: standard-state G0/(RT), element
+potentials, gas mole fractions, dual pair equilibrium pressure, condensate
+suppression, element-balance error, IPM control setters/getters and an
+engine-local warm iteration cap. A cap of zero keeps the IPM file's limit;
+failed capped warm attempts retry cold with the full limit. The production
+bridge exports no prototype exact-oracle or polish functions. Those remain
+external test tools; the production exact gas kernel is in the solver.
+
+`make check` checks every declared/exported symbol and rejects extra runtime
+libraries. The original ABI is qualified on 800 cold/warm calls, comparing
+statuses, iterations, amounts, pressures and activities bit for bit.
+`tests/Alltest M10c` exercises both GEMS gas modes, guarded/faulted calls,
+restart and MPI behavior. The default OpenFOAM build remains bridge-free.
+See the solver documentation and run/032 for configuration and external-data
+requirements. No licensed Bi-I records are included in the repository.

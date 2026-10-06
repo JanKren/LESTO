@@ -181,7 +181,8 @@
 #   M10a  independent species pairs, element accounting, shared samples,
 #          Chapman-Enskog diffusion and external-data generator checks
 #   M10b  homogeneous gas equilibrium, species/element ledgers and restart
-#   all    every milestone implemented so far: M0 M1 M2 M3 M4 M5 M7 M9 M10a M10b (not
+#   M10c  optional GEMS frozen/local gas engines, ABI and per-cell qualification
+#   all    every milestone implemented so far: M0 M1 M2 M3 M4 M5 M7 M9 M10a M10b M10c (not
 #          M4long, M7long)
 #
 #   -fresh re-run the cached pristine reference cases too
@@ -229,8 +230,8 @@ for arg in "$@"
 do
   case "$arg" in
     -fresh) fresh=-fresh ;;
-    M0|M1|M2|M3|M4|M4long|M5|M7|M7long|M9|M10a|M10b) milestones+=("$arg") ;;
-    all) milestones+=(M0 M1 M2 M3 M4 M5 M7 M9 M10a M10b) ;;
+    M0|M1|M2|M3|M4|M4long|M5|M7|M7long|M9|M10a|M10b|M10c) milestones+=("$arg") ;;
+    all) milestones+=(M0 M1 M2 M3 M4 M5 M7 M9 M10a M10b M10c) ;;
     -h|-help|--help) usage ;;
     *) echo "Unknown milestone or option: $arg" >&2; usage ;;
   esac
@@ -347,6 +348,11 @@ then
   expected+=(M10b.0:1 M10b.1:1 M10b.2:1 M10b.3:1 M10b.4:1 M10b.5:1 M10b.6:1 M10b.7:1 M10b.8:1)
 fi
 
+if want M10c
+then
+  expected+=(M10c.0:1 M10c.1:1 M10c.2:1 M10c.3:1 M10c.4:1 M10c.5:1 M10c.6:1 M10c.7:1 M10c.8:1)
+fi
+
 #------------------------------------------------------------------------------
 # The solver under test, built from scratch
 #------------------------------------------------------------------------------
@@ -450,6 +456,11 @@ fi
 if want M10b
 then
   runScript "$TESTS_DIR/speciation/Allrun"
+fi
+
+if want M10c
+then
+  runScript "$TESTS_DIR/gasGems/Allrun"
 fi
 
 #------------------------------------------------------------------------------

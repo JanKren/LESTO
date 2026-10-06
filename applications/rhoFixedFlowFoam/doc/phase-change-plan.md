@@ -8108,3 +8108,76 @@ the separate v2606 compile passed as M4.6. `all` excludes the hours-long
 M4long/M7long studies; their earlier revalidation is recorded in 36.8.
 Experimental qualification still requires the physical inputs described
 in 36.6 and the later M10 stages.
+
+
+### 36.10 M10c implementation and qualification (2026-10-06)
+
+M10c implements the optional gas GEMS backend in frozen and local modes,
+nine bridge additions, dual HKS pressures for Bi systems, upper mole-fraction
+and chi guards, input/restart validation, fault fallback and run/032.
+The production library exports 39 C functions. It retains the original
+30 signatures and default controls, with no prototype exact-oracle or
+polish exports. `make check` gates exports and runtime dependencies
+(libc, libm and the dynamic loader). The 800-call comparison with the
+M10b bridge is bit-identical in statuses, iterations, amounts, pressures
+and activities. Bridge and v2412 solver builds have zero warnings.
+
+Frozen mode caches formation constants at unique cell T/P states per rank.
+Local mode makes guarded, capped warm IPM calls; valid duals initialize the
+kernel refinement against unfloored physical element amounts. A canonical
+cold final refinement removes an otherwise observable restart difference
+in nearly exhausted iodine. This additional cost is included in timing.
+Fatal calls recreate the engine and invalidate warm states; NaN duals and
+other failed calls take the exact kernel fallback and are counted.
+
+The reduced map has 3 mixes x 24 temperatures x 13 dilutions. Both cold
+and warm kernel refinements match the independent fixed-volume reference
+to 6.82e-10 relative (the original 1e-10 species cutoff); element error is
+5.03e-16, with zero failures. GEMS/open-data formation constants differ
+by at most 3.69e-4 decades, below 1e-3. Raw IPM failures and errors are
+recorded by bulk dilution and species mole-fraction decade. A general
+70-digit Decimal Newton solve refines the external exact oracle against
+the precise fixed-volume inputs. The double oracle's KKT residue of
+1.55e-14 alone left a 1.14e-8 error in a near-exhausted minor iodine gas;
+this reference error is reported separately and the 1e-9 gate is retained.
+
+Both gas modes close serial/four-rank channels within 1e-14 and agree
+within 1e-9. Frozen binary restarts are byte-identical, including the
+accounts; local restart fields satisfy 1e-12 and are exact after the
+canonical refinement. Injected fatal and NaN-dual failures are counted,
+recreate the engine where required and leave fields byte-identical to
+frozen kernel fallback. Invalid modes, guards, caps, carriers, unknown keys
+and changed backend settings across restart are refused.
+
+Bi HKS dual pressures agree with the vapour tables to 8.37e-5 decades
+across 64 values. Start-of-step fields independently reproduce 2000 guard
+checks in each of none/lagged mode, including 36 upper-bound refusals and
+326 minor-gas chi refusals in lagged mode. Element closure passes 1e-14.
+
+In the 1173–350 K prescribed-source study at 1 ms, frozen/open-kernel deposit
+L1 differences in 1 cm bins are 1.0332e-10 (PbI2) and 1.0637e-7 (BiI3),
+below the 1e-3 gates; local/frozen differences are zero, below 1e-9.
+Maximum element closure is 6.65796e-16. The mean local IPM plus both
+refinements is 132.24 us over 5,814,420 calls, below 150 us. Run/032 records
+these provisional numerical benchmarks. M10d shared/reactive condensates
+and M10e experimental cases remain, with the physical/data uncertainties
+of 36.6 and 36.7 unresolved.
+
+The combined `tests/Alltest M0 M9 M10c` qualification finished with
+78 PASS, 0 FAIL and 2 NOTRUN, including all nine M10c gates. M10c.4
+explicitly rechecked the completed three-mode prescribed-source study,
+including every-step closure and the deposit curves. The other M10c
+gates used a fresh optional solver build. A narrow fallback-table check
+confirms that in-grid GEMS states never evaluate that table. Final default
+and optional v2412 builds and a separate v2606 Debug optional build have
+zero warnings; the v2606 executable starts with the bridge compiled in.
+M0.4 is NOTRUN because this suite was invoked under v2412. M9.8's
+historical run/015 excerpt comparison is NOTRUN because the extended bridge
+has another binary hash; the original-API bit comparison passes separately.
+Run/032's `qualification.json` preserves raw IPM diagnostics by input-bulk
+and individual gas mole-fraction decade; `verification.json` records the
+benchmark and acceptance summaries.
+Additional checks of all eight saved restart cases confirm species/element
+closure within 1e-14 in every output-time directory and final inventories
+within 1e-12 of the continuous cases; these checks are included in the
+channel test for subsequent runs.
