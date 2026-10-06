@@ -1,0 +1,254 @@
+{
+  "stage": "M10e full-size matrix execution",
+  "captured_utc": "2026-10-06T13:35:50.099106+00:00",
+  "status_at_capture": "RUNNING",
+  "started_utc": "2026-10-06T13:06:37.769919+00:00",
+  "status_counts_at_capture": {
+    "RUNNING": 15,
+    "NOTRUN": 1
+  },
+  "cells_per_case": 18432,
+  "dt_s": 0.002,
+  "end_time_s": 60,
+  "independent_serial_jobs": 15,
+  "runner_pid_at_launch": 31749,
+  "scientific_validation_status": "PROVISIONAL_ONLY",
+  "final_numerical_validation_status": "PENDING",
+  "local_status_file": "run/034-liu2025/work/prepared/run_state.json",
+  "local_batch_log": "run/034-liu2025/work/prepared/log.matrix",
+  "local_final_results": "run/034-liu2025/work/prepared/cases/validation.json",
+  "local_final_peaks": "run/034-liu2025/work/prepared/cases/peaks.csv",
+  "local_final_plot": "run/034-liu2025/work/prepared/cases/preliminary_profiles.png",
+  "private_solver": "/home/jan/LESTO/run/034-liu2025/work/prepared/bin/rhoFixedFlowFoam",
+  "private_solver_sha256": "b50edaa89b20c5b9bf61d92768453ebaa0d0abce640c8641c86689f52bb6f9e9",
+  "core_source_sha256": {
+    "applications/rhoFixedFlowFoam/ChapmanEnskogDiffusivity.H": "f14361e39307fe99891caeb830d9ca3b45239b1dc1da980826bd757f4a2bc824",
+    "applications/rhoFixedFlowFoam/PbI2HeDiffusivity.H": "894a8652374238fd4938de80c05c5ca72ff589dfb8430c0e4f78a1440e258e2c",
+    "applications/rhoFixedFlowFoam/axialProfiles.C": "fba1e633d52e3069c8a0e9c28cc4ebf28ee35e0f5660110cba1085c502402151",
+    "applications/rhoFixedFlowFoam/axialProfiles.H": "3a0c98f0bb7d9effc3df9e63c58cfc2afb147b7a1bc718dbdb9c8c2a42a592e5",
+    "applications/rhoFixedFlowFoam/binaryIOList.H": "8e1f87afdfb0480a3290a75d94f466f3b3b70fc689f4957f252f02f8a1a6d0aa",
+    "applications/rhoFixedFlowFoam/checkSpeciesConservation.H": "e05871710edd242efe100f47e4b388c245a9bd4e987d95904d8b5be3bc21d68a",
+    "applications/rhoFixedFlowFoam/chemicalFormula.H": "96a396781c6329628a3ca6cdeb2aca3baca1f7efd32ed4d5a04276a2dc374d1a",
+    "applications/rhoFixedFlowFoam/collectSpeciesBalance.H": "a859f0ad050a9adedaa5d40952106349231e4c57913e190b9b333ec96961b1bd",
+    "applications/rhoFixedFlowFoam/compensatedSum.H": "84d2761d7c90a4829386f15a6858f2bd0bddd9ae19df63a58c1f3bad16253893",
+    "applications/rhoFixedFlowFoam/createChapmanEnskogDiffusivity.H": "8697cb6292a1647da9c22224d232808f25cc1386f58b31e722355db35e2fd141",
+    "applications/rhoFixedFlowFoam/createPhaseChange.H": "4da1fd8360617fcaebeea3fbaeaa7e50a0d05f9768ed42138111f5353125fc6b",
+    "applications/rhoFixedFlowFoam/createVariableDiffusivity.H": "34477d38ff01d0e478371204f94bec6cc17456b93135f486cb7175e8ad2a32fe",
+    "applications/rhoFixedFlowFoam/evaluateThermochemistry.C": "a742a2169e61acbbbc7d114eb903a60c54f8f6e7a44fbafcb164d71a75caa515",
+    "applications/rhoFixedFlowFoam/evaluateThermochemistry.H": "cd88bcb17b0e28e5cfbc42e8734c3790e366eb98710c77ba3e366c4c57a0c1b7",
+    "applications/rhoFixedFlowFoam/gasRespeciation.C": "7e8c3a7fabb6c2941e0bf6e0533a8e5d10beae606b4e38af05577d97583f7d08",
+    "applications/rhoFixedFlowFoam/gasRespeciation.H": "b320d0657985b598a447bfdc472904db79830334f6a0e018eac5da70aff7deb1",
+    "applications/rhoFixedFlowFoam/gasSpeciation.H": "6269739bf4bdc54ba4a752c1241ebfdff244757ee61057f03e4c8e1eb0e834c5",
+    "applications/rhoFixedFlowFoam/gemsEquilibrium.C": "d8bf4bb17e69a96036c237077c824dedf5cf9f29d093585dca9ddd7ce7dfd36a",
+    "applications/rhoFixedFlowFoam/gemsEquilibrium.H": "d264a598669119c8ea054cc17d875fc5bf11f7685fd3d7437def3a9d73318bfd",
+    "applications/rhoFixedFlowFoam/gemsGasSpeciation.H": "c61a89fcbf2ba828a11914ede2eeb25baed1bec5b783dc87518cc8cf35ab5dff",
+    "applications/rhoFixedFlowFoam/interfaceExchange.C": "443bc1b62c6019cd7374ce64d6178bdd24929c201e0a599f696afcd4ea7ee3fd",
+    "applications/rhoFixedFlowFoam/interfaceExchange.H": "cc8c66700d407c577c120b311679c8ebb6a31b28ac829914e25e2049e2273e6b",
+    "applications/rhoFixedFlowFoam/matrixDefect.H": "f06df6409f9c9d602bcff7a2a78df1c86621f156d9a4618cabfa8c48eb5aef27",
+    "applications/rhoFixedFlowFoam/phaseChangeKinetics.H": "25d772878901052f6803efbb9d8e5c4c89048072d59f95d48f3e64d4ee839c5a",
+    "applications/rhoFixedFlowFoam/phaseChangeLedger.C": "0da069667471a5fc0d02dd5deff73501844b11e93f8d1a5d407a071e408cc6d8",
+    "applications/rhoFixedFlowFoam/phaseChangeLedger.H": "6505a7d978192d045aa0052d4b430bcf07a8df7960a2c387a9f5ed13d9d8c569",
+    "applications/rhoFixedFlowFoam/profileBinning.H": "a046b08b5e62bfa52c7111d22a37f6402647a6a6d16b9c74d5fccc1c79d759ac",
+    "applications/rhoFixedFlowFoam/rhoFixedFlowFoam.C": "e66109c57d4c009daca79d8377fdaf2f76ea1159c2bcf45834f000c3ba1b20c5",
+    "applications/rhoFixedFlowFoam/solveGasSpecies.H": "066e426751a4ce85f552e017faf3920c930bfab088e6351cce65dc91fadf2521",
+    "applications/rhoFixedFlowFoam/solveLedgeredGasSpecies.H": "c79aea74f653f7a16100b512f7805a728bf62d7c58d0a39ffec94dad775c5361",
+    "applications/rhoFixedFlowFoam/solvePairedGasSpecies.H": "2e83a96605eaed05cc99597766210914d1077fa2f25cf1d9152b9fc697081aa7",
+    "applications/rhoFixedFlowFoam/solveSolidSpecies.H": "83f0eb2c46278cfc99a9a5c15e6255b934450cc0a6059344ceb122b1d7c9225c",
+    "applications/rhoFixedFlowFoam/solveWallChannelGasSpecies.H": "931622368060cf9ad5b65f8a34e5f8b00838fdc5be5258cb6171b2e80e80d9cf",
+    "applications/rhoFixedFlowFoam/vapourPressureTable.H": "a2b8790c3cb47f712608ce7a4db7cc2380e10c2131f3bd4040eebecb0b20d56f",
+    "applications/rhoFixedFlowFoam/wallChannels.C": "f47ae01b5008c0b0c76858eae9245a64e517f13745a0407cff2eed184fe71fdc",
+    "applications/rhoFixedFlowFoam/wallChannels.H": "092ba6888ede5f91b78f3d3593ef4cac45de5cd8caf91360baeed87703782785"
+  },
+  "case_manifest_sha256": {
+    "LBE-I_SS_II_Q1_baseline": "3df87e204cfc00e3be167803ee96f12aa33e344eb9d052630efd32024631ac82",
+    "LBE-I_SS_II_Q2_baseline_sat0.001": "4ab764121f329842af1486e05cec8d790b71d0bd6cd45bfec652ae263da8bece",
+    "LBE-I_SS_II_Q2_baseline_sat0.01": "9d2fa81b791d8caab85c2eda517c0af348d96bd594b8585e50ebe8f429bb9ec7",
+    "LBE-I_SS_II_Q2_baseline_sat0.1": "e409235c5ff322a003e84e4c9fb2767fa06e8c0d061983df47456f533b261bef",
+    "LBE-I_SS_II_Q2_shift29k_sat0.001": "a82e59b4dd790f1b06bec239a09479b796560c656e1a37b1854e24cbfb43e51f",
+    "LBE-I_SS_II_Q2_shift29k_sat0.01": "cff009a86b52b4a4d124b7b8f82515ac48f808a3a7fc3ef71c59eac95888a6a5",
+    "LBE-I_SS_II_Q2_shift29k_sat0.1": "f6928c5cf23ab3b4bdb1570d1231d43b1e862bb605b005e5f174b4e1127b18aa",
+    "LBE-I_SiO2_I_Q1_baseline": "2d23cfea3dfe692dd2133cccfa4363108ba5f4d305c8bd02c77e64b7cf320d24",
+    "LBE-I_SiO2_I_Q2_baseline_sat0.001": "d19771320b25918cea6e281d2519520e959408fac6493d6ffa9a76f0c67469ce",
+    "LBE-I_SiO2_I_Q2_baseline_sat0.01": "bb684134801c357d97a89f99fb5cd699787530dae305cdecf0be1b12597e4442",
+    "LBE-I_SiO2_I_Q2_baseline_sat0.1": "61ee22aa033e7501b904f17f05abc818101ba35107253d722db7e8d85572a2b3",
+    "LBE-I_SiO2_I_Q2_shift29k_sat0.001": "70c6a7e4dd1739a4b6d0aeb5d9247051b548cf198cf9d9e3ea03c4b93e267803",
+    "LBE-I_SiO2_I_Q2_shift29k_sat0.01": "e13e000627a714999389b6f88302518afb42458de045f426411a31e1e595702a",
+    "LBE-I_SiO2_I_Q2_shift29k_sat0.1": "0bec3976bfd7cd3817888a7bc73bb2026d23b0edb2fd48ff41080a10ba4e1b2e",
+    "PbI2_SS_Q1_baseline": "4fb38a18a51edff3a227f2ecb4b6879b1e24338206c7310d02a8f21f159cda1d"
+  },
+  "matrix_sha256": "03b224b6df8ac9b25cd3999500cb3fe040c03981407f453e9157bec93c28e55a",
+  "first_attempt": "run/034-liu2025/work/attempt-1-pressure-underflow",
+  "precision_fix": {
+    "trigger": "Pb bulk 3.0847282814072739e-310 mol/m3 in silica Q1 first 2 ms step; double-pressure exponentiation lost relative accuracy.",
+    "policy": "Extremely dilute bulks bypass double predictor; extended libm handles extreme exponents; no species cutoffs or element-gate relaxation.",
+    "element_relative_gate": 1e-14,
+    "tiny_bulk_analytical_tests": 24,
+    "tiny_bulk_tests_fpe_traps": true,
+    "synthetic_equilibrium_reference_points": 140,
+    "synthetic_reference_max_element_error": 2.03342e-16,
+    "corrected_silica_10_step_smoke": {
+      "status": "PASS",
+      "max_relative_element_closure": 5.319543220735904e-16,
+      "max_relative_solver_defect": 4.598482324666322e-15
+    }
+  },
+  "regression": {
+    "status": "SELECTED_NUMERICAL_CHECKS_PASS_SUITE_INTERRUPTED",
+    "command": "tests/Alltest M10b M10c M10d",
+    "OpenFOAM": "v2412 linux64GccDPInt32Opt",
+    "suite_exit_code": 143,
+    "suite_recorded_PASS": 22,
+    "suite_recorded_FAIL": 0,
+    "suite_recorded_NOTRUN": 9,
+    "suite_log_sha256": "4cb1df52574c98f9705fe86a28973f03cf41dc9e841cb450e7308afb8853995c",
+    "suite_notrun_records": [
+      "NOTRUN M10b.5     External stored reference unavailable (LESTO_M10_DESIGN)",
+      "NOTRUN M10b.8     Representative external timing points unavailable",
+      "NOTRUN M10b.6     External Bi tables/NASA/ThermoFun inputs unavailable",
+      "NOTRUN M10b.7     Extended external oracle unavailable (LESTO_M10_DESIGN, LESTO_M10_ORACLE_LIB)",
+      "NOTRUN M10c.3     External PbBiIHe system unavailable (LESTO_M10_DESIGN)",
+      "NOTRUN M10c.1     External system, oracle and thermodynamic inputs unavailable",
+      "NOTRUN M10c.5     External Bi system/vapour tables unavailable",
+      "NOTRUN M10c.4     External prescribed-source inputs unavailable",
+      "NOTRUN M10c.8     External local-engine timing case unavailable"
+    ],
+    "termination_note": "The tool session received SIGTERM during the final shifted-data half-step run; all completed numerical checks passed.",
+    "resumed_test": {
+      "id": "M10d.3",
+      "status": "PASS",
+      "log_sha256": "0e24471f6cdee0ce4b5d79ac3b84249486193046d1dc22e02a9cab3ff1474bc6",
+      "results": {
+        "baseline": {
+          "shift_J_mol": 0,
+          "plug_flow_onset_K": {
+            "Pb(l)": 921,
+            "Bi(cr)": 544,
+            "Bi(l)": 885,
+            "PbI2(cr)": 537,
+            "BiI3(cr)": 451
+          },
+          "solver_onset_K": {
+            "Pb(l)": 919.9274999999999,
+            "Bi(l)": 882.8924999999999,
+            "Bi(cr)": 541.3475000000002,
+            "PbI2(cr)": 533.1175000000002,
+            "BiI3(cr)": 450.8175000000001
+          },
+          "difference_K": {
+            "Pb(l)": -1.0725000000001046,
+            "Bi(l)": -2.1075000000000728,
+            "Bi(cr)": -2.6524999999998045,
+            "PbI2(cr)": -3.8824999999998226,
+            "BiI3(cr)": -0.18249999999989086
+          },
+          "max_relative_closure": {
+            "phaseChangeElements": 4.3873471738090027e-16,
+            "phaseChangeSpecies": 2.203749378892395e-16,
+            "phaseChangeChannelCondensates": 2.203567089232293e-16
+          },
+          "half_step_onset_K": {
+            "Pb(l)": 919.9274999999999,
+            "Bi(l)": 882.8924999999999,
+            "Bi(cr)": 541.3475000000002,
+            "PbI2(cr)": 533.1175000000002,
+            "BiI3(cr)": 450.8175000000001
+          },
+          "half_step_closure": {
+            "phaseChangeElements": 4.429582715928499e-16,
+            "phaseChangeSpecies": 2.2037307409281608e-16,
+            "phaseChangeChannelCondensates": 2.2092810489633406e-16
+          },
+          "half_step_onset_change_K": {
+            "Pb(l)": 0.0,
+            "Bi(l)": 0.0,
+            "Bi(cr)": 0.0,
+            "PbI2(cr)": 0.0,
+            "BiI3(cr)": 0.0
+          },
+          "half_step_deposit_L1": {
+            "Pb": 0.002904320977795594,
+            "Bi": 0.009358555913406653,
+            "PbI2": 0.014417616168985911,
+            "BiI3": 0.003038092130776955
+          }
+        },
+        "shift29k": {
+          "shift_J_mol": 29000,
+          "plug_flow_onset_K": {
+            "Pb(l)": 882,
+            "Bi(cr)": 544,
+            "Bi(l)": 902,
+            "PbI2(cr)": 585,
+            "BiI3(cr)": 408
+          },
+          "solver_onset_K": {
+            "Pb(l)": 882.8924999999999,
+            "Bi(l)": 899.3525000000001,
+            "Bi(cr)": 541.3475000000002,
+            "PbI2(cr)": 582.4975,
+            "BiI3(cr)": 409.66750000000013
+          },
+          "difference_K": {
+            "Pb(l)": 0.8924999999999272,
+            "Bi(l)": -2.6474999999999227,
+            "Bi(cr)": -2.6524999999998045,
+            "PbI2(cr)": -2.5025000000000546,
+            "BiI3(cr)": 1.6675000000001319
+          },
+          "max_relative_closure": {
+            "phaseChangeElements": 3.61839386209214e-16,
+            "phaseChangeSpecies": 2.2082405641529021e-16,
+            "phaseChangeChannelCondensates": 2.219518954034722e-16
+          },
+          "half_step_onset_K": {
+            "Pb(l)": 878.7775,
+            "Bi(l)": 899.3525000000001,
+            "Bi(cr)": 541.3475000000002,
+            "PbI2(cr)": 582.4975,
+            "BiI3(cr)": 409.66750000000013
+          },
+          "half_step_closure": {
+            "phaseChangeElements": 4.01613712631873e-16,
+            "phaseChangeSpecies": 2.2072948754979431e-16,
+            "phaseChangeChannelCondensates": 2.2118333054591918e-16
+          },
+          "half_step_onset_change_K": {
+            "Pb(l)": -4.114999999999895,
+            "Bi(l)": 0.0,
+            "Bi(cr)": 0.0,
+            "PbI2(cr)": 0.0,
+            "BiI3(cr)": 0.0
+          },
+          "half_step_deposit_L1": {
+            "Pb": 0.030100293522670216,
+            "Bi": 0.0040805516560909446,
+            "PbI2": 0.002982201741441391,
+            "BiI3": 0.06452379365160969
+          }
+        }
+      }
+    },
+    "total_completed_PASS": 23,
+    "test_framework_checks_not_completed": [
+      "SELF",
+      "CACHE",
+      "LIST"
+    ],
+    "build_warnings": 0,
+    "v2606_this_change": "NOTRUN"
+  },
+  "python_tests": {
+    "PASS": 11,
+    "FAIL": 0
+  },
+  "unavailable_case": "BiI3_SiO2_800_Q1_baseline",
+  "experimental_limitations_reference": "run/034-liu2025/verification.json",
+  "simulated_time_range_s_at_capture": [
+    1.388,
+    3.488
+  ],
+  "source_tests_sha256": {
+    "applications/rhoFixedFlowFoam/tests/speciation/Allrun": "b54353b670c7a1c484461fb99c3a10e3794f1ae82bf8e69072ff7ea0c730f2c0",
+    "applications/rhoFixedFlowFoam/tests/speciation/testTinyBulk.C": "32c69f22e880f31a9932c4500e946eb929267a462accff5432482e16597e7d4a"
+  }
+}

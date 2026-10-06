@@ -8315,3 +8315,33 @@ M0/M10a–d regressions record 43 PASS, 0 FAIL, 13 NOTRUN, and eleven Python
 input/failure-path tests pass. No new v2606 qualification is claimed.
 Run/034's README, peak/profile artifacts and `verification.json` preserve
 the tested scope, source hashes, missing cases and remaining scientific work.
+
+### 36.13 Full-size M10e matrix launch and dilute-bulk precision (2026-10-06)
+
+The fifteen prepared column cases were launched concurrently on 18,432
+cells for 60 simulated seconds at 2 ms. The local runner writes live
+progress every 30 s and performs conservation reporting and plotting after
+the runs finish. Completion and scientific validation remain pending;
+`BiI3_SiO2_800` remains NOTRUN for its missing temperature profile.
+Run/034's `full_size_launch.json` fingerprints the private solver, core
+sources and case manifests and records the exact tested scope.
+
+The first silica Q1 step exposed relative precision loss at a Pb bulk
+concentration of 3.0847e-310 mol/m3: double pressure exponentiation rounded
+the smaller pressure before conversion back to concentration. Extremely
+dilute bulks now bypass the double predictor, and extreme exponents use
+extended libm. All species remain in the equilibrium equations, and the
+1e-14 element-residue gate is retained. Twenty-four monatomic-limit tests
+include the smallest positive double with FPE traps; the original 140-point
+reference is unchanged. The corrected ten-step silica smoke closes elements
+to 5.32e-16. The first attempt is archived and all cases started fresh with
+one corrected binary.
+
+The v2412 regression session recorded 22 PASS, zero FAIL and nine external
+studies NOTRUN, then received SIGTERM during the last scientific half-step
+run. That remaining M10d.3 check was completed separately, giving 23
+successful numerical/build checks. Both variants and both time steps retain
+all five onsets within 10 K and ledgers within 1e-14. Default and optional
+builds have zero warnings. The SELF/CACHE/LIST framework checks did not run
+after the interrupted session; no completed aggregate Alltest or new v2606
+qualification is claimed. The eleven benchmark Python tests also pass.

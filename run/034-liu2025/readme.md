@@ -114,7 +114,8 @@ Five selected full-size cases pass 1 s smoke checks. Two selected coarse
 cases also pass at 10 ms for 60 s. Their iodide peak temperatures are unchanged,
 but the deposit-profile L1 changes are 0.0243% for pure PbI2 and 3.17% / 2.00%
 for PbI2 / BiI3 in the steel Q2 baseline case at 1% metal saturation. The
-full-size 60 s / 2 ms matrix is prepared locally and **has not been run**.
+full-size 60 s / 2 ms matrix was subsequently launched locally; its completion
+and conservation results are recorded separately from these coarse results.
 
 Available Q1 peak errors are -18.43 K for pure PbI2; -17.37 K / +11.56 K
 for steel PbI2 / BiI3; and -17.41 K / +21.73 K for silica PbI2 / BiI3.
@@ -143,3 +144,41 @@ Saved outputs:
 The full 3-hour experimental inventories, cooling stage, qualified transport
 properties, missing temperature profile and second thermodynamic dataset
 remain outside this preliminary qualification.
+
+## Full-size matrix execution (2026-10-06)
+
+All fifteen available cases were launched concurrently at 18,432 cells,
+60 s end time and 2 ms time steps. The local runner continues independently
+of the chat and writes `work/prepared/run_state.json` every 30 s, with each
+case's status, process id and latest simulated time. On completion it runs
+the numerical report and creates `work/prepared/cases/validation.json`,
+`peaks.csv`, per-case iodine comparisons and `preliminary_profiles.png`.
+`RUNNING` is not a completed conservation or scientific validation result.
+The missing `BiI3_SiO2_800` case remains explicitly NOTRUN.
+
+The first silica Q1 step exposed a second precision issue: a bulk Pb
+concentration of 3.0847e-310 mol/m3 lost relative accuracy when the equilibrium
+kernel evaluated its smaller pressure with double libm. The kernel now
+bypasses the double predictor for extremely dilute bulks and uses extended
+exponentials for extreme arguments. It keeps every species in the equations
+and retains the existing 1e-14 element-residue gate. Twenty-four independent
+monatomic-limit tests cover the smallest representable double with FPE traps,
+and the original 140-point equilibrium reference remains unchanged.
+The corrected silica 10-step smoke passes with maximum element closure
+5.32e-16. All cases restarted from fresh initial fields with a private copy
+of that corrected binary; the first attempt is retained under
+`work/attempt-1-pressure-underflow`.
+
+The v2412 regression session recorded 22 PASS, zero FAIL and nine external
+studies NOTRUN before receiving SIGTERM in the last scientific half-step run.
+That remaining M10d.3 check was completed separately: both thermodynamic
+variants and both time steps retain all five onsets within the 10 K gate and
+all ledgers within 1e-14. Thus 23 numerical/build regression checks completed
+successfully. The session did not reach its SELF/CACHE/LIST framework checks;
+this is not claimed as a completed aggregate `Alltest` invocation. The
+default and optional solver builds have zero warnings; no new v2606 check
+was performed.
+
+[The launch record](full_size_launch.json) captures the configuration,
+source/binary hashes and regression evidence. It is a timestamped launch
+snapshot; consult the local `run_state.json` for live completion status.

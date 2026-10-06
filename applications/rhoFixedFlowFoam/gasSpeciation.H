@@ -28,6 +28,8 @@ derivative.  The API accepts a warm start; the solver adapter starts cold on eve
 so no unsaved numerical state influences a restart.
 A short extended-precision refinement removes cancellation in trace
 mixtures. Exponentials use double libm with an extended argument correction.
+Extremely dilute bulks bypass the double predictor, and extreme exponents
+use extended libm so pressure underflow cannot degrade concentration accuracy.
 The element balances hold to round-off by construction (the amounts are
 the exponentials of the converged potentials; the residual is printed).
 
@@ -83,17 +85,22 @@ public:
     if (!(scale>0) || !std::isfinite(scale)) return -1;
     for (double amount:b) if (!std::isfinite(amount)) return -1;
     for (int j=0;j<size();++j) if (!std::isfinite(lnKf[j])) return -1;
+    bool dilute = false;
+    for (double amount : b)
+      dilute = dilute || (amount > 0 && static_cast<long double>(amount) < 1e-280L*scale);
     std::array<double,3> fastPi = pi;
-    const int iterations = solveImpl<double>(lnKf, scale, b, fastPi, c);
+    const int iterations = dilute ? 0 : solveImpl<double>(lnKf, scale, b, fastPi, c);
     if (iterations < 0) return iterations;
     std::array<long double,3> precisePi = {fastPi[0], fastPi[1], fastPi[2]};
     const int refined = solveImpl<long double>(lnKf, scale, b, precisePi, c);
     pi = {double(precisePi[0]), double(precisePi[1]), double(precisePi[2])};
-    return refined < 0 ? refined : iterations;
+    return refined < 0 ? refined : (dilute ? refined : iterations);
   }
 
 private:
   template<class Real> static Real exponential(Real x) {
+    if (std::numeric_limits<Real>::digits > std::numeric_limits<double>::digits
+        && (x < -700 || x > 700)) return std::exp(x);
     const double base = static_cast<double>(x);
     return static_cast<Real>(std::exp(base))*(1 + (x-static_cast<Real>(base)));
   }

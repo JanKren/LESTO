@@ -300,7 +300,9 @@ void LESTO::gasRespeciation::apply() {
       after[0]+=f.nPb*static_cast<long double>(c[i]);after[1]+=f.nBi*static_cast<long double>(c[i]);after[2]+=f.nI*static_cast<long double>(c[i]); }
     for(int e=0;e<3;++e) if (b[e]>0) {
       const scalar error=scalar(std::fabs(after[e]/b[e]-1));
-      if(error>1e-14)FatalErrorInFunction<<"Gas equilibrium element residue "<<error<<" in cell "<<cell<<exit(FatalError);
+      if(error>1e-14)FatalErrorInFunction<<"Gas equilibrium element residue "<<error<<" in cell "<<cell
+        <<"; element "<<e<<", before "<<b[e]<<", after "<<double(after[e])
+        <<", T "<<thermo_.T()[cell]<<exit(FatalError);
       largest=max(largest,error);
     }
     ++calls; iterations+=it;

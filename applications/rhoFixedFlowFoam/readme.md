@@ -3103,6 +3103,9 @@ Fifteen 60 s coarse cases and five full-size smoke cases pass numerical
 conservation checks. Saved peak/profile comparisons and selected time-step
 checks remain preliminary: a temperature profile is missing, Figure 7C
 contains a curve/label discrepancy, and transport, source and thermodynamic
-inputs still need qualification. The full-size 60 s matrix is prepared but
-unrun. Reactive wall equilibrium handles zero/subnormal product pressures
+inputs still need qualification. The full-size 60 s matrix has been launched;
+its local runner records live status and reports results on completion.
+Reactive wall equilibrium handles zero/subnormal product pressures
 in log space, with an FPE-enabled regression test.
+The gas kernel also evaluates extremely dilute bulks and extreme exponents
+in extended precision without removing species or relaxing its element gate.
