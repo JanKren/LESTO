@@ -1,0 +1,33 @@
+#!/bin/bash
+# Explicit modes keep smoke/coarse results separate from full M10e runs.
+set -euo pipefail
+cd -- "$(dirname -- "$0")"
+mode=${1:-smoke}
+case "$mode" in
+    smoke) nx=128; nr=16; dt=.02; end=1;;
+    coarse) nx=128; nr=16; dt=.02; end=60;;
+    full|prepare) nx=384; nr=48; dt=.002; end=60;;
+    *) echo 'Usage: ./Allrun [smoke|coarse|full|prepare]' >&2; exit 2;;
+esac
+: "${WM_PROJECT_DIR:?Load OpenFOAM first}"
+: "${LESTO_M10E_NASA:?External NASA thermodynamic input required}"
+: "${LESTO_M10E_THERMOFUN:?External ThermoFun thermodynamic input required}"
+: "${LESTO_M10E_FLOW_T:?Explicit flow reference temperature in K required}"
+: "${LESTO_M10E_FLOW_P:?Explicit flow reference pressure in Pa required}"
+repo=$(cd ../.. && pwd)
+package="$repo/thermochemistry/benchmarks/liu2025"
+task_work="$PWD/work/$mode"
+mkdir -p "$task_work/bin"
+FOAM_USER_APPBIN="$task_work/bin" wmake "$package/carrierTool" > "$task_work/log.build-carrier" 2>&1
+python3 "$package/carriers.py" --out "$task_work/carriers" --nx "$nx" --nr "$nr" \
+    --flow-reference-temperature "$LESTO_M10E_FLOW_T" --flow-reference-pressure "$LESTO_M10E_FLOW_P" \
+    --tool "$task_work/bin/liuCarrierTool" --run
+python3 "$package/cases.py" --carrier-root "$task_work/carriers" --tables-root "$task_work/tables" \
+    --out "$task_work/cases" --nasa "$LESTO_M10E_NASA" --tf "$LESTO_M10E_THERMOFUN" \
+    --dt "$dt" --end-time "$end"
+if test "$mode" != prepare; then
+    python3 "$package/run.py" "$task_work/cases" --solver "${LESTO_M10E_SOLVER:-rhoFixedFlowFoam}" \
+        --jobs "${LESTO_M10E_JOBS:-1}"
+fi
+python3 "$package/report.py" "$task_work/cases"
+echo "Results: $task_work/cases/validation.json; peaks.csv; per-case iodine-comparison.csv"

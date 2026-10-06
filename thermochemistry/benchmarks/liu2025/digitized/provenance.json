@@ -1,0 +1,201 @@
+{
+  "doi": "10.1007/s10967-025-10246-4",
+  "licence": "CC BY 4.0",
+  "pdf_sha256": "488aa18a211658afccffe0ec3a53dca80da91113268ed0fd5d073d80a180746b",
+  "method": "red-pixel median and linear dash interpolation; gray histogram fill",
+  "temperature_pixel_uncertainty_K": 4,
+  "position_pixel_uncertainty_m": 0.001,
+  "gamma_height_pixel_uncertainty_percent": 0.4,
+  "notes": [
+    "Axes calibrated manually using printed major ticks.",
+    "Gamma CSV reads the interiors of printed 1 cm bins, not raw scan data.",
+    "Histogram areas are reported without normalization.",
+    "Pixel height uncertainty excludes bin alignment, black outlines and arrow-obscuration error.",
+    "BiI3_SiO2_800 has no plotted T(x) in this paper.",
+    "Plot origin and unplotted column ends require author confirmation.",
+    "Figure 7C trace and printed peak labels disagree; do not fit the trace to the labels."
+  ],
+  "experiments": {
+    "PbI2_SS": {
+      "calibration": {
+        "page": 6,
+        "figure": "2B",
+        "size": [
+          969,
+          872
+        ],
+        "frame": [
+          113,
+          289,
+          850,
+          761
+        ],
+        "x_ticks": [
+          204,
+          808.5
+        ],
+        "T_ticks": [
+          761,
+          341.5
+        ],
+        "gamma_ticks": [
+          761,
+          341.5
+        ],
+        "gamma_max": 40,
+        "legend": [
+          420,
+          610
+        ],
+        "deposits": [
+          33,
+          42
+        ]
+      },
+      "gamma_area_percent": 99.16567342073897,
+      "image_sha256": "0d25679846ee2de947ac968cbfcb1deaf8f9a980bee5b3e12146397746b9883b",
+      "covered_x_m": [
+        0.018000000000000002,
+        0.7360000000000007
+      ]
+    },
+    "LBE-I_SS_II": {
+      "calibration": {
+        "page": 11,
+        "figure": "7B",
+        "size": [
+          2032,
+          1451
+        ],
+        "frame": [
+          1093,
+          23,
+          1885,
+          531
+        ],
+        "x_ticks": [
+          1189.5,
+          1839.5
+        ],
+        "T_ticks": [
+          531,
+          80
+        ],
+        "gamma_ticks": [
+          531,
+          94.5
+        ],
+        "gamma_max": 30,
+        "legend": [
+          1450,
+          340
+        ],
+        "deposits": [
+          40,
+          63
+        ]
+      },
+      "gamma_area_percent": 96.70103092783505,
+      "image_sha256": "1384ea23bd5fe75d090b05a8e27d33f6f2d88876fe5dbe4ecc1b06fc6b6fe590",
+      "covered_x_m": [
+        0.016,
+        0.7360000000000005
+      ]
+    },
+    "LBE-I_SiO2_I": {
+      "calibration": {
+        "page": 11,
+        "figure": "7C",
+        "size": [
+          2032,
+          1451
+        ],
+        "frame": [
+          135,
+          625,
+          932,
+          1137
+        ],
+        "x_ticks": [
+          226,
+          831
+        ],
+        "T_ticks": [
+          1137,
+          681.5
+        ],
+        "gamma_ticks": [
+          1137,
+          696
+        ],
+        "gamma_max": 30,
+        "legend": [
+          500,
+          950
+        ],
+        "deposits": [
+          41,
+          65
+        ]
+      },
+      "gamma_area_percent": 102.24489795918367,
+      "image_sha256": "1384ea23bd5fe75d090b05a8e27d33f6f2d88876fe5dbe4ecc1b06fc6b6fe590",
+      "covered_x_m": [
+        0.015,
+        0.7950000000000007
+      ]
+    }
+  },
+  "figure_checks": [
+    {
+      "experiment": "PbI2_SS",
+      "species": "PbI2",
+      "scan_peak_x_m": 0.36,
+      "figure_temperature_K": 640.7590584028605,
+      "printed_peak_K": 641.15,
+      "difference_K": -0.390941597139431,
+      "printed_uncertainty_K": 18.0,
+      "status": "CONSISTENT_WITHIN_UNCERTAINTY"
+    },
+    {
+      "experiment": "LBE-I_SS_II",
+      "species": "PbI2",
+      "scan_peak_x_m": 0.51,
+      "figure_temperature_K": 560.2157797487064,
+      "printed_peak_K": 561.15,
+      "difference_K": -0.9342202512935955,
+      "printed_uncertainty_K": 18.0,
+      "status": "CONSISTENT_WITHIN_UNCERTAINTY"
+    },
+    {
+      "experiment": "LBE-I_SS_II",
+      "species": "BiI3",
+      "scan_peak_x_m": 0.57,
+      "figure_temperature_K": 436.6385439763497,
+      "printed_peak_K": 427.15,
+      "difference_K": 9.488543976349717,
+      "printed_uncertainty_K": 14.0,
+      "status": "CONSISTENT_WITHIN_UNCERTAINTY"
+    },
+    {
+      "experiment": "LBE-I_SiO2_I",
+      "species": "PbI2",
+      "scan_peak_x_m": 0.51,
+      "figure_temperature_K": 642.1218258324183,
+      "printed_peak_K": 579.15,
+      "difference_K": 62.97182583241829,
+      "printed_uncertainty_K": 24.0,
+      "status": "FIGURE_LABEL_DISCREPANCY"
+    },
+    {
+      "experiment": "LBE-I_SiO2_I",
+      "species": "BiI3",
+      "scan_peak_x_m": 0.59,
+      "figure_temperature_K": 508.4225942188062,
+      "printed_peak_K": 400.15,
+      "difference_K": 108.2725942188062,
+      "printed_uncertainty_K": 39.0,
+      "status": "FIGURE_LABEL_DISCREPANCY"
+    }
+  ]
+}

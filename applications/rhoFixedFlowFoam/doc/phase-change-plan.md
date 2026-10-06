@@ -8269,3 +8269,49 @@ Maximum element closure over both data variants and both time steps is
 4.42e-16. The 1 ms/0.5 ms deposit-profile L1 differences span 0.29–6.45%:
 these are reported, not gated by M10d's onset criteria. Quantitative M10e
 profiles need additional time-step refinement and the measured inputs.
+
+### 36.12 M10e preliminary benchmarks (2026-10-06)
+
+Run/034 and `thermochemistry/benchmarks/liu2025` now digitise the available
+paper curves, solve physical 45/100 mL/min laminar helium carriers, prepare
+the axisymmetric Q1/Q2 matrix and report conservation, deposition peaks,
+iodine profiles and iodide splits. A bounded finite-volume flux projection
+removes the low-Mach carrier solve's finite-precision residue; original
+defects and correction sizes remain recorded, and final carrier audits use
+the 1e-12 inflow-relative gate. Reference flow conditions of 298.15 K and
+101325 Pa are an explicit assumption inferred from the paper's Eq. (3).
+
+Only the supplied paper is available. Three temperature profiles and gamma
+histograms were digitised with provenance and pixel uncertainties.
+`BiI3_SiO2_800` has no plotted temperature profile and remains NOTRUN.
+Figure 7C's temperature trace disagrees with its printed peak labels by
+approximately 63 K / 108 K for PbI2 / BiI3. Both observations are retained;
+the trace is not fitted to the labels. Coordinates, boat/source placement,
+release histories and controller reference conditions remain unconfirmed.
+
+The full 384 x 48 wedge carriers and the coarse 128 x 16 carriers pass their
+mass-flow audits. Fifteen coarse cases run 60 s at 20 ms and pass numerical
+gates (maximum element closure 6.11e-16, solver defect 1.39e-13, zero gas
+re-speciation failures). Five selected full-size cases pass 1 s smoke checks.
+Two selected 60 s runs at 10 ms leave iodide peaks unchanged; profile L1
+changes are 0.0243%, 3.17% and 2.00%. Fourteen coarse cases meet the selected
+1% stationarity diagnostic; silica Q1 does not because of its very small
+Pb metal deposit. The full-size 60 s / 2 ms matrix is prepared but NOTRUN.
+
+All five available Q1 peak errors fall inside the proposed 20/40 K targets,
+but iodine-profile differences span 47.6–185.1 percentage points across the
+matrix. Q1 LBE splits are conditioned on measured deposition. Q2 sensitivity
+results use an ideal-activity metal source and the provisional +29 kJ/mol
+BiI surrogate. Constant diffusivity 1e-4 m2/s, unit accommodation, omitted
+boat blockage, unplotted-end temperature extensions and absent shutdown
+modelling remain explicit. These are preliminary numerical observations;
+M10e experimental validation and its scientific acceptance remain open.
+
+The full silica smoke revealed an FPE when a positive subnormal product
+pressure divided by 1 bar became zero before log(). Log-space conversion
+now preserves those pressures and rejects overflow. A closed-form test
+with FPE traps covers zero, subnormal and ordinary pressures. Final v2412
+M0/M10a–d regressions record 43 PASS, 0 FAIL, 13 NOTRUN, and eleven Python
+input/failure-path tests pass. No new v2606 qualification is claimed.
+Run/034's README, peak/profile artifacts and `verification.json` preserve
+the tested scope, source hashes, missing cases and remaining scientific work.

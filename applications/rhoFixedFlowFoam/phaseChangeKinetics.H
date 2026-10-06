@@ -81,11 +81,30 @@ solved gas values, in both directions (admissibleFlow).
 #include <algorithm>
 #include <cmath>
 #include <vector>
+#include <limits>
+#include <stdexcept>
 
 namespace LESTO {
 
   /* CODATA 2018 molar gas constant [J/(mol K)] */
   constexpr double universalGasConstant = 8.314462618;
+
+  // Keep the 1 bar conversion in log space. Dividing a positive subnormal
+  // partial pressure by 1e5 can round it to zero and make log() trap.
+  inline long double logBarPressure(const double pressurePa) {
+    if (pressurePa == 0) return -std::numeric_limits<long double>::infinity();
+    if (!(pressurePa > 0) || !std::isfinite(pressurePa))
+      throw std::domain_error("Invalid partial pressure");
+    return std::log(static_cast<long double>(pressurePa)) - std::log(1e5L);
+  }
+  inline double pressureFromLogBar(const long double logBar) {
+    const long double logPa = std::log(1e5L) + logBar;
+    if (logPa == -std::numeric_limits<long double>::infinity()) return 0;
+    if (!std::isfinite(logPa) || logPa > std::log(static_cast<long double>(std::numeric_limits<double>::max())))
+      throw std::overflow_error("Reactive equilibrium pressure exceeds double range");
+    if (logPa < std::log(static_cast<long double>(std::numeric_limits<double>::denorm_min()))) return 0;
+    return static_cast<double>(std::exp(logPa));
+  }
 
   /*--------------------------------------------------------------------------
   Regime of one interface element.  UNKNOWN is used only before the first

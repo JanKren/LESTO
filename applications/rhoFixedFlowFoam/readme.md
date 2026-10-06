@@ -3096,3 +3096,13 @@ serial/four-rank and changed-decomposition restarts, and input refusals.
 With `LESTO_M10D_NASA`, `LESTO_M10D_THERMOFUN` and `LESTO_M10D_REFERENCE`,
 it also compares both BiI variants and two time steps with fractional plug
 flow. External thermodynamic records remain outside the repository.
+
+[`run/034-liu2025`](../../run/034-liu2025/readme.md) prepares M10e's physical
+helium wedge carriers and Q1/Q2 column matrix from digitised paper curves.
+Fifteen 60 s coarse cases and five full-size smoke cases pass numerical
+conservation checks. Saved peak/profile comparisons and selected time-step
+checks remain preliminary: a temperature profile is missing, Figure 7C
+contains a curve/label discrepancy, and transport, source and thermodynamic
+inputs still need qualification. The full-size 60 s matrix is prepared but
+unrun. Reactive wall equilibrium handles zero/subnormal product pressures
+in log space, with an FPE-enabled regression test.

@@ -8,8 +8,12 @@ mkdir -p "$WALL_DIR/bin"
 cp -r "$TESTS_DIR/phaseChange/makeCarrier" "$WALL_DIR/"
 (cd "$WALL_DIR/makeCarrier" && wclean && FOAM_USER_APPBIN=$WALL_DIR/bin wmake) > "$WALL_DIR/log.carrier" 2>&1
 CARRIER=$WALL_DIR/bin/makeCarrier
-check M10d.0 'Bi/Bi2 implicit closed forms, shared CAPPED zero/order, reactive ratios, irreversibility, optional BiI(cr), halfCell' \
-  python3 "$TESTS_DIR/wallChannels/cases.py" boxes "$WALL_DIR/boxes" "$SOLVER_EXE" "$CARRIER"
+closedForms() {
+  g++ -O2 -std=c++17 -Wall -Wextra "$TESTS_DIR/wallChannels/testPressure.C" -o "$WALL_DIR/testPressure" \
+    && "$WALL_DIR/testPressure" \
+    && python3 "$TESTS_DIR/wallChannels/cases.py" boxes "$WALL_DIR/boxes" "$SOLVER_EXE" "$CARRIER"
+}
+check M10d.0 'Closed forms, shared stores, reactive ratios and zero/subnormal product pressures with FPE traps' closedForms
 check M10d.1 'Q2 release, all ledgers, serial/MPI profiles, exact restart and changed-decomposition recovery' \
   python3 "$TESTS_DIR/wallChannels/cases.py" channel "$WALL_DIR/channel" "$SOLVER_EXE" "$CARRIER"
 check M10d.2 'Invalid channel definitions and changed restart configuration/data refused' \

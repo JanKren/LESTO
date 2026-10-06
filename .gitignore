@@ -17,3 +17,7 @@ applications/rhoFixedFlowFoam/tests/work/
 /run/032-pbbi-gems-speciation/work/
 
 /run/033-lbe-metal-vapour/work/
+
+/run/034-liu2025/work/
+/thermochemistry/benchmarks/liu2025/carrierTool/Make/*/
+/thermochemistry/benchmarks/liu2025/carrierTool/lnInclude/

@@ -230,9 +230,10 @@ void LESTO::wallChannels::beginStep() {
       for(const auto& p:c.products) {
         const double partial=std::max(double(rho_[cell]*fields_[p.first][cell]/masses_[p.first]*8.314462618*thermo_.T()[cell]),0.0);
         if(partial==0) {lg=-HUGE_VAL;break;}
-        lg+=p.second*c.reactantNu*std::log(partial/1e5);
+        lg+=p.second*c.reactantNu*logBarPressure(partial);
       }
-      pressure=1e5*std::exp(double(lg/c.reactantNu));
+      try {pressure=pressureFromLogBar(lg/c.reactantNu);}
+      catch(const std::exception& error) {FatalErrorInFunction<<c.name<<": "<<error.what()<<exit(FatalError);}
     }
     c.pEq[e]=pressure;
     scalar G=hksConductance(masses_[c.reactant],T,c.accommodation,c.Ce,c.scale);
