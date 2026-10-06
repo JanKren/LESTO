@@ -1,0 +1,24 @@
+#!/bin/bash
+# M10d shared condensates, disproportionation, Q2, restarts and plug flow.
+set -euo pipefail
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+WALL_DIR=$WORK_DIR/wallChannels
+mkdir -p "$WALL_DIR/bin"
+cp -r "$TESTS_DIR/phaseChange/makeCarrier" "$WALL_DIR/"
+(cd "$WALL_DIR/makeCarrier" && wclean && FOAM_USER_APPBIN=$WALL_DIR/bin wmake) > "$WALL_DIR/log.carrier" 2>&1
+CARRIER=$WALL_DIR/bin/makeCarrier
+check M10d.0 'Bi/Bi2 implicit closed forms, shared CAPPED zero/order, reactive ratios, irreversibility, optional BiI(cr), halfCell' \
+  python3 "$TESTS_DIR/wallChannels/cases.py" boxes "$WALL_DIR/boxes" "$SOLVER_EXE" "$CARRIER"
+check M10d.1 'Q2 release, all ledgers, serial/MPI profiles, exact restart and changed-decomposition recovery' \
+  python3 "$TESTS_DIR/wallChannels/cases.py" channel "$WALL_DIR/channel" "$SOLVER_EXE" "$CARRIER"
+check M10d.2 'Invalid channel definitions and changed restart configuration/data refused' \
+  python3 "$TESTS_DIR/wallChannels/cases.py" inputs "$WALL_DIR/inputs" "$SOLVER_EXE" "$CARRIER"
+if [ -n "${LESTO_M10D_NASA:-}" ] && [ -n "${LESTO_M10D_THERMOFUN:-}" ] && [ -n "${LESTO_M10D_REFERENCE:-}" ]
+then
+  check M10d.3 'Both BiI thermodynamic variants: five onsets within 10 K of independent fractional plug flow, closure <=1e-14' \
+    python3 "$TESTS_DIR/wallChannels/scientific.py" "$WALL_DIR/scientific" "$SOLVER_EXE" "$CARRIER" \
+      "$LESTO_M10D_NASA" "$LESTO_M10D_THERMOFUN" "$LESTO_M10D_REFERENCE"
+else
+  result M10d.3 NOTRUN 'External NASA/ThermoFun records and plug-flow reference unavailable (LESTO_M10D_*)'
+fi

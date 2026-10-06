@@ -1,0 +1,31 @@
+M10d numerical qualification (2026-10-06), run/033
+Provisional carrier/source; not experimental validation.
+
+Selected combined suite: 43 PASS, 0 FAIL, 13 NOTRUN.
+All four M10d gates PASS. Older external scientific gates not selected.
+OpenFOAM v2412 default/optional and v2606 Debug: zero warnings.
+
+phase; plug-flow K; solver 1 ms K; solver 0.5 ms K
+
+baseline
+Pb(l); 921.00; 919.93; 919.93
+Bi(l); 885.00; 882.89; 882.89
+PbI2(cr); 537.00; 533.12; 533.12
+Bi(cr); 544.00; 541.35; 541.35
+BiI3(cr); 451.00; 450.82; 450.82
+closure: {"phaseChangeChannelCondensates": 2.1924083891411914e-16, "phaseChangeElements": 4.0413828479980373e-16, "phaseChangeSpecies": 2.203749378892395e-16}
+half-step deposit L1 (reported, not gated): {"Bi": 0.009359185258921123, "BiI3": 0.003037684575740663, "Pb": 0.0029043209777985927, "PbI2": 0.01441760135145671}
+
+shift29k
+Pb(l); 882.00; 882.89; 878.78
+Bi(l); 902.00; 899.35; 899.35
+PbI2(cr); 585.00; 582.50; 582.50
+Bi(cr); 544.00; 541.35; 541.35
+BiI3(cr); 408.00; 409.67; 409.67
+closure: {"phaseChangeChannelCondensates": 2.2195189540347175e-16, "phaseChangeElements": 4.3223876807392646e-16, "phaseChangeSpecies": 2.2082405641529021e-16}
+half-step deposit L1 (reported, not gated): {"Bi": 0.0040788518872578675, "BiI3": 0.06452578992323642, "Pb": 0.03010029352269596, "PbI2": 0.0029822021071544986}
+
+Q2 release, bounded shared stores, reactive ratios, halfCell, optional BiI(cr): PASS.
+Species/element/condensate closure <=1e-14; restart fields and accounts byte-identical.
+Serial/four-rank fields <=1e-9; changed-decomposition recovery and profile integrals: PASS.
+GEMS frozen/local shared-wall smoke check: fields byte-identical, closure <=1e-14.

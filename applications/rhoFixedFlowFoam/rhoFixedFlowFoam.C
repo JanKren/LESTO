@@ -778,6 +778,7 @@ int main(int argc, char *argv[]) {
     (nothing for model mock).
     -------------------------------------------------------------------------*/
     phaseChange.beginStep();
+    respeciation.beginStep();
 
     if (phaseChange.mock()) {
 
@@ -847,6 +848,8 @@ int main(int argc, char *argv[]) {
       if (state[speciesi] == "gas") {
         if (phaseChange.pairOfGas(speciesi) >= 0) {
           #include "solvePairedGasSpecies.H"
+        } else if (respeciation.wallGas(speciesi)) {
+          #include "solveWallChannelGasSpecies.H"
         } else if (respeciation.gasOnly(speciesi)) {
           #include "solveLedgeredGasSpecies.H"
         } else {
@@ -855,6 +858,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
+    respeciation.applyWallProducts();
     respeciation.apply();
 
     /*-------------------------------------------------------------------------

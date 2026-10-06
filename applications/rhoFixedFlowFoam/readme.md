@@ -3014,3 +3014,85 @@ External inputs are selected using the M10 environment variables and
 `LESTO_M10_SYSTEM`. `LESTO_M10C_SCIENCE_RECHECK` explicitly rechecks an
 already completed three-mode channel study; the default test invocation
 runs the study afresh. The criterion identifies such a recheck.
+
+
+## M10d: shared wall condensates and Q2 sources
+
+With `model HKS` and an enabled re-speciation engine, opt into `wallChannels`
+for metal channels sharing a physical deposit. Declare the gas/solid fields,
+molar masses and formulas in `speciesTransportProperties`, and select every
+reactant, gas product and source gas in `respeciation/species`.
+
+```foam
+wallChannels
+{
+    Bi {reactant Bi_g; condensed Bi_s;
+        vapourPressure {file "<constant>/pv_Bi_phases.csv";
+            phases ("Bi(cr)" "Bi(l)"); units log10Pa;}}
+    Bi2 {reactant Bi2_g; condensed Bi_s; stoichiometry 2;
+        vapourPressure {file "<constant>/pv_Bi2_phases.csv";
+            phases ("Bi(cr)" "Bi(l)"); units log10Pa;}}
+    BiI {reactant BiI_g; condensed Bi_s;
+        stoichiometry {BiI_g -3; Bi_s 2; BiI3_g 1;}
+        equilibrium {file "<constant>/logK_BiI_disp.csv"; column logK;}
+        reversible no;}
+}
+gasSources
+{
+    boat {amounts {Pb_g 2e-12; Bi_g 3e-12; I_g 4e-12;} // mol of gas
+        box ((.01 0 -1) (.02 .0048 1)); startTime 0; duration .006;}
+}
+```
+
+The source example is synthetic; run/033 provides the provisional LBE Q2
+source. Source amounts are distributed uniformly over the selected volume,
+with exact overlap of the release window and each time step. Paired gases
+use the existing sample release mechanism instead.
+
+Plain channels are reversible by default. A scalar stoichiometry gives the
+number of condensate formula units per gas molecule; the dimer requires
+two. A dictionary describes an atom-balanced reaction, with one consumed
+gas, one positive condensate and optional positive gas products. Reactive
+channels are irreversible. Their equilibrium table contains dimensionless
+log10(K), with gas standard pressure 1 bar. The lagged product pressure gives
+`p*_BiI = 1 bar * ((p_BiI3 / 1 bar) / K)^(1/3)`. Gas products are added only
+after all gas transport solves, then the homogeneous re-speciation runs.
+The pressure is lagged at every time step, regardless of the homogeneous
+update interval.
+
+Each channel's optional `HKS` block accepts `accommodation`, `Ce` and
+`kineticScale`, independently defaulting to one. The interface geometry,
+wall temperature and `wallResistance halfCell` are shared with the existing
+pairs. Channel tables use log/inverse-T interpolation by default and refuse
+temperatures outside the table; `interpolation` and `outOfRange` can be set
+in the table block. Reaction tables use `column`, without `units` or `phases`.
+
+Channels run in the species transport order. After each gas solve, the
+shared deposit changes before the next gas obtains its evaporation bound.
+Duplicate reactant/condensate channels and stores also owned by a legacy
+pair are refused. The same gas may deposit into different stores, allowing
+an optional plain BiI_g/BiI_s channel alongside disproportionation. The
+predictor and at most eight guard re-solves bound each wall event; CAPPED
+empties the store exactly, with rounding residues recorded separately.
+
+`mw_<solid>`, `mDep_<solid>` and derived `Y_<solid>` describe each physical
+store. Its profile is `condensate_<solid>`; element profiles count it once.
+`phaseChangeChannelCondensates` balances initial mass, exchange, clamping,
+restart adjustment and held mass. Its reference includes cumulative absolute
+exchange, so a nearly empty store is compared against the mass processed.
+Species references also include shared-store exchange and gas products.
+
+The binary `uniform/phaseChangeWallChannels` holds exact per-rank stores;
+`uniform/phaseChangeChannelCondensates` holds global compensated accounts.
+Same-decomposition restarts reproduce fields and accounts byte for byte.
+After re-decomposition, `mw_` reconstructs the stores and any inventory
+rounding adjustment is booked. Fingerprints refuse changes to channel
+definitions, source schedules or table contents across restart.
+
+[`run/033-lbe-metal-vapour`](../../run/033-lbe-metal-vapour/readme.md)
+contains the reproducible channel. `tests/Alltest M10d` includes analytical
+boxes, optional BiI(cr), half-cell resistance, source/ledger/profile checks,
+serial/four-rank and changed-decomposition restarts, and input refusals.
+With `LESTO_M10D_NASA`, `LESTO_M10D_THERMOFUN` and `LESTO_M10D_REFERENCE`,
+it also compares both BiI variants and two time steps with fractional plug
+flow. External thermodynamic records remain outside the repository.

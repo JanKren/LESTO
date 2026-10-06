@@ -8181,3 +8181,91 @@ Additional checks of all eight saved restart cases confirm species/element
 closure within 1e-14 in every output-time directory and final inventories
 within 1e-12 of the continuous cases; these checks are included in the
 channel test for subsequent runs.
+
+
+### 36.11 M10d implementation and qualification (2026-10-06)
+
+The opt-in `wallChannels` block adds physical per-condensate stores to the
+existing HKS solver. Bi_g and Bi2_g share Bi_s, with two Bi atoms deposited
+per dimer; Pb_g uses Pb_s. The irreversible, atom-balanced reaction
+`3 BiI_g = 2 Bi_s + BiI3_g` shares Bi_s and uses the lagged gas product
+pressure with a dimensionless K (gas standard pressure 1 bar). Products
+are applied after all gas transport, before homogeneous re-speciation.
+An optional plain BiI_g/BiI_s channel can coexist with the reactive channel.
+The existing legacy pairs remain available for PbI2 and BiI3, including
+their boat samples. Interface geometry, temperature and half-cell diffusion
+resistance are reused. Each channel has its own HKS coefficients.
+
+The species loop uses Gauss-Seidel deposit bounds. The implicit predictor,
+bounded guard re-solves and final admissible projection enforce the physical
+store limit. CAPPED sets the remaining store to exactly zero. Condensate
+accounts persist initial/held mass, compensated exchange, clamping, restart
+adjustments and cumulative absolute exchange. The last term defines a
+reference even after a store has nearly emptied. Species and element
+accounts include Q2 release, shared-store exchange and gas co-products;
+element profiles count each physical store once.
+
+`gasSources` supplies unpaired gases in mol over a selected volume and
+release window, with exact time-step overlap. Q2 supplies monatomic Pb,
+Bi and I. It requires enabled re-speciation accounts. Every channel/source
+gas and every gas co-product must be selected. Invalid stoichiometry,
+kinetics, keys, table units and incompatible ownership are refused, as are
+nonfinite accounts or changes to channel/source configuration and table
+contents across restart. Exact local binary stores support byte-identical
+same-decomposition restarts. Re-decomposition recovers deposits from mw_
+and books the inventory rounding adjustment.
+
+Synthetic gates reproduce the 700 K monomer/dimer implicit-Euler solutions
+within 1e-14, the 500 K disproportionation ratios within 1e-15, and the
+nonzero-product lagged-pressure solution within 1e-14. Shared evaporation
+ends at exactly zero, with the species-order permutation within 1e-3.
+BiI(cr), half-cell resistance (including zero diffusion), Q2 source totals,
+legacy-sample coexistence and profile integrals are tested. Serial/four-rank
+fields agree within 1e-9; fields and accounts restart byte-identically.
+Changed-decomposition recovery and every-step species/element/condensate
+closure pass 1e-14. A separate external Pb-Bi-I smoke check confirms closure
+with both GEMS gas modes and byte-identical final fields between them.
+
+Run/033 uses a provisional Q2 LBE source with metal vapour at 1% of ideal
+saturation, activities a_Pb=0.447 and a_Bi=0.553, and Liu's LBE-I_SS_II
+deposited PbI2/BiI3 amounts as its iodine basis. The numerical carrier is a
+0.1 m plane channel, 200 x 2 cells, 1173–350 K, zero molecular diffusion,
+with unit HKS coefficients. The independent fractional plug-flow algorithm
+uses the same record evaluator and selected nine gases/eight condensates.
+The reference is algorithmically independent of the C++ gas kernel and
+wall law. BiI(g)'s +29 kJ/mol sensitivity is generated consistently in its
+formation, pressure and reaction tables; it is an HSC-like surrogate, not
+an HSC record. Licensed records remain external.
+
+At 1 ms, onset temperatures of Pb(l), Bi(l), PbI2(cr), Bi(cr), BiI3(cr) are
+919.93, 882.89, 533.12, 541.35, 450.82 K with baseline data, against
+921, 885, 537, 544, 451 K from fractional plug flow. With the shifted BiI
+data they are 882.89, 899.35, 582.50, 541.35, 409.67 K, against
+882, 902, 585, 544, 408 K. All differences are below 3.9 K (gate 10 K).
+The onset is the hottest profile bin above 0.1% of the peak. Measurements
+are made during the active source window: a subsequent clean-helium flush
+evaporates warm metal deposits and is a different physical comparison.
+Run/033 itself closes elements to 4.05e-16, species to 2.21e-16 and
+condensates to 2.20e-16 relative. Its README and benchmark metadata provide
+the inputs and reproduction commands.
+
+M10e remains: measured T(x), physical 45/100 mL/min carriers, release/split
+constraints, the axisymmetric column cases and the validation table/run/034.
+M10d's plane carrier and ideal-LBE source are numerical qualification;
+the scientific targets of 36.5 M10e still need experimental inputs and the
+provenance decisions of 36.7.
+
+The final combined `tests/Alltest M0 M10a M10b M10c M10d` invocation records
+43 PASS, 0 FAIL and 13 NOTRUN. All four M10d criteria pass, with their
+external inputs enabled. Native M10a–c regressions pass; their earlier
+external-data studies were not selected, and M0.4 requires a v2606 suite
+invocation. Final default/optional v2412 builds and a separate v2606 Debug
+build/startup have zero warnings. Run/033's `verification.json` lists the
+scope and skips explicitly and fingerprints the final solver sources.
+
+At 0.5 ms every onset still agrees with plug flow within 3.89 K. Baseline
+onsets are unchanged; the shifted-data Pb onset moves one 4.115 K bin.
+Maximum element closure over both data variants and both time steps is
+4.42e-16. The 1 ms/0.5 ms deposit-profile L1 differences span 0.29–6.45%:
+these are reported, not gated by M10d's onset criteria. Quantitative M10e
+profiles need additional time-step refinement and the measured inputs.

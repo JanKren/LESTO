@@ -51,6 +51,8 @@ LESTO::gasRespeciation::gasRespeciation(
   const dictionary* rd = dict.findDict("respeciation");
   const word engine = rd ? rd->getOrDefault<word>("engine","none") : word("none");
   if (engine == "none") {
+    if(dict.found("wallChannels") || dict.found("gasSources"))FatalIOErrorInFunction(dict)<<"Wall channels/Q2 sources require respeciation accounts (engine kernel or GEMS)"<<exit(FatalIOError);
+    if(!exchange.mock() && exchange.ledger().layout().found("wallChannelsHash"))FatalIOErrorInFunction(dict)<<"Wall channels removed across restart"<<exit(FatalIOError);
     if (!exchange.mock() && exchange.ledger().layout().found("respeciation"))
       FatalErrorInFunction << "Re-speciation engine changed across restart" << exit(FatalError);
     return;
@@ -211,8 +213,14 @@ LESTO::gasRespeciation::gasRespeciation(
     if (!restart) { set(i,INITIAL,held); set(i,HELD,held); }
     else { add(i,RESTART,held-value(i,HELD)); set(i,HELD,held); }
     const label pi=exchange.pairOfGas(ids_[i]);
-    if (pi>=0) exchange.ledger().setReaction(pi,value(i,REACTION));
+    if (pi>=0) exchange.ledger().setReaction(pi,value(i,REACTION)+value(i,COPRODUCT));
   }
+  if(dict.isDict("wallChannels")) {
+    walls_.reset(new wallChannels(mesh,thermo,rho,fields,names,state,masses,dict,exchange));
+    forAll(names,si)if(walls_->uses(si) && index_[si]<0)
+      FatalIOErrorInFunction(*rd)<<"Include every wall channel/source gas in re-speciation species"<<exit(FatalIOError);
+  } else if(dict.found("gasSources") || exchange.ledger().layout().found("wallChannelsHash"))
+    FatalIOErrorInFunction(dict)<<"Missing wallChannels for sources/restart"<<exit(FatalIOError);
   active_=true; exchange.attachRespeciation(*this);
   if (Pstream::master()) {
     const fileName base(mesh.time().globalPath()/"postProcessing");
@@ -236,8 +244,20 @@ void LESTO::gasRespeciation::recordSolve(label si,const fvScalarMatrix& eqn) {
   const tmp<fvScalarMatrix> ddt=fvm::ddt(rho_,Y);
   List<long double> residual; scalarField remainder;
   cellDefect(eqn,ddt().source(),oldMass,mass,mesh_.time().deltaTValue(),Y,residual,remainder);
-  for(long double r:residual) defect.add(scalar(r));
+  forAll(residual,cell) {
+    if(walls_.valid())residual[cell]+=static_cast<long double>(walls_->rate(si)[cell])+static_cast<long double>(walls_->release(si)[cell]);
+    defect.add(scalar(residual[cell]));
+  }
   flux_[i]=globalAmount(boundary); defect_[i]=globalAmount(defect);
+}
+void LESTO::gasRespeciation::applyWallProducts() {
+  if(!walls_.valid())return;
+  scalarList amounts;walls_->products(amounts);
+  forAll(ids_,i) {
+    add(i,COPRODUCT,amounts[ids_[i]]);
+    const label p=exchange_.pairOfGas(ids_[i]);if(p>=0)exchange_.ledger().setReaction(p,value(i,REACTION)+value(i,COPRODUCT));
+  }
+  for(int e=0;e<3;++e)compensatedAdd((*elements_)[e],(*elements_)[3+e],walls_->elementConversion(e));
 }
 void LESTO::gasRespeciation::apply() {
   if (!active_ || (mesh_.time().timeIndex()-1)%interval_!=0) return;
@@ -293,7 +313,7 @@ void LESTO::gasRespeciation::apply() {
     }
   }
   forAll(ids_,i) { add(i,REACTION,globalAmount(reaction[i])); add(i,REACTION_VARIATION,globalAmount(variation[i])); fields_[ids_[i]].correctBoundaryConditions();
-    const label p=exchange_.pairOfGas(ids_[i]); if(p>=0) exchange_.ledger().setReaction(p,value(i,REACTION)); }
+    const label p=exchange_.pairOfGas(ids_[i]); if(p>=0) exchange_.ledger().setReaction(p,value(i,REACTION)+value(i,COPRODUCT)); }
   for(int e=0;e<3;++e) compensatedAdd((*elements_)[e],(*elements_)[3+e],globalAmount(conversion[e]));
   reduce(calls,sumOp<label>());reduce(iterations,sumOp<label>());reduce(skipped,sumOp<label>());reduce(largest,maxOp<scalar>());
   if(gems_.valid() && gems_->local()){reduce(ipmCalls,sumOp<label>());reduce(ipmIterations,sumOp<label>());reduce(failed,sumOp<label>());reduce(guarded,sumOp<label>());reduce(warmSeconds,sumOp<scalar>());
@@ -314,6 +334,7 @@ void LESTO::gasRespeciation::apply() {
 void LESTO::gasRespeciation::book() {
   if(!active_)return;
   const scalar dt=mesh_.time().deltaTValue();
+  if(walls_.valid())walls_->finish();
   label ci=0;
   forAll(ids_,i) {
     const label p=exchange_.pairOfGas(ids_[i]);
@@ -325,11 +346,14 @@ void LESTO::gasRespeciation::book() {
       (*condensates_)[8*ci+4]=-value(i,EXCHANGED);
       (*condensates_)[8*ci+5]=exchange_.ledger()(p,phaseChangeLedger::REMOVED);
       (*condensates_)[8*ci+6]=exchange_.ledger()(p,phaseChangeLedger::CLAMPED);++ci;
-    } else { add(i,TRANSPORT,flux_[i]*dt); add(i,DEFECT,defect_[i]*dt); }
+    } else {
+      add(i,TRANSPORT,flux_[i]*dt); add(i,DEFECT,defect_[i]*dt);
+      if(walls_.valid()){add(i,EXCHANGED,walls_->totalRate(ids_[i])*dt);add(i,RELEASED,walls_->totalRelease(ids_[i]));}
+    }
     const scalar held=inventory(i);set(i,HELD,held);
     compensatedSum supplied;for(entry e:{INITIAL,RELEASED,EXCHANGED,RESTART,REACTION,COPRODUCT})supplied.add(value(i,e));
     supplied.add(-value(i,TRANSPORT));supplied.add(-value(i,DEFECT));
-    const scalar ref=max(mag(value(i,INITIAL))+mag(value(i,RELEASED))+value(i,REACTION_VARIATION),VSMALL);
+    const scalar ref=max(mag(value(i,INITIAL))+mag(value(i,RELEASED))+value(i,REACTION_VARIATION)+mag(value(i,COPRODUCT))+(walls_.valid()?walls_->exchangeReference(ids_[i]):0),VSMALL);
     if(Pstream::master()) { auto& os=files_[i];os<<exchange_.ledger().time();
       for(int e=0;e<NENTRY;++e)os<<' '<<value(i,entry(e));
       os<<' '<<supplied.value()<<' '<<held-supplied.value()<<' '<<ref<<nl;os.flush(); }
@@ -356,7 +380,11 @@ void LESTO::gasRespeciation::writeElements() {
         t[5].add(k*value(i,DEFECT));t[6].add(k*value(i,RESTART));
         t[14].add(k*(mag(value(i,INITIAL))+mag(value(i,RELEASED))));
       }
-      t[7].add(k*value(i,HELD));t[15].add(k*value(i,REACTION));
+      t[7].add(k*value(i,HELD));t[15].add(k*value(i,REACTION)+value(i,COPRODUCT));
+    }
+    if(walls_.valid()) {
+      t[0].add(walls_->elementStore(e,0));t[8].add(walls_->elementStore(e,1));t[6].add(walls_->elementStore(e,2));t[4].add(walls_->elementStore(e,3));
+      t[14].add(mag(walls_->elementStore(e,0)));
     }
     compensatedSum held,supplied;for(int j:{7,8,9})held.add(t[j].value());
     supplied.add(t[0].value());supplied.add(t[1].value());for(int j:{2,3,4,5})supplied.add(-t[j].value());supplied.add(t[6].value());

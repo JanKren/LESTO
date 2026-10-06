@@ -1322,6 +1322,17 @@ public:
 
   /* true for model mock (or no constant/thermochemistryProperties) */
   bool mock() const { return model_ == modelType::mock; }
+  const Foam::labelList& wallCells() const { return elementCell_; }
+  const Foam::scalarField& wallAreas() const { return elementArea_; }
+  const Foam::scalarField& wallTemperatures() const { return elementT_; }
+  Foam::label nWallElements() const { return nWall_; }
+  const Foam::labelList& wallPatches() const { return elementPatch_; }
+  const Foam::labelList& wallFaces() const { return elementFace_; }
+  const Foam::labelList& wallInterfacePatches() const { return interfacePatches_; }
+  // Collective: demand-driven deltaCoeffs is obtained on every rank.
+  Foam::scalarField wallDiffusionResistance(Foam::label speciesi) const;
+  void writeChannelProfile(const Foam::word&, Foam::scalar, const Foam::string&, const Foam::word&, Foam::scalar, const Foam::scalarField&, Foam::scalar);
+  void writeWallStore(Foam::volScalarField&, Foam::volScalarField&, const Foam::scalarField&) const;
   void attachRespeciation(gasRespeciation& r) { respeciation_ = &r; }
   void includeElement(const Foam::word& e) {
     if (elementNames_.find(e)<0) elementNames_.append(e);

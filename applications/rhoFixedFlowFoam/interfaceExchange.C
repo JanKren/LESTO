@@ -958,7 +958,10 @@ void LESTO::interfaceExchange::readPairs (
   it outside the mock path.
   --------------------------------------------------------------------------*/
   forAll(state, si) {
-    if (state[si] == "solid" && condensateOwner[si] < 0) {
+    bool channelSolid = false;
+    if(dict_.isDict("wallChannels")) for(const entry& channel:dict_.subDict("wallChannels"))
+      if(channel.isDict() && channel.dict().getOrDefault<word>("condensed",word::null)==speciesNames_[si])channelSolid=true;
+    if (state[si] == "solid" && condensateOwner[si] < 0 && !channelSolid) {
       FatalIOErrorInFunction(pairsDict) << "Solid species "
         << speciesNames_[si] << " is not the condensate of any pair; "
         << "outside model mock every solid species must belong to a pair."
@@ -5877,9 +5880,17 @@ the processor patches from the neighbour cells
 ------------------------------------------------------------------------------*/
 
 void LESTO::interfaceExchange::updateDepositField(pairData& pair) const {
+  writeWallStore(pair.depositField(), pair.wallDepositField(), pair.deposit);
+}
 
-  volScalarField& mw = pair.depositField();
-  volScalarField& mDep = pair.wallDepositField();
+void LESTO::interfaceExchange::writeWallStore(volScalarField& mw, volScalarField& mDep, const scalarField& deposit) const {
+  if(deposit.size()==nWall_ && elementArea_.size()>nWall_) {
+    // A shared wall store has no inventory on a legacy pair's boat samples.
+    scalarField full(elementArea_.size(),0);
+    forAll(deposit,e)full[e]=deposit[e];
+    writeWallStore(mw,mDep,full);
+    return;
+  }
   scalarField& mwI = mw.primitiveFieldRef();
   scalarField& mDepI = mDep.primitiveFieldRef();
   mwI = 0;
@@ -5889,7 +5900,7 @@ void LESTO::interfaceExchange::updateDepositField(pairData& pair) const {
     for (label e = cellStart_[k]; e < cellStart_[k+1]; ++e) {
       area += elementArea_[e];
       wallArea += elementWallArea_[e];
-      mass += pair.deposit[e]*elementArea_[e];
+      mass += deposit[e]*elementArea_[e];
     }
     mwI[exchangeCells_[k]] = mass/area;
     mDepI[exchangeCells_[k]] = mass/wallArea;
@@ -5906,7 +5917,7 @@ void LESTO::interfaceExchange::updateDepositField(pairData& pair) const {
   --------------------------------------------------------------------------*/
   if (distanceLayer()) {
     for (label k = 0; k < nWallCells_; ++k) {
-      mwI[exchangeCells_[k]] = pair.deposit[cellStart_[k]];
+      mwI[exchangeCells_[k]] = deposit[cellStart_[k]];
     }
   }
 
@@ -5929,7 +5940,7 @@ void LESTO::interfaceExchange::updateDepositField(pairData& pair) const {
 
     scalarField elementMass(nWall_);
     forAll(elementMass, e) {
-      elementMass[e] = pair.deposit[e]*elementArea_[e];
+      elementMass[e] = deposit[e]*elementArea_[e];
     }
     const tmp<scalarField> tFaceMass(nearestFaceSums(elementMass));
     const scalarField& faceMass = tFaceMass();
@@ -5951,9 +5962,9 @@ void LESTO::interfaceExchange::updateDepositField(pairData& pair) const {
     for (label e = 0; e < nWall_; ++e) {
       const label patchi = elementPatch_[e];
       const label facei = elementFace_[e];
-      mw.boundaryFieldRef()[patchi][facei] = pair.deposit[e];
+      mw.boundaryFieldRef()[patchi][facei] = deposit[e];
       mDep.boundaryFieldRef()[patchi][facei] +=
-        pair.deposit[e]*(elementArea_[e]/elementWallArea_[e]);
+        deposit[e]*(elementArea_[e]/elementWallArea_[e]);
     }
   }
 
@@ -6482,6 +6493,7 @@ void LESTO::interfaceExchange::writeProfilesOfState(const bool timeWrite) {
       pairs_.size() > 1 ? &ownSamples : nullptr
     );
   }
+  if(respeciation_)respeciation_->writeWallProfiles(mesh_.time().timeName(),clock,reason);
   for (const word& element : elementNames_) {
     scalarField gas(V.size(), 0.0), wall(nWall_, 0.0), sample(V.size(), 0.0);
     FixedList<scalar, 3> inventory(Zero);
@@ -6499,7 +6511,8 @@ void LESTO::interfaceExchange::writeProfilesOfState(const bool timeWrite) {
       inventory[1] += factor*wallInventory(pair);
       inventory[2] += factor*sampleInventory(pair);
     }
-    if (respeciation_) respeciation_->addGasProfiles(element, gas, inventory[0]);
+    if (respeciation_) { respeciation_->addGasProfiles(element, gas, inventory[0]);
+      respeciation_->addWallProfiles(element,wall,inventory[1]); }
     profiles_->write(mesh_.time().timeName(), clock, reason,
       word("element_" + element), element, 1.0, gas, wall, sample, inventory, true);
   }
@@ -6553,4 +6566,24 @@ Foam::scalar LESTO::interfaceExchange::stepExchange(const Foam::label pi) const 
   const pairData& pair = pairs_[pi];
   for (const scalar q : pair.flow) sum.add(q);
   return globalSum(sum);
+}
+
+void LESTO::interfaceExchange::writeChannelProfile(const word& timeName,scalar clock,
+  const string& reason,const word& condensate,scalar mass,const scalarField& wall,scalar held) {
+  if(!profiles_)return;
+  scalarField gas(mesh_.nCells(),0),sample;
+  FixedList<scalar,3> inventory({0,held,0});
+  profiles_->write(timeName,clock,reason,word("condensate_"+condensate),condensate,mass,gas,wall,sample,inventory,true);
+}
+
+Foam::scalarField LESTO::interfaceExchange::wallDiffusionResistance(label si) const {
+  scalarField resistance(nWall_,0);
+  if(wallResistance_!="halfCell")return resistance;
+  const surfaceScalarField& delta=mesh_.deltaCoeffs();
+  forAll(resistance,e) {
+    const label p=elementPatch_[e],f=elementFace_[e];
+    const scalar diffusion=rhoD_[si].boundaryField()[p][f];
+    resistance[e]=diffusion>0?1/(delta.boundaryField()[p][f]*diffusion):-1;
+  }
+  return resistance;
 }

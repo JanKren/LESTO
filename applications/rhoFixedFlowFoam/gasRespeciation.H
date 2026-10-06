@@ -5,6 +5,7 @@
 #define gasRespeciationAdapter_H
 #include "gasSpeciation.H"
 #include "gemsGasSpeciation.H"
+#include "wallChannels.H"
 #include "interfaceExchange.H"
 #include "binaryIOList.H"
 #include "compensatedSum.H"
@@ -27,6 +28,7 @@ class gasRespeciation {
   std::vector<std::vector<double>> constants_;
   Foam::autoPtr<gasSpeciation> kernel_;
   Foam::autoPtr<gemsGasSpeciation> gems_;
+  Foam::autoPtr<wallChannels> walls_;
   Foam::autoPtr<binaryGlobalIOList<Foam::scalar>> values_, elements_;
   Foam::autoPtr<binaryGlobalIOList<Foam::scalar>> condensates_;
   Foam::scalarList flux_, defect_;
@@ -47,6 +49,16 @@ public:
   void recordSolve(Foam::label si, const Foam::fvScalarMatrix&);
   void checkTransport(Foam::label si) const;
   void apply();
+  bool wallGas(Foam::label si)const{return walls_.valid() && (walls_->owns(si) || walls_->hasSource(si));}
+  wallChannels& walls(){return walls_();}
+  void beginStep(){if(walls_.valid())walls_->beginStep();}
+  void applyWallProducts();
+  void writeWallProfiles(const Foam::word& time,Foam::scalar clock,const Foam::string& reason) {
+    if(walls_.valid())walls_->writeProfiles(time,clock,reason);
+  }
+  void addWallProfiles(const Foam::word& e,Foam::scalarField& w,Foam::scalar& inventory)const {
+    if(walls_.valid())walls_->addProfiles(e,w,inventory);
+  }
   void book();
   void writeElements();
   void addGasProfiles(const Foam::word&, Foam::scalarField&, Foam::scalar&) const;

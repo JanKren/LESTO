@@ -1,0 +1,155 @@
+{
+  "baseline": {
+    "shift_J_mol": 0,
+    "plug_flow_onset_K": {
+      "Pb(l)": 921,
+      "Bi(cr)": 544,
+      "Bi(l)": 885,
+      "PbI2(cr)": 537,
+      "BiI3(cr)": 451
+    },
+    "solver_onset_K": {
+      "Pb(l)": 919.9274999999999,
+      "Bi(l)": 882.8924999999999,
+      "Bi(cr)": 541.3475000000002,
+      "PbI2(cr)": 533.1175000000002,
+      "BiI3(cr)": 450.8175000000001
+    },
+    "difference_K": {
+      "Pb(l)": -1.0725000000001046,
+      "Bi(l)": -2.1075000000000728,
+      "Bi(cr)": -2.6524999999998045,
+      "PbI2(cr)": -3.8824999999998226,
+      "BiI3(cr)": -0.18249999999989086
+    },
+    "max_relative_closure": {
+      "phaseChangeElements": 4.0413828479980373e-16,
+      "phaseChangeSpecies": 2.203749378892395e-16,
+      "phaseChangeChannelCondensates": 2.1924083891411914e-16
+    },
+    "half_step_onset_K": {
+      "Pb(l)": 919.9274999999999,
+      "Bi(l)": 882.8924999999999,
+      "Bi(cr)": 541.3475000000002,
+      "PbI2(cr)": 533.1175000000002,
+      "BiI3(cr)": 450.8175000000001
+    },
+    "half_step_closure": {
+      "phaseChangeElements": 4.4188945207653943e-16,
+      "phaseChangeSpecies": 2.2056067876952204e-16,
+      "phaseChangeChannelCondensates": 2.2124647973861763e-16
+    },
+    "half_step_onset_change_K": {
+      "Pb(l)": 0.0,
+      "Bi(l)": 0.0,
+      "Bi(cr)": 0.0,
+      "PbI2(cr)": 0.0,
+      "BiI3(cr)": 0.0
+    },
+    "half_step_deposit_L1": {
+      "Pb": 0.0029043209777985927,
+      "Bi": 0.009359185258921123,
+      "PbI2": 0.01441760135145671,
+      "BiI3": 0.003037684575740663
+    }
+  },
+  "shift29k": {
+    "shift_J_mol": 29000,
+    "plug_flow_onset_K": {
+      "Pb(l)": 882,
+      "Bi(cr)": 544,
+      "Bi(l)": 902,
+      "PbI2(cr)": 585,
+      "BiI3(cr)": 408
+    },
+    "solver_onset_K": {
+      "Pb(l)": 882.8924999999999,
+      "Bi(l)": 899.3525000000001,
+      "Bi(cr)": 541.3475000000002,
+      "PbI2(cr)": 582.4975,
+      "BiI3(cr)": 409.66750000000013
+    },
+    "difference_K": {
+      "Pb(l)": 0.8924999999999272,
+      "Bi(l)": -2.6474999999999227,
+      "Bi(cr)": -2.6524999999998045,
+      "PbI2(cr)": -2.5025000000000546,
+      "BiI3(cr)": 1.6675000000001319
+    },
+    "max_relative_closure": {
+      "phaseChangeElements": 4.3223876807392646e-16,
+      "phaseChangeSpecies": 2.2082405641529021e-16,
+      "phaseChangeChannelCondensates": 2.2195189540347175e-16
+    },
+    "half_step_onset_K": {
+      "Pb(l)": 878.7775,
+      "Bi(l)": 899.3525000000001,
+      "Bi(cr)": 541.3475000000002,
+      "PbI2(cr)": 582.4975,
+      "BiI3(cr)": 409.66750000000013
+    },
+    "half_step_closure": {
+      "phaseChangeElements": 4.357308475071407e-16,
+      "phaseChangeSpecies": 2.2072948754979431e-16,
+      "phaseChangeChannelCondensates": 2.2151241589751452e-16
+    },
+    "half_step_onset_change_K": {
+      "Pb(l)": -4.114999999999895,
+      "Bi(l)": 0.0,
+      "Bi(cr)": 0.0,
+      "PbI2(cr)": 0.0,
+      "BiI3(cr)": 0.0
+    },
+    "half_step_deposit_L1": {
+      "Pb": 0.03010029352269596,
+      "Bi": 0.0040788518872578675,
+      "PbI2": 0.0029822021071544986,
+      "BiI3": 0.06452578992323642
+    }
+  },
+  "qualification": {
+    "date": "2026-10-06",
+    "command": "tests/Alltest M0 M10a M10b M10c M10d",
+    "passed": 43,
+    "failed": 0,
+    "not_run": 13,
+    "all_M10d_gates": "PASS",
+    "scope": "Native M0/M10a-c regressions and all M10d gates. Earlier external M10a-c scientific studies were not rerun. Their prior qualification is recorded in plan 36.9/36.10.",
+    "skips": [
+      "NOTRUN M0.4       compile on v2606: this OpenFOAM is v2412; run tests/Alltest M0 under v2606",
+      "NOTRUN M10a.4     Set LESTO_M10_NASA and LESTO_M10_THERMOFUN to external source files; restricted Bi data are not bundled",
+      "NOTRUN M10a.5     External generator inputs unavailable",
+      "NOTRUN M10a.6     External BiI3 vapour-pressure table unavailable (LESTO_M10_DATA)",
+      "NOTRUN M10b.5     External stored reference unavailable (LESTO_M10_DESIGN)",
+      "NOTRUN M10b.8     Representative external timing points unavailable",
+      "NOTRUN M10b.6     External Bi tables/NASA/ThermoFun inputs unavailable",
+      "NOTRUN M10b.7     Extended external oracle unavailable (LESTO_M10_DESIGN, LESTO_M10_ORACLE_LIB)",
+      "NOTRUN M10c.3     External PbBiIHe system unavailable (LESTO_M10_DESIGN)",
+      "NOTRUN M10c.1     External system, oracle and thermodynamic inputs unavailable",
+      "NOTRUN M10c.5     External Bi system/vapour tables unavailable",
+      "NOTRUN M10c.4     External prescribed-source inputs unavailable",
+      "NOTRUN M10c.8     External local-engine timing case unavailable"
+    ],
+    "builds": {
+      "v2412": "default fresh build plus final incremental rebuild, zero warnings; optional GEMS fresh build, zero warnings",
+      "v2606": "separate final Debug build and executable startup, zero warnings"
+    },
+    "extra_checks": [
+      "Tracked run/033 Allrun completed; all three balance groups <=1e-14",
+      "M10d with GEMS frozen/local: all three balance groups <=1e-14; final fields byte-identical"
+    ]
+  },
+  "solver_source_sha256": "c65fa3fb5da43ed2c9a280d2a5a25e3193ed806c9f8fceecc6b7eac351270b1b",
+  "measurement": {
+    "duration_s": 1.2,
+    "source_active_until_s": 2,
+    "onset_fraction_of_peak": 0.001,
+    "axial_temperature_spacing_K": 4.115,
+    "time_steps_s": [
+      0.001,
+      0.0005
+    ],
+    "reference": "Independent active-set fractional plug flow, 1 K increments, same nine gases and eight condensates; shared thermodynamic record evaluator",
+    "status": "provisional numerical qualification; HSC-like shift is a surrogate"
+  }
+}
