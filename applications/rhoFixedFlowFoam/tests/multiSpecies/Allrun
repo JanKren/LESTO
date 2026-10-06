@@ -1,0 +1,44 @@
+#!/bin/bash
+# M10a: independent simple pairs, element accounting, shared samples and LJ diffusion.
+set -euo pipefail
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+M10_DIR=$WORK_DIR/multiSpecies
+mkdir -p "$M10_DIR/bin"
+cp -r "$TESTS_DIR/phaseChange/makeCarrier" "$M10_DIR/"
+(cd "$M10_DIR/makeCarrier" && wclean && FOAM_USER_APPBIN=$M10_DIR/bin wmake) > "$M10_DIR/log.makeCarrier" 2>&1
+CARRIER=$M10_DIR/bin/makeCarrier
+check M10a.0 'Chapman-Enskog against independent SI kinetic-theory expression, pressure scaling and symmetry' \
+  bash -c 'g++ -std=c++17 -Wall -Wextra "$1" -o "$2" && "$2"' -- \
+  "$TESTS_DIR/multiSpecies/testDiffusivity.C" "$M10_DIR/testDiffusivity"
+check M10a.1 'Two pairs equal two single-pair runs: fields, balance and profiles byte-identical; temperature/HKS, serial/4 ranks; element closure and profiles' \
+  python3 "$TESTS_DIR/multiSpecies/cases.py" independence "$M10_DIR" "$SOLVER_EXE" "$CARRIER"
+check M10a.2 'Different-pair inventory samples share cells: bounded reservoirs, closure, independence and exact serial/MPI restart across removal' \
+  python3 "$TESTS_DIR/multiSpecies/cases.py" inventory "$M10_DIR" "$SOLVER_EXE" "$CARRIER"
+check M10a.3 'Chapman-Enskog solver path; invalid formulas/masses/LJ and same-pair overlap refused' \
+  python3 "$TESTS_DIR/multiSpecies/cases.py" inputs "$M10_DIR" "$SOLVER_EXE" "$CARRIER"
+if [ -n "${LESTO_M10_NASA:-}" ] && [ -n "${LESTO_M10_THERMOFUN:-}" ]
+then
+  verifyTables() {
+    python3 "$REPO_DIR/thermochemistry/systems/make_pv_tables.py" \
+      --nasa "$LESTO_M10_NASA" --tf "$LESTO_M10_THERMOFUN" \
+      --out "$M10_DIR/externalTables" --check \
+      --regress "$REPO_DIR/thermochemistry/systems/data/pv_PbI2_phases.csv" \
+      && g++ -std=c++17 -Wall -Wextra "$TESTS_DIR/multiSpecies/testTables.C" \
+        -o "$M10_DIR/testTables" \
+      && "$M10_DIR/testTables" "$M10_DIR/externalTables"
+  }
+  check M10a.4 'External phase tables: solver nodes exact, crossings within 0.1 K, direct evaluation within 2e-3 decades; PbI2 regression' verifyTables
+  check M10a.5 'Extended generator retains byte-identical default PbI2He files; generates PbBiIHe with element matrix' \
+    python3 "$TESTS_DIR/multiSpecies/generators.py" "$M10_DIR" "$LESTO_M10_NASA" "$LESTO_M10_THERMOFUN"
+else
+  result M10a.4 NOTRUN 'Set LESTO_M10_NASA and LESTO_M10_THERMOFUN to external source files; restricted Bi data are not bundled'
+  result M10a.5 NOTRUN 'External generator inputs unavailable'
+fi
+if [ -n "${LESTO_M10_DATA:-}" ]
+then
+  check M10a.6 '1000 to 350 K, LBE-I_SS_II prescribed split: full released masses and element closure; 1% onsets versus independent plug-flow baseline' \
+    python3 "$TESTS_DIR/multiSpecies/scientific.py" "$M10_DIR/scientific" "$SOLVER_EXE" "$CARRIER" "$LESTO_M10_DATA"
+else
+  result M10a.6 NOTRUN 'External BiI3 vapour-pressure table unavailable (LESTO_M10_DATA)'
+fi

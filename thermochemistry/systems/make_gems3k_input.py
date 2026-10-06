@@ -27,10 +27,30 @@ element reference convention -- do not mix conventions between species):
     Cp(T) = sum_k coeff_k * T**exponent_k  (any real exponents; e.g. HSC form
     A + B*1e-3 T + C*1e5 T^-2 + D*1e-6 T^2 -> {0:A, 1:B*1e-3, -2:C*1e5, 2:D*1e-6}).
     dHtr is a transition enthalpy added at the LOWER bound of that interval.
+  * "ThermoFun JSON" (M10): a substance record of a ThermoFun database file
+    (e.g. the HERACLES-TDB of ThermoHub) with the method cp_ft_equation,
+    read by read_thermofun_json() and mapped term by term onto the "cp"
+    model by tf_record_to_cp():
+      Cp = a0 + a1 T + a2 T^-2 + a3 T^-0.5 + a4 T^2 + a5 T^3 + a6 T^4
+           + a7 T^-3 + a8 T^-1 + a9 T^0.5          (a10 ln T must be 0)
+    The model takes H and S at the record's Tst from sm_enthalpy and
+    sm_entropy_abs, i.e. the ABSOLUTE convention (G = H - T S, H(298.15) =
+    DfH) of the NASA records -- not the record's sm_gibbs_energy, which is
+    the Benson-Helgeson apparent value (DfG at 298.15 K) and in HERACLES is
+    not even internally consistent (Bi(cr) uses its own S, every other Bi
+    record S(Bi) = 56.74 J/(mol K): 1.5 J/mol).  Phase transitions between
+    intervals (m_phase_trans_props [T, dS, dH, ...]) become dHtr; dS must
+    equal dH/T.  Intervals extrapolate as above (ThermoFun does the same:
+    EmpiricalCpIntegration.cpp, the first interval below its lower bound
+    and the last above its upper bound).
 
 Everything outside the fitted ranges is extrapolated with the nearest
 interval (needed: GEMS3K requires G0 of every DC at every grid T, e.g.
 supercooled liquid PbI2 at 300 K and superheated crystal at 1100 K).
+
+Systems: --system PbI2He (default; byte-identical to the repository's
+systems/PbI2He) and --system PbBiIHe (M10: the PbI2He species plus the
+Bi-I species of a ThermoFun file, --tf; see pbbii_system()).
 
 This is a research sketch; check every generated number before production use.
 """
@@ -164,6 +184,79 @@ def cp_props(model, T):
         S += dHtr / t
 
 
+# ----------------------------------------------------------------------------
+# ThermoFun JSON records (cp_ft_equation) -> "cp" model, absolute convention
+# ----------------------------------------------------------------------------
+
+# exponents of the cp_ft_equation coefficients a0..a9 (EmpiricalCpIntegration.cpp)
+TF_CP_EXPONENTS = (0, 1, -2, -0.5, 2, 3, 4, -3, -1, 0.5)
+
+
+def read_thermofun_json(path, symbols=None):
+    """Return {symbol: substance record} of a ThermoFun database file (all
+    substances, or those named in `symbols`, which must all be present)."""
+    with open(path) as fh:
+        db = json.load(fh)
+    subs = db['substances'] if isinstance(db, dict) else db
+    out = {}
+    for rec in subs:
+        sym = rec['symbol']
+        if symbols is None or sym in symbols:
+            if sym in out:
+                raise KeyError('symbol %s twice in %s' % (sym, path))
+            out[sym] = rec
+    if symbols is not None:
+        missing = set(symbols) - set(out)
+        if missing:
+            raise KeyError('not found in %s: %s' % (path, sorted(missing)))
+    return out
+
+
+def tf_parse_formula(formula):
+    """ThermoFun formula ('Bi|+3|I3', 'Bi|0|2', 'PbI2') -> {element: count}."""
+    import re
+    f = re.sub(r'\|[^|]*\|', '', formula)          # drop |valence| annotations
+    out = {}
+    for el, cnt in re.findall(r'([A-Z][a-z]?)(\d*\.?\d*)', f):
+        out[el] = out.get(el, 0.0) + (float(cnt) if cnt else 1.0)
+    return out
+
+
+def tf_record_to_cp(rec):
+    """The "cp" model of a ThermoFun record (method cp_ft_equation) in the
+    absolute convention: H, S at Tst from sm_enthalpy, sm_entropy_abs."""
+    ivs = [m for m in rec['TPMethods'] if 'm_heat_capacity_ft_coeffs' in m]
+    if not ivs or any(m['method'].get('0') != 'cp_ft_equation' for m in ivs):
+        raise ValueError('%s: no cp_ft_equation intervals' % rec['symbol'])
+    tst = float(rec.get('Tst', 298.15))
+    intervals = []
+    for k, m in enumerate(ivs):
+        a = [float(x) for x in m['m_heat_capacity_ft_coeffs']['values']]
+        if len(a) > 10 and any(abs(x) > 0.0 for x in a[10:]):
+            raise ValueError('%s: a10 (ln T) and higher terms are not supported'
+                             % rec['symbol'])
+        lim = m['limitsTP']
+        if k == 0 and not (float(lim['lowerT']) <= tst < float(lim['upperT'])):
+            raise ValueError('%s: Tst outside the first interval' % rec['symbol'])
+        if k > 0 and abs(float(lim['lowerT']) - intervals[-1]['Tmax']) > 1e-6:
+            raise ValueError('%s: Cp intervals not contiguous' % rec['symbol'])
+        cp = {e: c for e, c in zip(TF_CP_EXPONENTS, a) if c != 0.0}
+        iv = {'Tmax': float(lim['upperT']), 'cp': cp}
+        if k > 0:                    # transition at the lower bound of this interval
+            tr = ivs[k - 1].get('m_phase_trans_props', {}).get('values', [])
+            tr = [float(x) for x in tr] + [0.0] * (3 - len(tr))
+            t_tr, d_s, d_h = tr[0], tr[1], tr[2]
+            if d_h != 0.0 or d_s != 0.0:
+                if abs(t_tr - float(lim['lowerT'])) > 1e-6 or abs(d_s - d_h / t_tr) > 1e-9:
+                    raise ValueError('%s: transition [%g, dS %g, dH %g] not at the '
+                                     'interval bound or dS != dH/T' % (rec['symbol'],
+                                                                       t_tr, d_s, d_h))
+                iv['dHtr'] = d_h
+        intervals.append(iv)
+    return {'Tref': tst, 'H': float(rec['sm_enthalpy']['values'][0]),
+            'S': float(rec['sm_entropy_abs']['values'][0]), 'intervals': intervals}
+
+
 def species_props(sp, T):
     """(Cp, H, S, G) at T and P0 in the species' own G convention (see g_shift)."""
     if 'nasa' in sp:
@@ -220,9 +313,16 @@ def build(system):
     phases = system['phases']                # list of dicts, gas mixture first
     if phases[0]['class'] not in 'gfp' or len(phases[0]['species']) < 2:
         raise ValueError('first phase must be the multi-component gas phase')
+    pure_seen = False
     for ph in phases[1:]:
-        if len(ph['species']) != 1:
+        if ph.get('solution'):        # ideal condensed solution (M10: liquid Pb-Bi)
+            if pure_seen or len(ph['species']) < 2 or ph['class'] not in 'ls':
+                raise ValueError('%s: an ideal solution phase must have >= 2 DCs, class '
+                                 "'l' or 's', and come before the pure phases" % ph['name'])
+        elif len(ph['species']) != 1:
             raise ValueError('this sketch supports only pure condensed phases')
+        else:
+            pure_seen = True
     TK, Pv = system['TKval'], system['Pval']
     dcs = [(ph, sp) for ph in phases for sp in ph['species']]
     nDC, nIC, nPH = len(dcs), len(ics), len(phases)
@@ -252,13 +352,20 @@ def build(system):
                 nPH=nPH, nTp=nTp, nPp=nPp, TK=TK, Pv=Pv, phases=phases)
 
 
+def _multi(d):
+    """Multi-component phases (the gas, then ideal solutions): nPS, nDCs, ccDC."""
+    ph = d['phases']
+    multi = [p for p in ph if p['class'] in 'gfp' or p.get('solution')]
+    ccdc = [('G' if p['class'] in 'gfp' else ('I' if p.get('solution') else 'O'))
+            for p, _ in d['dcs']]
+    return len(multi), sum(len(p['species']) for p in multi), ccdc
+
+
 def write_kv(system, d, outdir, name, with_hs=True):
     os.makedirs(outdir, exist_ok=True)
     ph = d['phases']
-    nPS = 1
-    nDCs = len(ph[0]['species'])
+    nPS, nDCs, ccdc = _multi(d)
     dcnl = [sp['name'] for _, sp in d['dcs']]
-    ccdc = [('G' if p['class'] in 'gfp' else 'O') for p, _ in d['dcs']]
     grid = d['nTp'] * d['nPp']
     # ---------------- DCH ----------------
     with open(os.path.join(outdir, name + '-dch.dat'), 'w') as fh:
@@ -308,10 +415,14 @@ def write_kv(system, d, outdir, name, with_hs=True):
         ctl = system.get('ipm_controls', {})
         for tag, val in ctl.items():
             fh.write('<%s> %s\n' % (tag, val))
-        fh.write('# one ideal multicomponent phase (gas): TSolMod code I = ideal\n')
-        _kv_array(fh, 'sMod', ['INNINNNN'], quote=True)
-        _kv_array(fh, 'LsMod', [0, 0, 0])
-        _kv_array(fh, 'LsMdc', [0, 0, 0])
+        if nPS == 1:
+            fh.write('# one ideal multicomponent phase (gas): TSolMod code I = ideal\n')
+        else:
+            fh.write('# %d ideal multicomponent phases (gas, solutions): TSolMod code '
+                     'I = ideal\n' % nPS)
+        _kv_array(fh, 'sMod', ['INNINNNN'] * nPS, quote=True)
+        _kv_array(fh, 'LsMod', [0, 0, 0] * nPS)
+        _kv_array(fh, 'LsMdc', [0, 0, 0] * nPS)
         _kv_array(fh, 'B', b)
     # ---------------- DBR ----------------
     with open(os.path.join(outdir, name + '-dbr-0-0000.dat'), 'w') as fh:
@@ -329,13 +440,14 @@ def write_kv(system, d, outdir, name, with_hs=True):
 def write_json(system, d, outdir, name, with_hs=True):
     """Same content as JSON documents (for GEM_init(dch_json, ipm_json, dbr_json))."""
     ph = d['phases']
-    dch = dict(nIC=d['nIC'], nDC=d['nDC'], nPH=d['nPH'], nPS=1,
-               nDCs=len(ph[0]['species']), nICb=d['nIC'], nDCb=d['nDC'],
-               nPHb=d['nPH'], nPSb=1, nTp=d['nTp'], nPp=d['nPp'], iGrd=0,
+    nPS, nDCs, ccdc = _multi(d)
+    dch = dict(nIC=d['nIC'], nDC=d['nDC'], nPH=d['nPH'], nPS=nPS,
+               nDCs=nDCs, nICb=d['nIC'], nDCb=d['nDC'],
+               nPHb=d['nPH'], nPSb=nPS, nTp=d['nTp'], nPp=d['nPp'], iGrd=0,
                fAalp=0, mLook=0,
                ICNL=d['icn'], ccIC=['e'] * d['nIC'], ICmm=d['icmm'],
                DCNL=[sp['name'] for _, sp in d['dcs']],
-               ccDC=[('G' if p['class'] in 'gfp' else 'O') for p, _ in d['dcs']],
+               ccDC=ccdc,
                DCmm=d['DCmm'], PHNL=[p['name'] for p in ph],
                ccPH=[p['class'] for p in ph],
                nDCinPH=[len(p['species']) for p in ph], A=d['A'],
@@ -347,7 +459,8 @@ def write_json(system, d, outdir, name, with_hs=True):
     b = [float(system['bIC'].get(n, 0.0)) for n in d['icn']]
     ipm = {'ID_key': name, 'pa_PE': 0, 'PV': 0, 'PSOL': 0, 'PAalp': '-',
            'PSigm': '-', 'Lads': 0, 'FIa': 0, 'FIat': 0,
-           'sMod': ['INNINNNN'], 'LsMod': [0, 0, 0], 'LsMdc': [0, 0, 0], 'B': b}
+           'sMod': ['INNINNNN'] * nPS, 'LsMod': [0, 0, 0] * nPS, 'LsMdc': [0, 0, 0] * nPS,
+           'B': b}
     for tag, val in system.get('ipm_controls', {}).items():
         ipm[tag] = val
     dbr = dict(NodeHandle=0, NodeTypeHY=0, NodeTypeMT=0, NodeStatusFMT=-1,
@@ -472,23 +585,109 @@ def pbi2_system(nasa_path, liquid_class='l', with_pbi4=False, TK=1000.0, P=10132
                               'pa_DHB': 1e-10, 'pa_DK': 1e-5, 'pa_PSTALL': 0})
 
 
+# ----------------------------------------------------------------------------
+# M10: Pb-Bi-I-He = the PbI2He system + Bi-I species from a ThermoFun file
+# ----------------------------------------------------------------------------
+
+M_BI = 0.2089804      # kg/mol, IUPAC standard atomic weight of Bi, 208.98040(1)
+
+# the Bi species of the system and the formulas their records must have
+BI_GAS = [('Bi(g)', {'Bi': 1.0}), ('Bi2(g)', {'Bi': 2.0}), ('BiI(g)', {'Bi': 1.0, 'I': 1.0}),
+          ('BiI3(g)', {'Bi': 1.0, 'I': 3.0})]
+BI_COND = [('Bi(cr)', 's', {'Bi': 1.0}), ('Bi(l)', 'l', {'Bi': 1.0}),
+           ('BiI(cr)', 's', {'Bi': 1.0, 'I': 1.0}), ('BiI3(cr)', 's', {'Bi': 1.0, 'I': 3.0}),
+           ('BiI3(l)', 'l', {'Bi': 1.0, 'I': 3.0})]
+
+
+def _tf_species(name, recs, formula):
+    """A species of the system from the ThermoFun record `name` (absolute
+    convention: the record's sm_gibbs_energy must equal H - Tst*S)."""
+    rec = recs[name]
+    got = tf_parse_formula(rec['formula'])
+    if got != formula:
+        raise ValueError('%s: formula %s of the record, expected %s' % (name, got, formula))
+    model = tf_record_to_cp(rec)
+    g298 = float(rec['sm_gibbs_energy']['values'][0])
+    if abs(g298 - (model['H'] - model['Tref'] * model['S'])) > 1e-6:
+        raise ValueError('%s: sm_gibbs_energy is not H - Tst*S (absolute convention); '
+                         'convert the record first (make_bi_dataset.py)' % name)
+    src = rec.get('datasources', ['?'])
+    return dict(name=name, formula=formula, cp=model, tf_record=rec, convention='absolute',
+                source='ThermoFun record %s (%s)' % (name, src[0] if src else '?'))
+
+
+def pbbii_system(nasa_path, tf_path, liquid_class='l', TK=1000.0, P=101325.0,
+                 x_pbi2=1.0e-6, x_bii3=1.0e-6, lbe_solution=False):
+    """Pb-Bi-I-He: the species of pbi2_system() (NASA-9, Gurvich 1991; same
+    records, same order, no PbI4) followed by the Bi-I species of the
+    ThermoFun file tf_path (data/bi_i_m10-thermofun.json: HERACLES-TDB =
+    Barin 1995, BiI3(cr) cut at T_fus, constructed BiI3(l)).  Same grid,
+    tolerances and IPM controls as pbi2_system().  ICs in alphabetical order.
+
+    lbe_solution: a variant (not the M10 system) in which the pure liquids
+    Pb(l) and Bi(l) are replaced by one ideal (Raoult) liquid solution 'LBE'
+    with the end members Pb(LBE) and Bi(LBE) (the same G0 as Pb(l), Bi(l));
+    no iodine dissolves in it."""
+    base = pbi2_system(nasa_path, liquid_class, False, TK, P, x_pbi2)
+    recs = read_thermofun_json(tf_path, [n for n, _ in BI_GAS] + [n for n, _, _ in BI_COND])
+    gas = base['phases'][0]
+    gas['species'] = gas['species'] + [_tf_species(n, recs, f) for n, f in BI_GAS]
+    phases = list(base['phases'])
+    for n, cls, f in BI_COND:
+        sp = _tf_species(n, recs, f)
+        # V0 [m3/mol] from the record's sm_volume [J/bar]
+        sp['V0'] = float(recs[n]['sm_volume']['values'][0]) * 1e-5
+        if not sp['V0'] > 0.0:
+            raise ValueError('%s: no molar volume in the record' % n)
+        phases.append({'name': n, 'class': (liquid_class if cls == 'l' else cls),
+                       'species': [sp]})
+    if lbe_solution:
+        liq = {p['species'][0]['name']: p for p in phases if p['name'] in ('Pb(l)', 'Bi(l)')}
+        pb, bi = dict(liq['Pb(l)']['species'][0]), dict(liq['Bi(l)']['species'][0])
+        pb['name'], bi['name'] = 'Pb(LBE)', 'Bi(LBE)'
+        phases = ([phases[0], {'name': 'LBE', 'class': 'l', 'solution': True,
+                               'species': [pb, bi]}]
+                  + [p for p in phases[1:] if p['name'] not in ('Pb(l)', 'Bi(l)')])
+    ics = dict(base['ICs'])
+    ics['Bi'] = M_BI
+    sysd = dict(base)
+    sysd['ICs'] = sorted(ics.items())                      # Bi He I Pb
+    sysd['phases'] = phases
+    sysd['bIC'] = {'He': 1.0, 'Pb': x_pbi2, 'Bi': x_bii3,
+                   'I': float('%.15g' % (2.0 * x_pbi2 + 3.0 * x_bii3))}
+    return sysd
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[1])
     ap.add_argument('--nasa', required=True, help='NASA-Glenn thermo.inp')
     ap.add_argument('--out', required=True)
-    ap.add_argument('--name', default='PbI2He')
+    ap.add_argument('--system', default='PbI2He', choices=['PbI2He', 'PbBiIHe'])
+    ap.add_argument('--tf', help='ThermoFun file of the Bi-I species (--system PbBiIHe)')
+    ap.add_argument('--name', default=None, help='file prefix (default: the system)')
     ap.add_argument('--liquid-class', default='l', choices=['l', 's'])
     ap.add_argument('--pbi4', action='store_true')
     ap.add_argument('--TK', type=float, default=1000.0)
     ap.add_argument('--P', type=float, default=101325.0)
     ap.add_argument('--x', type=float, default=1e-6, help='mol PbI2 per mol He')
+    ap.add_argument('--x-bii3', type=float, default=1e-6,
+                    help='mol BiI3 per mol He (--system PbBiIHe)')
+    ap.add_argument('--lbe-solution', action='store_true',
+                    help='variant: ideal liquid Pb-Bi solution instead of Pb(l), Bi(l)')
     ap.add_argument('--json', action='store_true')
     ap.add_argument('--thermofun', action='store_true',
                     help='also write <name>-fun.json and <name>-dat-fun.lst (-o mode)')
     ap.add_argument('--no-hs', action='store_true', help='omit H0/S0/Cp0 grids')
     ap.add_argument('--dump-table', action='store_true')
     a = ap.parse_args()
-    sysd = pbi2_system(a.nasa, a.liquid_class, a.pbi4, a.TK, a.P, a.x)
+    a.name = a.name or a.system
+    if a.system == 'PbI2He':
+        sysd = pbi2_system(a.nasa, a.liquid_class, a.pbi4, a.TK, a.P, a.x)
+    else:
+        if not a.tf or a.pbi4:
+            ap.error('--system PbBiIHe needs --tf and takes no --pbi4')
+        sysd = pbbii_system(a.nasa, a.tf, a.liquid_class, a.TK, a.P, a.x, a.x_bii3,
+                            a.lbe_solution)
     d = build(sysd)
     write_kv(sysd, d, a.out, a.name, with_hs=not a.no_hs)
     if a.json:

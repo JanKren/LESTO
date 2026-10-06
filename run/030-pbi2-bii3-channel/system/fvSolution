@@ -1,0 +1,2 @@
+FoamFile {version 2.0; format ascii; class dictionary; object fvSolution;}
+solvers {Y_PbI2_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-15; relTol 0;} Y_PbI2_s {solver diagonal;} Y_BiI3_g {solver PBiCGStab; preconditioner DILU; tolerance 1e-15; relTol 0;} Y_BiI3_s {solver diagonal;}}

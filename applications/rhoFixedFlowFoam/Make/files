@@ -4,5 +4,6 @@ gemsEquilibrium.C
 interfaceExchange.C
 axialProfiles.C
 phaseChangeLedger.C
+gasRespeciation.C
 
 EXE = $(FOAM_USER_APPBIN)/rhoFixedFlowFoam

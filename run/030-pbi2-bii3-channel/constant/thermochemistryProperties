@@ -1,0 +1,16 @@
+FoamFile {version 2.0; format ascii; class dictionary; object thermochemistryProperties;}
+
+model HKS;
+pairs { PbI2_g {condensed PbI2_s; HKS {accommodation 1; Ce 1; kineticScale 1;} vapourPressure {file "$LESTO_REPO/thermochemistry/systems/data/pv_PbI2_phases.csv"; phases ("PbI2(cr)" "PbI2(l)"); units log10Pa; outOfRange fatal;}} BiI3_g {condensed BiI3_s; HKS {accommodation 1; Ce 1; kineticScale 1;} vapourPressure {file "$LESTO_M10_DATA/pv_BiI3_phases.csv"; phases ("BiI3(cr)" "BiI3(l)"); units log10Pa; outOfRange fatal;}} }
+interface {patches (WALL);}
+HKSCoeffs {accommodation 1; Ce 1; kineticScale 1;}
+temperatureCoeffs {A 220; k 8e-3; Tdep 680;}
+samples {boat {amounts {PbI2_g 2.7992536908413373e-11; BiI3_g 3.5684583649025576e-11;}
+ selection {boat {action use; source box; box (.01 .002 -1) (.02 .0028 1);}}
+ mode release; startTime 0; duration 2;
+}}
+balance {nGuard 5; guardTolerance 1e-13; writeExchangeField yes;}
+profiles {axis (1 0 0); origin (0 0 0); observable wall;
+ bins {native {min 0; max .1; nBins 100;}}
+ onset {fraction .01; searchFrom .02;}
+}

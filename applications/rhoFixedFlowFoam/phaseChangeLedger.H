@@ -200,6 +200,7 @@ private:
   Foam::IOdictionary                layout_;    /* uniform/
                                                    phaseChangeLayout */
   bool                              restarted_;
+  Foam::scalarList                  reaction_;  // optional M10b; separate restart list
   Foam::PtrList<Foam::OFstream>     files_;     /* master only */
 
   Foam::label index(const Foam::label pairi, const Foam::label k) const {
@@ -236,6 +237,10 @@ public:
   );
 
   bool restarted() const { return restarted_; }
+  void setReaction(Foam::label pairi, Foam::scalar mass) {
+    if (reaction_.empty()) reaction_.resize(pairNames_.size(), 0.0);
+    reaction_[pairi] = mass;
+  }
 
   /* exact time at the end of the last step booked [s] (the clock) */
   Foam::scalar& time() { return values_[TIME]; }

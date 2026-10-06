@@ -191,6 +191,7 @@ Foam::scalar LESTO::phaseChangeLedger::supplied(const label pairi) const {
   term(index(pairi, CLAMPED), -1);
   term(index(pairi, SOLVER_DEFECT), -1);
   term(index(pairi, RESTART), 1);
+  if (!reaction_.empty()) sum.add(reaction_[pairi]);
 
   return sum.value();
 }
@@ -275,4 +276,3 @@ void LESTO::phaseChangeLedger::writeLine (
      << l(pairi, PROJECTED) << ' ' << l(pairi, EVAPORATED_ABOVE_WARNING)
      << ' ' << closure << endl;
 }
-

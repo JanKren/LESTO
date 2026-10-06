@@ -1,0 +1,24 @@
+#!/bin/bash
+# Run into work/; keep the tracked inputs unchanged.
+set -euo pipefail
+cd -- "$(dirname -- "$0")"
+export LESTO_REPO=$(cd ../.. && pwd)
+: "${LESTO_M10_DATA:?Set LESTO_M10_DATA to the directory of external pv_BiI3_phases.csv}"
+: "${FOAM_USER_APPBIN:?Load OpenFOAM first}"
+[ -f "$LESTO_M10_DATA/pv_BiI3_phases.csv" ]
+[ -f "$LESTO_M10_DATA/log10Kf_PbBiI.csv" ]
+[ -x "$FOAM_USER_APPBIN/rhoFixedFlowFoam" ]
+mkdir -p work/bin
+cp -r "$LESTO_REPO/applications/rhoFixedFlowFoam/tests/phaseChange/makeCarrier" work/
+(cd work/makeCarrier && wclean && FOAM_USER_APPBIN=$PWD/../bin wmake) > work/log.makeCarrier 2>&1
+python3 - <<'PY'
+from pathlib import Path
+import shutil
+p=Path('work/case')
+if p.exists(): shutil.rmtree(p)
+for folder in ['0','constant','system']: shutil.copytree(folder,p/folder)
+shutil.copy2('benchmark.json',p/'benchmark.json')
+PY
+(cd work/case && blockMesh > log.blockMesh 2>&1 && ../bin/makeCarrier > log.makeCarrier 2>&1 \
+  && "$FOAM_USER_APPBIN/rhoFixedFlowFoam" > log.solver 2>&1)
+echo 'Results: work/case/postProcessing/; solver log: work/case/log.solver'

@@ -1,0 +1,10 @@
+/* frozen carrier of the channel: T from 1000 K (inlet) to 400 K (outlet),
+   plug flow of G = 0.01743 kg/(m2 s) (0.36 m/s at 1000 K, Co 0.36 at 1 ms) */
+FoamFile {version 2.0; format ascii; class dictionary; object carrierDict;}
+
+Tin       1173;
+Tout      350;
+L         0.1;
+p         101325;
+molarMass 4.0026e-3;
+massFlux  0.01743;

@@ -21,6 +21,7 @@ the ranks without WALL faces).
 ------------------------------------------------------------------------------*/
 
 #include "interfaceExchange.H"
+#include "gasRespeciation.H"
 #include "gemsEquilibrium.H"
 #include "matrixDefect.H"
 #include "fvmDdt.H"
@@ -315,6 +316,8 @@ LESTO::interfaceExchange::pairData::pairData (
   gas(-1),
   condensed(-1),
   molarMass(0),
+  formula(),
+  accommodation(1), Ce(1), kineticScale(1),
   solverName(gasFieldName),
   finalSolver(false),
   table(),
@@ -749,6 +752,7 @@ LESTO::interfaceExchange::interfaceExchange (
   }
 
   readState();
+  recordFormulas();
 
   if (writeFile_) {
     ledger_->openFiles();
@@ -823,7 +827,12 @@ void LESTO::interfaceExchange::readPairs (
   const List<scalar>& molarMass
 ) {
 
+  const IOdictionary properties(IOobject(
+    "speciesTransportProperties", mesh_.time().constant(), mesh_,
+    IOobject::MUST_READ, IOobject::NO_WRITE, false));
   const dictionary& pairsDict = dict_.subDict("pairs");
+  std::map<word, scalar> elements;
+  label formulaPairs = 0;
 
   if (pairsDict.empty()) {
     FatalIOErrorInFunction(pairsDict) << "No pair is defined."
@@ -882,6 +891,38 @@ void LESTO::interfaceExchange::readPairs (
     pair.gas = gi;
     pair.condensed = ci;
     pair.molarMass = molarMass[gi];
+    pair.formula = readFormula(properties.subDict(gasName), pair.molarMass);
+    const auto condensedFormula = readFormula(
+      properties.subDict(condensedName),
+      molarMass[ci] > 0 ? molarMass[ci] : pair.molarMass
+    );
+    if (pair.formula != condensedFormula) {
+      FatalIOErrorInFunction(pd) << "Pair " << gasName
+        << " requires identical gas and condensate formulas."
+        << exit(FatalIOError);
+    }
+    if (!pair.formula.empty()) ++formulaPairs;
+    for (const auto& atom : pair.formula) elements.emplace(atom);
+    pair.accommodation = accommodation_;
+    pair.Ce = Ce_;
+    pair.kineticScale = kineticScale_;
+    if (pd.found("HKS")) {
+      pair.pairHKS = true;
+      if (model_ != modelType::HKS) {
+        FatalIOErrorInFunction(pd) << "Per-pair HKS needs model HKS."
+          << exit(FatalIOError);
+      }
+      const dictionary& hks = pd.subDict("HKS");
+      pair.accommodation = hks.getOrDefault<scalar>("accommodation", accommodation_);
+      pair.Ce = hks.getOrDefault<scalar>("Ce", Ce_);
+      pair.kineticScale = hks.getOrDefault<scalar>("kineticScale", kineticScale_);
+      if (!std::isfinite(pair.accommodation) || pair.accommodation <= 0
+        || pair.accommodation > 1 || !std::isfinite(pair.Ce) || pair.Ce < 0
+        || !std::isfinite(pair.kineticScale) || pair.kineticScale < 0) {
+        FatalIOErrorInFunction(hks) << "Require finite 0 < accommodation <= 1 "
+          << "and Ce, kineticScale >= 0." << exit(FatalIOError);
+      }
+    }
 
     pairOfSpecies_[gi] = pairi;
     condensateOwner[ci] = pairi;
@@ -902,6 +943,14 @@ void LESTO::interfaceExchange::readPairs (
     }
     ++pairi;
   }
+
+  if (formulaPairs && formulaPairs != pairs_.size()) {
+    FatalIOErrorInFunction(pairsDict) << "Element accounting needs formulas "
+      << "for every pair." << exit(FatalIOError);
+  }
+  elementNames_.resize(elements.size());
+  label ai = 0;
+  for (const auto& atom : elements) elementNames_[ai++] = atom.first;
 
   /*--------------------------------------------------------------------------
   A solid species without a pair would never change: there is no model for
@@ -1888,6 +1937,31 @@ void LESTO::interfaceExchange::readSamples() {
     return;
   }
 
+  dictionary expanded;
+  for (const entry& entry : dict_.subDict("samples")) {
+    if (!entry.isDict() || !entry.dict().found("amounts")) {
+      expanded.add(entry);
+      continue;
+    }
+    const dictionary& sd = entry.dict();
+    if (sd.found("pair") || sd.found("amount") || sd.subDict("amounts").empty()) {
+      FatalIOErrorInFunction(sd) << "Give nonempty amounts OR pair/amount."
+        << exit(FatalIOError);
+    }
+    for (const Foam::entry& amount : sd.subDict("amounts")) {
+      const word name(entry.keyword() + "__" + amount.keyword());
+      if (dict_.subDict("samples").found(name) || expanded.found(name)) {
+        FatalIOErrorInFunction(sd) << "Expanded sample name collision: " << name
+          << exit(FatalIOError);
+      }
+      dictionary single(sd);
+      single.remove("amounts");
+      single.set("pair", amount.keyword());
+      single.set("amount", sd.subDict("amounts").get<scalar>(amount.keyword()));
+      expanded.add(name, single);
+    }
+  }
+  dict_.set("samples", expanded);
   const dictionary& all = dict_.subDict("samples");
   const scalarField& V = mesh_.V();
   const vectorField& C = mesh_.C().primitiveField();
@@ -1898,6 +1972,8 @@ void LESTO::interfaceExchange::readSamples() {
     layerCell[celli] = true;
   }
   boolList& sampleCell = sampleCell_;
+  List<boolList> pairSampleCell(pairs_.size());
+  for (boolList& cells : pairSampleCell) cells.resize(mesh_.nCells(), false);
 
   DynamicList<sampleData> samples;
 
@@ -1986,6 +2062,10 @@ void LESTO::interfaceExchange::readSamples() {
     }
 
     s.amount = sd.get<scalar>("amount");
+    if (!std::isfinite(s.amount)) {
+      FatalIOErrorInFunction(sd) << "Sample amount must be finite."
+        << exit(FatalIOError);
+    }
     s.startTime = 0;
     s.duration = 0;
     s.length = 0;
@@ -2005,8 +2085,10 @@ void LESTO::interfaceExchange::readSamples() {
 
     if (s.inventory) {
       s.areaPerVolume = sd.get<scalar>("areaPerVolume");
-      s.kineticScale = sd.getOrDefault<scalar>("kineticScale", 1);
-      s.Ce = sd.getOrDefault<scalar>("Ce", 1);
+      s.kineticScale = sd.getOrDefault<scalar>("kineticScale",
+        pairs_[s.pair].pairHKS ? pairs_[s.pair].kineticScale : 1);
+      s.Ce = sd.getOrDefault<scalar>("Ce",
+        pairs_[s.pair].pairHKS ? pairs_[s.pair].Ce : 1);
       s.removable = sd.readIfPresent("removeTime", s.removeTime);
 
       if (!(s.amount >= 0) || !(s.areaPerVolume >= 0)
@@ -2047,10 +2129,11 @@ void LESTO::interfaceExchange::readSamples() {
       if (layerCell[celli]) {
         ++nInLayer;
       }
-      if (sampleCell[celli]) {
+      if (pairSampleCell[s.pair][celli]) {
         ++nInOther;
       }
       sampleCell[celli] = true;
+      pairSampleCell[s.pair][celli] = true;
       s.volume += V[celli];
       volume.add(V[celli]);
       for (direction d = 0; d < vector::nComponents; ++d) {
@@ -2082,7 +2165,7 @@ void LESTO::interfaceExchange::readSamples() {
     }
     if (nInOther > 0) {
       FatalIOErrorInFunction(sd) << "Sample " << s.name << ": " << nInOther
-        << " cells belong to another sample." << exit(FatalIOError);
+        << " cells belong to another sample of the same pair." << exit(FatalIOError);
     }
 
     /*------------------------------------------------------------------------
@@ -2092,6 +2175,8 @@ void LESTO::interfaceExchange::readSamples() {
     other).
     ------------------------------------------------------------------------*/
     if (s.inventory) {
+      s.elements.resize(s.cells.size());
+      forAll(s.elements, i) s.elements[i] = s.firstElement + i;
       for (const label celli : s.cells) {
         elementCells.append(celli);
         elementAreas.append(s.areaPerVolume*V[celli]);
@@ -2124,6 +2209,42 @@ void LESTO::interfaceExchange::readSamples() {
     samples.append(s);
   }
 
+  std::map<label, DynamicList<label>> groups;
+  DynamicList<label> unique;
+  bool overlap = false;
+  for (label e = nWall_; e < elementCells.size(); ++e) {
+    const label celli = elementCells[e];
+    auto found = groups.find(celli);
+    if (found == groups.end()) unique.append(celli);
+    else overlap = true;
+    groups[celli].append(e);
+  }
+  if (overlap) {
+    const labelList oldCells(elementCells);
+    const scalarField oldAreas(elementAreas), oldT(elementTemperatures);
+    const labelList oldSamples(elementSamples);
+    labelList newIndex(elementCells.size(), -1);
+    elementCells.resize(nWall_);
+    elementAreas.resize(nWall_);
+    elementTemperatures.resize(nWall_);
+    elementSamples.clear();
+    exchange.resize(nWallCells_);
+    start.resize(nWallCells_ + 1);
+    for (const label celli : unique) {
+      exchange.append(celli);
+      for (const label old : groups[celli]) {
+        newIndex[old] = elementCells.size();
+        elementCells.append(oldCells[old]);
+        elementAreas.append(oldAreas[old]);
+        elementTemperatures.append(oldT[old]);
+        elementSamples.append(oldSamples[old - nWall_]);
+      }
+      start.append(elementCells.size());
+    }
+    for (sampleData& sample : samples) {
+      for (label& e : sample.elements) e = newIndex[e];
+    }
+  }
   samples_.transfer(samples);
 
   /* a start list without wall elements is (0); it gains one entry per
@@ -2557,8 +2678,8 @@ void LESTO::interfaceExchange::setCoefficients(pairData& pair) const {
     const scalar pEq = pair.pEq[e];
 
     pair.conductance[e] = wall
-      ? hksConductance(M, Te, accommodation_, Ce_, kineticScale_)
-      : hksConductance(M, Te, accommodation_, samples_[samplei].Ce,
+      ? hksConductance(M, Te, pair.accommodation, pair.Ce, pair.kineticScale)
+      : hksConductance(M, Te, pair.accommodation, samples_[samplei].Ce,
                        samples_[samplei].kineticScale);
 
     if (wall && deltaCoeffs) {
@@ -3452,7 +3573,7 @@ void LESTO::interfaceExchange::readState() {
       pairData& pair = pairs_[s.pair];
       const scalar Cs = s.amount*pair.molarMass/s.volume;
       forAll(s.cells, i) {
-        pair.reservoir[s.firstElement - nWall_ + i] = Cs;
+        pair.reservoir[s.elements[i] - nWall_] = Cs;
       }
       Info<< "Fresh start of sample " << s.name << ": reservoir Cs = n0 M/V_Z"
         << " = " << Cs << " kg/m3 of " << speciesNames_[pair.condensed]
@@ -4896,7 +5017,7 @@ void LESTO::interfaceExchange::removeSamples (
     pairData& pair = pairs_[s.pair];
     compensatedSum sum;
     forAll(s.cells, i) {
-      const label e = s.firstElement + i;
+      const label e = s.elements[i];
       sum.add(reservoirMass(pair, e));
       pair.reservoir[e - nWall_] = 0;
     }
@@ -5648,6 +5769,9 @@ void LESTO::interfaceExchange::balance() {
     const scalar gas = gasInventory(pair);
     const scalar wall = wallInventory(pair);
     const scalar sample = sampleInventory(pair);
+    pair.elementGas = gas;
+    pair.elementWall = wall;
+    pair.elementSample = sample;
     const scalar held = gas + wall + sample;
     ledger.set(pairi, phaseChangeLedger::HELD, held);
 
@@ -5725,6 +5849,9 @@ void LESTO::interfaceExchange::balance() {
   by it at a write time) and their record in the layout, so that the state
   written by runTime.write() records them (restart: carry-over (d)).
   --------------------------------------------------------------------------*/
+  if (respeciation_) respeciation_->book();
+  writeElementBalance();
+
   if (profiles_) {
     const string reached = profiles_->reached(stepEnd_, stepDeltaT_);
     profilesPending_ += string(profilesPending_.empty() || reached.empty()
@@ -6168,6 +6295,94 @@ void LESTO::interfaceExchange::recordProfileTimes() {
 }
 
 
+void LESTO::interfaceExchange::recordFormulas() {
+  dictionary record;
+  for (const pairData& pair : pairs_) {
+    if (pair.formula.empty()) continue;
+    dictionary formula;
+    for (const auto& atom : pair.formula) formula.add(atom.first, atom.second);
+    record.add(speciesNames_[pair.gas], formula);
+  }
+  const dictionary* old = ledger_->layout().findDict("formulas", keyType::LITERAL);
+  if (old) {
+    bool same = old->size() == record.size();
+    for (const entry& e : record) {
+      const dictionary* previous = old->findDict(e.keyword(), keyType::LITERAL);
+      if (!previous || previous->size() != e.dict().size()) {
+        same = false;
+        continue;
+      }
+      for (const entry& atom : e.dict()) {
+        if (!previous->found(atom.keyword())
+          || previous->get<scalar>(atom.keyword())
+             != e.dict().get<scalar>(atom.keyword())) same = false;
+      }
+    }
+    if (!same) {
+      FatalErrorInFunction << "Species formulas changed across restart."
+        << exit(FatalError);
+    }
+  }
+  if (record.empty()) return;
+  ledger_->layout().set("formulas", record);
+  if (dict_.isDict("respeciation") && dict_.subDict("respeciation").getOrDefault<word>("engine","none") != "none") return;
+  if (!writeFile_ || !Pstream::master()) return;
+  const fileName dir(mesh_.time().globalPath()/"postProcessing"
+    /"phaseChangeElements"/mesh_.time().timeName());
+  mkDir(dir);
+  elementFiles_.resize(elementNames_.size());
+  forAll(elementNames_, i) {
+    elementFiles_.set(i, new OFstream(dir/(elementNames_[i] + ".dat")));
+    OFstream& os = elementFiles_[i];
+    os.precision(17);
+    os << "# element " << elementNames_[i] << "; amounts [mol of atoms]" << nl
+      << "# Derived from pair ledgers with stoichiometric coefficients nu/M; "
+      << "no independent accumulated state." << nl
+      << "# columns time initial released transport removed clamped solverDefect "
+      << "restart gas wall sample held supplied closure pairClosure reference" << nl;
+  }
+}
+
+void LESTO::interfaceExchange::writeElementBalance() {
+  if (respeciation_) { respeciation_->writeElements(); return; }
+  if (!writeFile_ || !Pstream::master()) return;
+  const phaseChangeLedger& ledger = *ledger_;
+  forAll(elementFiles_, ei) {
+    FixedList<compensatedSum, 15> totals;
+    forAll(pairs_, pi) {
+      const pairData& pair = pairs_[pi];
+      const auto atom = pair.formula.find(elementNames_[ei]);
+      if (atom == pair.formula.end()) continue;
+      const scalar factor = atom->second/pair.molarMass;
+      const phaseChangeLedger::entry entries[] = {
+        phaseChangeLedger::INITIAL, phaseChangeLedger::RELEASED,
+        phaseChangeLedger::REMOVED, phaseChangeLedger::CLAMPED,
+        phaseChangeLedger::SOLVER_DEFECT, phaseChangeLedger::RESTART
+      };
+      const int columns[] = {0, 1, 3, 4, 5, 6};
+      for (int k = 0; k < 6; ++k) totals[columns[k]].add(factor*ledger(pi, entries[k]));
+      totals[2].add(factor*ledger.totalTransport(pi));
+      // Inventories require reductions: ledger HELD is already global. Pair
+      // gas/wall/sample are booked by balance(), avoiding collectives here.
+      totals[7].add(factor*pair.elementGas);
+      totals[8].add(factor*pair.elementWall);
+      totals[9].add(factor*pair.elementSample);
+      const scalar held = ledger(pi, phaseChangeLedger::HELD);
+      const scalar supplied = ledger.supplied(pi);
+      totals[10].add(factor*held);
+      totals[11].add(factor*supplied);
+      totals[13].add(factor*(held - supplied));
+      totals[14].add(factor*ledger.reference(pi));
+    }
+    OFstream& os = elementFiles_[ei];
+    os << ledger.time();
+    for (int k = 0; k < 12; ++k) os << ' ' << totals[k].value();
+    os << ' ' << totals[10].value() - totals[11].value()
+      << ' ' << totals[13].value() << ' ' << totals[14].value() << nl;
+    os.flush();
+  }
+}
+
 void LESTO::interfaceExchange::writeProfilesOfState(const bool timeWrite) {
 
   if (mock() || !profiles_) {
@@ -6240,6 +6455,17 @@ void LESTO::interfaceExchange::writeProfilesOfState(const bool timeWrite) {
     inventory[1] = wallInventory(pair);
     inventory[2] = sampleInventory(pair);
 
+    // Gas belonging to another pair's sample remains part of this pair's
+    // wallPlusGas observable. Elemental profiles use the union of samples.
+    boolList ownSamples;
+    if (pairs_.size() > 1) {
+      ownSamples.resize(mesh_.nCells(), false);
+      for (const sampleData& sample : samples_) {
+        if (sample.pair == pairi) {
+          for (const label celli : sample.cells) ownSamples[celli] = true;
+        }
+      }
+    }
     profiles_->write (
       mesh_.time().timeName(),
       clock,
@@ -6250,8 +6476,31 @@ void LESTO::interfaceExchange::writeProfilesOfState(const bool timeWrite) {
       gasMass,
       wallMass,
       sampleMass,
-      inventory
+      inventory,
+      !pair.formula.empty(),
+      pairs_.size() > 1 ? &ownSamples : nullptr
     );
+  }
+  for (const word& element : elementNames_) {
+    scalarField gas(V.size(), 0.0), wall(nWall_, 0.0), sample(V.size(), 0.0);
+    FixedList<scalar, 3> inventory(Zero);
+    for (const pairData& pair : pairs_) {
+      const auto atom = pair.formula.find(element);
+      if (atom == pair.formula.end()) continue;
+      const scalar factor = atom->second/pair.molarMass;
+      const scalarField& Y = species_[pair.gas].primitiveField();
+      forAll(gas, c) gas[c] += factor*rhoI[c]*Y[c]*V[c];
+      forAll(wall, e) wall[e] += factor*pair.deposit[e]*elementArea_[e];
+      for (label e = nWall_; e < elementCell_.size(); ++e) {
+        sample[elementCell_[e]] += factor*reservoirMass(pair, e);
+      }
+      inventory[0] += factor*gasInventory(pair);
+      inventory[1] += factor*wallInventory(pair);
+      inventory[2] += factor*sampleInventory(pair);
+    }
+    if (respeciation_) respeciation_->addGasProfiles(element, gas, inventory[0]);
+    profiles_->write(mesh_.time().timeName(), clock, reason,
+      word("element_" + element), element, 1.0, gas, wall, sample, inventory, true);
   }
 }
 
@@ -6296,4 +6545,11 @@ void LESTO::interfaceExchange::end() const {
   if (gems_) {
     gems_->summary();
   }
+}
+
+Foam::scalar LESTO::interfaceExchange::stepExchange(const Foam::label pi) const {
+  compensatedSum sum;
+  const pairData& pair = pairs_[pi];
+  for (const scalar q : pair.flow) sum.add(q);
+  return globalSum(sum);
 }

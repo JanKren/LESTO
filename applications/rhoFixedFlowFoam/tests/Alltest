@@ -178,7 +178,10 @@
 #          criterion lines); the driver's own mechanics (the verdicts of
 #          its criteria with a stand-in checker; a resumed run of the 007
 #          carrier, about 2 min); and the gate; not part of 'all'
-#   all    every milestone implemented so far: M0 M1 M2 M3 M4 M5 M7 M9 (not
+#   M10a  independent species pairs, element accounting, shared samples,
+#          Chapman-Enskog diffusion and external-data generator checks
+#   M10b  homogeneous gas equilibrium, species/element ledgers and restart
+#   all    every milestone implemented so far: M0 M1 M2 M3 M4 M5 M7 M9 M10a M10b (not
 #          M4long, M7long)
 #
 #   -fresh re-run the cached pristine reference cases too
@@ -226,8 +229,8 @@ for arg in "$@"
 do
   case "$arg" in
     -fresh) fresh=-fresh ;;
-    M0|M1|M2|M3|M4|M4long|M5|M7|M7long|M9) milestones+=("$arg") ;;
-    all) milestones+=(M0 M1 M2 M3 M4 M5 M7 M9) ;;
+    M0|M1|M2|M3|M4|M4long|M5|M7|M7long|M9|M10a|M10b) milestones+=("$arg") ;;
+    all) milestones+=(M0 M1 M2 M3 M4 M5 M7 M9 M10a M10b) ;;
     -h|-help|--help) usage ;;
     *) echo "Unknown milestone or option: $arg" >&2; usage ;;
   esac
@@ -334,6 +337,16 @@ then
              M9.11:2 M9.12:1 M9.13:1 M9.14:1)
 fi
 
+if want M10a
+then
+  expected+=(M10a.0:1 M10a.1:1 M10a.2:1 M10a.3:1 M10a.4:1 M10a.5:1 M10a.6:1)
+fi
+
+if want M10b
+then
+  expected+=(M10b.0:1 M10b.1:1 M10b.2:1 M10b.3:1 M10b.4:1 M10b.5:1 M10b.6:1 M10b.7:1 M10b.8:1)
+fi
+
 #------------------------------------------------------------------------------
 # The solver under test, built from scratch
 #------------------------------------------------------------------------------
@@ -427,6 +440,16 @@ fi
 if want M9
 then
   runScript "$TESTS_DIR/gems/Allrun"
+fi
+
+if want M10a
+then
+  runScript "$TESTS_DIR/multiSpecies/Allrun"
+fi
+
+if want M10b
+then
+  runScript "$TESTS_DIR/speciation/Allrun"
 fi
 
 #------------------------------------------------------------------------------

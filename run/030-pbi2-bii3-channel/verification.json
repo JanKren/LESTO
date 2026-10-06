@@ -1,0 +1,21 @@
+{
+  "PbI2": {
+    "onset_K": 561.164455240661,
+    "ideal_plug_flow_saturation_K": 567.0566764879466,
+    "difference_K": -5.8922212472855335,
+    "reference_K": 566
+  },
+  "BiI3": {
+    "onset_K": 449.9788393634718,
+    "ideal_plug_flow_saturation_K": 450.3826134102701,
+    "difference_K": -0.4037740467982758,
+    "reference_K": 450
+  },
+  "element_max_relative_closure": {
+    "Pb": 4.050170089360068e-16,
+    "Bi": 4.561621390652894e-16,
+    "I": 4.3676990609883967e-16
+  },
+  "steps": 3000,
+  "openfoam_version": "v2412"
+}

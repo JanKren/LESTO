@@ -603,7 +603,9 @@ void LESTO::axialProfiles::write (
   const scalarField& gasMass,
   const scalarField& wallMass,
   const scalarField& sampleMass,
-  const FixedList<scalar, 3>& inventory
+  const FixedList<scalar, 3>& inventory,
+  const bool writePeak,
+  const boolList* sampleCells
 ) const {
 
   const scalar M = molarMass;
@@ -622,7 +624,7 @@ void LESTO::axialProfiles::write (
     scalarField values(4*nBins + 4, 0.0);
 
     forAll(gasMass, celli) {
-      const bool inSample = sampleCell_[celli];
+      const bool inSample = sampleCells ? (*sampleCells)[celli] : sampleCell_[celli];
       for (label k = set.cellStart[celli]; k < set.cellStart[celli + 1]; ++k) {
         values[set.cellBin[k]] += set.cellWeight[k]*gasMass[celli];
         if (inSample) {
@@ -766,6 +768,18 @@ void LESTO::axialProfiles::write (
       os << "# Tdep "
          << onsetText(set, observable, true, true, minimumAmount).c_str()
          << nl;
+    }
+    if (writePeak) {
+      label peak = 0;
+      for (label b = 1; b < nBins; ++b) {
+        if (observable[b] > observable[peak]) peak = b;
+      }
+      if (observable[peak]*(set.edges[peak+1] - set.edges[peak]) > minimumAmount
+        && set.wallArea[peak] > 0) {
+        os << "# Tpeak " << set.wallT[peak] << " K at x "
+          << 0.5*(set.edges[peak] + set.edges[peak+1])
+          << " m; bin maximum of observable" << nl;
+      } else os << "# Tpeak none (no significant peak with wall temperature)" << nl;
     }
     os << "# columns x_lo x_hi x gas wall sample observable Twall wallArea"
        << " sampleGas" << nl

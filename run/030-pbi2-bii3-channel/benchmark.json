@@ -1,0 +1,12 @@
+{
+  "model": "independent PbI2/BiI3 pairs, prescribed source",
+  "iodine_mole_fraction": 3.9e-06,
+  "amounts_mol": {
+    "PbI2": 2.7992536908413373e-11,
+    "BiI3": 3.5684583649025576e-11
+  },
+  "carrier": "synthetic plane channel, He, uniform axial mass flux",
+  "diffusivity": "constant 1e-4 m2/s (provisional)",
+  "observable": "1% onset for code qualification; Tpeak separately reported",
+  "Bi_table": "LESTO_M10_DATA/pv_BiI3_phases.csv (external, not redistributed)"
+}

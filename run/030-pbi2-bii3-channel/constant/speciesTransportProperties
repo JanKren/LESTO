@@ -1,0 +1,6 @@
+FoamFile {version 2.0; format ascii; class dictionary; object speciesTransportProperties;}
+species (PbI2_g PbI2_s BiI3_g BiI3_s);
+PbI2_g {state gas; diffusivityModel constant; D 1e-4; molarMass 0.46100894; formula {Pb 1; I 2;}}
+PbI2_s {state solid; molarMass 0.46100894; formula {Pb 1; I 2;}}
+BiI3_g {state gas; diffusivityModel constant; D 1e-4; molarMass 0.58969381; formula {Bi 1; I 3;}}
+BiI3_s {state solid; molarMass 0.58969381; formula {Bi 1; I 3;}}

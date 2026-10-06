@@ -76,3 +76,12 @@ Current development uses:
 Later stages will also include:
 
     GEMS / GEMS3K
+
+The phase-change solver's M10a stage now supports independent PbI2/BiI3
+pairs, shared multi-species sources and element conservation outputs.
+See [the solver documentation](applications/rhoFixedFlowFoam/readme.md)
+and [the preliminary channel](run/030-pbi2-bii3-channel/readme.md).
+M10b adds bridge-free homogeneous gas re-speciation and reaction/element
+accounts; see [run/031](run/031-pbbi-gas-speciation/readme.md).
+GEMS standard-state engines and reactive/shared-condensate coupling remain
+for later M10 stages before experimental validation.

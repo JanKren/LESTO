@@ -292,7 +292,9 @@ public:
     const Foam::scalarField& gasMass,
     const Foam::scalarField& wallMass,
     const Foam::scalarField& sampleMass,
-    const Foam::FixedList<Foam::scalar, 3>& inventory
+    const Foam::FixedList<Foam::scalar, 3>& inventory,
+    const bool writePeak = false,
+    const Foam::boolList* sampleCells = nullptr
   ) const;
 };
 

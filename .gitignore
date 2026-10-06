@@ -9,3 +9,7 @@ applications/rhoFixedFlowFoam/utilities/*/Make/*/
 applications/rhoFixedFlowFoam/tests/work/
 # rhoFixedFlowFoam with equilibrium GEMS: the per-rank GEMS3K logs of a run
 **/gemsLog/
+# Preliminary M10 channel output and its helper build
+/run/030-pbi2-bii3-channel/work/
+
+/run/031-pbbi-gas-speciation/work/

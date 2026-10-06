@@ -1,0 +1,18 @@
+{
+  "status": "preliminary code qualification",
+  "engine": "kernel, S-C nine gas species; PbI2/BiI3 plain deposition pairs",
+  "Tin_K": 1173,
+  "Tout_K": 350,
+  "deltaT_s": 0.001,
+  "endTime_s": 3,
+  "source": "prescribed iodide formula units, 2 s; same normalized Liu LBE-I_SS_II ratio as run/030",
+  "iodine_mole_fraction": 3.9e-06,
+  "diffusivity_m2_s": 0.0001,
+  "observable": "condensate line densities in 1 cm bins",
+  "limitations": [
+    "synthetic channel and thermal ramp",
+    "provisional common diffusivity",
+    "no metal deposition or reactive wall channels",
+    "no experimental release history or LBE iodine activity"
+  ]
+}

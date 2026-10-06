@@ -7992,3 +7992,119 @@ Liu's T(x) (decision 15), and M8's carrier tooling.
     - **Recommended:** ask the authors for the measured T(x) (digitising
       is the fallback), a 2-D axisymmetric wedge, and M8's carrier tooling
       at 45 and 100 mL/min.
+
+### 36.8 M10a implementation and qualification (2026-10-05)
+
+Implemented the independent-pair stage described in 36.5: formulas with
+molar-mass validation, per-pair `HKS` overrides, multi-species samples,
+shared-cell inventory elements, Chapman-Enskog diffusion, element ledgers
+and profiles, and bin-based `Tpeak`. Legacy formula-free cases keep their
+existing files and defaults. Restart formulas are compared by element
+values, independent of dictionary formatting. Inventory samples retain
+explicit element maps after grouping shared cells; every cell is divided
+by its volume/density once. Pair `wallPlusGas` profiles use that pair's own
+sample mask, while elemental profiles use the union.
+
+`tests/multiSpecies/Allrun` records M10a.0–M10a.6. Independence is checked
+byte-for-byte against single-pair runs for both PbI2 plus an identical pair
+on a second boat and PbI2 plus BiI3 sharing a boat: temperature/HKS,
+serial/4 ranks, fields, ledgers and profiles. Element closure and its
+stoichiometric relation to pair closure are checked each step. Shared
+inventory tests independently recompute each reservoir's bounded HKS law
+from the written fields; a tiny BiI3 reservoir exercises depletion beside
+a larger PbI2 reservoir, and restarts cross the scheduled removal.
+
+The generators are code-only additions. The default PbI2He generator
+reproduces all 11 generated files byte-for-byte. Locally generated external
+BiI3, Bi, Bi2 and Pb tables have 198 nodes: the solver returns the exact
+file values at nodes, and crossings are 680.850000, 544.512416 and
+600.650043 K. The worst error against direct thermodynamic evaluation is
+6.074e-5 decades. The PbI2 table remains byte-identical. Restricted Bi
+records and derived tables are excluded from the repository.
+
+`run/030-pbi2-bii3-channel` is a synthetic 1000→350 K helium channel with
+the prescribed LBE-I_SS_II iodide ratio scaled to x_I = 3.9e-6. The initial
+v2412 serial qualification gives PbI2/BiI3 1% onsets 561.164/449.979 K,
+versus independent pure-condensate plug-flow crossings 567.057/450.383 K
+(differences -5.892/-0.404 K). Release totals equal n0 M and closures are
+within 1e-14. These are code/science qualification inputs, not an
+experimental prediction: source re-speciation, measured T(x), physical
+carrier/boat geometry, evaporation history and validated Bi diffusivities
+remain outstanding. The paper's deposit peak is a different observable.
+
+Final v2412 verification (2026-10-06): `tests/Alltest all` with external
+M10 data and the local v2606 installation reports **310 PASS, 0 FAIL,
+1 NOTRUN**. All seven M10a criteria pass. The NOTRUN is M0.4, which requires
+running M0 under v2606; M4.6 separately compiled every solver and utility
+source against local v2606 with zero warnings. The original 008–010 gate,
+run/012–015 excerpts, M7 Graetz checks and M9 GEMS checks pass unchanged.
+The separate Liu benchmark preparation tests also pass (6 tests).
+
+M10b–M10e, M6 HKS parity and M8 physical/experimental validation remain
+subsequent work.
+
+Long-study compatibility verification (2026-10-06): the separate M4/M7
+scripts revalidated all 31 completed runs using five-step old/new binary
+comparisons. Fields, profiles and checked balance columns are identical;
+none of the excluded diagnostic columns differ in these probes. The
+scripts report **35 PASS, 0 FAIL, 1 NOTRUN**. M4.17 is NOTRUN because no
+entire long trajectory was rerun with this source key; these are explicitly
+revalidated historical runs, not fresh full-run closure measurements.
+
+### 36.9 M10b implementation and qualification (2026-10-06)
+
+M10b now implements the bridge-free gas kernel, formation-table generator,
+gas-only conservative transport, split update, reaction and condensate
+accounts, element CONVERSION, element profiles including all participating
+gases, restart records and run/031. The default engine remains `none`.
+GEMS standard-state engines and reactive wall channels remain M10c/M10d.
+
+The mixed-precision kernel matches the 432 stored points to 7.1e-11
+relative for species above the specified 1e-10 cutoff. Element error is
+below 6e-16, as is idempotence on the largest-element scale. Cold calls on
+that set are about 15–17 us. The full 160740 external gas-map inputs match
+the exact GEMS standard-state oracle to 1.8e-10 relative, with no failures.
+For this comparison, the oracle is polished with tolerance 2e-15 (maximum
+reported KKT residue 1.7e-14). Its original 1e-13 tolerance left a minor I2
+difference of 1.8e-9: oracle stopping error amplified by nearly exhausted
+iodine, rather than a kernel element-balance error. The broader map has a
+higher mean cold cost (~26–30 us); the <=20 us representative timing gate is
+the stored 432-point set, as in the design's benchmark.
+
+Closed boxes at 450 and 1000 K, from monatomic and mixed-iodide initial
+splits, conserve elements and cancel reactions within 1e-15. Serial and
+four-rank synthetic channels close within 5e-16; their converged fields
+agree within 1e-9. Continuous versus binary-restarted fields and new/old
+accounts compare byte-identical on both decompositions. Engine `none` and
+an entirely sub-threshold case reproduce the disabled gas fields exactly.
+Restart comparisons read typed metadata rather than dictionary token
+formatting; numerical strings and the content hash are stored as strings
+to retain every digit across binary/ascii dictionary I/O.
+
+The external-data 1173–350 K study uses the same prescribed formula-unit
+source and common D as the independent-pair baseline. Every step satisfies
+1e-14 element closure. At 1 ms, 1 cm deposit L1 differences from that
+baseline are 8.5e-7 (PbI2) and 1.333e-3 (BiI3). The 2 ms versus 1 ms
+changes are 3.31e-4 and 5.76e-4. Written fields re-speciate within 1e-12
+on the largest-element scale. Individual near-exhausted minor species can
+show larger relative round-off differences; the same scale is used for
+idempotence so species approaching zero are not divided by zero.
+
+`tests/Alltest M10b` and `all` include the new gates. External references,
+Bi thermodynamics and the extended oracle are explicitly supplied through
+environment variables; unavailable checks are NOTRUN. The synthetic code
+tests and the default solver need no licensed data or bridge.
+
+The complete `tests/Alltest all` run under OpenFOAM v2412 finished with
+319 PASS, 0 FAIL and 1 NOTRUN, including all nine M10b gates with the
+external thermodynamic inputs enabled. The full-map species error was
+1.71235e-10, maximum oracle KKT residue 1.59397e-14, element error
+5.01064e-16 and idempotence 5.79954e-16. The representative cold-call
+timing was 16.2136 us. The 4/2/1 ms study reproduced the deposit differences
+above and had maximum element closure 6.25909e-16 across those runs.
+Clean v2412 and separate v2606 Debug compilations produced zero warnings.
+The sole NOTRUN is M0.4, which requires an invocation under v2606;
+the separate v2606 compile passed as M4.6. `all` excludes the hours-long
+M4long/M7long studies; their earlier revalidation is recorded in 36.8.
+Experimental qualification still requires the physical inputs described
+in 36.6 and the later M10 stages.

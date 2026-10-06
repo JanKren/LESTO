@@ -63,8 +63,9 @@ lower_e <= q_e <= upper_e [kg/s] of the step (plan E3):
                               Cs_c V_c/deltaT
   all                         lower = -infinity on the wall
 
-The wall elements come first (sorted by cell), then the sample elements (one
-per sample cell); the exchange cells follow the same order.
+The wall elements come first (sorted by cell), then the sample elements,
+grouped by exchange cell. Different pairs may share sample cells; samples
+of the same pair must be disjoint. Each sample retains its own element map.
 
 Step algorithm (plan section 3)
 
@@ -678,6 +679,8 @@ read.
 #ifndef interfaceExchange_H
 #define interfaceExchange_H
 
+#include "chemicalFormula.H"
+
 #include "fvMesh.H"
 #include "fvMatrices.H"
 #include "volFields.H"
@@ -695,6 +698,8 @@ read.
 #include "gemsEquilibrium.H"
 
 namespace LESTO {
+
+class gasRespeciation;
 
 class interfaceExchange {
 
@@ -716,6 +721,10 @@ private:
     Foam::label  gas;                  /* species index of the gas */
     Foam::label  condensed;            /* species index of the condensate */
     Foam::scalar molarMass;            /* [kg/mol] */
+    chemicalFormula formula;
+    Foam::scalar elementGas = 0, elementWall = 0, elementSample = 0;
+    Foam::scalar accommodation, Ce, kineticScale;
+    bool pairHKS = false;
     Foam::word   solverName;           /* Y_<gas> */
     bool         finalSolver;          /* Y_<gas>Final selects its own
                                           solvers entry */
@@ -873,9 +882,10 @@ private:
     Foam::scalar     length;           /* the window as represented,
                                           releaseWindowLength() [s] */
 
-    /* inventory: the first of its sample elements (local, contiguous, in
-       the order of cells), the kinetics and the removal */
+    /* inventory: elements in cell order; shared cells group elements
+       from different pairs, so one sample need not be contiguous */
     Foam::label      firstElement;
+    Foam::labelList  elements;         /* inventory elements, in cell order */
     Foam::scalar     areaPerVolume;    /* a_s [1/m] */
     Foam::scalar     kineticScale;
     Foam::scalar     Ce;
@@ -903,6 +913,11 @@ private:
   /* pairs */
   Foam::labelList               pairOfSpecies_;     /* -1: not a paired gas */
   Foam::PtrList<pairData>       pairs_;
+  gasRespeciation* respeciation_ = nullptr;
+  Foam::wordList elementNames_;
+  Foam::PtrList<Foam::OFstream> elementFiles_;
+  void recordFormulas();
+  void writeElementBalance();
 
   /* model HKS (HKSCoeffs) */
   Foam::scalar      accommodation_;     /* sigma */
@@ -1307,6 +1322,19 @@ public:
 
   /* true for model mock (or no constant/thermochemistryProperties) */
   bool mock() const { return model_ == modelType::mock; }
+  void attachRespeciation(gasRespeciation& r) { respeciation_ = &r; }
+  void includeElement(const Foam::word& e) {
+    if (elementNames_.find(e)<0) elementNames_.append(e);
+  }
+  phaseChangeLedger& ledger() { return ledger_(); }
+  Foam::scalar wallMass(Foam::label pi) const { return wallInventory(pairs_[pi]); }
+  Foam::scalar sampleMass(Foam::label pi) const { return sampleInventory(pairs_[pi]); }
+  Foam::scalar cachedWallMass(Foam::label pi) const { return pairs_[pi].elementWall; }
+  Foam::scalar cachedSampleMass(Foam::label pi) const { return pairs_[pi].elementSample; }
+  Foam::scalar stepReleased(Foam::label pi) const { return pairs_[pi].releasedStep; }
+  Foam::scalar stepDefect(Foam::label pi) const { return pairs_[pi].defect; }
+  const Foam::scalarField& stepTransport(Foam::label pi) const { return pairs_[pi].transport; }
+  Foam::scalar stepExchange(Foam::label pi) const;
 
   /* true for layer distance (the elements are cells, not wall faces) */
   bool distanceLayer() const { return layer_ == "distance"; }

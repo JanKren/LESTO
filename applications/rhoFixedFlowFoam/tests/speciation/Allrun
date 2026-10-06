@@ -1,0 +1,60 @@
+#!/bin/bash
+# M10b: gas-only equilibrium, transport/reaction ledgers, restart and channel.
+set -euo pipefail
+source "$(dirname "${BASH_SOURCE[0]}")/../functions"
+requireOpenFOAM
+SPEC_DIR=$WORK_DIR/speciation
+mkdir -p "$SPEC_DIR/bin"
+cp -r "$TESTS_DIR/phaseChange/makeCarrier" "$SPEC_DIR/"
+(cd "$SPEC_DIR/makeCarrier" && wclean && FOAM_USER_APPBIN=$SPEC_DIR/bin wmake) > "$SPEC_DIR/log.makeCarrier" 2>&1
+CARRIER=$SPEC_DIR/bin/makeCarrier
+buildKernel() {
+  python3 "$TESTS_DIR/speciation/reference.py" "$SPEC_DIR/reference.csv" \
+    && g++ -O2 -std=c++17 -Wall -Wextra "$TESTS_DIR/speciation/testSpeciation.C" -o "$SPEC_DIR/testSpeciation" \
+    && "$SPEC_DIR/testSpeciation" "$SPEC_DIR/reference.csv"
+}
+check M10b.0 'Synthetic Decimal reference: accuracy, absent elements, element balance and idempotence' buildKernel
+check M10b.1 '450/1000 K closed boxes: one-step equilibrium, element and reaction conservation' \
+  python3 "$TESTS_DIR/speciation/cases.py" closed "$SPEC_DIR" "$SOLVER_EXE" "$CARRIER"
+check M10b.2 'Engine none and below-minTemperature fields reproduce disabled transport exactly' \
+  python3 "$TESTS_DIR/speciation/cases.py" disabled "$SPEC_DIR" "$SOLVER_EXE" "$CARRIER"
+check M10b.3 'Serial/4-rank transport and species/element closure; exact binary restart' \
+  python3 "$TESTS_DIR/speciation/cases.py" channel "$SPEC_DIR" "$SOLVER_EXE" "$CARRIER"
+check M10b.4 'Invalid engines/species/schedules, lagged wall speciation and restart changes refused' \
+  python3 "$TESTS_DIR/speciation/cases.py" inputs "$SPEC_DIR" "$SOLVER_EXE" "$CARRIER"
+if [ -n "${LESTO_M10_DESIGN:-}" ]
+then
+  check M10b.5 '432 stored external reference points: 1e-9 species, 1e-14 elements, 1e-15 idempotence' \
+    "$SPEC_DIR/testSpeciation" "$LESTO_M10_DESIGN/design/kernel/reference.csv"
+  timing=$SPEC_DIR/timing.log
+  "$SPEC_DIR/testSpeciation" "$LESTO_M10_DESIGN/design/kernel/reference.csv" > "$timing"
+  cost=$(awk '/cold us\/call/ {print $NF}' "$timing")
+  if python3 -c 'import sys; sys.exit(float(sys.argv[1]) > 20)' "$cost"
+  then result M10b.8 PASS "Kernel cold calls $cost us (limit 20 us)"
+  elif python3 -c 'import os,sys; sys.exit(os.getloadavg()[0] < 4)'
+  then result M10b.8 NOTRUN "Kernel cost $cost us on a busy machine (load >= 4)"
+  else result M10b.8 FAIL "Kernel cost $cost us exceeds 20 us on an idle machine"
+  fi
+else
+  result M10b.5 NOTRUN 'External stored reference unavailable (LESTO_M10_DESIGN)'
+  result M10b.8 NOTRUN 'Representative external timing points unavailable'
+fi
+if [ -n "${LESTO_M10_NASA:-}" ] && [ -n "${LESTO_M10_THERMOFUN:-}" ] && [ -n "${LESTO_M10_DATA:-}" ]
+then
+  check M10b.6 '1173 K prescribed source: all-element closure, 1 cm deposits versus M10a and dt=4/2/1 ms convergence' \
+    python3 "$TESTS_DIR/speciation/scientific.py" "$SPEC_DIR/scientific" "$SOLVER_EXE" "$CARRIER" \
+      "$LESTO_M10_DATA" "$LESTO_M10_NASA" "$LESTO_M10_THERMOFUN"
+else
+  result M10b.6 NOTRUN 'External Bi tables/NASA/ThermoFun inputs unavailable'
+fi
+if [ -n "${LESTO_M10_DESIGN:-}" ] && [ -n "${LESTO_M10_ORACLE_LIB:-}" ]
+then
+  verifyOracle() {
+    GEMSBRIDGE_LIB=$LESTO_M10_ORACLE_LIB python3 "$TESTS_DIR/speciation/oracle.py" \
+      "$LESTO_M10_DESIGN" "$SPEC_DIR/oracle.csv" \
+      && "$SPEC_DIR/testSpeciation" "$SPEC_DIR/oracle.csv"
+  }
+  check M10b.7 'Every external gas-map input (160740): kernel versus exact GEMS standard-state oracle' verifyOracle
+else
+  result M10b.7 NOTRUN 'Extended external oracle unavailable (LESTO_M10_DESIGN, LESTO_M10_ORACLE_LIB)'
+fi

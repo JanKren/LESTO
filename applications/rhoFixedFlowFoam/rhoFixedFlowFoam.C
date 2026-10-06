@@ -182,9 +182,12 @@ locations, following common OpenFOAM solver practice.
 #include "fluidThermo.H"
 #include "processorFvPatch.H"
 #include "PbI2HeDiffusivity.H"
+#include "ChapmanEnskogDiffusivity.H"
+#include "chemicalFormula.H"
 #include "evaluateThermochemistry.H"
 #include "gemsEquilibrium.H"
 #include "interfaceExchange.H"
+#include "gasRespeciation.H"
 
 /*------------------------------------------------------------------------------
 Optional xGEMS start-up call of the main branch (71bf192, see the start of
@@ -581,6 +584,16 @@ int main(int argc, char *argv[]) {
       )
     );
 
+    if (speciesDict.found("molarMass")) {
+      molarMass[speciesi] = speciesDict.get<scalar>("molarMass");
+      if (!std::isfinite(molarMass[speciesi]) || molarMass[speciesi] <= 0) {
+        FatalErrorInFunction << "Species " << speciesName
+          << " requires molarMass > 0 when specified. Got "
+          << molarMass[speciesi] << exit(FatalError);
+      }
+    }
+    LESTO::readFormula(speciesDict, molarMass[speciesi]);
+
     if (state[speciesi] == "gas") {
 
       diffusionModel[speciesi] = speciesDict.getOrDefault<word> (
@@ -588,10 +601,11 @@ int main(int argc, char *argv[]) {
       );
 
       if (diffusionModel[speciesi] != "constant"
-        && diffusionModel[speciesi] != "PbI2He") {
+        && diffusionModel[speciesi] != "PbI2He"
+        && diffusionModel[speciesi] != "ChapmanEnskog") {
         FatalErrorInFunction << "Unknown diffusivityModel "
           << diffusionModel[speciesi] << " for species " << speciesName
-          << ". Choose constant or PbI2He." << exit(FatalError);
+          << ". Choose constant, PbI2He or ChapmanEnskog." << exit(FatalError);
       }
 
       if (diffusionModel[speciesi] == "constant") {
@@ -626,6 +640,10 @@ int main(int argc, char *argv[]) {
         Info<< "Species " << speciesName << ": field " << fieldName
           << ", diffusivityModel = constant, D = " << D << " m2/s" << nl;
 
+      } else if (diffusionModel[speciesi] == "ChapmanEnskog") {
+
+        #include "createChapmanEnskogDiffusivity.H"
+
       } else {
 
         if (speciesName != "PbI2_g") {
@@ -657,14 +675,7 @@ int main(int argc, char *argv[]) {
     ----------------------------------------------------------------------*/
     species[speciesi].oldTime();
 
-    if (speciesDict.found("molarMass")) {
-      molarMass[speciesi] = speciesDict.get<scalar>("molarMass");
-      if (!std::isfinite(molarMass[speciesi]) || molarMass[speciesi] <= 0) {
-        FatalErrorInFunction << "Species " << speciesName
-          << " requires molarMass > 0 when specified. Got "
-          << molarMass[speciesi] << exit(FatalError);
-      }
-    }
+
   }
 
   /*-------------------------------------------------------------------------
@@ -673,6 +684,8 @@ int main(int argc, char *argv[]) {
   created before the WALL mask below, which only the mock path uses.
   -------------------------------------------------------------------------*/
   #include "createPhaseChange.H"
+  LESTO::gasRespeciation respeciation(mesh, thermo, rho, species,
+    speciesNames, state, molarMass, phaseChange);
 
   /*-------------------------------------------------------------------------
   The source fields source_<species> belong to the thermochemistry of model
@@ -834,11 +847,15 @@ int main(int argc, char *argv[]) {
       if (state[speciesi] == "gas") {
         if (phaseChange.pairOfGas(speciesi) >= 0) {
           #include "solvePairedGasSpecies.H"
+        } else if (respeciation.gasOnly(speciesi)) {
+          #include "solveLedgeredGasSpecies.H"
         } else {
           #include "solveGasSpecies.H"
         }
       }
     }
+
+    respeciation.apply();
 
     /*-------------------------------------------------------------------------
     model mock: the integrated sources, the solid solve and the balance of

@@ -1922,7 +1922,9 @@ gas profile differed by 7e-9 of its peak (plan section 18, item 9).
   optional xGEMS start-up call of the main branch (`LESTO_XGEMS`, see
   Building) only equilibrates a demo system.  Several pairs are read (one
   GEMS3K call serves all pairs of an element), but the balance of a pair
-  assumes the same formula for gas and condensate (Pb-Bi-I: M10).
+  requires the same formula for gas and condensate. M10a adds independent
+  PbI2/BiI3 pairs and element accounting; re-speciation and shared/reactive
+  condensates remain future M10 work.
 - `layer distance` has no `wallResistance halfCell` (a cell of the second
   layer has no half cell of a wall face).
 - The carrier of `setFrozenCarrier` is the T-Flows parity carrier of the
@@ -2701,3 +2703,235 @@ alike in every step (plan section 26, item 11, and section 27).  So does
 and 20 minutes, 0.18 to 0.29 s per step; 26 core-hours), those on the
 paper-mode carrier 4 h 22 min (the second M7 study); their revalidation
 took 2 minutes.
+
+## M10a: independent species pairs and element accounting
+
+M10a adds simultaneous PbI2/BiI3 transport with different formulas and
+kinetics, prescribed multi-species release, and separate inventory
+reservoirs in a shared boat region. Each pair remains independent; gas
+re-speciation, reactive deposition and shared condensates belong to later
+M10 milestones. `run/030-pbi2-bii3-channel` is the first qualification case.
+
+Add formulas in `constant/speciesTransportProperties`:
+
+```foam
+species (PbI2_g PbI2_s BiI3_g BiI3_s);
+PbI2_g { state gas; diffusivityModel PbI2He;
+         molarMass 0.46100894; formula { Pb 1; I 2; } }
+PbI2_s { state solid; molarMass 0.46100894; formula { Pb 1; I 2; } }
+BiI3_g { state gas; diffusivityModel constant; D 1e-4;
+         molarMass 0.58969381; formula { Bi 1; I 3; } }
+BiI3_s { state solid; molarMass 0.58969381; formula { Bi 1; I 3; } }
+```
+
+Formulas are optional for legacy cases. When used, every pair needs a
+matching gas and condensate formula; each species declaring a formula
+must declare `molarMass`. Positive integer atom counts and the calculated
+mass are checked, with relative tolerance 1e-6. The explicit atomic-mass
+registry currently covers Pb, Bi, I, He, Ar, N, O, H and K. Formula records
+are written to `uniform/phaseChangeLayout` and changes are refused on
+restart. Element accounting covers the configured gas/condensate pairs.
+
+An optional per-pair `HKS` dictionary overrides `HKSCoeffs`:
+
+```foam
+pairs {
+  BiI3_g {
+    condensed BiI3_s;
+    HKS { accommodation 0.8; Ce 1; kineticScale 1; }
+    vapourPressure {
+      file "$LESTO_M10_DATA/pv_BiI3_phases.csv";
+      phases ("BiI3(cr)" "BiI3(l)");
+      units log10Pa; interpolation logInverseT; outOfRange fatal;
+    }
+  }
+  // PbI2_g has its own condensed/vapourPressure entries as before.
+}
+```
+
+The accommodation must be finite and in (0, 1]; Ce and kineticScale must
+be finite and nonnegative. Inventory samples can override their Ce and
+kineticScale. Without per-pair `HKS`, legacy inventory defaults remain 1,
+while wall kinetics keep using `HKSCoeffs`.
+
+A shared source schedule uses species amounts in mol:
+
+```foam
+samples {
+  boat {
+    amounts { PbI2_g 4.84e-8; BiI3_g 6.17e-8; }
+    selection {
+      boat { action use; source box; box (.01 .002 -1) (.02 .0028 1); }
+    }
+    mode release; startTime 0; duration 2;
+  }
+}
+```
+
+Use `mode inventory; areaPerVolume 4000;` instead of the release schedule
+for HKS reservoirs; an optional `removeTime` removes all listed reservoirs
+on the same clock. Legacy `pair`/`amount` still works. Do not mix the two
+syntaxes. Internally a multi-species source has names
+`<sample>__<gasSpecies>`, which appear in restart records. These names must
+not collide with explicit sample names. Different pairs may share cells;
+samples of the same pair must be disjoint, and all samples remain disjoint
+from the wall interaction layer. Shared cells have one exchange-cell
+entry containing each pair's own reservoir element. Pair profiles exclude
+only the gas in that pair's own sample cells from `wallPlusGas`.
+
+`diffusivityModel ChapmanEnskog` is available for dilute binary transport.
+Replace `D` with explicitly sourced Lennard-Jones parameters:
+
+```foam
+BiI3_g {
+  state gas; molarMass 0.58969381; formula { Bi 1; I 3; }
+  diffusivityModel ChapmanEnskog;
+  ChapmanEnskogCoeffs {
+    sigma 5; epsilonOverK 300;             // EXAMPLE estimates, not validated BiI3 data
+    carrierSigma 2.576; carrierEpsilonOverK 10.22;
+    carrierMolarMass 0.004002602;
+  }
+}
+```
+
+Sigma is in angstrom, epsilon/k in K, molar masses in kg/mol. The frozen
+T and absolute p are in K and Pa. Parameters and states must be finite and
+positive. Lorentz–Berthelot mixing and the Neufeld diffusion collision
+integral produce D in m²/s once at startup; `pressureUnit` does not change
+this model's SI inputs. The existing PbI2He correlation is unchanged. The
+example parameters illustrate syntax and must be replaced by documented
+estimates for research runs. The implementation references
+[Neufeld et al. (1972)](https://doi.org/10.1063/1.1678363) and the SI
+expression in [Langenberg et al. (2020)](https://doi.org/10.5194/acp-20-3669-2020).
+
+With formulas and balance `writeFile yes`, element ledgers are written to
+`postProcessing/phaseChangeElements/<startTime>/<element>.dat`, in mol of
+atoms. Every entry is a compensated stoichiometric `nu/M` sum of the
+existing pair ledgers; no second accumulated restart state is introduced.
+The files include gas, wall, sample, supplied, closure, the independently
+summed pairClosure and reference. Transport is positive outward, as in
+the pair ledger. Restart files begin a new output segment.
+
+With profiles enabled, `element_<element>_<binSet>.dat` uses the existing
+conservative binning, with gas/wall/sample and observable in mol of
+atoms/m; `molarMass 1` is the unit conversion for these already elemental
+amounts. Formula-enabled pair and element profiles also record `Tpeak`,
+the maximum bin of the selected observable and its wall temperature.
+Insignificant peaks or bins without wall temperature report none. `Tpeak`
+is separate from the existing 1% onset `Tdep`; peak locations depend on
+bin size. Legacy cases without formulas keep their original output format.
+
+Run `tests/Alltest M10a` (or `all`). The code gates use synthetic Bi tables.
+Set `LESTO_M10_NASA`, `LESTO_M10_THERMOFUN` and `LESTO_M10_DATA` for the
+external-data gates; otherwise those gates report NOTRUN. Generator usage
+and redistribution boundaries are documented in
+`../../thermochemistry/systems/README.md`.
+
+Final M10a verification on 2026-10-06: `tests/Alltest all` on v2412,
+with external data, reports 310 passed, 0 failed, 1 not run. All seven
+M10a gates pass. M4.6 builds every source against local v2606 with zero
+warnings; M0.4 is not run because this invocation uses v2412. Original
+regression logs/fields, run/012–015 excerpts, M7 and M9 gates pass.
+The separate Liu benchmark preparation suite passes all 6 tests.
+The 31 completed long studies also pass five-step old/new binary probes:
+35 additional checks pass, none fail. Their fresh whole-trajectory closure
+gate M4.17 remains NOTRUN; the historical trajectories are revalidated,
+not rerun in full.
+
+## M10b: homogeneous gas re-speciation
+
+`respeciation` is optional. With no entry, or `engine none`, the existing
+M0–M10a paths keep their arithmetic and outputs. `engine kernel` solves the
+ideal-gas equilibrium of Pb, Bi and I after all gas transport equations,
+once per scheduled physical step. Condensed phases are suppressed in this
+calculation; the bounded HKS exchange continues to handle deposition.
+
+```foam
+respeciation
+{
+    engine kernel;
+    species (Pb_g PbI_g PbI2_g Bi_g Bi2_g BiI_g BiI3_g I_g I2_g);
+    formationConstants "<constant>/log10Kf_PbBiI.csv";
+    minTemperature 350;
+    updateInterval 1;
+}
+```
+
+Every participating gas needs its integer `formula` and checked
+`molarMass`. Include every paired gas and the monatomic gas of every
+represented element. The kernel supports gases containing Pb or Bi with
+iodine, plus iodine species; mixed Pb-Bi molecules are rejected. Formation
+constants use monatomic gases and the 1 bar standard state. The generator
+is `thermochemistry/systems/make_kf_tables.py`. Standard-state constants
+are cached for the frozen cell temperatures. Below `minTemperature`, gas
+values remain those of the transport solve. Exactly absent elements stay
+absent; an invalid negative element total leaves that cell unchanged and
+is counted. Failed equilibrium or a balance residue above 1e-14 stops the
+run. A slightly negative species can recover through equilibrium when its
+element totals remain valid; no species is clipped.
+
+Gas-only participants use the same unrelaxed, conservative Euler
+transport equation as the paired path with zero exchange. Their final
+solve needs `relTol 0`; optional `<field>Final` entries are supported.
+The flux-form matrix defect is booked independently of the chemistry.
+They can enter through initial fields or boundaries; sample release still
+uses the existing condensate-pair sample interface. Combining re-speciation
+with `HKSCoeffs speciation lagged` is refused. `engine GEMS` belongs to
+M10c and is not accepted by this stage.
+
+The existing pair ledger retains its binary layout and balance-file
+columns. Its supplied amount includes the reaction amount from a separate
+species account when the new engine is active. New binary global lists
+are written with every field write:
+
+- `uniform/phaseChangeSpecies`: initial gas, release, boundary transport,
+  exchange, solver defect, restart, REACTION, COPRODUCT, held gas and
+  cumulative absolute reaction variation, with compensated sums. COPRODUCT
+  is zero until reactive channels are added. Species references include
+  reaction variation so a small net reaction does not erase a large
+  cumulative transfer history.
+- `uniform/phaseChangeElements`: compensated CONVERSION amounts in mol of
+  Pb, Bi and I atoms. Each is the measured element residue of the stored
+  before/after gas masses. Element supplied amounts use this rounding
+  transfer, while the element reaction sum is also printed separately.
+- `uniform/phaseChangeCondensates`: per paired condensate, initial wall and
+  sample amounts, current wall and sample amounts, exchange, removal,
+  clamping and restart. Entries follow the participating pair order.
+
+The layout records the engine, ordered species, formulas, molar masses, temperature
+threshold, update interval, ledger version and formation-table content
+hash. A restart with changed settings or missing new accounts stops.
+The kernel starts cold on every call, so no unsaved potential state changes
+restart results. Same-decomposition binary restarts are byte-identical in
+serial and on four ranks. Gas-only species contribute to the element
+profiles, including the iodine observable. Each update reports calls,
+iterations, invalid cells, the largest residue and mole-fraction/negative
+mass monitors for every participating gas.
+
+`tests/Alltest M10b` adds independent Decimal references, two initial
+species splits in closed boxes at 450/1000 K, disabled-mode comparisons,
+serial/MPI closure and restart, input refusals, written-field equilibrium
+checks, and optional external thermodynamic checks. Written-field and
+idempotence differences are normalized by the largest element amount;
+reference species comparisons use relative errors for species above
+1e-10 of that amount. The external exact GEMS oracle is polished to a
+2e-15 residual target before comparing all 160740 stored gas-map inputs;
+the original 1e-13 oracle stopping tolerance was insufficient for some
+minor iodine species. No external thermodynamic records are bundled.
+
+The reproducible preliminary case is
+[`run/031-pbbi-gas-speciation`](../../run/031-pbbi-gas-speciation/readme.md).
+Its common diffusivity and carrier ramp are provisional. In the 1173 K
+prescribed-source study, the 1 ms BiI3 deposit differs from M10a by 0.1332%
+in 1 cm bins, and the 2 ms to 1 ms change is 0.0575%; both are below the
+1% gates. PbI2 differences are smaller. Experimental validation still
+needs the physical thermal/carrier inputs and source constraints.
+
+On 2026-10-06, `tests/Alltest all` completed with 319 PASS, 0 FAIL and
+1 NOTRUN. All nine M10b gates passed with the external inputs enabled,
+including the complete 160740-point oracle comparison and the 4/2/1 ms
+channel study. Representative cold kernel calls took 16.2 us. Both the
+v2412 build and the separate v2606 Debug compile had zero warnings.
+M0.4 was NOTRUN because this invocation used v2412; M4.6 tested the
+v2606 compilation. The hours-long M4long/M7long studies are separate
+invocations.
