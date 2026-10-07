@@ -285,3 +285,72 @@ MPLCONFIGDIR=/tmp/lesto-matplotlib python3 thermochemistry/benchmarks/liu2025/an
 `corrector_probe.py` and `positivity_probe.py` reproduce the diagnostics
 using the unchanged private solver in an OpenFOAM v2412 environment; each
 requires a fresh `--out` directory. Both preserve the original sources.
+
+## Follow-up qualification study (2026-10-07)
+
+The completed 15-case matrix remains the baseline. A separate 64-case
+follow-up study audits numerical convergence and explicitly provisional
+physical assumptions using the same private corrected solver. The
+[physical input audit](physical_input_audit/report.html) records the
+available evidence, unresolved coefficients and cooling history, and
+conditional three-hour continuations of the measured late CFD rates.
+Those continuations are analytical projections, not three-hour CFD runs.
+
+The follow-up matrix consists of:
+
+- Four 18,432-cell / 1 ms / 60 s cases, compared with the original 2 ms cases.
+- Eight new mesh cases: 256×32 and 576×72 cells, all at 2 ms for 60 s.
+  Together with the original 384×48 mesh this gives a uniform ratio of 1.5.
+- Eight common-diffusivity cases (0.5 and 2 times the provisional coefficient),
+  and four cases selecting the existing PbI2He model for PbI2 alone.
+- Eight iodide-accommodation cases (0.1 and 0.01); metal-channel defaults
+  remain at unity. These are assumptions, not measured wall coefficients.
+- Eight cases shifting the source by one 15 mm boat length in either direction.
+  The empty-tube carrier still omits the boat obstruction.
+- Twelve source-loading cases between the existing 0.1% and 1% branches,
+  spanning both columns and both BiI thermodynamic variants.
+- Four 0 °C flow-reference alternatives. Brooks' 5850E manual uses that
+  nominal standard convention; the experimental controller's specific
+  calibration remains unconfirmed.
+- Four silica alignment hypotheses derived separately from the PbI2 and
+  BiI3 curve/label conflicts. Neither hypothesis is a corrected measurement.
+- Four closed, isothermal post-flow restarts from 60 to 80 s, with source
+  release expired and zero carrier flux. These preserve the existing
+  inventory and test redistribution without inventing a cooling trajectory.
+
+Every new configuration receives a ten-step native smoke check before the
+full study starts. Inputs, source rates, table hashes and private solver are
+fingerprinted. A durable pipeline runs up to 16 independent serial jobs,
+records progress in `work/followup-20261007/run_state.json`, and generates
+[the follow-up report](followup_results/report.html) plus CSVs, final profiles and conditional grid
+estimates automatically when the full jobs finish. Unfinished cases remain
+explicitly pending. Scientific validation is not inferred from numerical PASS.
+
+Nineteen Python benchmark/analysis checks pass. The core solver and its
+qualification from the completed matrix are unchanged. No new aggregate
+Alltest or optional-build claim is made. Raw fields, logs, binaries and
+restricted thermodynamic inputs remain outside git.
+
+Reproduce into a fresh work directory after loading OpenFOAM v2412:
+
+```bash
+python3 thermochemistry/benchmarks/liu2025/followup_study.py prepare \
+  --out "$study_work" --nasa "$LESTO_M10E_NASA" --tf "$LESTO_M10E_THERMOFUN" \
+  --carrier-tool "$carrier_tool" --full-carriers "$full_carriers"
+python3 thermochemistry/benchmarks/liu2025/followup_study.py finalise --out "$study_work"
+python3 thermochemistry/benchmarks/liu2025/followup_study.py smoke --out "$study_work" --jobs 8
+python3 thermochemistry/benchmarks/liu2025/followup_study.py run \
+  --out "$study_work" --jobs 16 --report-out run/034-liu2025/followup_results
+```
+
+`launch_followup.sh` wraps the audit, smoke, full-run and reporting stages;
+`followup_study.py launch` detaches it for durable execution. It performs no
+automatic git writes. `prewarm_carriers.py` optionally builds independent
+carriers in isolated staging directories and publishes only audited outputs.
+If another preparer already started a destination, staging is retained rather
+than replacing an active or completed carrier.
+
+The [launch snapshot](followup_launch.json) records 64 native smoke PASS, zero
+equilibrium failures and nine audited carriers. All 64 full cases were queued
+on 7 October with 16 concurrent slots. The initial report explicitly shows
+zero completed cases; it is regenerated after the native jobs finish.

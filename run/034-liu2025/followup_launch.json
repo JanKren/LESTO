@@ -1,0 +1,699 @@
+{
+  "status": "RUNNING",
+  "captured_utc": "2026-10-07T09:45:43.935442+00:00",
+  "started_utc": "2026-10-07T09:43:49.626162+00:00",
+  "case_status_counts": {
+    "RUNNING": 16,
+    "QUEUED": 48
+  },
+  "planned_cases": 64,
+  "categories": {
+    "numerical": 12,
+    "transport": 12,
+    "kinetics": 8,
+    "source_geometry": 8,
+    "source_loading": 12,
+    "flow_reference": 4,
+    "silica_alignment": 4,
+    "shutdown": 4
+  },
+  "jobs": 16,
+  "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+  "baseline_solver_source_commit": "fe214c6",
+  "study_manifest_sha256": "4d98f95da81b9afdd33bf91d4cfea5ec352946cfdc514ed4bebaf4cbce6b7143",
+  "smoke_summary_sha256": "d71b471a5b7be209f2087ad48a4547e1ed7fbc3cd0c53e5d75df8864232fcb67",
+  "native_smoke_PASS": 64,
+  "native_smoke_FAIL": 0,
+  "smoke_steps_per_case": 10,
+  "max_smoke_relative_element_closure": 8.854521880325612e-16,
+  "max_smoke_equilibrium_solver_failures": 0,
+  "audited_carriers": 9,
+  "python_tests_PASS": 19,
+  "execution_scripts_sha256": {
+    "thermochemistry/benchmarks/liu2025/followup_study.py": "74637c86bee0941198b2cfa91d3cc5b30d827dc0911667a9b5129b32628d970d",
+    "thermochemistry/benchmarks/liu2025/launch_followup.sh": "aa15b604bdf9920f0849713c3cc7bb60ba10bf9971873c013db0bc552aeb286c",
+    "thermochemistry/benchmarks/liu2025/report_followup.py": "844f81a2a5a37fe770ae76e8262d6e843dd5ace7723862f79f2d78b867e08f3e",
+    "thermochemistry/benchmarks/liu2025/qualify_inputs.py": "31983e6522a62047211a6aed93167546be12502e28cd9ade5468cc8306a68414",
+    "thermochemistry/benchmarks/liu2025/prewarm_carriers.py": "d158ee174bc9e676dde006d1e95981629457ab8ad2ca6133df0542ac8ab54d8b",
+    "thermochemistry/benchmarks/liu2025/test_followup.py": "63747e169a72a579f14d9491000ecdf4607d84482cf8eacc2192de902de0c1ca"
+  },
+  "cases": [
+    {
+      "case": "PbI2_SS_Q1_baseline__dt1ms",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "category": "numerical",
+      "changes": {
+        "dt_s": 0.001,
+        "cells": 18432
+      },
+      "manifest_sha256": "b609358394ba5fce852f6923e3928b5835e6ee5d785f55d2187f3e985f7275b9"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__dt1ms",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "category": "numerical",
+      "changes": {
+        "dt_s": 0.001,
+        "cells": 18432
+      },
+      "manifest_sha256": "e7bb8f00167d1bfee5fc34916e0cb4a0c82c9f1d53446193812e109e82ee5b3f"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__dt1ms",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "numerical",
+      "changes": {
+        "dt_s": 0.001,
+        "cells": 18432
+      },
+      "manifest_sha256": "d907faf338306521dd0f4453b085f11176cbdb7bbfedd599d4def9d496de0fc5"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__dt1ms",
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "category": "numerical",
+      "changes": {
+        "dt_s": 0.001,
+        "cells": 18432
+      },
+      "manifest_sha256": "c0b2e21440bbab791165387fd3583814a8cccf25dedcfaf71508f6c77a688147"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__grid256x32",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "category": "numerical",
+      "changes": {
+        "nx": 256,
+        "nr": 32,
+        "cells": 8192,
+        "dt_s": 0.002
+      },
+      "manifest_sha256": "fdc4b1429c8def342c1a54ce87b13e3fd3fd2a6a5fc1a8601e7aac1ddb8b2cab"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__grid256x32",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "category": "numerical",
+      "changes": {
+        "nx": 256,
+        "nr": 32,
+        "cells": 8192,
+        "dt_s": 0.002
+      },
+      "manifest_sha256": "4a556e4527003d529734483a46535fc9ec49291b001092405c7947e12d1adaf9"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__grid256x32",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "numerical",
+      "changes": {
+        "nx": 256,
+        "nr": 32,
+        "cells": 8192,
+        "dt_s": 0.002
+      },
+      "manifest_sha256": "5531dfa2646d1682003d61a7f01738aad60687c22789654ca1c703d7413ac7eb"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__grid256x32",
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "category": "numerical",
+      "changes": {
+        "nx": 256,
+        "nr": 32,
+        "cells": 8192,
+        "dt_s": 0.002
+      },
+      "manifest_sha256": "63b502a1ab55e80ffc6ae899dbd94ca35d90f96ff1cf9a0bad5d0ea526420d63"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__grid576x72",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "category": "numerical",
+      "changes": {
+        "nx": 576,
+        "nr": 72,
+        "cells": 41472,
+        "dt_s": 0.002
+      },
+      "manifest_sha256": "34a70a3cb2626f54c3bb00186f63088b681bd37768cc66dcb576d897c20a1aae"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__grid576x72",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "category": "numerical",
+      "changes": {
+        "nx": 576,
+        "nr": 72,
+        "cells": 41472,
+        "dt_s": 0.002
+      },
+      "manifest_sha256": "a23a6c9d8e4781110ef05a20cce06d4f1ba9c398dd0110f0bb1f9adc01ab1c97"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__grid576x72",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "numerical",
+      "changes": {
+        "nx": 576,
+        "nr": 72,
+        "cells": 41472,
+        "dt_s": 0.002
+      },
+      "manifest_sha256": "68bc3ae80931487b3c881c7427dfea384d479a963f10b137e29d82964c310331"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__grid576x72",
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "category": "numerical",
+      "changes": {
+        "nx": 576,
+        "nr": 72,
+        "cells": 41472,
+        "dt_s": 0.002
+      },
+      "manifest_sha256": "370b4f255d35dd6e13aab3e8d0328613f19ec3024a8e401ea87ec265f9a29e35"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__D5e-05",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "category": "transport",
+      "changes": {
+        "constant_D_m2_s": 5e-05
+      },
+      "manifest_sha256": "472fca574ff3e4acad23da1ad2273f30ac241313a1d0b6047cffc87dc4293eae"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__D0.0002",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "category": "transport",
+      "changes": {
+        "constant_D_m2_s": 0.0002
+      },
+      "manifest_sha256": "ba7098a8541bc060e0414f70e598f08fe5fb790d8fa054e343397d5f716b1ba3"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__alpha0.1",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "category": "kinetics",
+      "changes": {
+        "iodide_mass_accommodation": 0.1,
+        "metal_channel_mass_accommodation": 1,
+        "scope": "PbI2/BiI3 pair accommodation changed; wall-channel defaults retained."
+      },
+      "manifest_sha256": "a847d1e039d7b14ae5bd288711a0ba2965c4e1a31ac20fd2474770c5556d500c"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__alpha0.01",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "category": "kinetics",
+      "changes": {
+        "iodide_mass_accommodation": 0.01,
+        "metal_channel_mass_accommodation": 1,
+        "scope": "PbI2/BiI3 pair accommodation changed; wall-channel defaults retained."
+      },
+      "manifest_sha256": "4748c60a04ce4fdc0e91a5b3450726fe05fbc0fa500533122199417c4c9b4977"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__boatupstream",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "category": "source_geometry",
+      "changes": {
+        "source_axial_shift_m": -0.015
+      },
+      "manifest_sha256": "cedb333a08d7e048b31c441800d5c71fa1726fe33cdcfd2d193ee91c12ba36a7"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__boatdownstream",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "category": "source_geometry",
+      "changes": {
+        "source_axial_shift_m": 0.015
+      },
+      "manifest_sha256": "8e5029e7e63bc8cd5477583ac2c37d07d20d241dc479fddea6ba2934a1bc38aa"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__PbI2He",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "category": "transport",
+      "changes": {
+        "PbI2_diffusivity_model": "PbI2He",
+        "other_species_D_m2_s": 0.0001
+      },
+      "manifest_sha256": "78389a194cb2d881273cebf4451ca99237361b32d7decde1976275bfbcb4e3af"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__D5e-05",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "category": "transport",
+      "changes": {
+        "constant_D_m2_s": 5e-05
+      },
+      "manifest_sha256": "739924cdf08998105a083954078620f15e991cfac077f893eca667b55796bac4"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__D0.0002",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "category": "transport",
+      "changes": {
+        "constant_D_m2_s": 0.0002
+      },
+      "manifest_sha256": "606803741a8c65de4f671272bd44398b4de7e3b1c80473c12df62f68bbb7aa43"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__alpha0.1",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "category": "kinetics",
+      "changes": {
+        "iodide_mass_accommodation": 0.1,
+        "metal_channel_mass_accommodation": 1,
+        "scope": "PbI2/BiI3 pair accommodation changed; wall-channel defaults retained."
+      },
+      "manifest_sha256": "be8c76781b629bf57d275fdd713b077eb8d53d4134b3dfc46b0c0b71d012526f"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__alpha0.01",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "category": "kinetics",
+      "changes": {
+        "iodide_mass_accommodation": 0.01,
+        "metal_channel_mass_accommodation": 1,
+        "scope": "PbI2/BiI3 pair accommodation changed; wall-channel defaults retained."
+      },
+      "manifest_sha256": "ca49ed88df49519a5d54cf960bb553452b69475c41b6e0efaf8de1192ea413e8"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__boatupstream",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "category": "source_geometry",
+      "changes": {
+        "source_axial_shift_m": -0.015
+      },
+      "manifest_sha256": "e85f4327e287779e942bb2bd6fc2755b98d1df63140ec848cf303784d227c681"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__boatdownstream",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "category": "source_geometry",
+      "changes": {
+        "source_axial_shift_m": 0.015
+      },
+      "manifest_sha256": "dc8785820ddde358646694da39b88ea7fc517ee0070a5b8a703921af97182603"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__PbI2He",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "category": "transport",
+      "changes": {
+        "PbI2_diffusivity_model": "PbI2He",
+        "other_species_D_m2_s": 0.0001
+      },
+      "manifest_sha256": "1eaecd3f5a2338ee51f82afaf33a82e21c6dacd1f214b326fce750b328927942"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__D5e-05",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "transport",
+      "changes": {
+        "constant_D_m2_s": 5e-05
+      },
+      "manifest_sha256": "6a33daa53ed55f23a3a46b630f147be2321c17c3424fbf7bdee60f9d97f5a2a3"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__D0.0002",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "transport",
+      "changes": {
+        "constant_D_m2_s": 0.0002
+      },
+      "manifest_sha256": "b6ae48279cbbd3adc022cd42af5c87d95ec3741a085fe5c72b950047888fc9f1"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__alpha0.1",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "kinetics",
+      "changes": {
+        "iodide_mass_accommodation": 0.1,
+        "metal_channel_mass_accommodation": 1,
+        "scope": "PbI2/BiI3 pair accommodation changed; wall-channel defaults retained."
+      },
+      "manifest_sha256": "1ca85424e481facec75d437ff2976a760750d6f6966a1a38c5df2ed09cf3d654"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__alpha0.01",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "kinetics",
+      "changes": {
+        "iodide_mass_accommodation": 0.01,
+        "metal_channel_mass_accommodation": 1,
+        "scope": "PbI2/BiI3 pair accommodation changed; wall-channel defaults retained."
+      },
+      "manifest_sha256": "1910728f0f919d3fb6dadd0d4738ad5b1f6666f7a5af489ea15c0c74878d6af7"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__boatupstream",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "source_geometry",
+      "changes": {
+        "source_axial_shift_m": -0.015
+      },
+      "manifest_sha256": "bf99c9615aa1b28d9e0edee1f3531a6d169d220e53914c3e54538b321a250a6d"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__boatdownstream",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "source_geometry",
+      "changes": {
+        "source_axial_shift_m": 0.015
+      },
+      "manifest_sha256": "6c6d037d185d104d678de11f6ebb00900a896a3d80405af14f21549c7d6c3141"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__PbI2He",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "transport",
+      "changes": {
+        "PbI2_diffusivity_model": "PbI2He",
+        "other_species_D_m2_s": 0.0001
+      },
+      "manifest_sha256": "af1142dcbe9eb1ed65233ec1f7040523a7603edb73f6bb4496e439075a5444e6"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__D5e-05",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "category": "transport",
+      "changes": {
+        "constant_D_m2_s": 5e-05
+      },
+      "manifest_sha256": "90a0fda30548c9feec03ea26468ac8791e5d6e376fb40652d44ee17b18073850"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__D0.0002",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "category": "transport",
+      "changes": {
+        "constant_D_m2_s": 0.0002
+      },
+      "manifest_sha256": "679cc94d7e6a967d1d7cb49649e2f5b0b8812e453255a2000eea4eb5f3225160"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__alpha0.1",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "category": "kinetics",
+      "changes": {
+        "iodide_mass_accommodation": 0.1,
+        "metal_channel_mass_accommodation": 1,
+        "scope": "PbI2/BiI3 pair accommodation changed; wall-channel defaults retained."
+      },
+      "manifest_sha256": "451e6c5ec2f5b04bffdd3d2ae93d6ce0c44c0dd308c558fb60bdccb8728db533"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__alpha0.01",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "category": "kinetics",
+      "changes": {
+        "iodide_mass_accommodation": 0.01,
+        "metal_channel_mass_accommodation": 1,
+        "scope": "PbI2/BiI3 pair accommodation changed; wall-channel defaults retained."
+      },
+      "manifest_sha256": "1ac27c8548ee11148f35e943f7a1c16673b29f055293200743c30f494d8c7ce6"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__boatupstream",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "category": "source_geometry",
+      "changes": {
+        "source_axial_shift_m": -0.015
+      },
+      "manifest_sha256": "1b74c91bdf1582fb739f9a5fe1c1bb14b1d7e779dace07714467794173013b0a"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__boatdownstream",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "category": "source_geometry",
+      "changes": {
+        "source_axial_shift_m": 0.015
+      },
+      "manifest_sha256": "aa2949aa32b8c5128022a2c07a548d84679c42a3ba9a2ca0218ed8b730e2d373"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__PbI2He",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "category": "transport",
+      "changes": {
+        "PbI2_diffusivity_model": "PbI2He",
+        "other_species_D_m2_s": 0.0001
+      },
+      "manifest_sha256": "b524b7e80ed5539bf5bb084c5d7c4c4502f2fcfe470b55f806703e93ce2477ec"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__sat0.002",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "source_loading",
+      "changes": {
+        "metal_saturation_fraction": 0.002
+      },
+      "manifest_sha256": "c27e34b7c4d591b620768565c22cf39954520bd4097cd3f32b85d4d1ae246234"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__sat0.00316227766",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "source_loading",
+      "changes": {
+        "metal_saturation_fraction": 0.0031622776601683794
+      },
+      "manifest_sha256": "f635ffee79d45d7f1bcdc989c61b84d2230f213be36d12496d244162dcb019bc"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__sat0.00562341325",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "source_loading",
+      "changes": {
+        "metal_saturation_fraction": 0.005623413251903491
+      },
+      "manifest_sha256": "38b88cd020f38d21d525da8afb5811682caf29b6c3d73ef743fbeb5542e46c66"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__sat0.002",
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "category": "source_loading",
+      "changes": {
+        "metal_saturation_fraction": 0.002
+      },
+      "manifest_sha256": "b15a78a8ae63f3a0ccbd19a380d017c9a0b5bad9adc1fef26af0f70dcabf4f4b"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__sat0.00316227766",
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "category": "source_loading",
+      "changes": {
+        "metal_saturation_fraction": 0.0031622776601683794
+      },
+      "manifest_sha256": "4c4d851117d88b6e2606e7fe3793b071a93bb99939857a8f4a2e4036ab60fc43"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__sat0.00562341325",
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "category": "source_loading",
+      "changes": {
+        "metal_saturation_fraction": 0.005623413251903491
+      },
+      "manifest_sha256": "1240a085b4c8de4292e36696bd98e7075bd5e1fd55ebbaf4403554d8872c8fc5"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01__sat0.002",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.01",
+      "category": "source_loading",
+      "changes": {
+        "metal_saturation_fraction": 0.002
+      },
+      "manifest_sha256": "e9b0cbddfe19e2a693a58047a8d7c86aba13ba4b03af4cc66c83906eba0402e8"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01__sat0.00316227766",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.01",
+      "category": "source_loading",
+      "changes": {
+        "metal_saturation_fraction": 0.0031622776601683794
+      },
+      "manifest_sha256": "5d608b05c2d7ee60b09455a9c89ef07cdc69c3f8a871ff6f9fb9022e0589cbe3"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01__sat0.00562341325",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.01",
+      "category": "source_loading",
+      "changes": {
+        "metal_saturation_fraction": 0.005623413251903491
+      },
+      "manifest_sha256": "b6369ce570e04c24f8606ccee824299866736e6614cf7d344783865e4d6ca0da"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01__sat0.002",
+      "base_case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01",
+      "category": "source_loading",
+      "changes": {
+        "metal_saturation_fraction": 0.002
+      },
+      "manifest_sha256": "7698c8db6db4d56277c98c51ef71b56436429c1f127f00339940a27ea9a78d36"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01__sat0.00316227766",
+      "base_case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01",
+      "category": "source_loading",
+      "changes": {
+        "metal_saturation_fraction": 0.0031622776601683794
+      },
+      "manifest_sha256": "73ed4e5ecf70d0d5d18f1ebc05cf7ce5bf51598fac2784bd7a4cc64d26c418fe"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01__sat0.00562341325",
+      "base_case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01",
+      "category": "source_loading",
+      "changes": {
+        "metal_saturation_fraction": 0.005623413251903491
+      },
+      "manifest_sha256": "30eea93a05e1ef5222e92b573f23e82c4183d83bc6f82b62d0f36b7989f03547"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__flow0C",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "category": "flow_reference",
+      "changes": {
+        "flow_reference_temperature_K": 273.15,
+        "flow_reference_pressure_Pa": 101325
+      },
+      "manifest_sha256": "c8e53bf9aaeb87714885ee75cf494369b02eb6cc47302f23681b67f4b5e9aa34"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__flow0C",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "category": "flow_reference",
+      "changes": {
+        "flow_reference_temperature_K": 273.15,
+        "flow_reference_pressure_Pa": 101325
+      },
+      "manifest_sha256": "46bd881ba39b9f2082bb9cebd4a3dde694734801f29522629a99027b3d228ecb"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__flow0C",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "flow_reference",
+      "changes": {
+        "flow_reference_temperature_K": 273.15,
+        "flow_reference_pressure_Pa": 101325
+      },
+      "manifest_sha256": "64b33d3ccac81a361751dbe92241f73889e10dc42c576fea26b61b53070a76db"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__flow0C",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "category": "flow_reference",
+      "changes": {
+        "flow_reference_temperature_K": 273.15,
+        "flow_reference_pressure_Pa": 101325
+      },
+      "manifest_sha256": "10e7f59a072f3a982382499ddfa3128e5a3d32d347644ff69febfa344402108d"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline__curveShiftPbI2",
+      "base_case": "LBE-I_SiO2_I_Q1_baseline",
+      "category": "silica_alignment",
+      "changes": {
+        "temperature_curve_shift_m": -0.04096367986080896,
+        "scope": "Explicit hypothesis derived from curve/label disagreement; not a corrected measurement."
+      },
+      "manifest_sha256": "c2975aa4d83b4895b03dc305db91ff32f5dd80b2baebf467b28382af1b8f8e7c"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftPbI2",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "category": "silica_alignment",
+      "changes": {
+        "temperature_curve_shift_m": -0.04096367986080896,
+        "scope": "Explicit hypothesis derived from curve/label disagreement; not a corrected measurement."
+      },
+      "manifest_sha256": "daf2b8bedd7bb86a76ed5e0f530b0ac33c5f3a8505ff1ca5efaef2e021f19304"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline__curveShiftBiI3",
+      "base_case": "LBE-I_SiO2_I_Q1_baseline",
+      "category": "silica_alignment",
+      "changes": {
+        "temperature_curve_shift_m": -0.046531462799495715,
+        "scope": "Explicit hypothesis derived from curve/label disagreement; not a corrected measurement."
+      },
+      "manifest_sha256": "dfd9c7248ecc1fff7de2e2080dbba60a8c6fe188d071213852dd7ee6b19c0541"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftBiI3",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "category": "silica_alignment",
+      "changes": {
+        "temperature_curve_shift_m": -0.046531462799495715,
+        "scope": "Explicit hypothesis derived from curve/label disagreement; not a corrected measurement."
+      },
+      "manifest_sha256": "da79aa4242d7d32a6e88360c4b91c471b84e18ebd37ad139bbbda987c28542b2"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__flowStop60to80",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "category": "shutdown",
+      "changes": {
+        "start_time_s": 60,
+        "end_time_s": 80,
+        "release_end_time_s": 60,
+        "carrier_flow": "zero",
+        "ends": "zero normal species flux",
+        "thermal_scope": "Frozen measured temperature field; isothermal relaxation diagnostic, not experimental cooling."
+      },
+      "manifest_sha256": "87ad758a9ad398a6b2402e2f84829808b124240dde999ea02e0350a89debd4c0"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__flowStop60to80",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "category": "shutdown",
+      "changes": {
+        "start_time_s": 60,
+        "end_time_s": 80,
+        "release_end_time_s": 60,
+        "carrier_flow": "zero",
+        "ends": "zero normal species flux",
+        "thermal_scope": "Frozen measured temperature field; isothermal relaxation diagnostic, not experimental cooling."
+      },
+      "manifest_sha256": "dceeb2ed37147e1a3941c4feaf87ca5b876fe348881bc6a4bde39ef768675721"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__flowStop60to80",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "category": "shutdown",
+      "changes": {
+        "start_time_s": 60,
+        "end_time_s": 80,
+        "release_end_time_s": 60,
+        "carrier_flow": "zero",
+        "ends": "zero normal species flux",
+        "thermal_scope": "Frozen measured temperature field; isothermal relaxation diagnostic, not experimental cooling."
+      },
+      "manifest_sha256": "e2784f44f9eada6f701e244a86a1fee3bf9f97887363e4166f3815df3c194517"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__flowStop60to80",
+      "base_case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "category": "shutdown",
+      "changes": {
+        "start_time_s": 60,
+        "end_time_s": 80,
+        "release_end_time_s": 60,
+        "carrier_flow": "zero",
+        "ends": "zero normal species flux",
+        "thermal_scope": "Frozen measured temperature field; isothermal relaxation diagnostic, not experimental cooling."
+      },
+      "manifest_sha256": "71654a06d7ac2899604c93807059bdd44f531438083111e12af5b8f04cb69810"
+    }
+  ],
+  "live_status_path": "run/034-liu2025/work/followup-20261007/run_state.json",
+  "automatic_report": "run/034-liu2025/followup_results/report.html",
+  "physical_input_report": "run/034-liu2025/physical_input_audit/report.html",
+  "qualification": "Full numerical results pending; physical coefficients, calibration and cooling history remain provisional.",
+  "note": "Immutable launch snapshot. Live progress is local; no automatic git writes. Original completed matrix unchanged."
+}

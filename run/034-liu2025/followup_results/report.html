@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>M10e follow-up studies</title>
+    <style>body{font:16px/1.6 system-ui;max-width:1150px;margin:32px auto;padding:0 20px}table{display:block;overflow-x:auto;border-collapse:collapse;font-size:12px}td,th{padding:6px;border-bottom:1px solid #ccc}img{max-width:100%}</style><body>
+    <h1>M10e refinement and physical sensitivity studies</h1><p><strong>0 of 64 follow-up cases complete.</strong> Execution status: RUNNING.</p><p>Numerical cases use the same corrected private solver, source rates, thermodynamic tables and 60 s window.
+    Time-step checks compare 2 versus 1 ms on 18,432 cells. The three-grid sequence is 256×32, 384×48 and 576×72 cells, at 2 ms,
+    with a constant axial/radial refinement ratio of 1.5. The 384×48 results are the completed original matrix.
+    Physical scenarios vary individual assumptions; they are not experimentally qualified alternatives.</p><h2>Case metrics</h2><table><thead><tr><th>case</th><th>category</th><th>cells</th><th>dt s</th><th>BiI3 iodide I pct</th><th>raw profile L1 percentage points</th><th>PbI2 peak C</th><th>BiI3 peak C</th></tr></thead><tbody></tbody></table><h2>Changes from the original case</h2><table><thead><tr><th>case</th><th>species</th><th>profile L1 relative to base</th><th>normalised shape L1</th><th>deposit relative change</th><th>centroid shift cm</th></tr></thead><tbody></tbody></table><h2>Conditional grid estimates</h2><p>Scalar Richardson/GCI calculations follow the
+    <a href="https://www.grc.nasa.gov/www/wind/valid/tutorial/spatconv.html">NASA grid-convergence procedure</a>.
+    Oscillatory, non-decreasing and round-off-scale sequences receive no extrapolation.
+    Three grids alone do not establish an asymptotic regime for the complete distribution. A stable total amount cannot establish profile convergence.
+    Time-discretisation, source selection and non-linear wall/chemical coupling remain relevant.</p><table><thead><tr><th>base case</th><th>species</th><th>functional</th><th>status</th><th>observed order</th><th>fine GCI fraction</th></tr></thead><tbody></tbody></table><h2>Physical scope</h2><p>Silica shifts are explicit hypotheses derived separately from the PbI2 and BiI3 curve/label discrepancy.
+    They must not replace the published figure as a corrected measurement. The 0 °C flow alternative tests the nominal convention in the Brooks 5850E manual;
+    experiment-specific calibration is still unknown. Iodide accommodation changes leave metal-wall-channel accommodation at unity.
+    Boat-position changes omit the boat obstruction, whose complete geometry is unavailable. PbI2He changes only PbI2 transport.
+    All other trace diffusivities remain provisional.</p>
+    <p>The four shutdown cases restart the original 60 s state with release expired, zero carrier flux and zero normal species flux at both ends,
+    then relax isothermally until 80 s. Gas inventory and deposited state are preserved. This tests post-flow redistribution at fixed temperature,
+    not the experimental cooling trajectory or a three-hour exposure. Cooling cannot be uniquely reconstructed from the paper.</p>
+    <p><a href="analysis.json">Machine-readable analysis</a> · <a href="case_metrics.csv">Case metrics CSV</a> ·
+    <a href="comparisons.csv">Comparison CSV</a> · <a href="grid_estimates.json">Conditional grid estimates</a></p></body></html>

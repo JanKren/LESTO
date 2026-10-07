@@ -8405,3 +8405,30 @@ post-experiment cooling. The full analysis, six exportable figures, CSVs,
 final profiles and reproducible analysis/probe scripts are saved in run/034
 and the benchmark package. Fifteen Python checks pass. M10e scientific
 acceptance remains open despite completed numerical matrix execution.
+
+
+### 36.16 Follow-up qualification launched (2026-10-07)
+
+The full-size analysis identifies independent refinement and physical input
+qualification as the next M10e work. A separate 64-case study now covers
+four full-mesh 2/1 ms comparisons, a 256×32 / 384×48 / 576×72 grid sequence
+at fixed 2 ms, and source, transport, iodide-kinetic, geometry, flow-reference,
+silica-alignment and post-flow sensitivities. All cold-start cases retain a
+60 s window; the four flow-stop restarts retain the original 60 s state and
+relax isothermally until 80 s. They do not represent experimental cooling.
+
+The physical evidence audit identifies the nominal Brooks 5850E 0 °C / 1 atm
+standard-flow convention, retains the experiment-specific calibration gap,
+checks internal thermodynamic provenance/temperature coverage, screens the
+existing PbI2He diffusivity, and states missing surface coefficients, boat
+geometry, release history and cooling data explicitly. Conditional three-hour
+profile projections continue 50–60 s rates analytically; no experimental
+release history or cooling curve is fabricated.
+
+A durable pipeline fingerprints inputs and the unchanged private solver,
+checks every configuration with ten native steps, runs up to 16 serial cases
+concurrently, and generates the comparison report automatically. Independent
+scalar convergence examples reject oscillatory and non-decreasing sequences;
+any reported Richardson/GCI estimate remains conditional on the convergence
+assumptions. Nineteen Python checks pass. Full follow-up results are pending;
+this entry adds no new core-solver Alltest or optional-build qualification.

@@ -1,0 +1,653 @@
+{
+  "status": "PHYSICAL_EVIDENCE_AUDITED_WITH_EXPLICIT_REMAINING_GAPS",
+  "created_utc": "2026-10-07T08:44:07.429153+00:00",
+  "source_sha256": "31983e6522a62047211a6aed93167546be12502e28cd9ade5468cc8306a68414",
+  "findings": [
+    {
+      "input": "Flow controller reference",
+      "status": "NOMINAL_PRODUCT_CONVENTION_IDENTIFIED_EXPERIMENT_UNCONFIRMED",
+      "evidence": "Brooks 5850E manual printed p.7: standard flow uses 0 C and 101.3 kPa (760 Torr); laboratory zero adjustment at 21.1 C is a different quantity.",
+      "source": "https://sales.brooksinstrument.com/hubfs/Installation-Manual-5850E-EN.pdf?hsLang=en",
+      "action": "Run 273.15 K / 101325 Pa alternative; retain original 298.15 K assumption as reference.",
+      "helium_molar_flow_ratio_0C_to_25C": 1.0915248032216731
+    },
+    {
+      "input": "Silica temperature coordinates",
+      "status": "INTERNALLY_INCONSISTENT_PAPER_INPUTS",
+      "evidence": "Figure curve and printed temperatures disagree at deposition scan maxima; two species imply different shifts.",
+      "source": "https://doi.org/10.1007/s10967-025-10246-4",
+      "action": "Run two explicitly labelled alignment hypotheses; no unique correction selected."
+    },
+    {
+      "input": "Species diffusion",
+      "status": "PbI2_CORRELATION_AVAILABLE_OTHER_SPECIES_PROVISIONAL",
+      "evidence": "Repository utilities/diffusivity.py derives PbI2-He collision parameters from estimated molecular properties. The C++ curve reproduces that model; this is not an independent gas-diffusion measurement.",
+      "source": "utilities/diffusivity.py; utilities/interpolation.py; applications/rhoFixedFlowFoam/PbI2HeDiffusivity.H",
+      "action": "Compare PbI2He against constant D, and bracket common D by factors 0.5 and 2. No BiI3-specific coefficient fabricated."
+    },
+    {
+      "input": "Mass accommodation",
+      "status": "SURFACE_SPECIFIC_COEFFICIENTS_UNCONFIRMED",
+      "evidence": "A primary BiI3 effusion study derives condensation coefficients, but accessible abstract does not provide transferable values for these steel/silica walls.",
+      "source": "https://doi.org/10.1016/0021-9614(90)90072-X",
+      "action": "Pair accommodation 0.1 and 0.01 are sensitivity assumptions. Do not substitute thermal accommodation coefficients for mass accommodation."
+    },
+    {
+      "input": "BiI thermodynamics",
+      "status": "PROVENANCE_AUDITED_INDEPENDENT_COEFFICIENT_CHECK_PENDING",
+      "evidence": "Internal gas record has explicit temperature coverage, an absolute Gibbs convention and HERACLES/Barin source labels. The 29 kJ/mol shift is not a second measured record.",
+      "source": "https://doi.org/10.1021/j100821a030; https://doi.org/10.1021/ic50060a006; external ThermoFun metadata",
+      "action": "Retain both branches as sensitivity scenarios. Identified primary papers require full coefficient/standard-state reconciliation before replacing the baseline."
+    },
+    {
+      "input": "Boat geometry",
+      "status": "PARTIAL_PUBLISHED_GEOMETRY",
+      "evidence": "Paper specifies about 3 mm boat width and 15 mm length; height, detailed cross-section and exact axial position are not supplied.",
+      "source": "https://doi.org/10.1007/s10967-025-10246-4",
+      "action": "Shift source by one boat length in either direction; empty-tube carrier still omits boat obstruction."
+    },
+    {
+      "input": "Release history",
+      "status": "UNIDENTIFIABLE_FROM_FINAL_SCAN",
+      "evidence": "The paper reports a three-hour evaporation window and final deposits; it does not provide a measured species-release time series.",
+      "source": "https://doi.org/10.1007/s10967-025-10246-4",
+      "action": "Retain three-hour mean release rates; refine saturation 0.2%, 0.316% and 0.562% between existing branches without fitting."
+    },
+    {
+      "input": "Shutdown and cooling",
+      "status": "PROTOCOL_KNOWN_THERMAL_HISTORY_UNAVAILABLE",
+      "evidence": "Sample withdrawal, furnace shutdown and carrier-flow shutdown occur together before cooldown and scanning. No temperature-versus-time trajectory or complete thermal apparatus is given.",
+      "source": "https://doi.org/10.1007/s10967-025-10246-4",
+      "action": "Run closed isothermal flow-stop relaxation from 60 to 80 s and conditional three-hour rate projections. Neither reconstructs experimental cooling."
+    }
+  ],
+  "thermofun_file_sha256": "6555075ec823abfe5ab0feca63e1a2bfd467141202ef53f202aaec3b9a46fe12",
+  "thermodynamic_temperature_coverage": [
+    {
+      "species": "Bi(g)",
+      "lower_K": 273.15,
+      "upper_K": 1999.9999755859,
+      "source_status": "HERACLES/Barin compilation; independent confirmation pending"
+    },
+    {
+      "species": "Bi2(g)",
+      "lower_K": 273.15,
+      "upper_K": 2199.9999755859,
+      "source_status": "HERACLES/Barin compilation; independent confirmation pending"
+    },
+    {
+      "species": "BiI(g)",
+      "lower_K": 273.15,
+      "upper_K": 1999.9999755859,
+      "source_status": "HERACLES/Barin compilation; independent confirmation pending"
+    },
+    {
+      "species": "BiI3(g)",
+      "lower_K": 273.15,
+      "upper_K": 1499.9999755859,
+      "source_status": "HERACLES/Barin compilation; independent confirmation pending"
+    },
+    {
+      "species": "Bi(cr)",
+      "lower_K": 273.15,
+      "upper_K": 550.00000610352,
+      "source_status": "HERACLES/Barin compilation; independent confirmation pending"
+    },
+    {
+      "species": "Bi(l)",
+      "lower_K": 273.15,
+      "upper_K": 1837.15,
+      "source_status": "HERACLES/Barin compilation; independent confirmation pending"
+    },
+    {
+      "species": "BiI(cr)",
+      "lower_K": 273.15,
+      "upper_K": 600.00000610352,
+      "source_status": "HERACLES/Barin compilation; independent confirmation pending"
+    },
+    {
+      "species": "BiI3(cr)",
+      "lower_K": 273.15,
+      "upper_K": 680.85,
+      "source_status": "HERACLES/Barin compilation; independent confirmation pending"
+    },
+    {
+      "species": "BiI3(l)",
+      "lower_K": 273.15,
+      "upper_K": 2000.0,
+      "source_status": "Constructed phase record"
+    }
+  ],
+  "diffusion_screening": [
+    {
+      "T_K": 293.15,
+      "p_Pa": 101325,
+      "PbI2He_D_m2_s": 2.9482092623519223e-05,
+      "ratio_to_constant_1e4": 0.29482092623519224
+    },
+    {
+      "T_K": 400.15,
+      "p_Pa": 101325,
+      "PbI2He_D_m2_s": 5.168137632355253e-05,
+      "ratio_to_constant_1e4": 0.5168137632355253
+    },
+    {
+      "T_K": 427.15,
+      "p_Pa": 101325,
+      "PbI2He_D_m2_s": 5.8110275668601916e-05,
+      "ratio_to_constant_1e4": 0.5811027566860192
+    },
+    {
+      "T_K": 561.15,
+      "p_Pa": 101325,
+      "PbI2He_D_m2_s": 9.436572161482824e-05,
+      "ratio_to_constant_1e4": 0.9436572161482824
+    },
+    {
+      "T_K": 579.15,
+      "p_Pa": 101325,
+      "PbI2He_D_m2_s": 9.97452882563853e-05,
+      "ratio_to_constant_1e4": 0.997452882563853
+    },
+    {
+      "T_K": 641.15,
+      "p_Pa": 101325,
+      "PbI2He_D_m2_s": 0.00011912250978190765,
+      "ratio_to_constant_1e4": 1.1912250978190764
+    },
+    {
+      "T_K": 1173.15,
+      "p_Pa": 101325,
+      "PbI2He_D_m2_s": 0.00033096825426146123,
+      "ratio_to_constant_1e4": 3.309682542614612
+    }
+  ],
+  "duration_projections": [
+    {
+      "case": "PbI2_SS_Q1_baseline",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 3.1666501696682046e-05,
+      "peak_x_cm": 35.99999999999999,
+      "centroid_cm": 37.272180386447914,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 9.997392678423711e-05,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 6.333300339336404e-05,
+      "peak_x_cm": 35.99999999999999,
+      "centroid_cm": 37.272180386447914,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 9.997392678423711e-05,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q1_baseline",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 2.4069603934505757e-07,
+      "peak_x_cm": 50.99999999999999,
+      "centroid_cm": 51.83924177829968,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0003813784797776782,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q1_baseline",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 3.0681411803967866e-07,
+      "peak_x_cm": 56.999999999999986,
+      "centroid_cm": 57.36158096675453,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0003813784797776782,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q1_baseline",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4018344328091516e-06,
+      "peak_x_cm": 56.999999999999986,
+      "centroid_cm": 55.465201281005925,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0003813784797776782,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 3.0244491277153296e-07,
+      "peak_x_cm": 50.99999999999999,
+      "centroid_cm": 51.6694378215992,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00037626902994498945,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 2.656506096816894e-07,
+      "peak_x_cm": 56.999999999999986,
+      "centroid_cm": 57.572105671709174,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00037626902994498945,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4018416545881346e-06,
+      "peak_x_cm": 56.999999999999986,
+      "centroid_cm": 55.02512490936285,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00037626902994498945,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 3.767525735561771e-08,
+      "peak_x_cm": 52.99999999999999,
+      "centroid_cm": 53.4078010420664,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00040383881247782423,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 4.421508372059919e-07,
+      "peak_x_cm": 56.999999999999986,
+      "centroid_cm": 57.35869079762782,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00040383881247782423,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4018030263292136e-06,
+      "peak_x_cm": 56.999999999999986,
+      "centroid_cm": 57.14632032113624,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00040383881247782423,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.1",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 3.7672448882066473e-08,
+      "peak_x_cm": 52.99999999999999,
+      "centroid_cm": 53.407846773714965,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004038317483204769,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.1",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 4.421527016818237e-07,
+      "peak_x_cm": 56.999999999999986,
+      "centroid_cm": 57.358697886679536,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004038317483204769,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.1",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4018030028096046e-06,
+      "peak_x_cm": 56.999999999999986,
+      "centroid_cm": 57.14634531460556,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004038317483204769,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.001",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 3.024449127704394e-07,
+      "peak_x_cm": 50.99999999999999,
+      "centroid_cm": 51.669438152294624,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00037457799660085416,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.001",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 2.6565140329150957e-07,
+      "peak_x_cm": 56.999999999999986,
+      "centroid_cm": 57.411992576303405,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00037457799660085416,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.001",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4018440354154066e-06,
+      "peak_x_cm": 56.999999999999986,
+      "centroid_cm": 54.93410441189833,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00037457799660085416,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 6.866524991566251e-07,
+      "peak_x_cm": 50.99999999999999,
+      "centroid_cm": 50.98816976513242,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00032464679885463164,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 9.536352904336941e-09,
+      "peak_x_cm": 59.0,
+      "centroid_cm": 58.79071733035308,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00032464679885463164,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4019140570262607e-06,
+      "peak_x_cm": 50.99999999999999,
+      "centroid_cm": 51.14739745836059,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00032464679885463164,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.1",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 6.866474793369083e-07,
+      "peak_x_cm": 50.99999999999999,
+      "centroid_cm": 50.988177238960596,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0003246467566022101,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.1",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 9.53970002999899e-09,
+      "peak_x_cm": 59.0,
+      "centroid_cm": 58.790591533220514,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0003246467566022101,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.1",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4019140587638133e-06,
+      "peak_x_cm": 50.99999999999999,
+      "centroid_cm": 51.14745809803689,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0003246467566022101,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 5.268977812446747e-07,
+      "peak_x_cm": 55.99999999999999,
+      "centroid_cm": 56.130295074973006,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004223761085493465,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4407123846701504e-07,
+      "peak_x_cm": 62.999999999999986,
+      "centroid_cm": 63.242308026674046,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004223761085493465,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4860092778903948e-06,
+      "peak_x_cm": 55.99999999999999,
+      "centroid_cm": 58.19886193223983,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004223761085493465,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 5.621519770361678e-07,
+      "peak_x_cm": 55.99999999999999,
+      "centroid_cm": 56.0700581568851,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004175592930546682,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.2057075476147887e-07,
+      "peak_x_cm": 62.999999999999986,
+      "centroid_cm": 63.3859479517946,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004175592930546682,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4860162183567724e-06,
+      "peak_x_cm": 55.99999999999999,
+      "centroid_cm": 57.85082409354379,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004175592930546682,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 4.032894290232659e-08,
+      "peak_x_cm": 57.999999999999986,
+      "centroid_cm": 58.465975498458235,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004847692153093367,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 4.684195636469417e-07,
+      "peak_x_cm": 62.999999999999986,
+      "centroid_cm": 62.752126824672,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004847692153093367,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4859165767454786e-06,
+      "peak_x_cm": 62.999999999999986,
+      "centroid_cm": 62.51946779816837,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004847692153093367,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.1",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 4.032898187360618e-08,
+      "peak_x_cm": 57.999999999999986,
+      "centroid_cm": 58.46597561053775,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004847525425534613,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.1",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 4.684195482350239e-07,
+      "peak_x_cm": 62.999999999999986,
+      "centroid_cm": 62.75220805841333,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004847525425534613,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.1",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.485916608452285e-06,
+      "peak_x_cm": 62.999999999999986,
+      "centroid_cm": 62.51954440863218,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0004847525425534613,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.001",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 5.886429981648604e-07,
+      "peak_x_cm": 55.99999999999999,
+      "centroid_cm": 56.029511558124234,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00041323295708688786,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.001",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.0291231652484952e-07,
+      "peak_x_cm": 62.999999999999986,
+      "centroid_cm": 63.317944824157834,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00041323295708688786,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.001",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4860229459042697e-06,
+      "peak_x_cm": 55.99999999999999,
+      "centroid_cm": 57.54376048673926,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00041323295708688786,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 7.279270437443181e-07,
+      "peak_x_cm": 54.999999999999986,
+      "centroid_cm": 55.86291555471523,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00039199498565595285,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.0066814874562453e-08,
+      "peak_x_cm": 63.99999999999999,
+      "centroid_cm": 64.12952091747327,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00039199498565595285,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4860545321123226e-06,
+      "peak_x_cm": 54.999999999999986,
+      "centroid_cm": 56.0309142062378,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.00039199498565595285,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.1",
+      "species": "PbI2",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 7.279265384107717e-07,
+      "peak_x_cm": 54.999999999999986,
+      "centroid_cm": 55.862916151166644,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0003920010499826793,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.1",
+      "species": "BiI3",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.0067149079789112e-08,
+      "peak_x_cm": 63.99999999999999,
+      "centroid_cm": 64.12951453150592,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0003920010499826793,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.1",
+      "species": "I",
+      "projection_duration_s": 10800.0,
+      "status": "CONDITIONAL_NONNEGATIVE_PROJECTION",
+      "projected_full_column_wall_mol": 1.4860545240609117e-06,
+      "peak_x_cm": 54.999999999999986,
+      "centroid_cm": 56.030920239031865,
+      "residual_gas_I_over_3h_supply_if_inventory_steady": 0.0003920010499826793,
+      "scope": "Analytical continuation of 50\u201360 s net wall rates; not a 3 h CFD run or cooling simulation."
+    }
+  ],
+  "restricted_data_policy": "No external thermodynamic coefficients or evaluated thermodynamic tables included.",
+  "experimental_evidence": "Supplied Liu paper only; manufacturer documentation and other primary publications inform model qualification, not new experimental inputs."
+}

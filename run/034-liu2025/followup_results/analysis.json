@@ -1,0 +1,270 @@
+{
+  "execution_status": "RUNNING",
+  "completed_cases": 0,
+  "planned_cases": 64,
+  "missing_or_failed": [
+    {
+      "case": "PbI2_SS_Q1_baseline__dt1ms",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__dt1ms",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__dt1ms",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__dt1ms",
+      "status": "QUEUED"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__grid256x32",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__grid256x32",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__grid256x32",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__grid256x32",
+      "status": "QUEUED"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__grid576x72",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__grid576x72",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__grid576x72",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__grid576x72",
+      "status": "QUEUED"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__D5e-05",
+      "status": "QUEUED"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__D0.0002",
+      "status": "QUEUED"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__alpha0.1",
+      "status": "QUEUED"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__alpha0.01",
+      "status": "QUEUED"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__boatupstream",
+      "status": "QUEUED"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__boatdownstream",
+      "status": "QUEUED"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__PbI2He",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__D5e-05",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__D0.0002",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__alpha0.1",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__alpha0.01",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__boatupstream",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__boatdownstream",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__PbI2He",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__D5e-05",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__D0.0002",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__alpha0.1",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__alpha0.01",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__boatupstream",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__boatdownstream",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__PbI2He",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__D5e-05",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__D0.0002",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__alpha0.1",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__alpha0.01",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__boatupstream",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__boatdownstream",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__PbI2He",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__sat0.002",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__sat0.00316227766",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__sat0.00562341325",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__sat0.002",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__sat0.00316227766",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__sat0.00562341325",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01__sat0.002",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01__sat0.00316227766",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01__sat0.00562341325",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01__sat0.002",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01__sat0.00316227766",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01__sat0.00562341325",
+      "status": "QUEUED"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__flow0C",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__flow0C",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__flow0C",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__flow0C",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline__curveShiftPbI2",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftPbI2",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline__curveShiftBiI3",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftBiI3",
+      "status": "QUEUED"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__flowStop60to80",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__flowStop60to80",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__flowStop60to80",
+      "status": "QUEUED"
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__flowStop60to80",
+      "status": "QUEUED"
+    }
+  ],
+  "case_metrics": [],
+  "comparisons": [],
+  "conditional_grid_estimates": [],
+  "material_audits": {},
+  "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+  "study_manifest_sha256": "4d98f95da81b9afdd33bf91d4cfea5ec352946cfdc514ed4bebaf4cbce6b7143",
+  "scope": "Numerical and sensitivity evidence; no parameter fitting. Thermal cooling history and independent BiI coefficients remain unqualified."
+}
