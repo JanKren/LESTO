@@ -1,0 +1,19 @@
+{
+  "script_sha256": "82b885a4b7c32ced96dc11e59249bb02f2715fa8c1fcd7c24dbd16534b03b27d",
+  "input_sha256": {
+    "run/034-liu2025/full_analysis/analysis.json": "bb2331bcffbf96b4894d1287eb3a81f58b5fb7469dfd796b7fe64ae29d284a34",
+    "run/034-liu2025/full_analysis/profiles/LBE-I_SS_II_Q1_baseline/iodine-comparison.csv": "91586e44e31cb6f66e94b0c34b2a0fbe19f09ca0c43a2731944dff8ded120c28",
+    "run/034-liu2025/full_analysis/profiles/LBE-I_SS_II_Q2_baseline_sat0.001/iodine-comparison.csv": "699960b89dcb90761898f081046330d7e126b73430efe192777c33cccda00aba",
+    "run/034-liu2025/full_analysis/profiles/LBE-I_SiO2_I_Q1_baseline/iodine-comparison.csv": "fbbd02ed520b8ab46311af83f398c2e14183b95749ee58e5c41c4a07155094f2",
+    "run/034-liu2025/full_analysis/profiles/PbI2_SS_Q1_baseline/iodine-comparison.csv": "b50ba3c229fa43220e97443dfcca208793be501e25f0e9e4570f59e33136aa64",
+    "run/034-liu2025/work/followup-20261007/run_state.json": "27661d26da959c4e32c28d65d39354b58d25823d2bb5a7fe12738bcd6259945a",
+    "run/034-liu2025/work/followup-20261007/smoke.json": "d71b471a5b7be209f2087ad48a4547e1ed7fbc3cd0c53e5d75df8864232fcb67",
+    "thermochemistry/benchmarks/liu2025/digitized/LBE-I_SS_II_gamma.csv": "4f01db625bcba5ec6e4e104f790da40bbce1b3f6e4767e8cee040f8c310d91d0",
+    "thermochemistry/benchmarks/liu2025/digitized/LBE-I_SS_II_temperature.csv": "39abb678c58589765b8eb1311b820ba97707520189595d47d2d18ccf60d863c9",
+    "thermochemistry/benchmarks/liu2025/digitized/LBE-I_SiO2_I_gamma.csv": "1d8b0f3022af73ae15a732dfa00cfd6b6ead841d042bb652f60591983af42b8e",
+    "thermochemistry/benchmarks/liu2025/digitized/LBE-I_SiO2_I_temperature.csv": "b1ed1d57808f45ca993600c36fea8858e13a19556a153678e2ebaab9b662207d",
+    "thermochemistry/benchmarks/liu2025/digitized/PbI2_SS_gamma.csv": "b781290b8183539139de8f24d6158b2fb28e953e104bc258a79f6ea564f669aa",
+    "thermochemistry/benchmarks/liu2025/digitized/PbI2_SS_temperature.csv": "905a0eed625bd9a1e1979b460a10362967e663d8d52f1bf058d16430c1342563"
+  },
+  "note": "Digitised Liu curves retain published coordinates; no fitting or alignment applied."
+}

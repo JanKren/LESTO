@@ -1,0 +1,86 @@
+% ======================================================================
+%  beamerthemePSI.sty  --  \usetheme{PSI}
+%
+%  A Beamer theme reproducing the corporate design of
+%  PSI - Center for Scientific Computing, Theory and Data
+%  (derived from the official PowerPoint template).
+%
+%  Usage:
+%     \documentclass[aspectratio=169]{beamer}
+%     \usetheme{PSI}
+%
+%  Requires the accompanying  psi-assets/  folder next to your .tex file.
+% ======================================================================
+\ProvidesPackage{beamerthemePSI}[2026/07/21 PSI beamer theme]
+
+% NB: beamer already loads xcolor; colortbl (loaded after) provides both
+% \rowcolor and \rowcolors here, so we must NOT re-load xcolor with options
+% (that would raise an option clash).
+\RequirePackage{graphicx}
+\RequirePackage{tikz}
+\RequirePackage{colortbl}
+\RequirePackage{booktabs}
+\RequirePackage{etoolbox}
+
+% Where the PSI logos and backgrounds live (edit if you move the folder).
+\graphicspath{{psi-assets/}{./}}
+
+% ---- Load the component themes ------------------------------------------
+\useinnertheme{PSI}
+\useoutertheme{PSI}
+\usecolortheme{PSI}
+\usefonttheme{PSI}
+
+% ---- Global geometry -----------------------------------------------------
+% Align the body text block with the frame title / footer (5.7 % margins).
+\setbeamersize{text margin left=\PSIleftmargin,text margin right=\PSIrightmargin}
+\setbeamertemplate{navigation symbols}{}
+\setbeamercovered{transparent}
+
+% ======================================================================
+%  TABLE HELPERS  (PSI blue / purple / red tables with banded rows)
+% ======================================================================
+% Header text colour on the coloured header row.
+\newcommand{\PSItableheadfg}{white}
+% \psihead{Title}  -> bold, header-coloured cell text
+\newcommand{\psihead}[1]{\textcolor{\PSItableheadfg}{\bfseries #1}}
+% \psitablecolors{PSIblue}  -> banded rows in a tint of the given accent.
+%   Put it just before \begin{tabular}; start the header row with
+%   \rowcolor{PSIblue}. Accents: PSIblue, PSIpurple, PSIred, PSIgreen, ...
+\newcommand{\psitablecolors}[1]{%
+  \rowcolors{2}{#1!12}{white}%
+  \arrayrulecolor{white}%
+  \renewcommand{\arraystretch}{1.25}%
+}
+
+% ======================================================================
+%  IMAGE HELPERS  (captioned figures & photo placeholders)
+% ======================================================================
+% \psicaption{text} : accent-coloured caption line
+\newcommand{\psicaption}[1]{\par\vspace{0.35em}{\usebeamerfont{caption name}%
+  \color{PSIaccent}#1}}
+
+% \psifigure[width]{file}{caption} : image at a given width, caption below
+\newcommand{\psifigure}[3][\linewidth]{%
+  \begin{minipage}[t]{#1}\centering
+     \includegraphics[width=\linewidth]{#2}%
+     \psicaption{#3}%
+  \end{minipage}}
+
+% \psifigureh{height}{file}{caption} : image at a fixed height, caption below
+% (use in grids so several rows fit above the footer)
+\newcommand{\psifigureh}[3]{%
+  \begin{minipage}[t]{\linewidth}\centering
+     \includegraphics[height=#1]{#2}%
+     \psicaption{#3}%
+  \end{minipage}}
+
+% \psiplaceholder[fill]{width}{height}{label} : stand-in "photo" box
+% (handy for laying out image grids before the real figures exist)
+\newcommand{\psiplaceholder}[4][PSIlightgray!35]{%
+  \begin{tikzpicture}
+    \node[rectangle,fill=#1,minimum width=#2,minimum height=#3,
+          inner sep=0pt,text=PSIgray,font=\footnotesize] {#4};
+  \end{tikzpicture}}
+
+\mode<all>

@@ -1,0 +1,74 @@
+% ======================================================================
+%  beamerouterthemePSI.sty
+%  Header logo, three-part footer and frame title.
+%  All positions are fractions of \paperwidth / \paperheight, taken from
+%  the official PSI PowerPoint master (16:9).
+% ======================================================================
+\ProvidesPackage{beamerouterthemePSI}[2026/07/21 PSI beamer outer theme]
+
+\RequirePackage{tikz}
+
+% ---- Layout metrics (edit here to nudge the whole grid) ------------------
+\newcommand{\PSIleftmargin}{0.057\paperwidth}   % 5.7 %  content left edge
+\newcommand{\PSIrightmargin}{0.057\paperwidth}  % 5.7 %  content right edge
+\newcommand{\PSItopmargin}{0.043\paperheight}   % 4.3 %  title / logo top
+\newcommand{\PSIfootbaseline}{0.052\paperheight}% footer distance from bottom
+\newcommand{\PSImarkheight}{0.053\paperheight}   % header PSI mark height
+
+% Footer text (institute line) and date -----------------------------------
+\newcommand{\PSIfootername}{PSI Center for Scientific Computing, Theory and Data}
+% Swiss-style DD.MM.YYYY date used in the footer (override with \renewcommand)
+\newcommand{\PSItwodigit}[1]{\ifnum#1<10 0\fi\number#1}
+\newcommand{\PSIfootdate}{\PSItwodigit{\day}.\PSItwodigit{\month}.\number\year}
+
+% ---- No navigation symbols ----------------------------------------------
+\setbeamertemplate{navigation symbols}{}
+
+% ======================================================================
+%  Frame title  (bold black, top-left) + PSI mark (top-right)
+% ======================================================================
+\setbeamertemplate{frametitle}{%
+  % reserve vertical space so body starts ~20 % down.
+  % (beamer already indents the frametitle by the left text margin, so we
+  %  do NOT add another \hspace here -- that would double the indent.)
+  \vskip\PSItopmargin
+  \begin{minipage}[t]{0.82\textwidth}
+     \usebeamercolor[fg]{frametitle}\usebeamerfont{frametitle}%
+     \hyphenchar\font=-1\relax\raggedright
+     \strut\insertframetitle\strut
+     \ifx\insertframesubtitle\@empty\else
+        \\[0.15em]{\usebeamercolor[fg]{framesubtitle}\usebeamerfont{framesubtitle}\insertframesubtitle}%
+     \fi
+  \end{minipage}%
+  % PSI mark, absolutely anchored top-right (independent of title length)
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=north east,inner sep=0pt]
+      at ([shift={(-\PSIrightmargin,-\PSItopmargin)}]current page.north east)
+      {\includegraphics[height=\PSImarkheight]{psi-mark-black}};
+  \end{tikzpicture}%
+  \vskip0.6em
+}
+
+% ======================================================================
+%  Footline : page number | institute line | date
+% ======================================================================
+\setbeamertemplate{footline}{%
+  \usebeamercolor[fg]{PSI footer}\usebeamerfont{PSI footer}%
+  \nointerlineskip
+  \hbox to \paperwidth{%
+    \hskip\PSIleftmargin
+    % page number
+    \hbox to 0.052\paperwidth{\usebeamercolor[fg]{PSI page number}%
+        \usebeamerfont{PSI page number}\insertframenumber\hfil}%
+    \hskip0.023\paperwidth
+    % institute line
+    \PSIfootername
+    \hfil
+    % date, right aligned
+    \PSIfootdate
+    \hskip\PSIrightmargin
+  }%
+  \vskip\PSIfootbaseline
+}
+
+\mode<all>

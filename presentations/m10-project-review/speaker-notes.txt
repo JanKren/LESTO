@@ -1,0 +1,82 @@
+PSI Beamer — presenter notes
+7 October 2026
+
+01. Iodine deposition in lead–bismuth systems
+
+This is a development review of the LESTO rhoFixedFlowFoam work. It presents completed numerical evidence and separates it from provisional experimental validation. All follow-up status counts are a dated snapshot.
+
+02. A working solver; physical validation is open
+
+The five peak matches are from the available Q1 cases, not five independently predicted release mechanisms. M10a–d functionality is implemented; M10e scientific acceptance remains open. A numerical PASS reports execution and conservation gates.
+
+03. Experiment: a source and a temperature gradient
+
+Steel and silica inner diameters are respectively 4.8 and 5.0 mm in the paper. The CFD benchmark currently uses a common 4.8 mm diameter wedge, so the schematic must not imply a geometry-qualified silica simulation. Sample boat obstruction is omitted in the current empty-tube carrier.
+
+04. Three published temperature profiles are available
+
+The available profiles are PbI2_SS, LBE-I_SS_II and LBE-I_SiO2_I. Digitisation is lower-information evidence than author-supplied numerical data. The silica curve and printed peak temperatures conflict; this is shown explicitly later.
+
+05. A frozen carrier supports transient chemistry
+
+The source is applied together with conservative transport and exchange; homogeneous respeciation follows gas transport and wall coproduct application. The diagram describes dependencies rather than promising a particular order. No energy equation or two-way feedback is solved in the current model.
+
+06. Transport and phase change conserve material
+
+The compact equation includes prescribed gas source terms; wall exchange is enforced through the coupled interface law rather than a fitted volumetric sink. S_i in this slide is schematic for sources. Conservation accounts include boundary transport and numerical corrections, which are also assessed independently.
+
+07. Chemistry couples iodides and shared metal stores
+
+Gas products are returned to the transport/respeciation system; wall Bi is deposited in the same physical store used by monomer and dimer exchange. Do not count that store twice in the element ledger. The channel is a model assumption, not a independently measured rate law for these surfaces.
+
+08. Two source models answer different questions
+
+Q1 split agreement is partly imposed by the source and must not be presented as independent validation of the release chemistry. The 60 s case does not compress a three-hour release into one minute. Q2 saturation is a provisional source parameter; neither source reconstructs an experimental release time series.
+
+09. Verification covers equilibrium and conservation
+
+The 600,000-input equilibrium stress test used constants representative of the previously failed cells and had zero convergence or balance failures. The core kernel repair and targeted checks are documented. Smoke checks ensure the new configurations execute; they do not demonstrate full-window convergence or physical agreement.
+
+10. All 15 available baseline cases finished
+
+Each LBE experiment has a Q1 case and six Q2 cases: three saturation levels times two BiI thermodynamic variants. Raw residue is computed from actual material inventories and transport before numerical corrections. Accounted closure uses the conserved reference specified by the ledger.
+
+11. Five Q1 peak temperatures match uncertainty bands
+
+The plot is limited to the five available Q1 condensate peaks. The silica uncertainties are broad enough to contain temperature errors of about -18 and +26 K despite the 4–5 cm spatial mismatch. This is why peak-temperature agreement alone is insufficient.
+
+12. Steel profiles reveal shape and split differences
+
+The error is the sum of absolute differences in per-bin percentage yield; it is not a 36.8% relative scalar error. It is the lowest within the tested steel scenarios, not an optimised physical model. Model curves retain the same normalisation convention as the baseline analysis.
+
+13. Silica deposition positions differ by 4--5 cm
+
+The model PbI2 and BiI3 peaks are respectively near 56 and 63 cm; published scan maxima are near 51 and 59 cm. Separate curve/label alignment hypotheses imply shifts about 4.10 and 4.65 cm, so the paper does not establish a unique correction. The ongoing shifted-curve cases are hypotheses.
+
+14. BiI data and source loading can reverse the split
+
+The two scenarios differ in BiI Gibbs formation energy consistently across formation, vapour-pressure and reaction tables. Large split differences show strong input sensitivity. The measured iodine split does not uniquely select thermodynamic data because the metal source is also unqualified. Dashed lines show the published iodide-only share.
+
+15. Earlier refinement changed several factors together
+
+Examples are shown rather than all 29 condensate comparisons. The 67.95% maximum is BiI3 in the silica Q2 baseline at 1% saturation. Total deposited amounts can change little while profile shapes change significantly. The numerical-diffusion estimate is a diagnostic, not a measured diffusivity.
+
+16. Independent spatial and temporal refinement is running
+
+Three grids are not automatic proof of an asymptotic regime. The analysis declines to report an order or GCI for oscillatory, nondecreasing or roundoff-dominated scalar sequences. Mesh and temporal studies use the same private solver and retain original source rates and thermodynamic tables.
+
+17. The 64-case study exposes provisional assumptions
+
+The source loading values added between 0.1 and 1% are 0.2, 0.316 and 0.562%. Only PbI2 gets the species-specific He diffusivity model; other gases retain provisional coefficients. The 0-degree reference follows nominal manufacturer convention, not a confirmed calibration of the experimental controller. Counts are deliberately frozen for this draft.
+
+18. Exposure duration and cooling need separate evidence
+
+The residual gas fraction uses the inventory at 60 s divided by a hypothetical three-hour steady iodine supply. It is not a bound on re-evaporation or redistribution of wall deposits during cooling. Analytical duration projections are not three-hour native CFD simulations. The fixed-temperature closed-end shutdown is a deliberately limited sensitivity experiment.
+
+19. Decisions after the refinement study
+
+No automatic acceptance is inferred when jobs finish. Convergence must be assessed for the physical quantities used in the claims. A follow-up can quantify sensitivity without identifying the true release history or wall kinetics. The manuscript is still a skeleton and will need final methods/results text and co-author review.
+
+20. Conservative model; validation remains open
+
+The contribution is the reproducible implementation and an honest assessment of what the available experiments can constrain. The current deck is a first draft prepared while the refinement queue is active. Update dated status and result slides only after analysing completed follow-up evidence.

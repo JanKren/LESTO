@@ -1,0 +1,167 @@
+% ======================================================================
+%  beamerinnerthemePSI.sty
+%  Title page (blue / dark-blue / red / white), section pages,
+%  itemize markers, flat blocks and agenda-style table of contents.
+% ======================================================================
+\ProvidesPackage{beamerinnerthemePSI}[2026/07/21 PSI beamer inner theme]
+
+\RequirePackage{tikz}
+\RequirePackage{etoolbox}
+
+% ----------------------------------------------------------------------
+%  TITLE PAGE
+%  \psititlestyle{blue|darkblue|red|white}   (default: blue)
+% ----------------------------------------------------------------------
+\newcommand{\PSI@titlestyle}{blue}
+\newcommand{\psititlestyle}[1]{\renewcommand{\PSI@titlestyle}{#1}}
+
+% resolve style -> background image / text colour / lockup / band colour
+\newcommand{\PSI@resolvetitle}{%
+  \ifdefstring{\PSI@titlestyle}{blue}{%
+     \def\PSI@titlebg{psi-bg-blue}\colorlet{PSI@titlefg}{PSIwhite}%
+     \def\PSI@titlelockup{psi-full-white}\def\PSI@titleband{}}{}%
+  \ifdefstring{\PSI@titlestyle}{darkblue}{%
+     \def\PSI@titlebg{psi-bg-darkblue}\colorlet{PSI@titlefg}{PSIwhite}%
+     \def\PSI@titlelockup{psi-full-white}\def\PSI@titleband{}}{}%
+  \ifdefstring{\PSI@titlestyle}{red}{%
+     \def\PSI@titlebg{psi-bg-red}\colorlet{PSI@titlefg}{PSIwhite}%
+     \def\PSI@titlelockup{psi-full-white}\def\PSI@titleband{}}{}%
+  \ifdefstring{\PSI@titlestyle}{white}{%
+     \def\PSI@titlebg{}\colorlet{PSI@titlefg}{PSIblack}%
+     \def\PSI@titlelockup{psi-full-black}\colorlet{PSI@titleband}{PSIaccent}}{}%
+}
+
+\setbeamertemplate{title page}{%
+  \PSI@resolvetitle
+  \begin{tikzpicture}[remember picture,overlay]
+    % --- full-bleed particle background (coloured styles only) ---
+    \ifdefempty{\PSI@titlebg}{%
+       % white style: thin accent band along the bottom
+       \fill[PSI@titleband] ([yshift=0pt]current page.south west)
+             rectangle ([yshift=0.075\paperheight]current page.south east);
+    }{%
+       \node[anchor=center,inner sep=0pt] at (current page.center)
+          {\includegraphics[width=\paperwidth,height=\paperheight]{\PSI@titlebg}};
+    }%
+    % --- PSI lockup, top-left ---
+    \node[anchor=north west,inner sep=0pt]
+      at ([shift={(0.052\paperwidth,-0.052\paperheight)}]current page.north west)
+      {\includegraphics[width=0.335\paperwidth]{\PSI@titlelockup}};
+    % --- title (bottom-anchored at ~50 %, as in the PPT master) ---
+    \node[anchor=south west,text width=0.66\paperwidth,inner sep=0pt]
+      at ([shift={(0.057\paperwidth,0.498\paperheight)}]current page.south west)
+      {\color{PSI@titlefg}\usebeamerfont{title}\hyphenchar\font=-1\relax
+       \raggedright\inserttitle};
+    % --- subtitle (top-anchored just below) ---
+    \ifx\insertsubtitle\@empty\else
+      \node[anchor=north west,text width=0.66\paperwidth,inner sep=0pt]
+        at ([shift={(0.057\paperwidth,-0.552\paperheight)}]current page.north west)
+        {\color{PSI@titlefg}\usebeamerfont{subtitle}\hyphenchar\font=-1\relax
+         \raggedright\insertsubtitle};
+    \fi
+    % --- author / location / date, bottom-left ---
+    \node[anchor=south west,text width=0.7\paperwidth,inner sep=0pt]
+      at ([shift={(0.057\paperwidth,0.085\paperheight)}]current page.south west)
+      {\color{PSI@titlefg}\usebeamerfont{author}%
+       {\bfseries\insertauthor}\\[0.15em]
+       \insertinstitute\ifx\insertinstitute\@empty\else\ifx\insertdate\@empty\else,\ \fi\fi\insertdate};
+  \end{tikzpicture}%
+}
+
+% ----------------------------------------------------------------------
+%  SECTION PAGE
+%  \psisectionstyle{blue|darkblue|red|purple|green|yellow|magenta}
+% ----------------------------------------------------------------------
+\newcommand{\PSI@secstyle}{blue}
+\newcommand{\psisectionstyle}[1]{\renewcommand{\PSI@secstyle}{#1}}
+
+\newcommand{\PSI@resolvesection}{%
+  % default (blue)
+  \colorlet{PSI@secbg}{PSIblue}\colorlet{PSI@secfg}{PSIwhite}\def\PSI@secmark{psi-mark-white}%
+  \ifdefstring{\PSI@secstyle}{darkblue}{\colorlet{PSI@secbg}{PSIdarkblue}\colorlet{PSI@secfg}{PSIwhite}\def\PSI@secmark{psi-mark-white}}{}%
+  \ifdefstring{\PSI@secstyle}{red}{\colorlet{PSI@secbg}{PSIred}\colorlet{PSI@secfg}{PSIwhite}\def\PSI@secmark{psi-mark-white}}{}%
+  \ifdefstring{\PSI@secstyle}{purple}{\colorlet{PSI@secbg}{PSIpurple}\colorlet{PSI@secfg}{PSIwhite}\def\PSI@secmark{psi-mark-white}}{}%
+  \ifdefstring{\PSI@secstyle}{green}{\colorlet{PSI@secbg}{PSIgreen}\colorlet{PSI@secfg}{PSIblack}\def\PSI@secmark{psi-mark-black}}{}%
+  \ifdefstring{\PSI@secstyle}{yellow}{\colorlet{PSI@secbg}{PSIyellow}\colorlet{PSI@secfg}{PSIblack}\def\PSI@secmark{psi-mark-black}}{}%
+  \ifdefstring{\PSI@secstyle}{magenta}{\colorlet{PSI@secbg}{PSImagenta}\colorlet{PSI@secfg}{PSIblack}\def\PSI@secmark{psi-mark-black}}{}%
+}
+
+\setbeamertemplate{section page}{%
+  \PSI@resolvesection
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[PSI@secbg] (current page.south west) rectangle (current page.north east);
+    \node[anchor=north west,inner sep=0pt]
+      at ([shift={(0.057\paperwidth,-0.075\paperheight)}]current page.north west)
+      {\includegraphics[height=0.06\paperheight]{\PSI@secmark}};
+    \node[anchor=west,text width=0.86\paperwidth,inner sep=0pt]
+      at ([shift={(0.057\paperwidth,0)}]current page.west)
+      {\color{PSI@secfg}\usebeamerfont{section page}\hyphenchar\font=-1\relax
+       \raggedright
+       \ifnum\thesection>0 \thesection\hspace{0.4em}\fi\insertsectionhead};
+  \end{tikzpicture}%
+}
+
+% Show a section page automatically at every \section
+\AtBeginSection[]{%
+  \begingroup
+  \setbeamertemplate{footline}{}\setbeamertemplate{headline}{}%
+  \begin{frame}[plain,noframenumbering]
+    \sectionpage
+  \end{frame}
+  \endgroup
+}
+
+% ----------------------------------------------------------------------
+%  ITEMIZE / ENUMERATE
+% ----------------------------------------------------------------------
+\setbeamertemplate{itemize item}{%
+  \usebeamercolor[fg]{itemize item}\raisebox{0.12ex}{\textbullet}}
+\setbeamertemplate{itemize subitem}{%
+  \usebeamercolor[fg]{itemize subitem}\raisebox{0.18ex}{\small\textbullet}}
+\setbeamertemplate{itemize subsubitem}{%
+  \usebeamercolor[fg]{itemize subsubitem}\textendash}
+\setbeamertemplate{enumerate item}{%
+  \usebeamercolor[fg]{enumerate item}\insertenumlabel}
+\setlength{\leftmargini}{1.4em}
+
+% Bold accent-coloured "Heading (formatted bold)" helper used on content slides
+\newcommand{\psiheading}[1]{{\usebeamerfont{block title}\color{PSIblack}#1}\par\vspace{0.15em}}
+
+% ----------------------------------------------------------------------
+%  BLOCKS  (flat, no shadow)
+% ----------------------------------------------------------------------
+\setbeamertemplate{block begin}{%
+  \setbeamercolor{item}{fg=PSIaccent}%
+  \begin{beamercolorbox}[leftskip=0.6em,rightskip=0.6em,ht=1.4em,dp=0.5em]{block title}%
+    \usebeamerfont{block title}\insertblocktitle\end{beamercolorbox}%
+  \nointerlineskip
+  \begin{beamercolorbox}[leftskip=0.6em,rightskip=0.6em,vmode]{block body}%
+    \vspace{0.3em}}
+\setbeamertemplate{block end}{\vspace{0.4em}\end{beamercolorbox}\vspace{0.5em}}
+
+\setbeamertemplate{block alerted begin}{%
+  \begin{beamercolorbox}[leftskip=0.6em,rightskip=0.6em,ht=1.4em,dp=0.5em]{block title alerted}%
+    \usebeamerfont{block title}\insertblocktitle\end{beamercolorbox}%
+  \nointerlineskip
+  \begin{beamercolorbox}[leftskip=0.6em,rightskip=0.6em,vmode]{block body alerted}%
+    \vspace{0.3em}}
+\setbeamertemplate{block alerted end}{\vspace{0.4em}\end{beamercolorbox}\vspace{0.5em}}
+
+\setbeamertemplate{block example begin}{%
+  \begin{beamercolorbox}[leftskip=0.6em,rightskip=0.6em,ht=1.4em,dp=0.5em]{block title example}%
+    \usebeamerfont{block title}\insertblocktitle\end{beamercolorbox}%
+  \nointerlineskip
+  \begin{beamercolorbox}[leftskip=0.6em,rightskip=0.6em,vmode]{block body example}%
+    \vspace{0.3em}}
+\setbeamertemplate{block example end}{\vspace{0.4em}\end{beamercolorbox}\vspace{0.5em}}
+
+% ----------------------------------------------------------------------
+%  TABLE OF CONTENTS  (styled like the "Agenda" slide: numbered)
+% ----------------------------------------------------------------------
+\setbeamertemplate{section in toc}{%
+  {\color{PSIaccent}\usebeamerfont{section in toc}\inserttocsectionnumber}\hspace{0.6em}%
+  {\color{PSIblack}\usebeamerfont{section in toc}\inserttocsection}\par\vspace{0.35em}}
+\setbeamertemplate{subsection in toc}{%
+  \hspace{2.2em}{\color{PSIgray}\usebeamerfont{subsection in toc}\inserttocsubsection}\par\vspace{0.15em}}
+
+\mode<all>

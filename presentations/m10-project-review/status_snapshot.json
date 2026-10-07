@@ -1,0 +1,20 @@
+{
+  "captured_utc": "2026-10-07T11:55:49.723248+00:00",
+  "state_updated_utc": "2026-10-07T11:55:26.662776+00:00",
+  "local_snapshot_time": "07 October 2026, 13:55 CEST",
+  "counts": {
+    "RUNNING": 16,
+    "PASS": 1,
+    "QUEUED": 47
+  },
+  "case_count": 64,
+  "scope": "Status snapshot; no unfinished follow-up scientific result plotted.",
+  "baseline_solver_source_commit": "fe214c6",
+  "study_commit": "361f02d",
+  "baseline_summary": {
+    "PASS": 15,
+    "FAIL": 0,
+    "NOTRUN": 1
+  },
+  "native_smoke_PASS": 64
+}

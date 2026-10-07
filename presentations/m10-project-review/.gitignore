@@ -1,0 +1,10 @@
+build/
+.template-check.tex
+__pycache__/
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.synctex.gz
