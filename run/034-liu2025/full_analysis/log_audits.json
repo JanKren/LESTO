@@ -1,0 +1,827 @@
+{
+  "PbI2_SS_Q1_baseline": {
+    "signature": {
+      "size": 204367054,
+      "mtime_ns": 1791322374812635126,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "28f9fa5f4836d1fb409e6f498e2dc2b3959c31167328ff6bd83a5014b5a48c43",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 30000,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.4296061199080495e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 30000,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.0547434031745193e-15,
+          "p95_initial_residual": 1.1135446546137624e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 0,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 0.0,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 0,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 0.0,
+          "p95_initial_residual": 0.0
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 0,
+      "max_equilibrium_element_residue": 5.452452725429602e-16,
+      "max_sum_of_species_mole_fraction_maxima": 5.865498121376582e-05,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 0,
+      "first_invalid_time_s": null,
+      "last_invalid_time_s": null,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 0.0,
+      "max_negative_I_over_supplied_I": 0.0,
+      "final_execution_s": 22462.96,
+      "final_clock_s": 22495.0
+    }
+  },
+  "LBE-I_SS_II_Q1_baseline": {
+    "signature": {
+      "size": 281020355,
+      "mtime_ns": 1791330362764998551,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "688b33098c73493a67c7ebb2a2f13d71f56e23a9f0dd09c1226b3b3702356332",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 30000,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.5258113531233706e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 30000,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.4742355100466283e-15,
+          "p95_initial_residual": 1.6491405790618295e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 30000,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 3.023655425161705e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 30000,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 2.015498951917164e-15,
+          "p95_initial_residual": 2.1109705386320438e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 0,
+      "max_equilibrium_element_residue": 5.63134608388971e-16,
+      "max_sum_of_species_mole_fraction_maxima": 7.401882221799641e-06,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 0,
+      "first_invalid_time_s": null,
+      "last_invalid_time_s": null,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 2.598704032800714e-157,
+      "max_negative_I_over_supplied_I": 1.9861245138532367e-144,
+      "final_execution_s": 30441.13,
+      "final_clock_s": 30483.0
+    }
+  },
+  "LBE-I_SS_II_Q2_baseline_sat0.001": {
+    "signature": {
+      "size": 285267490,
+      "mtime_ns": 1791324260284720909,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "65f75ef3ee12657582d4cc785442d3ee63f3106200ee64b2cfa4fb47d0ea01c5",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 29999,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.471316966555814e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29999,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.4140358560596671e-15,
+          "p95_initial_residual": 1.6291552851671128e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 29992,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 3.056055831437037e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29992,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.876144094008118e-15,
+          "p95_initial_residual": 2.0944481389248176e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 0,
+      "max_equilibrium_element_residue": 5.269222558279552e-16,
+      "max_sum_of_species_mole_fraction_maxima": 7.437199448749428e-06,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 0,
+      "first_invalid_time_s": null,
+      "last_invalid_time_s": null,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 4.765932770807028e-151,
+      "max_negative_I_over_supplied_I": 2.2747405395978402e-138,
+      "final_execution_s": 24344.0,
+      "final_clock_s": 24381.0
+    }
+  },
+  "LBE-I_SS_II_Q2_baseline_sat0.01": {
+    "signature": {
+      "size": 285688535,
+      "mtime_ns": 1791327790152881506,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "f087b258e1c2dc4f80e3db9e6015f7d7233416b25d458c06b9763896d9382ace",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 29999,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.831654412135831e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29999,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.5703593498427826e-15,
+          "p95_initial_residual": 1.827833028759154e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 29990,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 4.735527546599375e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29990,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.5129985889848048e-15,
+          "p95_initial_residual": 1.7098400293457679e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 0,
+      "max_equilibrium_element_residue": 5.130444680201407e-16,
+      "max_sum_of_species_mole_fraction_maxima": 1.3708228468893177e-05,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 0,
+      "first_invalid_time_s": null,
+      "last_invalid_time_s": null,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 6.21494727926898e-143,
+      "max_negative_I_over_supplied_I": 2.881150734519384e-130,
+      "final_execution_s": 27872.77,
+      "final_clock_s": 27911.0
+    }
+  },
+  "LBE-I_SS_II_Q2_baseline_sat0.1": {
+    "signature": {
+      "size": 285672941,
+      "mtime_ns": 1791332401249091295,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "424d48dd3f2f161081d3a6c3e0ba4ad9f102d4ca8948527c03f69b58dfb7c5b1",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 29999,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.796728106396193e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29999,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.5646113382946738e-15,
+          "p95_initial_residual": 1.79577746489896e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 29819,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 4.413677328814714e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29819,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.5084856709580926e-15,
+          "p95_initial_residual": 1.6580407769956555e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 0,
+      "max_equilibrium_element_residue": 5.208507236620363e-16,
+      "max_sum_of_species_mole_fraction_maxima": 9.010413338964315e-05,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 0,
+      "first_invalid_time_s": null,
+      "last_invalid_time_s": null,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 2.76713784604499e-137,
+      "max_negative_I_over_supplied_I": 1.135919801709971e-124,
+      "final_execution_s": 32482.42,
+      "final_clock_s": 32522.0
+    }
+  },
+  "LBE-I_SS_II_Q2_shift29k_sat0.001": {
+    "signature": {
+      "size": 285331426,
+      "mtime_ns": 1791327930656887898,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "c57d8c10d0799023b59ff41d5fa46088edf3f32f1bd4b14fa4ec2542ab8a5186",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 29999,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.4410664292273816e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29999,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.4125005681570772e-15,
+          "p95_initial_residual": 1.6269963443782416e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 29994,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.9178897758460484e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29994,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.8091239051046816e-15,
+          "p95_initial_residual": 2.0688810910553464e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 0,
+      "max_equilibrium_element_residue": 5.392279504856656e-16,
+      "max_sum_of_species_mole_fraction_maxima": 9.241964533288986e-06,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 0,
+      "first_invalid_time_s": null,
+      "last_invalid_time_s": null,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 3.1482282765962177e-159,
+      "max_negative_I_over_supplied_I": 1.6535419961894315e-146,
+      "final_execution_s": 28014.7,
+      "final_clock_s": 28051.0
+    }
+  },
+  "LBE-I_SS_II_Q2_shift29k_sat0.01": {
+    "signature": {
+      "size": 286427624,
+      "mtime_ns": 1791328465088912213,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "b92c2d8988e013af90bb88d0627fd5db997cca7aaf80d61bcc811c61d36759ad",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 29999,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.576540593434099e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29999,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.3751182078190592e-15,
+          "p95_initial_residual": 1.6487351137784054e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 29996,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 3.560430317829028e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29996,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 2.254678196585134e-15,
+          "p95_initial_residual": 2.3773363964795985e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 0,
+      "max_equilibrium_element_residue": 5.515878552520004e-16,
+      "max_sum_of_species_mole_fraction_maxima": 1.79421308900194e-05,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 0,
+      "first_invalid_time_s": null,
+      "last_invalid_time_s": null,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 5.6047059705496775e-155,
+      "max_negative_I_over_supplied_I": 2.762787637893787e-142,
+      "final_execution_s": 28548.8,
+      "final_clock_s": 28586.0
+    }
+  },
+  "LBE-I_SS_II_Q2_shift29k_sat0.1": {
+    "signature": {
+      "size": 286322743,
+      "mtime_ns": 1791328808440927835,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "3f2d6ea9483a54c7cd10fbefe1bca1df1c32ad152968dca2f93b0e5c0c236b0f",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 29999,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.607264995867758e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29999,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.368993388095618e-15,
+          "p95_initial_residual": 1.6560588763833415e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 29997,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 3.484590667359177e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29997,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 2.2558456584343554e-15,
+          "p95_initial_residual": 2.389220885437406e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 96,
+      "max_equilibrium_element_residue": 5.566836054626823e-16,
+      "max_sum_of_species_mole_fraction_maxima": 9.185175769835115e-05,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 1,
+      "first_invalid_time_s": 0.008,
+      "last_invalid_time_s": 0.008,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 1.2064214661865507e-147,
+      "max_negative_I_over_supplied_I": 5.559593586726987e-135,
+      "final_execution_s": 28891.5,
+      "final_clock_s": 28929.0
+    }
+  },
+  "LBE-I_SiO2_I_Q1_baseline": {
+    "signature": {
+      "size": 281942504,
+      "mtime_ns": 1791327931752887948,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "da3374c360af8467569d20077b6e40c3df6b621b0a44de83dcee943d93a12833",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 30000,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.4485957183107924e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 30000,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.4191531509874728e-15,
+          "p95_initial_residual": 1.7329558366792636e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 30000,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.887545620155102e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 30000,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 2.0604906034648435e-15,
+          "p95_initial_residual": 2.158806826477661e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 0,
+      "max_equilibrium_element_residue": 5.76524505219167e-16,
+      "max_sum_of_species_mole_fraction_maxima": 8.092035927859003e-06,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 0,
+      "first_invalid_time_s": null,
+      "last_invalid_time_s": null,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 2.7025381209481083e-174,
+      "max_negative_I_over_supplied_I": 9.24353617621567e-162,
+      "final_execution_s": 28013.42,
+      "final_clock_s": 28052.0
+    }
+  },
+  "LBE-I_SiO2_I_Q2_baseline_sat0.001": {
+    "signature": {
+      "size": 285731457,
+      "mtime_ns": 1791332882649113197,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "b65c0bb624b268a02e73d81065052c080cdb6ffa774bfc65f7e0d5459c1f381d",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 29999,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.412562913275996e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29999,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.4236806942753462e-15,
+          "p95_initial_residual": 1.741620448978341e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 29992,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 4.089703333316424e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29992,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.6155976742445364e-15,
+          "p95_initial_residual": 1.9890666717340567e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 1170,
+      "max_equilibrium_element_residue": 5.326685273421283e-16,
+      "max_sum_of_species_mole_fraction_maxima": 8.266639602098828e-06,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 1,
+      "first_invalid_time_s": 0.006,
+      "last_invalid_time_s": 0.006,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 5.3988716308941676e-154,
+      "max_negative_I_over_supplied_I": 1.52834380646963e-141,
+      "final_execution_s": 32964.98,
+      "final_clock_s": 33003.0
+    }
+  },
+  "LBE-I_SiO2_I_Q2_baseline_sat0.01": {
+    "signature": {
+      "size": 285804735,
+      "mtime_ns": 1791327297628859098,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "e78fba36dc8820c736e37e3cc8e577055869eb725007f7e8a5a000b5a309bcf7",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 29999,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.7925250408531966e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29999,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.5261205151401405e-15,
+          "p95_initial_residual": 1.8059557417958496e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 29991,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 4.300074940880525e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29991,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.454825048608367e-15,
+          "p95_initial_residual": 1.8536583513440665e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 633,
+      "max_equilibrium_element_residue": 5.370595461406946e-16,
+      "max_sum_of_species_mole_fraction_maxima": 1.4053770051676464e-05,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 1,
+      "first_invalid_time_s": 0.01,
+      "last_invalid_time_s": 0.01,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 3.012319997540337e-164,
+      "max_negative_I_over_supplied_I": 1.102506837489989e-151,
+      "final_execution_s": 27384.61,
+      "final_clock_s": 27418.0
+    }
+  },
+  "LBE-I_SiO2_I_Q2_baseline_sat0.1": {
+    "signature": {
+      "size": 285756916,
+      "mtime_ns": 1791331393593045450,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "7356cb8861013be049f91e06b64e5dc12a579a0482c8c6fc5b646a08e8a8caa4",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 29999,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.6474208145967014e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29999,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.5065079199607527e-15,
+          "p95_initial_residual": 1.8398561432383413e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 29829,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 4.426115370858402e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29829,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.42774038219478e-15,
+          "p95_initial_residual": 1.6822729967833318e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 0,
+      "max_equilibrium_element_residue": 5.289822399556776e-16,
+      "max_sum_of_species_mole_fraction_maxima": 8.912268807148175e-05,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 0,
+      "first_invalid_time_s": null,
+      "last_invalid_time_s": null,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 2.0243212047642102e-170,
+      "max_negative_I_over_supplied_I": 2.959752218788621e-163,
+      "final_execution_s": 31475.9,
+      "final_clock_s": 31514.0
+    }
+  },
+  "LBE-I_SiO2_I_Q2_shift29k_sat0.001": {
+    "signature": {
+      "size": 285679441,
+      "mtime_ns": 1791330249568993401,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "17c83fb4f82c49ef3e38f87bbf3d470f1dbe1a7accc41078ea7fd853b46d0064",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 29999,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.418038971267939e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29999,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.41100934873101e-15,
+          "p95_initial_residual": 1.717907041837697e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 29995,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 3.0099145638312292e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29995,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.9954165697996844e-15,
+          "p95_initial_residual": 2.1317462746900383e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 0,
+      "max_equilibrium_element_residue": 6.434197792615226e-16,
+      "max_sum_of_species_mole_fraction_maxima": 9.467122693538422e-06,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 0,
+      "first_invalid_time_s": null,
+      "last_invalid_time_s": null,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 2.5367001162656954e-164,
+      "max_negative_I_over_supplied_I": 1.0450918812523813e-151,
+      "final_execution_s": 30330.46,
+      "final_clock_s": 30370.0
+    }
+  },
+  "LBE-I_SiO2_I_Q2_shift29k_sat0.01": {
+    "signature": {
+      "size": 286223806,
+      "mtime_ns": 1791332506661096091,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "40c184d10f608ae1daad37882777331c2d53ed97db83c7d4e8a2028b9bc1b150",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 29999,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.4628581666591657e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29999,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.5206920009297703e-15,
+          "p95_initial_residual": 1.7402171376966425e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 29997,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 3.4137134390325017e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29997,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 2.153450345935903e-15,
+          "p95_initial_residual": 2.2804477761240753e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 0,
+      "max_equilibrium_element_residue": 6.130079083233042e-16,
+      "max_sum_of_species_mole_fraction_maxima": 1.8080000308874172e-05,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 0,
+      "first_invalid_time_s": null,
+      "last_invalid_time_s": null,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 9.411825540431752e-184,
+      "max_negative_I_over_supplied_I": 4.254436318331005e-171,
+      "final_execution_s": 32589.05,
+      "final_clock_s": 32627.0
+    }
+  },
+  "LBE-I_SiO2_I_Q2_shift29k_sat0.1": {
+    "signature": {
+      "size": 286259077,
+      "mtime_ns": 1791330927461024243,
+      "audit_version": 2
+    },
+    "audit": {
+      "sha256": "4f57a250e8e5b604192f30ad8fd56d98f9d4f688a3202a652e036109397c2e6e",
+      "pairs": {
+        "Y_PbI2_g": {
+          "steps": 30000,
+          "unconverged_steps": 29999,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 2.5086925538581354e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29999,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 1.5211975660533802e-15,
+          "p95_initial_residual": 1.7259363542830464e-15
+        },
+        "Y_BiI3_g": {
+          "steps": 30000,
+          "unconverged_steps": 29997,
+          "unconverged_with_significant_regime_changes": 0,
+          "max_initial_residual": 3.263986413544494e-15,
+          "tolerance": 1e-16,
+          "summary_unconverged_steps": 29997,
+          "guard_passes": 0,
+          "projected_elements": 0,
+          "significant_projected_elements": 0,
+          "complementarity_violations": 0,
+          "significant_complementarity_violations": 0,
+          "median_initial_residual": 2.1551944462797345e-15,
+          "p95_initial_residual": 2.2911307249260002e-15
+        }
+      },
+      "max_respeciation_failures": 0,
+      "max_invalid_element_cells": 0,
+      "max_equilibrium_element_residue": 6.230367784187951e-16,
+      "max_sum_of_species_mole_fraction_maxima": 9.086257229190446e-05,
+      "normal_end": true,
+      "steps_with_invalid_element_cells": 0,
+      "first_invalid_time_s": null,
+      "last_invalid_time_s": null,
+      "final_invalid_element_cells": 0,
+      "max_negative_gas_mass_kg": 4.178913315051834e-163,
+      "max_negative_I_over_supplied_I": 1.960135369186742e-150,
+      "final_execution_s": 31009.67,
+      "final_clock_s": 31048.0
+    }
+  }
+}

@@ -1,0 +1,4408 @@
+{
+  "created_utc": "2026-10-07T08:03:37.595191+00:00",
+  "input_full_root": "/home/jan/LESTO/run/034-liu2025/work/prepared/cases",
+  "input_coarse_root": "/tmp/lesto-m10e-final-coarse",
+  "input_half_root": "/tmp/lesto-m10e-final-half-step",
+  "status": "NUMERICAL_MATRIX_COMPLETE_EXPERIMENTAL_VALIDATION_PROVISIONAL",
+  "PASS": 15,
+  "FAIL": 0,
+  "NOTRUN": 1,
+  "cells": 18432,
+  "dt_s": 0.002,
+  "end_time_s": 60,
+  "max_accounted_element_closure_over_reference": 8.62353435301164e-16,
+  "max_raw_material_residue_over_source": 5.971898568961056e-13,
+  "max_invalid_element_cells": 1170,
+  "max_equilibrium_element_residue": 6.434197792615226e-16,
+  "max_trace_mole_fraction_upper_bound": 9.185175769835115e-05,
+  "max_negative_I_over_supplied_I": 1.135919801709971e-124,
+  "corrector_diagnostic": {
+    "status": "PASS",
+    "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+    "start_time_s": 59,
+    "end_time_s": 59.04,
+    "steps": 20,
+    "dt_s": 0.002,
+    "cases": [
+      "PbI2_SS_Q1_baseline",
+      "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "LBE-I_SiO2_I_Q1_baseline"
+    ],
+    "configurations": [
+      [
+        "control",
+        3,
+        "1e-16"
+      ],
+      [
+        "more_correctors",
+        8,
+        "1e-16"
+      ],
+      [
+        "tolerance_1e14",
+        3,
+        "1e-14"
+      ]
+    ],
+    "comparisons": [
+      {
+        "case": "PbI2_SS_Q1_baseline",
+        "variant": "more_correctors",
+        "gas_fields": {
+          "PbI2_g": {
+            "max_difference_over_max_control": 1.3998238323425006e-14,
+            "unweighted_cell_L1_relative_to_control": 3.379136675343199e-15
+          },
+          "BiI3_g": {
+            "max_difference_over_max_control": null,
+            "unweighted_cell_L1_relative_to_control": null
+          },
+          "Pb_g": {
+            "max_difference_over_max_control": 1.2922201796999572e-14,
+            "unweighted_cell_L1_relative_to_control": 4.807379834859713e-15
+          },
+          "PbI_g": {
+            "max_difference_over_max_control": 7.934085450836193e-15,
+            "unweighted_cell_L1_relative_to_control": 5.6921482409343706e-15
+          },
+          "Bi_g": {
+            "max_difference_over_max_control": null,
+            "unweighted_cell_L1_relative_to_control": null
+          },
+          "Bi2_g": {
+            "max_difference_over_max_control": null,
+            "unweighted_cell_L1_relative_to_control": null
+          },
+          "BiI_g": {
+            "max_difference_over_max_control": null,
+            "unweighted_cell_L1_relative_to_control": null
+          },
+          "I_g": {
+            "max_difference_over_max_control": 5.850419215934672e-15,
+            "unweighted_cell_L1_relative_to_control": 4.3775761549944404e-15
+          },
+          "I2_g": {
+            "max_difference_over_max_control": 7.908341353618144e-14,
+            "unweighted_cell_L1_relative_to_control": 2.359704809337386e-14
+          }
+        },
+        "cumulative_wall_profile_L1": {
+          "PbI2_g": 3.637610177473492e-33,
+          "BiI3_g": null,
+          "element_I": 1.5777261560971054e-32
+        },
+        "wall_increment_profile_L1": {
+          "PbI2_g": 5.270922755085406e-30,
+          "BiI3_g": null,
+          "element_I": 2.2861363070081567e-29
+        }
+      },
+      {
+        "case": "PbI2_SS_Q1_baseline",
+        "variant": "tolerance_1e14",
+        "gas_fields": {
+          "PbI2_g": {
+            "max_difference_over_max_control": 1.4523172260553444e-14,
+            "unweighted_cell_L1_relative_to_control": 3.5331151671617343e-15
+          },
+          "BiI3_g": {
+            "max_difference_over_max_control": null,
+            "unweighted_cell_L1_relative_to_control": null
+          },
+          "Pb_g": {
+            "max_difference_over_max_control": 1.3729839409312046e-14,
+            "unweighted_cell_L1_relative_to_control": 7.328192390792809e-15
+          },
+          "PbI_g": {
+            "max_difference_over_max_control": 1.2329997660083272e-14,
+            "unweighted_cell_L1_relative_to_control": 7.279261267761363e-15
+          },
+          "Bi_g": {
+            "max_difference_over_max_control": null,
+            "unweighted_cell_L1_relative_to_control": null
+          },
+          "Bi2_g": {
+            "max_difference_over_max_control": null,
+            "unweighted_cell_L1_relative_to_control": null
+          },
+          "BiI_g": {
+            "max_difference_over_max_control": null,
+            "unweighted_cell_L1_relative_to_control": null
+          },
+          "I_g": {
+            "max_difference_over_max_control": 1.21113941663209e-14,
+            "unweighted_cell_L1_relative_to_control": 5.822898171169111e-15
+          },
+          "I2_g": {
+            "max_difference_over_max_control": 8.395461747139976e-14,
+            "unweighted_cell_L1_relative_to_control": 2.7741816367408813e-14
+          }
+        },
+        "cumulative_wall_profile_L1": {
+          "PbI2_g": 1.7352930432015548e-32,
+          "BiI3_g": null,
+          "element_I": 1.9139169570257595e-32
+        },
+        "wall_increment_profile_L1": {
+          "PbI2_g": 2.514451835656909e-29,
+          "BiI3_g": null,
+          "element_I": 2.773279144258453e-29
+        }
+      },
+      {
+        "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+        "variant": "more_correctors",
+        "gas_fields": {
+          "PbI2_g": {
+            "max_difference_over_max_control": 5.026381287248817e-10,
+            "unweighted_cell_L1_relative_to_control": 2.1939338396785578e-12
+          },
+          "BiI3_g": {
+            "max_difference_over_max_control": 3.4211863429386275e-08,
+            "unweighted_cell_L1_relative_to_control": 1.537386596970361e-10
+          },
+          "Pb_g": {
+            "max_difference_over_max_control": 3.836853643784368e-12,
+            "unweighted_cell_L1_relative_to_control": 2.109151029867336e-14
+          },
+          "PbI_g": {
+            "max_difference_over_max_control": 4.4304821545674985e-10,
+            "unweighted_cell_L1_relative_to_control": 1.4389627426640752e-12
+          },
+          "Bi_g": {
+            "max_difference_over_max_control": 4.7844045206883686e-12,
+            "unweighted_cell_L1_relative_to_control": 2.6448027224740516e-14
+          },
+          "Bi2_g": {
+            "max_difference_over_max_control": 6.357513070455557e-11,
+            "unweighted_cell_L1_relative_to_control": 4.3014813549760846e-13
+          },
+          "BiI_g": {
+            "max_difference_over_max_control": 2.911994571795675e-09,
+            "unweighted_cell_L1_relative_to_control": 5.242473969771897e-12
+          },
+          "I_g": {
+            "max_difference_over_max_control": 2.9201918283512265e-09,
+            "unweighted_cell_L1_relative_to_control": 3.4659448260691342e-12
+          },
+          "I2_g": {
+            "max_difference_over_max_control": 3.5954637987288064e-08,
+            "unweighted_cell_L1_relative_to_control": 7.020357589074246e-09
+          }
+        },
+        "cumulative_wall_profile_L1": {
+          "PbI2_g": 1.8819189273259057e-17,
+          "BiI3_g": 9.955314568594185e-23,
+          "element_I": 5.119861107834674e-19
+        },
+        "wall_increment_profile_L1": {
+          "PbI2_g": 2.6041872774528993e-14,
+          "BiI3_g": 1.3599045316484995e-19,
+          "element_I": 6.99866852145326e-16
+        }
+      },
+      {
+        "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+        "variant": "tolerance_1e14",
+        "gas_fields": {
+          "PbI2_g": {
+            "max_difference_over_max_control": 2.6466122570717953e-10,
+            "unweighted_cell_L1_relative_to_control": 1.8902263296433263e-12
+          },
+          "BiI3_g": {
+            "max_difference_over_max_control": 4.776892361111544e-09,
+            "unweighted_cell_L1_relative_to_control": 2.2021969780862768e-11
+          },
+          "Pb_g": {
+            "max_difference_over_max_control": 2.8754962015670935e-12,
+            "unweighted_cell_L1_relative_to_control": 2.0175592516301467e-14
+          },
+          "PbI_g": {
+            "max_difference_over_max_control": 2.1318290390867704e-10,
+            "unweighted_cell_L1_relative_to_control": 1.1997190595322051e-12
+          },
+          "Bi_g": {
+            "max_difference_over_max_control": 2.6553117078418977e-12,
+            "unweighted_cell_L1_relative_to_control": 2.28880647396414e-14
+          },
+          "Bi2_g": {
+            "max_difference_over_max_control": 2.19888005886088e-11,
+            "unweighted_cell_L1_relative_to_control": 3.6519547571167624e-13
+          },
+          "BiI_g": {
+            "max_difference_over_max_control": 4.0659269201838147e-10,
+            "unweighted_cell_L1_relative_to_control": 9.066626999185936e-13
+          },
+          "I_g": {
+            "max_difference_over_max_control": 2.6910815593217194e-09,
+            "unweighted_cell_L1_relative_to_control": 3.1931376316128224e-12
+          },
+          "I2_g": {
+            "max_difference_over_max_control": 3.313373528816654e-08,
+            "unweighted_cell_L1_relative_to_control": 5.9595815295688935e-09
+          }
+        },
+        "cumulative_wall_profile_L1": {
+          "PbI2_g": 2.1171587932424094e-17,
+          "BiI3_g": 1.034984806596371e-22,
+          "element_I": 8.70376493614479e-18
+        },
+        "wall_increment_profile_L1": {
+          "PbI2_g": 2.929710687135571e-14,
+          "BiI3_g": 1.4137981466883014e-19,
+          "element_I": 1.1897737925646126e-14
+        }
+      },
+      {
+        "case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+        "variant": "more_correctors",
+        "gas_fields": {
+          "PbI2_g": {
+            "max_difference_over_max_control": 3.899186925290086e-12,
+            "unweighted_cell_L1_relative_to_control": 1.8879651478960954e-14
+          },
+          "BiI3_g": {
+            "max_difference_over_max_control": 6.197170129577848e-10,
+            "unweighted_cell_L1_relative_to_control": 1.685844110061187e-12
+          },
+          "Pb_g": {
+            "max_difference_over_max_control": 2.9202604012686565e-14,
+            "unweighted_cell_L1_relative_to_control": 4.025367668806572e-15
+          },
+          "PbI_g": {
+            "max_difference_over_max_control": 1.1148229406910715e-11,
+            "unweighted_cell_L1_relative_to_control": 4.5192597285066494e-14
+          },
+          "Bi_g": {
+            "max_difference_over_max_control": 9.852876663181602e-14,
+            "unweighted_cell_L1_relative_to_control": 3.197753625399566e-15
+          },
+          "Bi2_g": {
+            "max_difference_over_max_control": 1.1381755922569988e-12,
+            "unweighted_cell_L1_relative_to_control": 1.430617670695629e-14
+          },
+          "BiI_g": {
+            "max_difference_over_max_control": 1.2001304733900024e-11,
+            "unweighted_cell_L1_relative_to_control": 7.599378241928554e-14
+          },
+          "I_g": {
+            "max_difference_over_max_control": 2.7968972493089326e-11,
+            "unweighted_cell_L1_relative_to_control": 5.2847273658535684e-14
+          },
+          "I2_g": {
+            "max_difference_over_max_control": 8.677498488615158e-09,
+            "unweighted_cell_L1_relative_to_control": 8.704779324230447e-12
+          }
+        },
+        "cumulative_wall_profile_L1": {
+          "PbI2_g": 2.5718179872364364e-18,
+          "BiI3_g": 8.300772613423906e-23,
+          "element_I": 1.5123097509694466e-18
+        },
+        "wall_increment_profile_L1": {
+          "PbI2_g": 3.572232321506959e-15,
+          "BiI3_g": 1.1267060876037235e-19,
+          "element_I": 2.0996082085848543e-15
+        }
+      },
+      {
+        "case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+        "variant": "tolerance_1e14",
+        "gas_fields": {
+          "PbI2_g": {
+            "max_difference_over_max_control": 2.9612584515818805e-12,
+            "unweighted_cell_L1_relative_to_control": 1.7914703917959818e-14
+          },
+          "BiI3_g": {
+            "max_difference_over_max_control": 2.5160797438718474e-10,
+            "unweighted_cell_L1_relative_to_control": 1.163753876824886e-12
+          },
+          "Pb_g": {
+            "max_difference_over_max_control": 2.4898808465976587e-14,
+            "unweighted_cell_L1_relative_to_control": 3.9788502842476e-15
+          },
+          "PbI_g": {
+            "max_difference_over_max_control": 8.402174760079642e-12,
+            "unweighted_cell_L1_relative_to_control": 4.170085589955526e-14
+          },
+          "Bi_g": {
+            "max_difference_over_max_control": 7.378314148274679e-14,
+            "unweighted_cell_L1_relative_to_control": 3.500099907616169e-15
+          },
+          "Bi2_g": {
+            "max_difference_over_max_control": 9.705782214908136e-13,
+            "unweighted_cell_L1_relative_to_control": 1.3559629514855325e-14
+          },
+          "BiI_g": {
+            "max_difference_over_max_control": 5.043834905172738e-12,
+            "unweighted_cell_L1_relative_to_control": 5.731903883389854e-14
+          },
+          "I_g": {
+            "max_difference_over_max_control": 1.1353033844349435e-11,
+            "unweighted_cell_L1_relative_to_control": 3.987933464850758e-14
+          },
+          "I2_g": {
+            "max_difference_over_max_control": 3.5223294598669685e-09,
+            "unweighted_cell_L1_relative_to_control": 5.630149481909336e-12
+          }
+        },
+        "cumulative_wall_profile_L1": {
+          "PbI2_g": 6.583854047322198e-17,
+          "BiI3_g": 1.2160349539461484e-21,
+          "element_I": 6.754947128709868e-17
+        },
+        "wall_increment_profile_L1": {
+          "PbI2_g": 9.144914743053538e-14,
+          "BiI3_g": 1.650586095003142e-18,
+          "element_I": 9.37819942700513e-14
+        }
+      },
+      {
+        "case": "LBE-I_SiO2_I_Q1_baseline",
+        "variant": "more_correctors",
+        "gas_fields": {
+          "PbI2_g": {
+            "max_difference_over_max_control": 1.4781526509591145e-14,
+            "unweighted_cell_L1_relative_to_control": 4.035266124428074e-15
+          },
+          "BiI3_g": {
+            "max_difference_over_max_control": 1.3017000779540267e-14,
+            "unweighted_cell_L1_relative_to_control": 3.900054055722053e-15
+          },
+          "Pb_g": {
+            "max_difference_over_max_control": 8.235066852605274e-15,
+            "unweighted_cell_L1_relative_to_control": 3.6648503072457934e-15
+          },
+          "PbI_g": {
+            "max_difference_over_max_control": 1.3098414549482842e-14,
+            "unweighted_cell_L1_relative_to_control": 3.498147394238608e-15
+          },
+          "Bi_g": {
+            "max_difference_over_max_control": 2.16697383485397e-14,
+            "unweighted_cell_L1_relative_to_control": 5.998184535594536e-15
+          },
+          "Bi2_g": {
+            "max_difference_over_max_control": 4.3419496550233475e-14,
+            "unweighted_cell_L1_relative_to_control": 1.2113941767775389e-14
+          },
+          "BiI_g": {
+            "max_difference_over_max_control": 1.8919452494280513e-14,
+            "unweighted_cell_L1_relative_to_control": 3.9928046982547995e-15
+          },
+          "I_g": {
+            "max_difference_over_max_control": 1.527654308107978e-14,
+            "unweighted_cell_L1_relative_to_control": 4.274890512397899e-15
+          },
+          "I2_g": {
+            "max_difference_over_max_control": 1.6099481448459685e-14,
+            "unweighted_cell_L1_relative_to_control": 4.353675122850426e-15
+          }
+        },
+        "cumulative_wall_profile_L1": {
+          "PbI2_g": 6.318259668499378e-30,
+          "BiI3_g": 3.327276811928419e-22,
+          "element_I": 5.991620659673696e-24
+        },
+        "wall_increment_profile_L1": {
+          "PbI2_g": 8.65592883278867e-27,
+          "BiI3_g": 4.46649542460554e-19,
+          "element_I": 8.16033853475806e-21
+        }
+      },
+      {
+        "case": "LBE-I_SiO2_I_Q1_baseline",
+        "variant": "tolerance_1e14",
+        "gas_fields": {
+          "PbI2_g": {
+            "max_difference_over_max_control": 1.41902654492075e-14,
+            "unweighted_cell_L1_relative_to_control": 3.408701980180448e-15
+          },
+          "BiI3_g": {
+            "max_difference_over_max_control": 1.3657181145747165e-14,
+            "unweighted_cell_L1_relative_to_control": 3.4353745905134644e-15
+          },
+          "Pb_g": {
+            "max_difference_over_max_control": 7.567358729421063e-15,
+            "unweighted_cell_L1_relative_to_control": 3.2336014662689913e-15
+          },
+          "PbI_g": {
+            "max_difference_over_max_control": 9.511943899029206e-15,
+            "unweighted_cell_L1_relative_to_control": 2.932200708807496e-15
+          },
+          "Bi_g": {
+            "max_difference_over_max_control": 1.7430006932521062e-14,
+            "unweighted_cell_L1_relative_to_control": 5.64398085394417e-15
+          },
+          "Bi2_g": {
+            "max_difference_over_max_control": 3.523073184997015e-14,
+            "unweighted_cell_L1_relative_to_control": 1.1347237411662424e-14
+          },
+          "BiI_g": {
+            "max_difference_over_max_control": 1.5951695240275724e-14,
+            "unweighted_cell_L1_relative_to_control": 3.673947627944543e-15
+          },
+          "I_g": {
+            "max_difference_over_max_control": 9.829093610307146e-15,
+            "unweighted_cell_L1_relative_to_control": 3.565139107727093e-15
+          },
+          "I2_g": {
+            "max_difference_over_max_control": 1.3771845576393225e-14,
+            "unweighted_cell_L1_relative_to_control": 3.9176148726504465e-15
+          }
+        },
+        "cumulative_wall_profile_L1": {
+          "PbI2_g": 1.9193796088868956e-31,
+          "BiI3_g": 3.2679438239427576e-22,
+          "element_I": 8.812269083546605e-25
+        },
+        "wall_increment_profile_L1": {
+          "PbI2_g": 2.629523661470001e-28,
+          "BiI3_g": 4.386847552082262e-19,
+          "element_I": 1.2001944559861163e-21
+        }
+      }
+    ],
+    "scope": "Short matched late-time restarts; source, transport discretisation and linear solver tolerances unchanged. No full-run iteration-independence claim."
+  },
+  "positivity_diagnostic": {
+    "status": "COMPLETED",
+    "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+    "dt_s": 0.002,
+    "end_time_s": 0.01,
+    "results": [
+      {
+        "case": "LBE-I_SS_II_Q2_shift29k_sat0.1",
+        "events": [
+          {
+            "time_s": 0.008,
+            "invalid_cells": 96,
+            "positive_I_over_supplied_I_upper_bound": 1.003153788414887e-225
+          }
+        ],
+        "maximum_logged_invalid_cells": 96
+      },
+      {
+        "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+        "events": [
+          {
+            "time_s": 0.006,
+            "invalid_cells": 1170,
+            "positive_I_over_supplied_I_upper_bound": 3.9077817508590026e-225
+          }
+        ],
+        "maximum_logged_invalid_cells": 1170
+      },
+      {
+        "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01",
+        "events": [
+          {
+            "time_s": 0.01,
+            "invalid_cells": 633,
+            "positive_I_over_supplied_I_upper_bound": 1.2428619363780944e-235
+          }
+        ],
+        "maximum_logged_invalid_cells": 633
+      }
+    ],
+    "scope": "Five-step startup replay; original physical inputs and source rates; positive iodine bound uses entire axial-slice volume per affected radial cell."
+  },
+  "q1_peaks": [
+    {
+      "case": "PbI2_SS_Q1_baseline",
+      "experiment": "PbI2_SS",
+      "species": "PbI2",
+      "predicted_peak_C": 350.72813859893336,
+      "published_peak_C": 368.0,
+      "error_K": -17.271861401066644,
+      "uncertainty_K": 18.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 36.99999999999999,
+      "figure_x_cm": 36.0,
+      "offset_cm": 0.9999999999999953
+    },
+    {
+      "case": "LBE-I_SS_II_Q1_baseline",
+      "experiment": "LBE-I_SS_II",
+      "species": "PbI2",
+      "predicted_peak_C": 288.08725858341006,
+      "published_peak_C": 288.0,
+      "error_K": 0.08725858341006187,
+      "uncertainty_K": 18.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 50.99999999999999,
+      "figure_x_cm": 51.0,
+      "offset_cm": -1.1102230246251565e-14
+    },
+    {
+      "case": "LBE-I_SS_II_Q1_baseline",
+      "experiment": "LBE-I_SS_II",
+      "species": "BiI3",
+      "predicted_peak_C": 166.41083189720092,
+      "published_peak_C": 154.0,
+      "error_K": 12.410831897200922,
+      "uncertainty_K": 14.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 56.999999999999986,
+      "figure_x_cm": 56.99999999999999,
+      "offset_cm": -1.1102230246251565e-14
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "experiment": "LBE-I_SiO2_I",
+      "species": "PbI2",
+      "predicted_peak_C": 287.58800869032245,
+      "published_peak_C": 306.0,
+      "error_K": -18.411991309677546,
+      "uncertainty_K": 24.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 55.99999999999999,
+      "figure_x_cm": 51.0,
+      "offset_cm": 4.999999999999993
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "experiment": "LBE-I_SiO2_I",
+      "species": "BiI3",
+      "predicted_peak_C": 152.76694283199407,
+      "published_peak_C": 127.0,
+      "error_K": 25.766942831994072,
+      "uncertainty_K": 39.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 62.999999999999986,
+      "figure_x_cm": 59.0,
+      "offset_cm": 3.9999999999999925
+    }
+  ],
+  "case_metrics": [
+    {
+      "case": "PbI2_SS_Q1_baseline",
+      "experiment": "PbI2_SS",
+      "source_mode": "Q1",
+      "thermo_variant": "baseline",
+      "metal_saturation": null,
+      "BiI3_iodide_I_pct": 0.0,
+      "observed_BiI3_iodide_I_pct": 0.0,
+      "split_error_percentage_points": 0.0,
+      "iodine_wall_fraction": 0.9820046931792252,
+      "iodine_gas_fraction": 0.017995306821162686,
+      "iodine_outlet_net_fraction": 6.426843144385171e-16,
+      "max_accounted_closure_over_reference": 8.62353435301164e-16,
+      "max_raw_material_residue_over_source": 3.888867510632376e-13,
+      "final_clock_hours": 6.248611111111111,
+      "raw_L1_percentage_points": 53.89594314278326,
+      "observed_scan_sum_pct": 99.16567342073898,
+      "model_scan_sum_pct": 99.75974081969807,
+      "normalised_scan_total_variation": 0.2707184969680882,
+      "normalised_scan_overlap": 0.7292815030319117,
+      "normalised_scan_Wasserstein_m": 0.008008580249053683,
+      "normalised_scan_centroid_difference_m": 0.008008580249053694,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 350.72813859893336,
+      "PbI2_peak_error_K": -17.271861401066644,
+      "PbI2_wall_mol_full_column": 1.7277645804459383e-07,
+      "BiI3_peak_C": null,
+      "BiI3_peak_error_K": null,
+      "BiI3_wall_mol_full_column": 0.0
+    },
+    {
+      "case": "LBE-I_SS_II_Q1_baseline",
+      "experiment": "LBE-I_SS_II",
+      "source_mode": "Q1",
+      "thermo_variant": "baseline",
+      "metal_saturation": null,
+      "BiI3_iodide_I_pct": 65.34110227234207,
+      "observed_BiI3_iodide_I_pct": 65.63169164882227,
+      "split_error_percentage_points": -0.2905893764801992,
+      "iodine_wall_fraction": 0.9313518375120801,
+      "iodine_gas_fraction": 0.06864812635998208,
+      "iodine_outlet_net_fraction": 3.612770398471177e-08,
+      "max_accounted_closure_over_reference": 6.419324226213146e-16,
+      "max_raw_material_residue_over_source": 5.971898568961056e-13,
+      "final_clock_hours": 8.4675,
+      "raw_L1_percentage_points": 53.44836097355756,
+      "observed_scan_sum_pct": 96.70103092783505,
+      "model_scan_sum_pct": 93.39999243840383,
+      "normalised_scan_total_variation": 0.28124042490869977,
+      "normalised_scan_overlap": 0.7187595750913003,
+      "normalised_scan_Wasserstein_m": 0.013097536159175603,
+      "normalised_scan_centroid_difference_m": 0.010638317349351924,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 288.08725858341006,
+      "PbI2_peak_error_K": 0.08725858341006187,
+      "PbI2_wall_mol_full_column": 1.2574433530986138e-09,
+      "BiI3_peak_C": 166.41083189720092,
+      "BiI3_peak_error_K": 12.410831897200922,
+      "BiI3_wall_mol_full_column": 1.5804067665800205e-09
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "experiment": "LBE-I_SS_II",
+      "source_mode": "Q2",
+      "thermo_variant": "baseline",
+      "metal_saturation": 0.001,
+      "BiI3_iodide_I_pct": 56.474661932483215,
+      "observed_BiI3_iodide_I_pct": 65.63169164882227,
+      "split_error_percentage_points": -9.15702971633905,
+      "iodine_wall_fraction": 0.9322715661401714,
+      "iodine_gas_fraction": 0.06772842539009809,
+      "iodine_outlet_net_fraction": 8.46940466143963e-09,
+      "max_accounted_closure_over_reference": 4.766607621318233e-16,
+      "max_raw_material_residue_over_source": 5.719586302511744e-13,
+      "final_clock_hours": 6.7725,
+      "raw_L1_percentage_points": 36.79730419887923,
+      "observed_scan_sum_pct": 96.70103092783505,
+      "model_scan_sum_pct": 93.39998682627467,
+      "normalised_scan_total_variation": 0.18899974723208074,
+      "normalised_scan_overlap": 0.8110002527679192,
+      "normalised_scan_Wasserstein_m": 0.00982779572669625,
+      "normalised_scan_centroid_difference_m": 0.006194926869423604,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 288.08725858341006,
+      "PbI2_peak_error_K": 0.08725858341006187,
+      "PbI2_wall_mol_full_column": 1.5806819676447644e-09,
+      "BiI3_peak_C": 166.41083189720092,
+      "BiI3_peak_error_K": 12.410831897200922,
+      "BiI3_wall_mol_full_column": 1.3673028739724987e-09
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "experiment": "LBE-I_SS_II",
+      "source_mode": "Q2",
+      "thermo_variant": "baseline",
+      "metal_saturation": 0.01,
+      "BiI3_iodide_I_pct": 94.56004535260291,
+      "observed_BiI3_iodide_I_pct": 65.63169164882227,
+      "split_error_percentage_points": 28.92835370378064,
+      "iodine_wall_fraction": 0.927309005277733,
+      "iodine_gas_fraction": 0.07269098624600835,
+      "iodine_outlet_net_fraction": 8.476079563875858e-09,
+      "max_accounted_closure_over_reference": 4.662079667508325e-16,
+      "max_raw_material_residue_over_source": 2.1127513430783063e-13,
+      "final_clock_hours": 7.753055555555555,
+      "raw_L1_percentage_points": 75.43989333156458,
+      "observed_scan_sum_pct": 96.70103092783505,
+      "model_scan_sum_pct": 93.3999867481811,
+      "normalised_scan_total_variation": 0.40501670869584205,
+      "normalised_scan_overlap": 0.594983291304158,
+      "normalised_scan_Wasserstein_m": 0.027987808633029628,
+      "normalised_scan_centroid_difference_m": 0.027595697983705873,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 251.3514362494036,
+      "PbI2_peak_error_K": -36.648563750596395,
+      "PbI2_wall_mol_full_column": 1.9650774119852263e-10,
+      "BiI3_peak_C": 166.41083189720092,
+      "BiI3_peak_error_K": 12.410831897200922,
+      "BiI3_wall_mol_full_column": 2.2771980190142292e-09
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.1",
+      "experiment": "LBE-I_SS_II",
+      "source_mode": "Q2",
+      "thermo_variant": "baseline",
+      "metal_saturation": 0.1,
+      "BiI3_iodide_I_pct": 94.55671872805749,
+      "observed_BiI3_iodide_I_pct": 65.63169164882227,
+      "split_error_percentage_points": 28.92502707923522,
+      "iodine_wall_fraction": 0.9273102768263131,
+      "iodine_gas_fraction": 0.07268971469768583,
+      "iodine_outlet_net_fraction": 8.475846383287643e-09,
+      "max_accounted_closure_over_reference": 5.167087407995203e-16,
+      "max_raw_material_residue_over_source": 2.211388060131589e-13,
+      "final_clock_hours": 9.033888888888889,
+      "raw_L1_percentage_points": 75.4325650438157,
+      "observed_scan_sum_pct": 96.70103092783505,
+      "model_scan_sum_pct": 93.39998675286249,
+      "normalised_scan_total_variation": 0.4050107060542516,
+      "normalised_scan_overlap": 0.5949892939457483,
+      "normalised_scan_Wasserstein_m": 0.027986788229873966,
+      "normalised_scan_centroid_difference_m": 0.027594374234899386,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 251.3514362494036,
+      "PbI2_peak_error_K": -36.648563750596395,
+      "PbI2_wall_mol_full_column": 1.9662817863660135e-10,
+      "BiI3_peak_C": 166.41083189720092,
+      "BiI3_peak_error_K": 12.410831897200922,
+      "BiI3_wall_mol_full_column": 2.277121029575403e-09
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.001",
+      "experiment": "LBE-I_SS_II",
+      "source_mode": "Q2",
+      "thermo_variant": "shift29k",
+      "metal_saturation": 0.001,
+      "BiI3_iodide_I_pct": 56.48886855345149,
+      "observed_BiI3_iodide_I_pct": 65.63169164882227,
+      "split_error_percentage_points": -9.142823095370778,
+      "iodine_wall_fraction": 0.9325759569174831,
+      "iodine_gas_fraction": 0.06742403938815375,
+      "iodine_outlet_net_fraction": 3.694354219162029e-09,
+      "max_accounted_closure_over_reference": 4.3779854970326617e-16,
+      "max_raw_material_residue_over_source": 3.927067101188213e-13,
+      "final_clock_hours": 7.791944444444445,
+      "raw_L1_percentage_points": 43.816938648704976,
+      "observed_scan_sum_pct": 96.70103092783505,
+      "model_scan_sum_pct": 93.39999368464335,
+      "normalised_scan_total_variation": 0.23629930805463772,
+      "normalised_scan_overlap": 0.7637006919453622,
+      "normalised_scan_Wasserstein_m": 0.010729061566821352,
+      "normalised_scan_centroid_difference_m": 0.005296931557484579,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 288.08725858341006,
+      "PbI2_peak_error_K": 0.08725858341006187,
+      "PbI2_wall_mol_full_column": 1.5806819660220314e-09,
+      "BiI3_peak_C": 166.41083189720092,
+      "BiI3_peak_error_K": 12.410831897200922,
+      "BiI3_wall_mol_full_column": 1.3680933718937302e-09
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "experiment": "LBE-I_SS_II",
+      "source_mode": "Q2",
+      "thermo_variant": "shift29k",
+      "metal_saturation": 0.01,
+      "BiI3_iodide_I_pct": 1.996160301771938,
+      "observed_BiI3_iodide_I_pct": 65.63169164882227,
+      "split_error_percentage_points": -63.635531347050325,
+      "iodine_wall_fraction": 0.9415635725315687,
+      "iodine_gas_fraction": 0.058436423793833694,
+      "iodine_outlet_net_fraction": 3.6741278324751958e-09,
+      "max_accounted_closure_over_reference": 5.332764635138749e-16,
+      "max_raw_material_residue_over_source": 4.720592638007916e-13,
+      "final_clock_hours": 7.940555555555555,
+      "raw_L1_percentage_points": 123.19164394663326,
+      "observed_scan_sum_pct": 96.70103092783505,
+      "model_scan_sum_pct": 93.39999377221477,
+      "normalised_scan_total_variation": 0.6533550827653186,
+      "normalised_scan_overlap": 0.3466449172346815,
+      "normalised_scan_Wasserstein_m": 0.04297453959069457,
+      "normalised_scan_centroid_difference_m": -0.032390873367323596,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 288.08725858341006,
+      "PbI2_peak_error_K": 0.08725858341006187,
+      "PbI2_wall_mol_full_column": 3.5946171877701446e-09,
+      "BiI3_peak_C": 108.15257551517863,
+      "BiI3_peak_error_K": -45.847424484821374,
+      "BiI3_wall_mol_full_column": 4.88105510449953e-11
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.1",
+      "experiment": "LBE-I_SS_II",
+      "source_mode": "Q2",
+      "thermo_variant": "shift29k",
+      "metal_saturation": 0.1,
+      "BiI3_iodide_I_pct": 1.9925410715006082,
+      "observed_BiI3_iodide_I_pct": 65.63169164882227,
+      "split_error_percentage_points": -63.63915057732166,
+      "iodine_wall_fraction": 0.9415635801383192,
+      "iodine_gas_fraction": 0.058436416188397816,
+      "iodine_outlet_net_fraction": 3.672795771430159e-09,
+      "max_accounted_closure_over_reference": 4.499895109318448e-16,
+      "max_raw_material_residue_over_source": 4.87641572055853e-13,
+      "final_clock_hours": 8.035833333333333,
+      "raw_L1_percentage_points": 123.19840164760349,
+      "observed_scan_sum_pct": 96.70103092783505,
+      "model_scan_sum_pct": 93.39999377400851,
+      "normalised_scan_total_variation": 0.6533912588879038,
+      "normalised_scan_overlap": 0.3466087411120961,
+      "normalised_scan_Wasserstein_m": 0.04297752752325984,
+      "normalised_scan_centroid_difference_m": -0.03239387819975702,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 288.08725858341006,
+      "PbI2_peak_error_K": 0.08725858341006187,
+      "PbI2_wall_mol_full_column": 3.594749964134345e-09,
+      "BiI3_peak_C": 108.15257551517863,
+      "BiI3_peak_error_K": -45.847424484821374,
+      "BiI3_wall_mol_full_column": 4.872205322344229e-11
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "experiment": "LBE-I_SiO2_I",
+      "source_mode": "Q1",
+      "thermo_variant": "baseline",
+      "metal_saturation": null,
+      "BiI3_iodide_I_pct": 28.67690243417545,
+      "observed_BiI3_iodide_I_pct": 29.03225806451613,
+      "split_error_percentage_points": -0.3553556303406813,
+      "iodine_wall_fraction": 0.9239722552952692,
+      "iodine_gas_fraction": 0.07602769953888233,
+      "iodine_outlet_net_fraction": 4.516587661401985e-08,
+      "max_accounted_closure_over_reference": 6.592941951549325e-16,
+      "max_raw_material_residue_over_source": 1.7304746587422676e-13,
+      "final_clock_hours": 7.792222222222223,
+      "raw_L1_percentage_points": 181.84449909251248,
+      "observed_scan_sum_pct": 102.24489795918367,
+      "model_scan_sum_pct": 92.99053458790515,
+      "normalised_scan_total_variation": 0.9279984058919583,
+      "normalised_scan_overlap": 0.07200159410804188,
+      "normalised_scan_Wasserstein_m": 0.05370499636840194,
+      "normalised_scan_centroid_difference_m": 0.05370499636840207,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 287.58800869032245,
+      "PbI2_peak_error_K": -18.411991309677546,
+      "PbI2_wall_mol_full_column": 2.721395423986287e-09,
+      "BiI3_peak_C": 152.76694283199407,
+      "BiI3_peak_error_K": 25.766942831994072,
+      "BiI3_wall_mol_full_column": 7.294615977331568e-10
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "experiment": "LBE-I_SiO2_I",
+      "source_mode": "Q2",
+      "thermo_variant": "baseline",
+      "metal_saturation": 0.001,
+      "BiI3_iodide_I_pct": 23.965914017704858,
+      "observed_BiI3_iodide_I_pct": 29.03225806451613,
+      "split_error_percentage_points": -5.066344046811272,
+      "iodine_wall_fraction": 0.9248393162861612,
+      "iodine_gas_fraction": 0.07516067274984026,
+      "iodine_outlet_net_fraction": 1.0964081785426943e-08,
+      "max_accounted_closure_over_reference": 5.160181100644179e-16,
+      "max_raw_material_residue_over_source": 1.5581816533208518e-13,
+      "final_clock_hours": 9.1675,
+      "raw_L1_percentage_points": 181.84462801563353,
+      "observed_scan_sum_pct": 102.24489795918367,
+      "model_scan_sum_pct": 92.98230314247208,
+      "normalised_scan_total_variation": 0.9280369885788009,
+      "normalised_scan_overlap": 0.07196301142119906,
+      "normalised_scan_Wasserstein_m": 0.050236369752659424,
+      "normalised_scan_centroid_difference_m": 0.05023636975265942,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 287.58800869032245,
+      "PbI2_peak_error_K": -18.411991309677546,
+      "PbI2_wall_mol_full_column": 2.903869777921963e-09,
+      "BiI3_peak_C": 152.76694283199407,
+      "BiI3_peak_error_K": 25.766942831994072,
+      "BiI3_wall_mol_full_column": 6.101990751226557e-10
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01",
+      "experiment": "LBE-I_SiO2_I",
+      "source_mode": "Q2",
+      "thermo_variant": "baseline",
+      "metal_saturation": 0.01,
+      "BiI3_iodide_I_pct": 94.49130260244912,
+      "observed_BiI3_iodide_I_pct": 29.03225806451613,
+      "split_error_percentage_points": 65.45904453793298,
+      "iodine_wall_fraction": 0.9127415302530975,
+      "iodine_gas_fraction": 0.08725845875568057,
+      "iodine_outlet_net_fraction": 1.0991385226887512e-08,
+      "max_accounted_closure_over_reference": 6.475051258554159e-16,
+      "max_raw_material_residue_over_source": 1.7053542772008876e-13,
+      "final_clock_hours": 7.6161111111111115,
+      "raw_L1_percentage_points": 185.47480336303408,
+      "observed_scan_sum_pct": 102.24489795918367,
+      "model_scan_sum_pct": 92.98168434031932,
+      "normalised_scan_total_variation": 0.9475607534663668,
+      "normalised_scan_overlap": 0.05243924653363313,
+      "normalised_scan_Wasserstein_m": 0.09716821018141697,
+      "normalised_scan_centroid_difference_m": 0.09716821018141698,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 252.93363293637185,
+      "PbI2_peak_error_K": -53.06636706362815,
+      "PbI2_wall_mol_full_column": 2.076343732852617e-10,
+      "BiI3_peak_C": 152.76694283199407,
+      "BiI3_peak_error_K": 25.766942831994072,
+      "BiI3_wall_mol_full_column": 2.3743837524384976e-09
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.1",
+      "experiment": "LBE-I_SiO2_I",
+      "source_mode": "Q2",
+      "thermo_variant": "baseline",
+      "metal_saturation": 0.1,
+      "BiI3_iodide_I_pct": 94.48746960852087,
+      "observed_BiI3_iodide_I_pct": 29.03225806451613,
+      "split_error_percentage_points": 65.45521154400473,
+      "iodine_wall_fraction": 0.912744531349539,
+      "iodine_gas_fraction": 0.087255457659623,
+      "iodine_outlet_net_fraction": 1.0990980225877872e-08,
+      "max_accounted_closure_over_reference": 5.974620259103378e-16,
+      "max_raw_material_residue_over_source": 1.5244325632477792e-13,
+      "final_clock_hours": 8.75388888888889,
+      "raw_L1_percentage_points": 185.46990781086245,
+      "observed_scan_sum_pct": 102.24489795918367,
+      "model_scan_sum_pct": 92.98167375268808,
+      "normalised_scan_total_variation": 0.9475344790686389,
+      "normalised_scan_overlap": 0.05246552093136114,
+      "normalised_scan_Wasserstein_m": 0.09716716704731099,
+      "normalised_scan_centroid_difference_m": 0.09716716704731096,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 252.93363293637185,
+      "PbI2_peak_error_K": -53.06636706362815,
+      "PbI2_wall_mol_full_column": 2.0777953005314892e-10,
+      "BiI3_peak_C": 152.76694283199407,
+      "BiI3_peak_error_K": 25.766942831994072,
+      "BiI3_wall_mol_full_column": 2.3742952433745353e-09
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.001",
+      "experiment": "LBE-I_SiO2_I",
+      "source_mode": "Q2",
+      "thermo_variant": "shift29k",
+      "metal_saturation": 0.001,
+      "BiI3_iodide_I_pct": 20.442914067775646,
+      "observed_BiI3_iodide_I_pct": 29.03225806451613,
+      "split_error_percentage_points": -8.589343996740483,
+      "iodine_wall_fraction": 0.9256180628724553,
+      "iodine_gas_fraction": 0.07438193227563979,
+      "iodine_outlet_net_fraction": 4.8519768680493385e-09,
+      "max_accounted_closure_over_reference": 4.3085413089885477e-16,
+      "max_raw_material_residue_over_source": 1.0252170215803754e-13,
+      "final_clock_hours": 8.436111111111112,
+      "raw_L1_percentage_points": 181.8613350159409,
+      "observed_scan_sum_pct": 102.24489795918367,
+      "model_scan_sum_pct": 92.99065505239753,
+      "normalised_scan_total_variation": 0.9280883762561716,
+      "normalised_scan_overlap": 0.07191162374382853,
+      "normalised_scan_Wasserstein_m": 0.04730265179334376,
+      "normalised_scan_centroid_difference_m": 0.04720397699531026,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 287.58800869032245,
+      "PbI2_peak_error_K": -18.411991309677546,
+      "PbI2_wall_mol_full_column": 3.040977532018151e-09,
+      "BiI3_peak_C": 152.76694283199407,
+      "BiI3_peak_error_K": 25.766942831994072,
+      "BiI3_wall_mol_full_column": 5.209378200205731e-10
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01",
+      "experiment": "LBE-I_SiO2_I",
+      "source_mode": "Q2",
+      "thermo_variant": "shift29k",
+      "metal_saturation": 0.01,
+      "BiI3_iodide_I_pct": 1.9799459969655473,
+      "observed_BiI3_iodide_I_pct": 29.03225806451613,
+      "split_error_percentage_points": -27.05231206755058,
+      "iodine_wall_fraction": 0.9294408977526565,
+      "iodine_gas_fraction": 0.0705590974180715,
+      "iodine_outlet_net_fraction": 4.829320180925311e-09,
+      "max_accounted_closure_over_reference": 5.011200828441032e-16,
+      "max_raw_material_residue_over_source": 1.58373626211707e-13,
+      "final_clock_hours": 9.063055555555556,
+      "raw_L1_percentage_points": 181.9035428972851,
+      "observed_scan_sum_pct": 102.24489795918367,
+      "model_scan_sum_pct": 92.99143155554997,
+      "normalised_scan_total_variation": 0.928311746607084,
+      "normalised_scan_overlap": 0.07168825339291603,
+      "normalised_scan_Wasserstein_m": 0.04098124870249053,
+      "normalised_scan_centroid_difference_m": 0.032274634413464585,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 306.94802833988615,
+      "PbI2_peak_error_K": 0.9480283398861502,
+      "PbI2_wall_mol_full_column": 3.762177132405393e-09,
+      "BiI3_peak_C": 119.84291483300615,
+      "BiI3_peak_error_K": -7.157085166993852,
+      "BiI3_wall_mol_full_column": 5.0662473299941806e-11
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.1",
+      "experiment": "LBE-I_SiO2_I",
+      "source_mode": "Q2",
+      "thermo_variant": "shift29k",
+      "metal_saturation": 0.1,
+      "BiI3_iodide_I_pct": 1.975797887175744,
+      "observed_BiI3_iodide_I_pct": 29.03225806451613,
+      "split_error_percentage_points": -27.056460177340387,
+      "iodine_wall_fraction": 0.9294398061754451,
+      "iodine_gas_fraction": 0.07056018899688225,
+      "iodine_outlet_net_fraction": 4.8277718778925265e-09,
+      "max_accounted_closure_over_reference": 5.738216301403798e-16,
+      "max_raw_material_residue_over_source": 1.4422357014227177e-13,
+      "final_clock_hours": 8.624444444444444,
+      "raw_L1_percentage_points": 181.903501483739,
+      "observed_scan_sum_pct": 102.24489795918367,
+      "model_scan_sum_pct": 92.99143607119956,
+      "normalised_scan_total_variation": 0.9283115031343541,
+      "normalised_scan_overlap": 0.07168849686564596,
+      "normalised_scan_Wasserstein_m": 0.04098172768454155,
+      "normalised_scan_centroid_difference_m": 0.03227099851974637,
+      "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting.",
+      "PbI2_peak_C": 306.94802833988615,
+      "PbI2_peak_error_K": 0.9480283398861502,
+      "PbI2_wall_mol_full_column": 3.7623319252887625e-09,
+      "BiI3_peak_C": 119.84291483300615,
+      "BiI3_peak_error_K": -7.157085166993852,
+      "BiI3_wall_mol_full_column": 5.055627289733628e-11
+    }
+  ],
+  "combined_refinement": [
+    {
+      "case": "PbI2_SS_Q1_baseline",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.2941807765379292,
+      "normalised_shape_L1": 0.2942814673466283,
+      "deposit_relative_change": 0.00015692621643005657,
+      "peak_change_K": 1.1560912164466117,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q1_baseline",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.2459271609348756,
+      "normalised_shape_L1": 0.24578892297041185,
+      "deposit_relative_change": 0.00036241216175706884,
+      "peak_change_K": 17.453451115629832,
+      "peak_shift_cm": -1.0000000000000009,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q1_baseline",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.24449845813842264,
+      "normalised_shape_L1": 0.24448737131331333,
+      "deposit_relative_change": 0.00011290090763982272,
+      "peak_change_K": 0.8507465977502875,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.3048945184885907,
+      "normalised_shape_L1": 0.30500363894386434,
+      "deposit_relative_change": 0.00041533191247915594,
+      "peak_change_K": 17.453451115629832,
+      "peak_shift_cm": -1.0000000000000009,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.24168877172001543,
+      "normalised_shape_L1": 0.24176275430045213,
+      "deposit_relative_change": 0.00027553901653979486,
+      "peak_change_K": 26.09200463111307,
+      "peak_shift_cm": -1.0000000000000009,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.3516330407666621,
+      "normalised_shape_L1": 0.35179364507985733,
+      "deposit_relative_change": 0.03343754825557353,
+      "peak_change_K": 0.40342899988854697,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.28574875998879334,
+      "normalised_shape_L1": 0.2858306834492766,
+      "deposit_relative_change": -0.0012345331270512815,
+      "peak_change_K": 0.8507465977502875,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.1",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.35179402988887665,
+      "normalised_shape_L1": 0.3519517803208285,
+      "deposit_relative_change": 0.03368390679844765,
+      "peak_change_K": 0.40342899988854697,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.1",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.28563238984919165,
+      "normalised_shape_L1": 0.2857147965722593,
+      "deposit_relative_change": -0.001240708263722809,
+      "peak_change_K": 0.8507465977502875,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.001",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.30489453903422253,
+      "normalised_shape_L1": 0.3050036596747252,
+      "deposit_relative_change": 0.0004153318743001799,
+      "peak_change_K": 17.453451115629832,
+      "peak_shift_cm": -1.0000000000000009,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.001",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.2317281658344177,
+      "normalised_shape_L1": 0.23172343679897217,
+      "deposit_relative_change": 0.000231190483385412,
+      "peak_change_K": 0.8507465977502875,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.3097408838347741,
+      "normalised_shape_L1": 0.30744911023603505,
+      "deposit_relative_change": 0.008932099686549212,
+      "peak_change_K": -1.9187465902779195,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.505745657442906,
+      "normalised_shape_L1": 0.225928423563308,
+      "deposit_relative_change": -0.28283081312969477,
+      "peak_change_K": -3.813459345143201,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.1",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.3094464446320386,
+      "normalised_shape_L1": 0.3072256731555338,
+      "deposit_relative_change": 0.008645021913243643,
+      "peak_change_K": -1.9187465902779195,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.1",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.5162981126923534,
+      "normalised_shape_L1": 0.24032391435840939,
+      "deposit_relative_change": -0.27584416733835093,
+      "peak_change_K": -3.813459345143201,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.2812238232511659,
+      "normalised_shape_L1": 0.2811376138078077,
+      "deposit_relative_change": 0.00044608282698879937,
+      "peak_change_K": -1.006227268331486,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.11029204496770838,
+      "normalised_shape_L1": 0.1104358656623799,
+      "deposit_relative_change": -0.00033653248744624473,
+      "peak_change_K": 4.040518526483936,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.26423822940575176,
+      "normalised_shape_L1": 0.26469037880246743,
+      "deposit_relative_change": -0.001864117076193409,
+      "peak_change_K": -1.006227268331486,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.21837349742576553,
+      "normalised_shape_L1": 0.21797597868018026,
+      "deposit_relative_change": 0.007393431988923998,
+      "peak_change_K": 4.040518526483936,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.2908745240882146,
+      "normalised_shape_L1": 0.29186611406096086,
+      "deposit_relative_change": 0.024367329718030142,
+      "peak_change_K": -1.3173752491732102,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.6794608738682897,
+      "normalised_shape_L1": 0.6790890619808179,
+      "deposit_relative_change": -0.0003861225293998581,
+      "peak_change_K": 4.040518526483936,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.1",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.29073506850775177,
+      "normalised_shape_L1": 0.29170554834521134,
+      "deposit_relative_change": 0.024160396962329397,
+      "peak_change_K": -1.3173752491732102,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.1",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.6793742990792047,
+      "normalised_shape_L1": 0.6789512913863249,
+      "deposit_relative_change": -0.00043931745300089764,
+      "peak_change_K": 4.040518526483936,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.001",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.25636707031690825,
+      "normalised_shape_L1": 0.25626912519002193,
+      "deposit_relative_change": 0.00035987092059879043,
+      "peak_change_K": -1.006227268331486,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.001",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.13220411625325676,
+      "normalised_shape_L1": 0.1321742482639498,
+      "deposit_relative_change": 0.00011348870094442413,
+      "peak_change_K": 4.040518526483936,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.2273998612452598,
+      "normalised_shape_L1": 0.22983831001309207,
+      "deposit_relative_change": 0.006509842857037,
+      "peak_change_K": 18.35379238123221,
+      "peak_shift_cm": -1.000000000000012,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.3123752004152569,
+      "normalised_shape_L1": 0.16564802699668257,
+      "deposit_relative_change": -0.22917485678492394,
+      "peak_change_K": -0.69364649854964,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.1",
+      "species": "PbI2",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.2274865831154021,
+      "normalised_shape_L1": 0.23001829284249423,
+      "deposit_relative_change": 0.006757830278219811,
+      "peak_change_K": 18.35379238123221,
+      "peak_shift_cm": -1.000000000000012,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.1",
+      "species": "BiI3",
+      "coarse_cells": 2048,
+      "fine_cells": 18432,
+      "coarse_dt_s": 0.02,
+      "fine_dt_s": 0.002,
+      "profile_L1_relative_to_full": 0.3231506789395902,
+      "normalised_shape_L1": 0.16284033781308324,
+      "deposit_relative_change": -0.23584899506401588,
+      "peak_change_K": -0.69364649854964,
+      "peak_shift_cm": 0.0,
+      "scope": "Combined mesh/time-step/solver-revision change; not isolated convergence."
+    }
+  ],
+  "coarse_time_refinement": [
+    {
+      "case": "PbI2_SS_Q1_baseline",
+      "species": "PbI2",
+      "cells": 2048,
+      "dt_s_1": 0.02,
+      "dt_s_2": 0.01,
+      "profile_L1_relative_to_10ms": 0.00024259655618437357,
+      "peak_change_K": 0.0
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "species": "PbI2",
+      "cells": 2048,
+      "dt_s_1": 0.02,
+      "dt_s_2": 0.01,
+      "profile_L1_relative_to_10ms": 0.0317459938304296,
+      "peak_change_K": 0.0
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "species": "BiI3",
+      "cells": 2048,
+      "dt_s_1": 0.02,
+      "dt_s_2": 0.01,
+      "profile_L1_relative_to_10ms": 0.0199984293927114,
+      "peak_change_K": 0.0
+    }
+  ],
+  "thermodynamic_sensitivity": [
+    {
+      "experiment": "LBE-I_SS_II",
+      "metal_saturation": 0.001,
+      "baseline_BiI3_iodide_I_pct": 56.474661932483215,
+      "shift29k_BiI3_iodide_I_pct": 56.48886855345149,
+      "split_change_percentage_points": 0.014206620968273853,
+      "PbI2_peak_change_K": 0.0,
+      "BiI3_peak_change_K": 0.0
+    },
+    {
+      "experiment": "LBE-I_SS_II",
+      "metal_saturation": 0.01,
+      "baseline_BiI3_iodide_I_pct": 94.56004535260291,
+      "shift29k_BiI3_iodide_I_pct": 1.996160301771938,
+      "split_change_percentage_points": -92.56388505083098,
+      "PbI2_peak_change_K": 36.73582233400646,
+      "BiI3_peak_change_K": -58.258256382022296
+    },
+    {
+      "experiment": "LBE-I_SS_II",
+      "metal_saturation": 0.1,
+      "baseline_BiI3_iodide_I_pct": 94.55671872805749,
+      "shift29k_BiI3_iodide_I_pct": 1.9925410715006082,
+      "split_change_percentage_points": -92.56417765655688,
+      "PbI2_peak_change_K": 36.73582233400646,
+      "BiI3_peak_change_K": -58.258256382022296
+    },
+    {
+      "experiment": "LBE-I_SiO2_I",
+      "metal_saturation": 0.001,
+      "baseline_BiI3_iodide_I_pct": 23.965914017704858,
+      "shift29k_BiI3_iodide_I_pct": 20.442914067775646,
+      "split_change_percentage_points": -3.5229999499292113,
+      "PbI2_peak_change_K": 0.0,
+      "BiI3_peak_change_K": 0.0
+    },
+    {
+      "experiment": "LBE-I_SiO2_I",
+      "metal_saturation": 0.01,
+      "baseline_BiI3_iodide_I_pct": 94.49130260244912,
+      "shift29k_BiI3_iodide_I_pct": 1.9799459969655473,
+      "split_change_percentage_points": -92.51135660548357,
+      "PbI2_peak_change_K": 54.0143954035143,
+      "BiI3_peak_change_K": -32.924027998987924
+    },
+    {
+      "experiment": "LBE-I_SiO2_I",
+      "metal_saturation": 0.1,
+      "baseline_BiI3_iodide_I_pct": 94.48746960852087,
+      "shift29k_BiI3_iodide_I_pct": 1.975797887175744,
+      "split_change_percentage_points": -92.51167172134512,
+      "PbI2_peak_change_K": 54.0143954035143,
+      "BiI3_peak_change_K": -32.924027998987924
+    }
+  ],
+  "silica_figure_diagnostics": [
+    {
+      "species": "PbI2",
+      "figure_peak_x_m": 0.51,
+      "figure_minus_printed_K": 62.97182583241829,
+      "curve_crossings_at_printed_temperature_m": [
+        0.550963679860809
+      ],
+      "diagnostic_offset_cm": [
+        4.096367986080896
+      ],
+      "scope": "Diagnostic only; no coordinate or temperature correction applied."
+    },
+    {
+      "species": "BiI3",
+      "figure_peak_x_m": 0.59,
+      "figure_minus_printed_K": 108.2725942188062,
+      "curve_crossings_at_printed_temperature_m": [
+        0.6365314627994957
+      ],
+      "diagnostic_offset_cm": [
+        4.6531462799495715
+      ],
+      "scope": "Diagnostic only; no coordinate or temperature correction applied."
+    }
+  ],
+  "audits": {
+    "PbI2_SS_Q1_baseline": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 2.4436472096973707e-09,
+            "transport": 1.6804730262746498e-24,
+            "removed": 0.0,
+            "clamped": -4.292033323958461e-22,
+            "solverDefect": -5.206856690093127e-22,
+            "restart": 0.0,
+            "gas": 4.397418130118233e-11,
+            "wall": 2.3996730283971365e-09,
+            "sample": 0.0,
+            "held": 2.4436472096983187e-09,
+            "supplied": 2.4436472096983187e-09,
+            "closure": 0.0,
+            "pairClosure": 0.0,
+            "reference": 2.4436472096983187e-09,
+            "conversion": -8.046940336673149e-26,
+            "reaction": -8.072886959669746e-26
+          },
+          "max_accounted_closure_over_source": 8.542289749417779e-16,
+          "max_raw_material_residue_over_source": 3.888867510632376e-13,
+          "max_net_clamped_over_source": 1.7566340240935526e-13,
+          "max_solver_defect_over_source": 2.3807358596088306e-13
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 0.0,
+            "transport": 0.0,
+            "removed": 0.0,
+            "clamped": 0.0,
+            "solverDefect": 0.0,
+            "restart": 0.0,
+            "gas": 0.0,
+            "wall": 0.0,
+            "sample": 0.0,
+            "held": 0.0,
+            "supplied": 0.0,
+            "closure": 0.0,
+            "pairClosure": 0.0,
+            "reference": 0.0,
+            "conversion": 0.0,
+            "reaction": 0.0
+          },
+          "max_accounted_closure_over_source": 0.0,
+          "max_raw_material_residue_over_source": 0.0,
+          "max_net_clamped_over_source": 0.0,
+          "max_solver_defect_over_source": 0.0
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 4.8872944193947414e-09,
+            "transport": 3.1409874633879003e-24,
+            "removed": 0.0,
+            "clamped": -8.584066647916923e-22,
+            "solverDefect": -1.0422113881046139e-21,
+            "restart": 0.0,
+            "gas": 8.794836260236452e-11,
+            "wall": 4.799346056794273e-09,
+            "sample": 0.0,
+            "held": 4.887294419396637e-09,
+            "supplied": 4.887294419396637e-09,
+            "closure": 0.0,
+            "pairClosure": 0.0,
+            "reference": 4.887294419396637e-09,
+            "conversion": -1.7688073489076037e-24,
+            "reaction": -1.7688501860025912e-24
+          },
+          "max_accounted_closure_over_source": 8.623534353012785e-16,
+          "max_raw_material_residue_over_source": 3.888867510632376e-13,
+          "max_net_clamped_over_source": 1.7566340240935526e-13,
+          "max_solver_defect_over_source": 2.3829055584839534e-13
+        }
+      },
+      "log": {
+        "sha256": "28f9fa5f4836d1fb409e6f498e2dc2b3959c31167328ff6bd83a5014b5a48c43",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 30000,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.4296061199080495e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 30000,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.0547434031745193e-15,
+            "p95_initial_residual": 1.1135446546137624e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 0,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 0.0,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 0,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 0.0,
+            "p95_initial_residual": 0.0
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 0,
+        "max_equilibrium_element_residue": 5.452452725429602e-16,
+        "max_sum_of_species_mole_fraction_maxima": 5.865498121376582e-05,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 0,
+        "first_invalid_time_s": null,
+        "last_invalid_time_s": null,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 0.0,
+        "max_negative_I_over_supplied_I": 0.0,
+        "final_execution_s": 22462.96,
+        "final_clock_s": 22495.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 4.0727453495030846e-11,
+          "last_two_10s_rate_relative_change": 2.1849276519501377e-13,
+          "last_two_10s_rate_spatial_L1": 5.554019141264412e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 2.1450978127914973e-12,
+          "40_vs_60_cumulative_shape_L1": 0.0004993293499706186
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 0.0,
+          "last_two_10s_rate_relative_change": 0.0,
+          "last_two_10s_rate_spatial_L1": 0.0,
+          "20_30_vs_50_60_rate_spatial_L1": null,
+          "40_vs_60_cumulative_shape_L1": null
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 1.4482034478876272e-27,
+          "last_two_10s_rate_relative_change": 0.1775178549897745,
+          "last_two_10s_rate_spatial_L1": 0.1775178549897746,
+          "20_30_vs_50_60_rate_spatial_L1": 1.1373115885970797,
+          "40_vs_60_cumulative_shape_L1": 0.0006034509949307964
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 0.0,
+          "last_two_10s_rate_relative_change": 0.0,
+          "last_two_10s_rate_spatial_L1": 0.0,
+          "20_30_vs_50_60_rate_spatial_L1": null,
+          "40_vs_60_cumulative_shape_L1": null
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 8.145490699006163e-11,
+          "last_two_10s_rate_relative_change": 2.169060348740625e-13,
+          "last_two_10s_rate_spatial_L1": 5.540355338928343e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 2.144174090474769e-12,
+          "40_vs_60_cumulative_shape_L1": 0.0004993293499703557
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 53.89594314278326,
+        "observed_scan_sum_pct": 99.16567342073898,
+        "model_scan_sum_pct": 99.75974081969807,
+        "normalised_scan_total_variation": 0.2707184969680882,
+        "normalised_scan_overlap": 0.7292815030319117,
+        "normalised_scan_Wasserstein_m": 0.008008580249053683,
+        "normalised_scan_centroid_difference_m": 0.008008580249053694,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.706787727981411,
+        "median_axial_velocity_m_s": 0.1655236303536154,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 23.007413020228224,
+        "max_advective_Courant": 0.4342503800717789,
+        "max_1D_upwind_diffusion_over_physical_D": 11.503706510114112,
+        "median_1D_upwind_diffusion_over_physical_D": 2.694069504453376,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SS_II_Q1_baseline": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.8578413717562215e-11,
+            "transport": 1.8093423010923003e-25,
+            "removed": 0.0,
+            "clamped": 2.257768257872752e-24,
+            "solverDefect": 8.827049554776948e-24,
+            "restart": 0.0,
+            "gas": 1.113922702292416e-12,
+            "wall": 1.7464491015258524e-11,
+            "sample": 0.0,
+            "held": 1.857841371755094e-11,
+            "supplied": 1.8578413717550944e-11,
+            "closure": -3.2311742677852644e-27,
+            "pairClosure": -3.504459444740122e-27,
+            "reference": 1.8578413717562215e-11,
+            "conversion": -5.797491530039338e-27,
+            "reaction": -5.806016262426647e-27
+          },
+          "max_accounted_closure_over_source": 6.419324226213222e-16,
+          "max_raw_material_residue_over_source": 5.971898568961056e-13,
+          "max_net_clamped_over_source": 1.2152642804689393e-13,
+          "max_solver_defect_over_source": 4.751481576113691e-13
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 2.3683561105577905e-11,
+            "transport": 6.4037862997811475e-19,
+            "removed": 0.0,
+            "clamped": -1.707674374474479e-24,
+            "solverDefect": 2.616273782227822e-24,
+            "restart": 0.0,
+            "gas": 1.7334655948896327e-12,
+            "wall": 2.1950094870308726e-11,
+            "sample": 0.0,
+            "held": 2.368356046519836e-11,
+            "supplied": 2.368356046519836e-11,
+            "closure": 0.0,
+            "pairClosure": 2.7397050918554364e-27,
+            "reference": 2.3683561105577905e-11,
+            "conversion": -8.502227720182004e-27,
+            "reaction": 2.6242278060460176e-19
+          },
+          "max_accounted_closure_over_source": 5.248247094412645e-16,
+          "max_raw_material_residue_over_source": 2.0261839477384965e-13,
+          "max_net_clamped_over_source": 7.829292886832516e-14,
+          "max_solver_defect_over_source": 1.8695359417145363e-13
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.0820751075185814e-10,
+            "transport": 3.909288917365647e-18,
+            "removed": 0.0,
+            "clamped": -6.074865824210701e-25,
+            "solverDefect": 2.66011915169182e-23,
+            "restart": 0.0,
+            "gas": 7.428242871192677e-12,
+            "wall": 1.0077926397135125e-10,
+            "sample": 0.0,
+            "held": 1.0820750684254392e-10,
+            "supplied": 1.0820750684254393e-10,
+            "closure": -1.2924697071141057e-26,
+            "pairClosure": 1.2101963860860654e-27,
+            "reference": 1.0820751075185814e-10,
+            "conversion": 6.921932099051907e-25,
+            "reaction": 2.624234810223789e-19
+          },
+          "max_accounted_closure_over_source": 4.540431673150947e-16,
+          "max_raw_material_residue_over_source": 2.670654214522721e-13,
+          "max_net_clamped_over_source": 6.208645582032229e-14,
+          "max_solver_defect_over_source": 2.590883845636512e-13
+        }
+      },
+      "log": {
+        "sha256": "688b33098c73493a67c7ebb2a2f13d71f56e23a9f0dd09c1226b3b3702356332",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 30000,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.5258113531233706e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 30000,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.4742355100466283e-15,
+            "p95_initial_residual": 1.6491405790618295e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 30000,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 3.023655425161705e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 30000,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 2.015498951917164e-15,
+            "p95_initial_residual": 2.1109705386320438e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 0,
+        "max_equilibrium_element_residue": 5.63134608388971e-16,
+        "max_sum_of_species_mole_fraction_maxima": 7.401882221799641e-06,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 0,
+        "first_invalid_time_s": null,
+        "last_invalid_time_s": null,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 2.598704032800714e-157,
+        "max_negative_I_over_supplied_I": 1.9861245138532367e-144,
+        "final_execution_s": 30441.13,
+        "final_clock_s": 30483.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 3.09640228626059e-13,
+          "last_two_10s_rate_relative_change": 4.889894552018281e-13,
+          "last_two_10s_rate_spatial_L1": 4.907034071049674e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 1.5863676205462446e-12,
+          "40_vs_60_cumulative_shape_L1": 0.002277017950943311
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 3.9472598705914886e-13,
+          "last_two_10s_rate_relative_change": 4.1978147082328655e-13,
+          "last_two_10s_rate_spatial_L1": 4.653715335218983e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 2.092909157496125e-12,
+          "40_vs_60_cumulative_shape_L1": 0.0026606059406069477
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 0.0,
+          "last_two_10s_rate_relative_change": 0.0,
+          "last_two_10s_rate_spatial_L1": 0.0,
+          "20_30_vs_50_60_rate_spatial_L1": null,
+          "40_vs_60_cumulative_shape_L1": null
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 1.6209321229609064e-20,
+          "last_two_10s_rate_relative_change": 3.169185353423778e-07,
+          "last_two_10s_rate_spatial_L1": 3.169185353924164e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 1.7371345099531977e-06,
+          "40_vs_60_cumulative_shape_L1": 0.001787117116078994
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.8034584184295646e-12,
+          "last_two_10s_rate_relative_change": 1.0693937389273125e-13,
+          "last_two_10s_rate_spatial_L1": 4.732179450190605e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 1.918910148186176e-12,
+          "40_vs_60_cumulative_shape_L1": 0.004128692880706799
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 53.44836097355756,
+        "observed_scan_sum_pct": 96.70103092783505,
+        "model_scan_sum_pct": 93.39999243840383,
+        "normalised_scan_total_variation": 0.28124042490869977,
+        "normalised_scan_overlap": 0.7187595750913003,
+        "normalised_scan_Wasserstein_m": 0.013097536159175603,
+        "normalised_scan_centroid_difference_m": 0.010638317349351924,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3270294757313686,
+        "median_axial_velocity_m_s": 0.07834004745882056,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 10.645490746463821,
+        "max_advective_Courant": 0.20092690988935286,
+        "max_1D_upwind_diffusion_over_physical_D": 5.3227453732319105,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2750658766084078,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SS_II_Q2_baseline_sat0.001": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 2.334452442612278e-11,
+            "transport": 1.801296969606772e-25,
+            "removed": 0.0,
+            "clamped": 3.8443556963813436e-24,
+            "solverDefect": 9.510092056960545e-24,
+            "restart": 0.0,
+            "gas": 1.3906082088208542e-12,
+            "wall": 2.1953916217288393e-11,
+            "sample": 0.0,
+            "held": 2.3344524426109246e-11,
+            "supplied": 2.3344524426109246e-11,
+            "closure": 0.0,
+            "pairClosure": 3.504459444740122e-27,
+            "reference": 4.63568462788061e-11,
+            "conversion": 2.8269756998526767e-27,
+            "reaction": 2.9787387781145406e-27
+          },
+          "max_accounted_closure_over_source": 4.473578281261504e-16,
+          "max_raw_material_residue_over_source": 5.719586302511744e-13,
+          "max_net_clamped_over_source": 1.64691891666451e-13,
+          "max_solver_defect_over_source": 4.073799869882398e-13
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 4.0564455361817104e-11,
+            "transport": 6.493773249275541e-19,
+            "removed": 0.0,
+            "clamped": 7.775068450764829e-24,
+            "solverDefect": 1.3176097145410164e-24,
+            "restart": 0.0,
+            "gas": 2.981389314482733e-12,
+            "wall": 3.758306539794793e-11,
+            "sample": 0.0,
+            "held": 4.0564454712430666e-11,
+            "supplied": 4.0564454712430666e-11,
+            "closure": 0.0,
+            "pairClosure": 2.7397050918554364e-27,
+            "reference": 5.981408674200929e-11,
+            "conversion": -1.8031259647558485e-26,
+            "reaction": 5.482014115563114e-12
+          },
+          "max_accounted_closure_over_source": 5.087989994413029e-16,
+          "max_raw_material_residue_over_source": 2.364767016326495e-13,
+          "max_net_clamped_over_source": 1.9167195470553313e-13,
+          "max_solver_defect_over_source": 2.3797894187617955e-13
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.0820751075185816e-10,
+            "transport": 9.164531959645664e-19,
+            "removed": 0.0,
+            "clamped": 1.335693486147823e-23,
+            "solverDefect": 2.2623364850387978e-23,
+            "restart": 0.0,
+            "gas": 7.328724318605462e-12,
+            "wall": 1.0087878551676424e-10,
+            "sample": 0.0,
+            "held": 1.0820750983536971e-10,
+            "supplied": 1.0820750983536968e-10,
+            "closure": 2.5849394142282115e-26,
+            "pairClosure": 1.5228034165046553e-26,
+            "reference": 2.1198104859780137e-10,
+            "conversion": 7.023230243149001e-25,
+            "reaction": 5.482014115563826e-12
+          },
+          "max_accounted_closure_over_source": 4.436984492881508e-16,
+          "max_raw_material_residue_over_source": 3.2611383238940323e-13,
+          "max_net_clamped_over_source": 1.2343814924371006e-13,
+          "max_solver_defect_over_source": 2.414846940978594e-13
+        }
+      },
+      "log": {
+        "sha256": "65f75ef3ee12657582d4cc785442d3ee63f3106200ee64b2cfa4fb47d0ea01c5",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 29999,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.471316966555814e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29999,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.4140358560596671e-15,
+            "p95_initial_residual": 1.6291552851671128e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 29992,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 3.056055831437037e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29992,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.876144094008118e-15,
+            "p95_initial_residual": 2.0944481389248176e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 0,
+        "max_equilibrium_element_residue": 5.269222558279552e-16,
+        "max_sum_of_species_mole_fraction_maxima": 7.437199448749428e-06,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 0,
+        "first_invalid_time_s": null,
+        "last_invalid_time_s": null,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 4.765932770807028e-151,
+        "max_negative_I_over_supplied_I": 2.2747405395978402e-138,
+        "final_execution_s": 24344.0,
+        "final_clock_s": 24381.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 3.890754071020693e-13,
+          "last_two_10s_rate_relative_change": 4.3262560788944444e-13,
+          "last_two_10s_rate_spatial_L1": 5.213725887535196e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 1.5982567890386715e-12,
+          "40_vs_60_cumulative_shape_L1": 0.0022672583284003797
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 3.4176922564623023e-13,
+          "last_two_10s_rate_relative_change": 1.1655326834859202e-13,
+          "last_two_10s_rate_spatial_L1": 1.181684494961532e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 1.6312361400238904e-12,
+          "40_vs_60_cumulative_shape_L1": 0.0029650033761144325
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 0.0,
+          "last_two_10s_rate_relative_change": 0.0,
+          "last_two_10s_rate_spatial_L1": 0.0,
+          "20_30_vs_50_60_rate_spatial_L1": null,
+          "40_vs_60_cumulative_shape_L1": null
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 3.3430501522633067e-13,
+          "last_two_10s_rate_relative_change": 6.675130874654281e-14,
+          "last_two_10s_rate_spatial_L1": 8.144453590173909e-14,
+          "20_30_vs_50_60_rate_spatial_L1": 1.5782899886760846e-12,
+          "40_vs_60_cumulative_shape_L1": 0.0022216206712541483
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.80345849114283e-12,
+          "last_two_10s_rate_relative_change": 2.526232646856772e-13,
+          "last_two_10s_rate_spatial_L1": 2.922224684739312e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 1.6176596925231147e-12,
+          "40_vs_60_cumulative_shape_L1": 0.004413320530014014
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 36.79730419887923,
+        "observed_scan_sum_pct": 96.70103092783505,
+        "model_scan_sum_pct": 93.39998682627467,
+        "normalised_scan_total_variation": 0.18899974723208074,
+        "normalised_scan_overlap": 0.8110002527679192,
+        "normalised_scan_Wasserstein_m": 0.00982779572669625,
+        "normalised_scan_centroid_difference_m": 0.006194926869423604,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3270294757313686,
+        "median_axial_velocity_m_s": 0.07834004745882056,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 10.645490746463821,
+        "max_advective_Courant": 0.20092690988935286,
+        "max_1D_upwind_diffusion_over_physical_D": 5.3227453732319105,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2750658766084078,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SS_II_Q2_baseline_sat0.01": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 6.62395208031678e-11,
+            "transport": 1.784131179987114e-25,
+            "removed": 0.0,
+            "clamped": -8.372223571792048e-24,
+            "solverDefect": 8.389543717191159e-24,
+            "restart": 0.0,
+            "gas": 1.7575602955482434e-12,
+            "wall": 6.448196050761935e-11,
+            "sample": 0.0,
+            "held": 6.62395208031676e-11,
+            "supplied": 6.623952080316761e-11,
+            "closure": -1.2924697071141057e-26,
+            "pairClosure": 0.0,
+            "reference": 6.905690843395878e-11,
+            "conversion": 8.585722489010317e-27,
+            "reaction": 7.888609052210118e-27
+          },
+          "max_accounted_closure_over_source": 4.856163031879557e-16,
+          "max_raw_material_residue_over_source": 1.665521717551138e-13,
+          "max_net_clamped_over_source": 1.2639317842697406e-13,
+          "max_solver_defect_over_source": 1.642584338940302e-13
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.9249250366796985e-10,
+            "transport": 6.5016118017242e-19,
+            "removed": 0.0,
+            "clamped": 2.369575368310718e-24,
+            "solverDefect": 3.046720188094438e-23,
+            "restart": 0.0,
+            "gas": 9.859481537324892e-12,
+            "wall": 1.8263302148045095e-10,
+            "sample": 0.0,
+            "held": 1.9249250301777586e-10,
+            "supplied": 1.9249250301777586e-10,
+            "closure": 0.0,
+            "pairClosure": -5.479410183710873e-27,
+            "reference": 2.2422768869347485e-10,
+            "conversion": 1.2623117572894876e-26,
+            "reaction": 2.1201731999914755e-11
+          },
+          "max_accounted_closure_over_source": 4.321409377512193e-16,
+          "max_raw_material_residue_over_source": 1.8456067739344085e-13,
+          "max_net_clamped_over_source": 1.9368919698811905e-14,
+          "max_solver_defect_over_source": 1.9182752752139523e-13
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.0820751075185816e-10,
+            "transport": 9.17175470541702e-19,
+            "removed": 0.0,
+            "clamped": 1.8492944754502842e-25,
+            "solverDefect": 1.9213955018172478e-23,
+            "restart": 0.0,
+            "gas": 7.865710675778123e-12,
+            "wall": 1.0034179915888519e-10,
+            "sample": 0.0,
+            "held": 1.0820750983466331e-10,
+            "supplied": 1.082075098346633e-10,
+            "closure": 1.2924697071141057e-26,
+            "pairClosure": -1.643823055113262e-26,
+            "reference": 2.0904784108995507e-10,
+            "conversion": 1.4418278407023173e-26,
+            "reaction": 2.1201731999914742e-11
+          },
+          "max_accounted_closure_over_source": 4.960741130296132e-16,
+          "max_raw_material_residue_over_source": 2.1127513430783063e-13,
+          "max_net_clamped_over_source": 2.1480009526551283e-15,
+          "max_solver_defect_over_source": 2.1086585190118034e-13
+        }
+      },
+      "log": {
+        "sha256": "f087b258e1c2dc4f80e3db9e6015f7d7233416b25d458c06b9763896d9382ace",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 29999,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.831654412135831e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29999,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.5703593498427826e-15,
+            "p95_initial_residual": 1.827833028759154e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 29990,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 4.735527546599375e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29990,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.5129985889848048e-15,
+            "p95_initial_residual": 1.7098400293457679e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 0,
+        "max_equilibrium_element_residue": 5.130444680201407e-16,
+        "max_sum_of_species_mole_fraction_maxima": 1.3708228468893177e-05,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 0,
+        "first_invalid_time_s": null,
+        "last_invalid_time_s": null,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 6.21494727926898e-143,
+        "max_negative_I_over_supplied_I": 2.881150734519384e-130,
+        "final_execution_s": 27872.77,
+        "final_clock_s": 27911.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 4.846724293195114e-14,
+          "last_two_10s_rate_relative_change": 9.411077471133012e-08,
+          "last_two_10s_rate_spatial_L1": 9.411077481669576e-08,
+          "20_30_vs_50_60_rate_spatial_L1": 4.949692096501621e-08,
+          "40_vs_60_cumulative_shape_L1": 0.0015088354400525754
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 5.688413500762693e-13,
+          "last_two_10s_rate_relative_change": 6.136730122737055e-08,
+          "last_two_10s_rate_spatial_L1": 6.136730127482929e-08,
+          "20_30_vs_50_60_rate_spatial_L1": 2.6732809697418997e-08,
+          "40_vs_60_cumulative_shape_L1": 0.0026508194741680013
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 1.0555250177979824e-12,
+          "last_two_10s_rate_relative_change": 6.02154577210309e-07,
+          "last_two_10s_rate_spatial_L1": 8.523514787585975e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 1.2787044173187372e-08,
+          "40_vs_60_cumulative_shape_L1": 0.0006346971136243477
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 2.6394044049820127e-12,
+          "last_two_10s_rate_relative_change": 1.4432564018010381e-05,
+          "last_two_10s_rate_spatial_L1": 8.376883209804824e-05,
+          "20_30_vs_50_60_rate_spatial_L1": 3.798314023041157e-05,
+          "40_vs_60_cumulative_shape_L1": 0.011532225796907103
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.8034585360927136e-12,
+          "last_two_10s_rate_relative_change": 6.312723961463415e-08,
+          "last_two_10s_rate_spatial_L1": 6.312723970440581e-08,
+          "20_30_vs_50_60_rate_spatial_L1": 2.795636368658721e-08,
+          "40_vs_60_cumulative_shape_L1": 0.0029960490677898187
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 75.43989333156458,
+        "observed_scan_sum_pct": 96.70103092783505,
+        "model_scan_sum_pct": 93.3999867481811,
+        "normalised_scan_total_variation": 0.40501670869584205,
+        "normalised_scan_overlap": 0.594983291304158,
+        "normalised_scan_Wasserstein_m": 0.027987808633029628,
+        "normalised_scan_centroid_difference_m": 0.027595697983705873,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3270294757313686,
+        "median_axial_velocity_m_s": 0.07834004745882056,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 10.645490746463821,
+        "max_advective_Courant": 0.20092690988935286,
+        "max_1D_upwind_diffusion_over_physical_D": 5.3227453732319105,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2750658766084078,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SS_II_Q2_baseline_sat0.1": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 4.951894845736181e-10,
+            "transport": 1.581235349000226e-25,
+            "removed": 0.0,
+            "clamped": -6.184876987273351e-24,
+            "solverDefect": 5.06000497371989e-23,
+            "restart": 0.0,
+            "gas": 9.210658294191231e-12,
+            "wall": 4.859788262793827e-10,
+            "sample": 0.0,
+            "held": 4.951894845735739e-10,
+            "supplied": 4.951894845735739e-10,
+            "closure": 0.0,
+            "pairClosure": 0.0,
+            "reference": 4.98006282904047e-10,
+            "conversion": 3.84827198771817e-25,
+            "reaction": 3.8970990895366337e-25
+          },
+          "max_accounted_closure_over_source": 5.195854266966088e-16,
+          "max_raw_material_residue_over_source": 1.4521522463103507e-13,
+          "max_net_clamped_over_source": 2.1991632119300112e-14,
+          "max_solver_defect_over_source": 1.480235930499911e-13
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.7117729867294973e-09,
+            "transport": 6.501402495235112e-19,
+            "removed": 0.0,
+            "clamped": -1.0107272820336098e-23,
+            "solverDefect": 3.8623601510742296e-22,
+            "restart": 0.0,
+            "gas": 3.852732933280295e-11,
+            "wall": 1.6732456567461878e-09,
+            "sample": 0.0,
+            "held": 1.7117729860789907e-09,
+            "supplied": 1.7117729860789902e-09,
+            "closure": 4.1359030627651384e-25,
+            "pairClosure": 0.0,
+            "reference": 1.7435070152872926e-09,
+            "conversion": 9.431349290245064e-24,
+            "reaction": 2.1635638170253953e-11
+          },
+          "max_accounted_closure_over_source": 4.657591782874527e-16,
+          "max_raw_material_residue_over_source": 2.211388060131589e-13,
+          "max_net_clamped_over_source": 1.8723119042256396e-14,
+          "max_solver_defect_over_source": 2.2643125455083743e-13
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.0820751075185816e-10,
+            "transport": 9.171502386506958e-19,
+            "removed": 0.0,
+            "clamped": -1.7570105283367568e-25,
+            "solverDefect": 1.728141735641849e-23,
+            "restart": 0.0,
+            "gas": 7.865573084699341e-12,
+            "wall": 1.0034193674999183e-10,
+            "sample": 0.0,
+            "held": 1.0820750983469118e-10,
+            "supplied": 1.0820750983469116e-10,
+            "closure": 1.2924697071141057e-26,
+            "pairClosure": 0.0,
+            "reference": 2.090431930861019e-10,
+            "conversion": 3.505912767168285e-25,
+            "reaction": 2.1635638170244693e-11
+          },
+          "max_accounted_closure_over_source": 4.870831911804177e-16,
+          "max_raw_material_residue_over_source": 1.746989051144502e-13,
+          "max_net_clamped_over_source": 3.5029815942655556e-15,
+          "max_solver_defect_over_source": 1.7703292728460348e-13
+        }
+      },
+      "log": {
+        "sha256": "424d48dd3f2f161081d3a6c3e0ba4ad9f102d4ca8948527c03f69b58dfb7c5b1",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 29999,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.796728106396193e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29999,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.5646113382946738e-15,
+            "p95_initial_residual": 1.79577746489896e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 29819,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 4.413677328814714e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29819,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.5084856709580926e-15,
+            "p95_initial_residual": 1.6580407769956555e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 0,
+        "max_equilibrium_element_residue": 5.208507236620363e-16,
+        "max_sum_of_species_mole_fraction_maxima": 9.010413338964315e-05,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 0,
+        "first_invalid_time_s": null,
+        "last_invalid_time_s": null,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 2.76713784604499e-137,
+        "max_negative_I_over_supplied_I": 1.135919801709971e-124,
+        "final_execution_s": 32482.42,
+        "final_clock_s": 32522.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 4.84634552858342e-14,
+          "last_two_10s_rate_relative_change": 1.6275322534744246e-08,
+          "last_two_10s_rate_spatial_L1": 1.6275322497543926e-08,
+          "20_30_vs_50_60_rate_spatial_L1": 3.407331738524827e-08,
+          "40_vs_60_cumulative_shape_L1": 0.0014144651429627197
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 5.688438607648566e-13,
+          "last_two_10s_rate_relative_change": 1.9730005948197563e-08,
+          "last_two_10s_rate_spatial_L1": 1.9730006123340938e-08,
+          "20_30_vs_50_60_rate_spatial_L1": 1.1544936376636508e-09,
+          "40_vs_60_cumulative_shape_L1": 0.002657883889915928
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 8.204694696370844e-12,
+          "last_two_10s_rate_relative_change": 3.7800313545993896e-08,
+          "last_two_10s_rate_spatial_L1": 1.2359283478184743e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 1.0802442538198469e-10,
+          "40_vs_60_cumulative_shape_L1": 0.00027872120921904715
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 2.7960717384892163e-11,
+          "last_two_10s_rate_relative_change": 1.354835056597683e-06,
+          "last_two_10s_rate_spatial_L1": 6.969654400711953e-06,
+          "20_30_vs_50_60_rate_spatial_L1": 3.76905437848837e-06,
+          "40_vs_60_cumulative_shape_L1": 0.002165985124195347
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.803458492866239e-12,
+          "last_two_10s_rate_relative_change": 1.7794899336247062e-08,
+          "last_two_10s_rate_spatial_L1": 1.9544334174813833e-08,
+          "20_30_vs_50_60_rate_spatial_L1": 2.9237164790785278e-09,
+          "40_vs_60_cumulative_shape_L1": 0.0030309782842018393
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 75.4325650438157,
+        "observed_scan_sum_pct": 96.70103092783505,
+        "model_scan_sum_pct": 93.39998675286249,
+        "normalised_scan_total_variation": 0.4050107060542516,
+        "normalised_scan_overlap": 0.5949892939457483,
+        "normalised_scan_Wasserstein_m": 0.027986788229873966,
+        "normalised_scan_centroid_difference_m": 0.027594374234899386,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3270294757313686,
+        "median_axial_velocity_m_s": 0.07834004745882056,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 10.645490746463821,
+        "max_advective_Courant": 0.20092690988935286,
+        "max_1D_upwind_diffusion_over_physical_D": 5.3227453732319105,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2750658766084078,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SS_II_Q2_shift29k_sat0.001": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 2.334452442612278e-11,
+            "transport": 1.8012977666292981e-25,
+            "removed": 0.0,
+            "clamped": -7.08448704504225e-24,
+            "solverDefect": 8.06458182384079e-24,
+            "restart": 0.0,
+            "gas": 1.3906082313711834e-12,
+            "wall": 2.1953916194750432e-11,
+            "sample": 0.0,
+            "held": 2.3344524426121615e-11,
+            "supplied": 2.334452442612162e-11,
+            "closure": -3.2311742677852644e-27,
+            "pairClosure": 0.0,
+            "reference": 4.638122108285189e-11,
+            "conversion": -1.2605535788932081e-27,
+            "reaction": 1.0097419586828951e-28
+          },
+          "max_accounted_closure_over_source": 4.429436621332968e-16,
+          "max_raw_material_residue_over_source": 3.927067101188213e-13,
+          "max_net_clamped_over_source": 3.034753210527875e-13,
+          "max_solver_defect_over_source": 3.8329597142149504e-13
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 4.0564455361817104e-11,
+            "transport": 1.3282286823400993e-19,
+            "removed": 0.0,
+            "clamped": -2.2804443406883556e-24,
+            "solverDefect": 1.3275731473448886e-23,
+            "restart": 0.0,
+            "gas": 2.585789639177556e-12,
+            "wall": 3.7978665589805684e-11,
+            "sample": 0.0,
+            "held": 4.056445522898324e-11,
+            "supplied": 4.056445522898324e-11,
+            "closure": 0.0,
+            "pairClosure": 0.0,
+            "reference": 6.010607426838853e-11,
+            "conversion": -4.621792289433291e-27,
+            "reaction": 5.5932884460859455e-12
+          },
+          "max_accounted_closure_over_source": 4.4271396428299577e-16,
+          "max_raw_material_residue_over_source": 3.1986381883934716e-13,
+          "max_net_clamped_over_source": 5.686988806329639e-14,
+          "max_solver_defect_over_source": 3.272749838506446e-13
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.0820751075185816e-10,
+            "transport": 3.997568738911478e-19,
+            "removed": 0.0,
+            "clamped": -2.651960660122373e-23,
+            "solverDefect": 2.769628887932785e-23,
+            "restart": 0.0,
+            "gas": 7.295787467027354e-12,
+            "wall": 1.0091172288507296e-10,
+            "sample": 0.0,
+            "held": 1.0820751035210031e-10,
+            "supplied": 1.082075103521003e-10,
+            "closure": 1.2924697071141057e-26,
+            "pairClosure": 0.0,
+            "reference": 2.1290576078503067e-10,
+            "conversion": 2.004085416174061e-25,
+            "reaction": 5.593288446086162e-12
+          },
+          "max_accounted_closure_over_source": 4.4405584936503e-16,
+          "max_raw_material_residue_over_source": 2.433416343353458e-13,
+          "max_net_clamped_over_source": 2.4508101532839606e-13,
+          "max_solver_defect_over_source": 2.559662888376967e-13
+        }
+      },
+      "log": {
+        "sha256": "c57d8c10d0799023b59ff41d5fa46088edf3f32f1bd4b14fa4ec2542ab8a5186",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 29999,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.4410664292273816e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29999,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.4125005681570772e-15,
+            "p95_initial_residual": 1.6269963443782416e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 29994,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.9178897758460484e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29994,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.8091239051046816e-15,
+            "p95_initial_residual": 2.0688810910553464e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 0,
+        "max_equilibrium_element_residue": 5.392279504856656e-16,
+        "max_sum_of_species_mole_fraction_maxima": 9.241964533288986e-06,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 0,
+        "first_invalid_time_s": null,
+        "last_invalid_time_s": null,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 3.1482282765962177e-159,
+        "max_negative_I_over_supplied_I": 1.6535419961894315e-146,
+        "final_execution_s": 28014.7,
+        "final_clock_s": 28051.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 3.890754071027536e-13,
+          "last_two_10s_rate_relative_change": 4.794695924263279e-13,
+          "last_two_10s_rate_spatial_L1": 4.799598575470423e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 2.5106123259243094e-12,
+          "40_vs_60_cumulative_shape_L1": 0.0022672589524796462
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 3.4176922967051506e-13,
+          "last_two_10s_rate_relative_change": 2.743211872938108e-13,
+          "last_two_10s_rate_spatial_L1": 2.882441677700377e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 2.092774133267525e-12,
+          "40_vs_60_cumulative_shape_L1": 0.0028239383323834842
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 0.0,
+          "last_two_10s_rate_relative_change": 0.0,
+          "last_two_10s_rate_spatial_L1": 0.0,
+          "20_30_vs_50_60_rate_spatial_L1": null,
+          "40_vs_60_cumulative_shape_L1": null
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 3.343050232652505e-13,
+          "last_two_10s_rate_relative_change": 2.27588732719664e-13,
+          "last_two_10s_rate_spatial_L1": 2.457443957013103e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 1.6708575397842106e-12,
+          "40_vs_60_cumulative_shape_L1": 0.0008328584801013396
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.8034585032170508e-12,
+          "last_two_10s_rate_relative_change": 3.6135428620699914e-13,
+          "last_two_10s_rate_spatial_L1": 3.694181640439105e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 2.2721137628353776e-12,
+          "40_vs_60_cumulative_shape_L1": 0.004217128262466932
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 43.816938648704976,
+        "observed_scan_sum_pct": 96.70103092783505,
+        "model_scan_sum_pct": 93.39999368464335,
+        "normalised_scan_total_variation": 0.23629930805463772,
+        "normalised_scan_overlap": 0.7637006919453622,
+        "normalised_scan_Wasserstein_m": 0.010729061566821352,
+        "normalised_scan_centroid_difference_m": 0.005296931557484579,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3270294757313686,
+        "median_axial_velocity_m_s": 0.07834004745882056,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 10.645490746463821,
+        "max_advective_Courant": 0.20092690988935286,
+        "max_1D_upwind_diffusion_over_physical_D": 5.3227453732319105,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2750658766084078,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SS_II_Q2_shift29k_sat0.01": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 6.62395208031678e-11,
+            "transport": 1.746868235329891e-25,
+            "removed": 0.0,
+            "clamped": -5.0563492092226414e-26,
+            "solverDefect": 2.4637205523217338e-23,
+            "restart": 0.0,
+            "gas": 3.4459760245258635e-12,
+            "wall": 6.279354477861716e-11,
+            "sample": 0.0,
+            "held": 6.623952080314303e-11,
+            "supplied": 6.623952080314303e-11,
+            "closure": 0.0,
+            "pairClosure": 0.0,
+            "reference": 1.180305267005051e-10,
+            "conversion": -7.334664005659953e-27,
+            "reaction": -8.885729236409477e-27
+          },
+          "max_accounted_closure_over_source": 4.432209372778198e-16,
+          "max_raw_material_residue_over_source": 4.014279290635437e-13,
+          "max_net_clamped_over_source": 8.18897010405596e-15,
+          "max_solver_defect_over_source": 4.040799749596896e-13
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.9249250366796985e-10,
+            "transport": 1.3209423747638214e-19,
+            "removed": 0.0,
+            "clamped": -2.3709481163931628e-24,
+            "solverDefect": 3.1708381103448846e-23,
+            "restart": 0.0,
+            "gas": 5.310475216904448e-12,
+            "wall": 1.8718202831894185e-10,
+            "sample": 0.0,
+            "held": 1.9249250353584629e-10,
+            "supplied": 1.924925035358463e-10,
+            "closure": -2.5849394142282115e-26,
+            "pairClosure": -8.561578412048239e-29,
+            "reference": 1.9318447222396315e-10,
+            "conversion": 2.5040945434121643e-26,
+            "reaction": 3.8441136115757985e-12
+          },
+          "max_accounted_closure_over_source": 5.351532800458123e-16,
+          "max_raw_material_residue_over_source": 2.16980329909504e-13,
+          "max_net_clamped_over_source": 6.382778252199016e-14,
+          "max_solver_defect_over_source": 1.6472783593593148e-13
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.0820751075185816e-10,
+            "transport": 3.9756822693626106e-19,
+            "removed": 0.0,
+            "clamped": -7.065580203879008e-26,
+            "solverDefect": 5.085943347725554e-23,
+            "restart": 0.0,
+            "gas": 6.323259955971399e-12,
+            "wall": 1.018842503982677e-10,
+            "sample": 0.0,
+            "held": 1.082075103542391e-10,
+            "supplied": 1.082075103542391e-10,
+            "closure": 0.0,
+            "pairClosure": -2.5684735236144717e-28,
+            "reference": 2.1386542821451268e-10,
+            "conversion": -3.4822095997756416e-26,
+            "reaction": 3.844113611575752e-12
+          },
+          "max_accounted_closure_over_source": 4.3983167748250625e-16,
+          "max_raw_material_residue_over_source": 4.720592638007916e-13,
+          "max_net_clamped_over_source": 3.97487723705215e-15,
+          "max_solver_defect_over_source": 4.700664035147259e-13
+        }
+      },
+      "log": {
+        "sha256": "b92c2d8988e013af90bb88d0627fd5db997cca7aaf80d61bcc811c61d36759ad",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 29999,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.576540593434099e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29999,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.3751182078190592e-15,
+            "p95_initial_residual": 1.6487351137784054e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 29996,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 3.560430317829028e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29996,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 2.254678196585134e-15,
+            "p95_initial_residual": 2.3773363964795985e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 0,
+        "max_equilibrium_element_residue": 5.515878552520004e-16,
+        "max_sum_of_species_mole_fraction_maxima": 1.79421308900194e-05,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 0,
+        "first_invalid_time_s": null,
+        "last_invalid_time_s": null,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 5.6047059705496775e-155,
+        "max_negative_I_over_supplied_I": 2.762787637893787e-142,
+        "final_execution_s": 28548.8,
+        "final_clock_s": 28586.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 8.83325421540522e-13,
+          "last_two_10s_rate_relative_change": 1.6516859138464017e-12,
+          "last_two_10s_rate_spatial_L1": 1.8834676308304356e-12,
+          "20_30_vs_50_60_rate_spatial_L1": 9.498947275301415e-12,
+          "40_vs_60_cumulative_shape_L1": 0.002042759588440591
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 1.2269219885800674e-14,
+          "last_two_10s_rate_relative_change": 8.440083235009496e-08,
+          "last_two_10s_rate_spatial_L1": 8.440083230111139e-08,
+          "20_30_vs_50_60_rate_spatial_L1": 3.677133812904871e-08,
+          "40_vs_60_cumulative_shape_L1": 0.0025532842841672395
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 2.2066659184506627e-13,
+          "last_two_10s_rate_relative_change": 4.9190618140610404e-14,
+          "last_two_10s_rate_spatial_L1": 1.8262229244363828e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 2.9062168351554873e-12,
+          "40_vs_60_cumulative_shape_L1": 0.0011566446185401697
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 3.1959389446482133e-12,
+          "last_two_10s_rate_relative_change": 1.6107470514161927e-07,
+          "last_two_10s_rate_spatial_L1": 1.0901843748448326e-06,
+          "20_30_vs_50_60_rate_spatial_L1": 1.0218924783522837e-06,
+          "40_vs_60_cumulative_shape_L1": 0.0008182772694814201
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.803458502738446e-12,
+          "last_two_10s_rate_relative_change": 1.7209600315791409e-09,
+          "last_two_10s_rate_spatial_L1": 1.7244230116911636e-09,
+          "20_30_vs_50_60_rate_spatial_L1": 7.597891489650786e-10,
+          "40_vs_60_cumulative_shape_L1": 0.002340295132465095
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 123.19164394663326,
+        "observed_scan_sum_pct": 96.70103092783505,
+        "model_scan_sum_pct": 93.39999377221477,
+        "normalised_scan_total_variation": 0.6533550827653186,
+        "normalised_scan_overlap": 0.3466449172346815,
+        "normalised_scan_Wasserstein_m": 0.04297453959069457,
+        "normalised_scan_centroid_difference_m": -0.032390873367323596,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3270294757313686,
+        "median_axial_velocity_m_s": 0.07834004745882056,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 10.645490746463821,
+        "max_advective_Courant": 0.20092690988935286,
+        "max_1D_upwind_diffusion_over_physical_D": 5.3227453732319105,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2750658766084078,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SS_II_Q2_shift29k_sat0.1": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 4.951894845736181e-10,
+            "transport": 1.5317829141958087e-25,
+            "removed": 0.0,
+            "clamped": 2.821363524255118e-23,
+            "solverDefect": 9.529023868684071e-23,
+            "restart": 0.0,
+            "gas": 1.1297174440823828e-11,
+            "wall": 4.838923101326708e-10,
+            "sample": 0.0,
+            "held": 4.951894845734946e-10,
+            "supplied": 4.951894845734946e-10,
+            "closure": 0.0,
+            "pairClosure": 0.0,
+            "reference": 5.469111453575922e-10,
+            "conversion": 2.1561491543337945e-25,
+            "reaction": 2.203256953846077e-25
+          },
+          "max_accounted_closure_over_source": 4.661267415607279e-16,
+          "max_raw_material_residue_over_source": 2.7852138426569634e-13,
+          "max_net_clamped_over_source": 8.852520779302908e-14,
+          "max_solver_defect_over_source": 1.9245978339390492e-13
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.7117729867294973e-09,
+            "transport": 1.3204635282841353e-19,
+            "removed": 0.0,
+            "clamped": 1.1430702536240038e-22,
+            "solverDefect": 1.290353984256423e-22,
+            "restart": 0.0,
+            "gas": 3.343326125973083e-11,
+            "wall": 1.678339725337478e-09,
+            "sample": 0.0,
+            "held": 1.711772986597209e-09,
+            "supplied": 1.7117729865972088e-09,
+            "closure": 2.0679515313825692e-25,
+            "pairClosure": -5.993104888433767e-28,
+            "reference": 1.7124637277056673e-09,
+            "conversion": 1.1641855086784066e-24,
+            "reaction": 3.752759535712787e-12
+          },
+          "max_accounted_closure_over_source": 4.42005905154657e-16,
+          "max_raw_material_residue_over_source": 1.4160536522987052e-13,
+          "max_net_clamped_over_source": 8.440959342073632e-14,
+          "max_solver_defect_over_source": 1.3753241846304002e-13
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.0820751075185816e-10,
+            "transport": 3.9742408792640807e-19,
+            "removed": 0.0,
+            "clamped": -3.7134259936907374e-25,
+            "solverDefect": 5.305414391224302e-23,
+            "restart": 0.0,
+            "gas": 6.3232591330061145e-12,
+            "wall": 1.0188425122137524e-10,
+            "sample": 0.0,
+            "held": 1.0820751035438136e-10,
+            "supplied": 1.0820751035438134e-10,
+            "closure": 1.2924697071141057e-26,
+            "pairClosure": -1.79793146653013e-27,
+            "reference": 2.137230552483165e-10,
+            "conversion": -3.9192745659749163e-26,
+            "reaction": 3.75275953571163e-12
+          },
+          "max_accounted_closure_over_source": 4.639988790292076e-16,
+          "max_raw_material_residue_over_source": 4.87641572055853e-13,
+          "max_net_clamped_over_source": 5.678112250873377e-15,
+          "max_solver_defect_over_source": 4.90300012851298e-13
+        }
+      },
+      "log": {
+        "sha256": "3f2d6ea9483a54c7cd10fbefe1bca1df1c32ad152968dca2f93b0e5c0c236b0f",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 29999,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.607264995867758e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29999,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.368993388095618e-15,
+            "p95_initial_residual": 1.6560588763833415e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 29997,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 3.484590667359177e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29997,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 2.2558456584343554e-15,
+            "p95_initial_residual": 2.389220885437406e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 96,
+        "max_equilibrium_element_residue": 5.566836054626823e-16,
+        "max_sum_of_species_mole_fraction_maxima": 9.185175769835115e-05,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 1,
+        "first_invalid_time_s": 0.008,
+        "last_invalid_time_s": 0.008,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 1.2064214661865507e-147,
+        "max_negative_I_over_supplied_I": 5.559593586726987e-135,
+        "final_execution_s": 28891.5,
+        "final_clock_s": 28929.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 8.833187582412243e-13,
+          "last_two_10s_rate_relative_change": 2.222916919323671e-12,
+          "last_two_10s_rate_spatial_L1": 5.550031522366548e-12,
+          "20_30_vs_50_60_rate_spatial_L1": 7.953426648045566e-12,
+          "40_vs_60_cumulative_shape_L1": 0.00202026719281253
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 1.2273662808782778e-14,
+          "last_two_10s_rate_relative_change": 1.6916302161343502e-08,
+          "last_two_10s_rate_spatial_L1": 1.6916302187126533e-08,
+          "20_30_vs_50_60_rate_spatial_L1": 1.025090354041098e-07,
+          "40_vs_60_cumulative_shape_L1": 0.003015619430213021
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 7.369839317993113e-12,
+          "last_two_10s_rate_relative_change": 3.860394806490385e-13,
+          "last_two_10s_rate_spatial_L1": 3.90405391113816e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 2.1369807376014214e-12,
+          "40_vs_60_cumulative_shape_L1": 0.00023679702790353367
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 2.851727731546762e-11,
+          "last_two_10s_rate_relative_change": 5.9483741395186866e-08,
+          "last_two_10s_rate_spatial_L1": 1.6129319347532082e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 1.1167815704381298e-07,
+          "40_vs_60_cumulative_shape_L1": 0.0004661228760592262
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.8034585049087963e-12,
+          "last_two_10s_rate_relative_change": 3.4755597178147074e-10,
+          "last_two_10s_rate_spatial_L1": 3.5081489093993367e-10,
+          "20_30_vs_50_60_rate_spatial_L1": 2.10070431023877e-09,
+          "40_vs_60_cumulative_shape_L1": 0.0023512520081994765
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 123.19840164760349,
+        "observed_scan_sum_pct": 96.70103092783505,
+        "model_scan_sum_pct": 93.39999377400851,
+        "normalised_scan_total_variation": 0.6533912588879038,
+        "normalised_scan_overlap": 0.3466087411120961,
+        "normalised_scan_Wasserstein_m": 0.04297752752325984,
+        "normalised_scan_centroid_difference_m": -0.03239387819975702,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3270294757313686,
+        "median_axial_velocity_m_s": 0.07834004745882056,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 10.645490746463821,
+        "max_advective_Courant": 0.20092690988935286,
+        "max_1D_upwind_diffusion_over_physical_D": 5.3227453732319105,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2750658766084078,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SiO2_I_Q1_baseline": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 4.067166246277134e-11,
+            "transport": 2.7212572711732433e-25,
+            "removed": 0.0,
+            "clamped": 2.8176263050074627e-24,
+            "solverDefect": -1.649233838522367e-24,
+            "restart": 0.0,
+            "gas": 2.87450379629367e-12,
+            "wall": 3.779715866647621e-11,
+            "sample": 0.0,
+            "held": 4.067166246276988e-11,
+            "supplied": 4.067166246276988e-11,
+            "closure": 0.0,
+            "pairClosure": -7.008918889480244e-27,
+            "reference": 4.067166246277134e-11,
+            "conversion": -1.8674819794038327e-26,
+            "reaction": -1.8629739137699415e-26
+          },
+          "max_accounted_closure_over_source": 6.571765694765999e-16,
+          "max_raw_material_residue_over_source": 1.5777354218220978e-13,
+          "max_net_clamped_over_source": 6.929209366132317e-14,
+          "max_solver_defect_over_source": 1.0655231467144913e-13
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.1122114331348748e-11,
+            "transport": 8.714401387946056e-19,
+            "removed": 0.0,
+            "clamped": 2.557345463582351e-25,
+            "solverDefect": -1.5433069276145422e-24,
+            "restart": 0.0,
+            "gas": 9.907012329124542e-13,
+            "wall": 1.0131412226997436e-11,
+            "sample": 0.0,
+            "held": 1.112211345990989e-11,
+            "supplied": 1.1122113459909895e-11,
+            "closure": -4.8467614016778965e-27,
+            "pairClosure": -4.109557637783155e-27,
+            "reference": 1.1122114331348748e-11,
+            "conversion": -2.122500381060606e-27,
+            "reaction": 3.382985686812109e-19
+          },
+          "max_accounted_closure_over_source": 6.592941951549325e-16,
+          "max_raw_material_residue_over_source": 1.7099058669023011e-13,
+          "max_net_clamped_over_source": 2.924124271856829e-14,
+          "max_solver_defect_over_source": 1.5721249946389144e-13
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.1470966791958892e-10,
+            "transport": 5.180962707691344e-18,
+            "removed": 0.0,
+            "clamped": 6.402456288040908e-24,
+            "solverDefect": -9.459496991777849e-24,
+            "restart": 0.0,
+            "gas": 8.721112166795476e-12,
+            "wall": 1.0598855057183395e-10,
+            "sample": 0.0,
+            "held": 1.1470966273862944e-10,
+            "supplied": 1.1470966273862944e-10,
+            "closure": 0.0,
+            "pairClosure": -2.634651069230995e-26,
+            "reference": 1.1470966791958892e-10,
+            "conversion": 1.672102994964276e-25,
+            "reaction": 3.382987377395556e-19
+          },
+          "max_accounted_closure_over_source": 5.944068874693597e-16,
+          "max_raw_material_residue_over_source": 1.7304746587422676e-13,
+          "max_net_clamped_over_source": 5.5815248152439885e-14,
+          "max_solver_defect_over_source": 1.316078833991585e-13
+        }
+      },
+      "log": {
+        "sha256": "da3374c360af8467569d20077b6e40c3df6b621b0a44de83dcee943d93a12833",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 30000,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.4485957183107924e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 30000,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.4191531509874728e-15,
+            "p95_initial_residual": 1.7329558366792636e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 30000,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.887545620155102e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 30000,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 2.0604906034648435e-15,
+            "p95_initial_residual": 2.158806826477661e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 0,
+        "max_equilibrium_element_residue": 5.76524505219167e-16,
+        "max_sum_of_species_mole_fraction_maxima": 8.092035927859003e-06,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 0,
+        "first_invalid_time_s": null,
+        "last_invalid_time_s": null,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 2.7025381209481083e-174,
+        "max_negative_I_over_supplied_I": 9.24353617621567e-162,
+        "final_execution_s": 28013.42,
+        "final_clock_s": 28052.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 6.778610410468242e-13,
+          "last_two_10s_rate_relative_change": 9.682401456946169e-15,
+          "last_two_10s_rate_spatial_L1": 1.6581008834354348e-14,
+          "20_30_vs_50_60_rate_spatial_L1": 1.4529349494082538e-12,
+          "40_vs_60_cumulative_shape_L1": 0.0020164205405831357
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 1.853685299882085e-13,
+          "last_two_10s_rate_relative_change": 2.2074832701224012e-13,
+          "last_two_10s_rate_spatial_L1": 2.9027851712009857e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 1.315680557281085e-12,
+          "40_vs_60_cumulative_shape_L1": 0.00258866713453299
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 0.0,
+          "last_two_10s_rate_relative_change": 0.0,
+          "last_two_10s_rate_spatial_L1": 0.0,
+          "20_30_vs_50_60_rate_spatial_L1": null,
+          "40_vs_60_cumulative_shape_L1": null
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 2.1310984257114538e-20,
+          "last_two_10s_rate_relative_change": 9.258864499299585e-08,
+          "last_two_10s_rate_spatial_L1": 9.258864570213476e-08,
+          "20_30_vs_50_60_rate_spatial_L1": 7.16285046897531e-08,
+          "40_vs_60_cumulative_shape_L1": 0.0018396837575069542
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.911827672058275e-12,
+          "last_two_10s_rate_relative_change": 5.6829512587451244e-14,
+          "last_two_10s_rate_spatial_L1": 9.588002863142976e-14,
+          "20_30_vs_50_60_rate_spatial_L1": 1.4132504981760217e-12,
+          "40_vs_60_cumulative_shape_L1": 0.0048473473258223675
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 181.84449909251248,
+        "observed_scan_sum_pct": 102.24489795918367,
+        "model_scan_sum_pct": 92.99053458790515,
+        "normalised_scan_total_variation": 0.9279984058919583,
+        "normalised_scan_overlap": 0.07200159410804188,
+        "normalised_scan_Wasserstein_m": 0.05370499636840194,
+        "normalised_scan_centroid_difference_m": 0.05370499636840207,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3015197827627005,
+        "median_axial_velocity_m_s": 0.07382715431030995,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 9.81509709513999,
+        "max_advective_Courant": 0.18525375452940315,
+        "max_1D_upwind_diffusion_over_physical_D": 4.907548547569995,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2016138396860343,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SiO2_I_Q2_baseline_sat0.001": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 4.543777317133189e-11,
+            "transport": 2.7165276813030954e-25,
+            "removed": 0.0,
+            "clamped": -1.3231376181315614e-25,
+            "solverDefect": -4.424848756359308e-24,
+            "restart": 0.0,
+            "gas": 3.1583863863732933e-12,
+            "wall": 4.227938678496289e-11,
+            "sample": 0.0,
+            "held": 4.543777317133618e-11,
+            "supplied": 4.543777317133618e-11,
+            "closure": 0.0,
+            "pairClosure": 0.0,
+            "reference": 8.796781251568059e-11,
+            "conversion": 2.738421518673936e-27,
+            "reaction": 3.786532345060857e-27
+          },
+          "max_accounted_closure_over_source": 4.4288191956632136e-16,
+          "max_raw_material_residue_over_source": 1.3545156866990345e-13,
+          "max_net_clamped_over_source": 3.508228603666677e-15,
+          "max_solver_defect_over_source": 1.3498850439604736e-13
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 2.8003008587587937e-11,
+            "transport": 8.86521653751324e-19,
+            "removed": 0.0,
+            "clamped": 6.145145039766203e-25,
+            "solverDefect": -2.3968279951361417e-24,
+            "restart": 0.0,
+            "gas": 2.4531257999380633e-12,
+            "wall": 2.5549881901129995e-11,
+            "sample": 0.0,
+            "held": 2.800300770106806e-11,
+            "supplied": 2.8003007701068053e-11,
+            "closure": 6.462348535570529e-27,
+            "pairClosure": -1.3698525459277182e-27,
+            "reference": 3.6503322478892e-11,
+            "conversion": -1.1904261933537336e-26,
+            "reaction": 5.0373754407977545e-12
+          },
+          "max_accounted_closure_over_source": 5.19655796987512e-16,
+          "max_raw_material_residue_over_source": 1.174342543588882e-13,
+          "max_net_clamped_over_source": 6.083682421852137e-14,
+          "max_solver_defect_over_source": 1.149296321369675e-13
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.147096679195889e-10,
+            "transport": 1.257686180649538e-18,
+            "removed": 0.0,
+            "clamped": 1.1977569394032968e-25,
+            "solverDefect": -9.873711117732356e-24,
+            "restart": 0.0,
+            "gas": 8.621655811747071e-12,
+            "wall": 1.060880108501652e-10,
+            "sample": 0.0,
+            "held": 1.1470966666191228e-10,
+            "supplied": 1.1470966666191228e-10,
+            "closure": 0.0,
+            "pairClosure": -4.109557637783155e-27,
+            "reference": 2.2527068828219845e-10,
+            "conversion": -1.9940286446409904e-25,
+            "reaction": 5.037375440797554e-12
+          },
+          "max_accounted_closure_over_source": 4.48698296470303e-16,
+          "max_raw_material_residue_over_source": 1.5581816533208518e-13,
+          "max_net_clamped_over_source": 2.140330450046226e-15,
+          "max_solver_defect_over_source": 1.5687386346157083e-13
+        }
+      },
+      "log": {
+        "sha256": "b65c0bb624b268a02e73d81065052c080cdb6ffa774bfc65f7e0d5459c1f381d",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 29999,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.412562913275996e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29999,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.4236806942753462e-15,
+            "p95_initial_residual": 1.741620448978341e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 29992,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 4.089703333316424e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29992,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.6155976742445364e-15,
+            "p95_initial_residual": 1.9890666717340567e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 1170,
+        "max_equilibrium_element_residue": 5.326685273421283e-16,
+        "max_sum_of_species_mole_fraction_maxima": 8.266639602098828e-06,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 1,
+        "first_invalid_time_s": 0.006,
+        "last_invalid_time_s": 0.006,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 5.3988716308941676e-154,
+        "max_negative_I_over_supplied_I": 1.52834380646963e-141,
+        "final_execution_s": 32964.98,
+        "final_clock_s": 33003.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 7.232155328706883e-13,
+          "last_two_10s_rate_relative_change": 6.077136452035529e-07,
+          "last_two_10s_rate_spatial_L1": 7.122080497569827e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 8.924118906248056e-07,
+          "40_vs_60_cumulative_shape_L1": 0.002150626291243907
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 1.551321069811145e-13,
+          "last_two_10s_rate_relative_change": 4.22937306582953e-07,
+          "last_two_10s_rate_spatial_L1": 4.229373065426706e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 5.412682995977432e-07,
+          "40_vs_60_cumulative_shape_L1": 0.003467013218284149
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 3.408059792409866e-14,
+          "last_two_10s_rate_relative_change": 5.882484873116691e-06,
+          "last_two_10s_rate_spatial_L1": 7.582517181943275e-06,
+          "20_30_vs_50_60_rate_spatial_L1": 1.4717626915179667e-05,
+          "40_vs_60_cumulative_shape_L1": 0.0010138100108891953
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 3.1156145649110514e-13,
+          "last_two_10s_rate_relative_change": 0.00012095594178864875,
+          "last_two_10s_rate_spatial_L1": 0.00020573229090379037,
+          "20_30_vs_50_60_rate_spatial_L1": 0.00018895515508271908,
+          "40_vs_60_cumulative_shape_L1": 0.0013015890410042442
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.91182738668472e-12,
+          "last_two_10s_rate_relative_change": 3.5682233925923825e-07,
+          "last_two_10s_rate_spatial_L1": 6.417909434330646e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 8.069329730915956e-07,
+          "40_vs_60_cumulative_shape_L1": 0.004601772115371541
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 181.84462801563353,
+        "observed_scan_sum_pct": 102.24489795918367,
+        "model_scan_sum_pct": 92.98230314247208,
+        "normalised_scan_total_variation": 0.9280369885788009,
+        "normalised_scan_overlap": 0.07196301142119906,
+        "normalised_scan_Wasserstein_m": 0.050236369752659424,
+        "normalised_scan_centroid_difference_m": 0.05023636975265942,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3015197827627005,
+        "median_axial_velocity_m_s": 0.07382715431030995,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 9.81509709513999,
+        "max_advective_Courant": 0.18525375452940315,
+        "max_1D_upwind_diffusion_over_physical_D": 4.907548547569995,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2016138396860343,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SiO2_I_Q2_baseline_sat0.01": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 8.833276954837691e-11,
+            "transport": 2.706382378120674e-25,
+            "removed": 0.0,
+            "clamped": 1.8373136222024934e-24,
+            "solverDefect": -3.852332303868686e-24,
+            "restart": 0.0,
+            "gas": 2.7905058145333077e-12,
+            "wall": 8.554226373384536e-11,
+            "sample": 0.0,
+            "held": 8.833276954837866e-11,
+            "supplied": 8.833276954837867e-11,
+            "closure": -1.2924697071141057e-26,
+            "pairClosure": -4.380574305925152e-28,
+            "reference": 9.132933937677072e-11,
+            "conversion": 1.9619995822004742e-26,
+            "reaction": 2.0952145642670074e-26
+          },
+          "max_accounted_closure_over_source": 5.123587008216905e-16,
+          "max_raw_material_residue_over_source": 1.7053542772008876e-13,
+          "max_net_clamped_over_source": 8.228085194246343e-14,
+          "max_solver_defect_over_source": 1.166850760953118e-13
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.7993105689374066e-10,
+            "transport": 8.886972761489072e-19,
+            "removed": 0.0,
+            "clamped": 1.8731741120438983e-23,
+            "solverDefect": -2.5717015948680914e-23,
+            "restart": 0.0,
+            "gas": 1.1868973886399324e-11,
+            "wall": 1.6806208211865103e-10,
+            "sample": 0.0,
+            "held": 1.7993105600505036e-10,
+            "supplied": 1.7993105600505038e-10,
+            "closure": -2.5849394142282115e-26,
+            "pairClosure": 0.0,
+            "reference": 2.1304526284009897e-10,
+            "conversion": 7.563554398868632e-27,
+            "reaction": 2.2139640093445928e-11
+          },
+          "max_accounted_closure_over_source": 4.465583114585658e-16,
+          "max_raw_material_residue_over_source": 1.4364764178830087e-13,
+          "max_net_clamped_over_source": 1.0412934304968363e-13,
+          "max_solver_defect_over_source": 1.430078635718604e-13
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.147096679195889e-10,
+            "transport": 1.2608181493525418e-18,
+            "removed": 0.0,
+            "clamped": 1.0349674564323935e-25,
+            "solverDefect": -1.8844523700676738e-23,
+            "restart": 0.0,
+            "gas": 1.0009388827039263e-11,
+            "wall": 1.0470027783175023e-10,
+            "sample": 0.0,
+            "held": 1.1470966665878949e-10,
+            "supplied": 1.1470966665878949e-10,
+            "closure": 0.0,
+            "pairClosure": -8.761148611850305e-28,
+            "reference": 2.200454254154514e-10,
+            "conversion": -6.781242792879521e-27,
+            "reaction": 2.2139640093445895e-11
+          },
+          "max_accounted_closure_over_source": 6.615723838875692e-16,
+          "max_raw_material_residue_over_source": 1.6354322281676458e-13,
+          "max_net_clamped_over_source": 2.4144752955638007e-15,
+          "max_solver_defect_over_source": 1.6437152968698704e-13
+        }
+      },
+      "log": {
+        "sha256": "e78fba36dc8820c736e37e3cc8e577055869eb725007f7e8a5a000b5a309bcf7",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 29999,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.7925250408531966e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29999,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.5261205151401405e-15,
+            "p95_initial_residual": 1.8059557417958496e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 29991,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 4.300074940880525e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29991,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.454825048608367e-15,
+            "p95_initial_residual": 1.8536583513440665e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 633,
+        "max_equilibrium_element_residue": 5.370595461406946e-16,
+        "max_sum_of_species_mole_fraction_maxima": 1.4053770051676464e-05,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 1,
+        "first_invalid_time_s": 0.01,
+        "last_invalid_time_s": 0.01,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 3.012319997540337e-164,
+        "max_negative_I_over_supplied_I": 1.102506837489989e-151,
+        "final_execution_s": 27384.61,
+        "final_clock_s": 27418.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 5.1884580655184826e-14,
+          "last_two_10s_rate_relative_change": 7.116967189076729e-06,
+          "last_two_10s_rate_spatial_L1": 7.116967188973934e-06,
+          "20_30_vs_50_60_rate_spatial_L1": 1.2288388118246974e-06,
+          "40_vs_60_cumulative_shape_L1": 0.0018185006327337558
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 6.026861937390119e-13,
+          "last_two_10s_rate_relative_change": 4.3314118735756224e-07,
+          "last_two_10s_rate_spatial_L1": 4.331411874549595e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 8.986155717418499e-08,
+          "40_vs_60_cumulative_shape_L1": 0.0032689765832571473
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 1.4203284404938483e-12,
+          "last_two_10s_rate_relative_change": 1.8159294197816463e-07,
+          "last_two_10s_rate_spatial_L1": 4.1106914191617915e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 2.7655591192858197e-07,
+          "40_vs_60_cumulative_shape_L1": 0.0007424128325779435
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 2.3961643969969764e-12,
+          "last_two_10s_rate_relative_change": 2.0719538901841857e-06,
+          "last_two_10s_rate_spatial_L1": 7.966809547792103e-05,
+          "20_30_vs_50_60_rate_spatial_L1": 0.00011111268117479646,
+          "40_vs_60_cumulative_shape_L1": 0.014044367240863153
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.911827742527406e-12,
+          "last_two_10s_rate_relative_change": 2.3337703325739283e-08,
+          "last_two_10s_rate_spatial_L1": 7.959249901535131e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 1.516823407120277e-07,
+          "40_vs_60_cumulative_shape_L1": 0.0034148418338154265
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 185.47480336303408,
+        "observed_scan_sum_pct": 102.24489795918367,
+        "model_scan_sum_pct": 92.98168434031932,
+        "normalised_scan_total_variation": 0.9475607534663668,
+        "normalised_scan_overlap": 0.05243924653363313,
+        "normalised_scan_Wasserstein_m": 0.09716821018141697,
+        "normalised_scan_centroid_difference_m": 0.09716821018141698,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3015197827627005,
+        "median_axial_velocity_m_s": 0.07382715431030995,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 9.81509709513999,
+        "max_advective_Courant": 0.18525375452940315,
+        "max_1D_upwind_diffusion_over_physical_D": 4.907548547569995,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2016138396860343,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SiO2_I_Q2_baseline_sat0.1": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 5.172827333188272e-10,
+            "transport": 2.426930874623278e-25,
+            "removed": 0.0,
+            "clamped": -9.283819301543402e-25,
+            "solverDefect": -5.122662677014899e-23,
+            "restart": 0.0,
+            "gas": 1.2050332617080022e-11,
+            "wall": 5.052324007017997e-10,
+            "sample": 0.0,
+            "held": 5.172827333188798e-10,
+            "supplied": 5.172827333188798e-10,
+            "closure": 0.0,
+            "pairClosure": 0.0,
+            "reference": 5.202755655881559e-10,
+            "conversion": 6.23564497097636e-25,
+            "reaction": 6.2331371109495115e-25
+          },
+          "max_accounted_closure_over_source": 4.662487047436454e-16,
+          "max_raw_material_residue_over_source": 1.1407195488362418e-13,
+          "max_net_clamped_over_source": 1.7445808895814586e-14,
+          "max_solver_defect_over_source": 9.903022751500862e-14
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.6992115399552686e-09,
+            "transport": 8.886656649590132e-19,
+            "removed": 0.0,
+            "clamped": -1.1173569466474526e-22,
+            "solverDefect": -2.443542185068415e-23,
+            "restart": 0.0,
+            "gas": 4.83925956929124e-11,
+            "wall": 1.650818943373838e-09,
+            "sample": 0.0,
+            "held": 1.6992115390667504e-09,
+            "supplied": 1.6992115390667504e-09,
+            "closure": 0.0,
+            "pairClosure": -5.479410183710873e-27,
+            "reference": 1.7323247571479238e-09,
+            "conversion": 1.1412557104452448e-23,
+            "reaction": 2.2651783964558984e-11
+          },
+          "max_accounted_closure_over_source": 5.081682622473759e-16,
+          "max_raw_material_residue_over_source": 9.171826721236978e-14,
+          "max_net_clamped_over_source": 6.652843961626629e-14,
+          "max_solver_defect_over_source": 6.089171024560916e-14
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.147096679195889e-10,
+            "transport": 1.260771691821219e-18,
+            "removed": 0.0,
+            "clamped": 5.4457578293904366e-27,
+            "solverDefect": -1.5915536127106826e-23,
+            "restart": 0.0,
+            "gas": 1.0009044572307105e-11,
+            "wall": 1.0470062208652643e-10,
+            "sample": 0.0,
+            "held": 1.1470966665883354e-10,
+            "supplied": 1.1470966665883354e-10,
+            "closure": 0.0,
+            "pairClosure": -1.643823055113262e-26,
+            "reference": 2.2003498403621182e-10,
+            "conversion": 4.1418615743864925e-25,
+            "reaction": 2.2651783964548082e-11
+          },
+          "max_accounted_closure_over_source": 6.108784036282351e-16,
+          "max_raw_material_residue_over_source": 1.5244325632477792e-13,
+          "max_net_clamped_over_source": 2.7231301929045875e-15,
+          "max_solver_defect_over_source": 1.4882684172400792e-13
+        }
+      },
+      "log": {
+        "sha256": "7356cb8861013be049f91e06b64e5dc12a579a0482c8c6fc5b646a08e8a8caa4",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 29999,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.6474208145967014e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29999,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.5065079199607527e-15,
+            "p95_initial_residual": 1.8398561432383413e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 29829,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 4.426115370858402e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29829,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.42774038219478e-15,
+            "p95_initial_residual": 1.6822729967833318e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 0,
+        "max_equilibrium_element_residue": 5.289822399556776e-16,
+        "max_sum_of_species_mole_fraction_maxima": 8.912268807148175e-05,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 0,
+        "first_invalid_time_s": null,
+        "last_invalid_time_s": null,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 2.0243212047642102e-170,
+        "max_negative_I_over_supplied_I": 2.959752218788621e-163,
+        "final_execution_s": 31475.9,
+        "final_clock_s": 31514.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 5.1884443336893517e-14,
+          "last_two_10s_rate_relative_change": 8.883441796060924e-06,
+          "last_two_10s_rate_spatial_L1": 8.883441795959575e-06,
+          "20_30_vs_50_60_rate_spatial_L1": 5.415592784122484e-06,
+          "40_vs_60_cumulative_shape_L1": 0.001811303427167535
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 6.02686288267703e-13,
+          "last_two_10s_rate_relative_change": 4.63863926990445e-07,
+          "last_two_10s_rate_spatial_L1": 4.638639271059611e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 1.7350261737595325e-07,
+          "40_vs_60_cumulative_shape_L1": 0.0032775671924989364
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 8.569494730125574e-12,
+          "last_two_10s_rate_relative_change": 1.419747524375732e-07,
+          "last_two_10s_rate_spatial_L1": 1.420070114936495e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 2.6596288437937902e-08,
+          "40_vs_60_cumulative_shape_L1": 0.00029371215692308673
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 2.7717528365448624e-11,
+          "last_two_10s_rate_relative_change": 1.2535511236248609e-06,
+          "last_two_10s_rate_spatial_L1": 8.53500280104478e-06,
+          "20_30_vs_50_60_rate_spatial_L1": 8.035511090622442e-06,
+          "40_vs_60_cumulative_shape_L1": 0.002708392263723563
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.911827751476897e-12,
+          "last_two_10s_rate_relative_change": 4.348705712223624e-08,
+          "last_two_10s_rate_spatial_L1": 9.208602046294646e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 4.5802917281137714e-07,
+          "40_vs_60_cumulative_shape_L1": 0.003438565911240059
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 185.46990781086245,
+        "observed_scan_sum_pct": 102.24489795918367,
+        "model_scan_sum_pct": 92.98167375268808,
+        "normalised_scan_total_variation": 0.9475344790686389,
+        "normalised_scan_overlap": 0.05246552093136114,
+        "normalised_scan_Wasserstein_m": 0.09716716704731099,
+        "normalised_scan_centroid_difference_m": 0.09716716704731096,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3015197827627005,
+        "median_axial_velocity_m_s": 0.07382715431030995,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 9.81509709513999,
+        "max_advective_Courant": 0.18525375452940315,
+        "max_1D_upwind_diffusion_over_physical_D": 4.907548547569995,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2016138396860343,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SiO2_I_Q2_shift29k_sat0.001": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 4.543777317133189e-11,
+            "transport": 2.7140902875838007e-25,
+            "removed": 0.0,
+            "clamped": -1.983305683387233e-24,
+            "solverDefect": -5.897036571290839e-25,
+            "restart": 0.0,
+            "gas": 3.2019741155265447e-12,
+            "wall": 4.223579905580765e-11,
+            "sample": 0.0,
+            "held": 4.54377731713342e-11,
+            "supplied": 4.54377731713342e-11,
+            "closure": 0.0,
+            "pairClosure": 0.0,
+            "reference": 9.000706136857397e-11,
+            "conversion": 3.891510430913386e-27,
+            "reaction": 1.327810675668007e-26
+          },
+          "max_accounted_closure_over_source": 4.761260690114975e-16,
+          "max_raw_material_residue_over_source": 9.042154580139074e-14,
+          "max_net_clamped_over_source": 6.327211859120235e-14,
+          "max_solver_defect_over_source": 8.362081485717374e-14
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 2.8003008587587937e-11,
+            "transport": 1.8506753074302217e-19,
+            "removed": 0.0,
+            "clamped": 2.1489258041044034e-25,
+            "solverDefect": -3.0760930521075263e-24,
+            "restart": 0.0,
+            "gas": 1.9106471857246726e-12,
+            "wall": 2.6092361216798597e-11,
+            "sample": 0.0,
+            "held": 2.800300840252327e-11,
+            "supplied": 2.8003008402523265e-11,
+            "closure": 6.462348535570529e-27,
+            "pairClosure": 2.7397050918554364e-27,
+            "reference": 3.5438228834482136e-11,
+            "conversion": -1.4623507354633505e-27,
+            "reaction": 4.7961653683240655e-12
+          },
+          "max_accounted_closure_over_source": 4.390108411329498e-16,
+          "max_raw_material_residue_over_source": 1.0252170215803754e-13,
+          "max_net_clamped_over_source": 7.914670006739559e-15,
+          "max_solver_defect_over_source": 1.09848853634079e-13
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.147096679195889e-10,
+            "transport": 5.565686552874667e-19,
+            "removed": 0.0,
+            "clamped": -3.941197162477934e-24,
+            "solverDefect": -4.3704829629383054e-24,
+            "restart": 0.0,
+            "gas": 8.532326750555992e-12,
+            "wall": 1.0617734061247251e-10,
+            "sample": 0.0,
+            "held": 1.1470966736302851e-10,
+            "supplied": 1.1470966736302852e-10,
+            "closure": -1.2924697071141057e-26,
+            "pairClosure": 8.21911527556631e-27,
+            "reference": 2.2615390505475567e-10,
+            "conversion": -4.465702882072535e-26,
+            "reaction": 4.796165368324025e-12
+          },
+          "max_accounted_closure_over_source": 4.438279718237332e-16,
+          "max_raw_material_residue_over_source": 8.988530418430045e-14,
+          "max_net_clamped_over_source": 4.978982971617554e-14,
+          "max_solver_defect_over_source": 9.002093303840942e-14
+        }
+      },
+      "log": {
+        "sha256": "17c83fb4f82c49ef3e38f87bbf3d470f1dbe1a7accc41078ea7fd853b46d0064",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 29999,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.418038971267939e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29999,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.41100934873101e-15,
+            "p95_initial_residual": 1.717907041837697e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 29995,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 3.0099145638312292e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29995,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.9954165697996844e-15,
+            "p95_initial_residual": 2.1317462746900383e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 0,
+        "max_equilibrium_element_residue": 6.434197792615226e-16,
+        "max_sum_of_species_mole_fraction_maxima": 9.467122693538422e-06,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 0,
+        "first_invalid_time_s": null,
+        "last_invalid_time_s": null,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 2.5367001162656954e-164,
+        "max_negative_I_over_supplied_I": 1.0450918812523813e-151,
+        "final_execution_s": 30330.46,
+        "final_clock_s": 30370.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 7.572962195231251e-13,
+          "last_two_10s_rate_relative_change": 2.3200313996214085e-14,
+          "last_two_10s_rate_spatial_L1": 9.717150592636443e-14,
+          "20_30_vs_50_60_rate_spatial_L1": 1.59843205073969e-12,
+          "40_vs_60_cumulative_shape_L1": 0.002218964441619714
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 1.3241177672360459e-13,
+          "last_two_10s_rate_relative_change": 6.773203513968019e-08,
+          "last_two_10s_rate_spatial_L1": 6.77320352179404e-08,
+          "20_30_vs_50_60_rate_spatial_L1": 5.726799776501976e-08,
+          "40_vs_60_cumulative_shape_L1": 0.003150440976961545
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": -1.3495602774378053e-35,
+          "last_two_10s_rate_relative_change": 0.38386898202592196,
+          "last_two_10s_rate_spatial_L1": 0.6113560406876489,
+          "20_30_vs_50_60_rate_spatial_L1": 3.4291468074485256,
+          "40_vs_60_cumulative_shape_L1": 0.31509583834732896
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 3.343075704950593e-13,
+          "last_two_10s_rate_relative_change": 1.4753785300857492e-05,
+          "last_two_10s_rate_spatial_L1": 0.00013900789474522395,
+          "20_30_vs_50_60_rate_spatial_L1": 4.322669375179097e-05,
+          "40_vs_60_cumulative_shape_L1": 0.0038550136832077994
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.9118277692170643e-12,
+          "last_two_10s_rate_relative_change": 1.4073194303907105e-08,
+          "last_two_10s_rate_spatial_L1": 1.4073289342600573e-08,
+          "20_30_vs_50_60_rate_spatial_L1": 1.1900284637793457e-08,
+          "40_vs_60_cumulative_shape_L1": 0.004306574270641299
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 181.8613350159409,
+        "observed_scan_sum_pct": 102.24489795918367,
+        "model_scan_sum_pct": 92.99065505239753,
+        "normalised_scan_total_variation": 0.9280883762561716,
+        "normalised_scan_overlap": 0.07191162374382853,
+        "normalised_scan_Wasserstein_m": 0.04730265179334376,
+        "normalised_scan_centroid_difference_m": 0.04720397699531026,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3015197827627005,
+        "median_axial_velocity_m_s": 0.07382715431030995,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 9.81509709513999,
+        "max_advective_Courant": 0.18525375452940315,
+        "max_1D_upwind_diffusion_over_physical_D": 4.907548547569995,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2016138396860343,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SiO2_I_Q2_shift29k_sat0.01": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 8.833276954837691e-11,
+            "transport": 2.6703115918585074e-25,
+            "removed": 0.0,
+            "clamped": -6.632323347400289e-25,
+            "solverDefect": -2.9272462689733556e-24,
+            "restart": 0.0,
+            "gas": 4.977391499754825e-12,
+            "wall": 8.335537804862542e-11,
+            "sample": 0.0,
+            "held": 8.833276954838024e-11,
+            "supplied": 8.833276954838024e-11,
+            "closure": 0.0,
+            "pairClosure": 0.0,
+            "reference": 1.4297992707035357e-10,
+            "conversion": 3.403966708820902e-27,
+            "reaction": 1.8175355256292112e-27
+          },
+          "max_accounted_closure_over_source": 5.552640971714716e-16,
+          "max_raw_material_residue_over_source": 8.359921998612055e-14,
+          "max_net_clamped_over_source": 1.5901066932223735e-14,
+          "max_solver_defect_over_source": 8.335286081264441e-14
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.7993105689374066e-10,
+            "transport": 1.8420199033835652e-19,
+            "removed": 0.0,
+            "clamped": 5.318812032803132e-24,
+            "solverDefect": -2.2109178656137027e-23,
+            "restart": 0.0,
+            "gas": 6.2206636007691034e-12,
+            "wall": 1.737103931087864e-10,
+            "sample": 0.0,
+            "held": 1.799310567095555e-10,
+            "supplied": 1.7993105670955554e-10,
+            "closure": -2.5849394142282115e-26,
+            "pairClosure": 5.136947047228943e-28,
+            "reference": 1.806512092144421e-10,
+            "conversion": 6.660542545692053e-26,
+            "reaction": 3.2087260804876365e-12
+          },
+          "max_accounted_closure_over_source": 5.030991964966835e-16,
+          "max_raw_material_residue_over_source": 1.58373626211707e-13,
+          "max_net_clamped_over_source": 4.266580811398024e-14,
+          "max_solver_defect_over_source": 1.606285667636571e-13
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.147096679195889e-10,
+            "transport": 5.539697142313114e-19,
+            "removed": 0.0,
+            "clamped": 6.226185542157123e-26,
+            "solverDefect": -5.623471771405196e-24,
+            "restart": 0.0,
+            "gas": 8.093810633532904e-12,
+            "wall": 1.0661585673209181e-10,
+            "sample": 0.0,
+            "held": 1.1470966736562472e-10,
+            "supplied": 1.1470966736562473e-10,
+            "closure": -1.2924697071141057e-26,
+            "pairClosure": 1.541084114168683e-27,
+            "reference": 2.2616443992564652e-10,
+            "conversion": -2.4556708617652325e-26,
+            "reaction": 3.208726080487558e-12
+          },
+          "max_accounted_closure_over_source": 5.315884619536564e-16,
+          "max_raw_material_residue_over_source": 9.260473806837572e-14,
+          "max_net_clamped_over_source": 5.264924433597999e-15,
+          "max_solver_defect_over_source": 9.243650124982704e-14
+        }
+      },
+      "log": {
+        "sha256": "40c184d10f608ae1daad37882777331c2d53ed97db83c7d4e8a2028b9bc1b150",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 29999,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.4628581666591657e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29999,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.5206920009297703e-15,
+            "p95_initial_residual": 1.7402171376966425e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 29997,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 3.4137134390325017e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29997,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 2.153450345935903e-15,
+            "p95_initial_residual": 2.2804477761240753e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 0,
+        "max_equilibrium_element_residue": 6.130079083233042e-16,
+        "max_sum_of_species_mole_fraction_maxima": 1.8080000308874172e-05,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 0,
+        "first_invalid_time_s": null,
+        "last_invalid_time_s": null,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 9.411825540431752e-184,
+        "max_negative_I_over_supplied_I": 4.254436318331005e-171,
+        "final_execution_s": 32589.05,
+        "final_clock_s": 32627.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 9.364846712858378e-13,
+          "last_two_10s_rate_relative_change": 1.0135322768909683e-13,
+          "last_two_10s_rate_spatial_L1": 4.272686776062396e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 1.9846025962632808e-12,
+          "40_vs_60_cumulative_shape_L1": 0.002344455939407109
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 1.2952814506081252e-14,
+          "last_two_10s_rate_relative_change": 9.588985534060677e-09,
+          "last_two_10s_rate_spatial_L1": 9.588985562744443e-09,
+          "20_30_vs_50_60_rate_spatial_L1": 8.33769553263991e-08,
+          "40_vs_60_cumulative_shape_L1": 0.0026054572523514243
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 5.357281545221337e-13,
+          "last_two_10s_rate_relative_change": 1.4324501748156394e-13,
+          "last_two_10s_rate_spatial_L1": 1.77733964844364e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 1.8207689300574747e-12,
+          "40_vs_60_cumulative_shape_L1": 0.001086018395266472
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 2.9858974507613925e-12,
+          "last_two_10s_rate_relative_change": 2.7391963637388316e-07,
+          "last_two_10s_rate_spatial_L1": 1.9910877282190464e-06,
+          "20_30_vs_50_60_rate_spatial_L1": 1.9697130356467155e-06,
+          "40_vs_60_cumulative_shape_L1": 0.0009471928196718688
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.9118277860899183e-12,
+          "last_two_10s_rate_relative_change": 1.947986705411145e-10,
+          "last_two_10s_rate_spatial_L1": 1.953164143766059e-10,
+          "20_30_vs_50_60_rate_spatial_L1": 1.6966052279384933e-09,
+          "40_vs_60_cumulative_shape_L1": 0.002635357375805144
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 181.9035428972851,
+        "observed_scan_sum_pct": 102.24489795918367,
+        "model_scan_sum_pct": 92.99143155554997,
+        "normalised_scan_total_variation": 0.928311746607084,
+        "normalised_scan_overlap": 0.07168825339291603,
+        "normalised_scan_Wasserstein_m": 0.04098124870249053,
+        "normalised_scan_centroid_difference_m": 0.032274634413464585,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3015197827627005,
+        "median_axial_velocity_m_s": 0.07382715431030995,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 9.81509709513999,
+        "max_advective_Courant": 0.18525375452940315,
+        "max_1D_upwind_diffusion_over_physical_D": 4.907548547569995,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2016138396860343,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    },
+    "LBE-I_SiO2_I_Q2_shift29k_sat0.1": {
+      "ledger": {
+        "Pb": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 5.172827333188272e-10,
+            "transport": 2.3850824497814207e-25,
+            "removed": 0.0,
+            "clamped": -2.461080628205957e-23,
+            "solverDefect": -4.942896895906369e-23,
+            "restart": 0.0,
+            "gas": 1.469381432342521e-11,
+            "wall": 5.025889189954764e-10,
+            "sample": 0.0,
+            "held": 5.172827333189016e-10,
+            "supplied": 5.172827333189016e-10,
+            "closure": 0.0,
+            "pairClosure": -7.008918889480244e-27,
+            "reference": 5.717972160391786e-10,
+            "conversion": 5.042909024489659e-25,
+            "reaction": 5.121411214439644e-25
+          },
+          "max_accounted_closure_over_source": 5.281159001829396e-16,
+          "max_raw_material_residue_over_source": 1.4422357014227177e-13,
+          "max_net_clamped_over_source": 4.757708830557601e-14,
+          "max_solver_defect_over_source": 9.562932087426713e-14
+        },
+        "Bi": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.6992115399552686e-09,
+            "transport": 1.841429164706977e-19,
+            "removed": 0.0,
+            "clamped": 1.0024341997616091e-22,
+            "solverDefect": -7.971894970498416e-23,
+            "restart": 0.0,
+            "gas": 4.2041127885523925e-11,
+            "wall": 1.6571704118855832e-09,
+            "sample": 0.0,
+            "held": 1.6992115397711071e-09,
+            "supplied": 1.6992115397711071e-09,
+            "closure": 0.0,
+            "pairClosure": -5.136947047228943e-28,
+            "reference": 1.6999302226186651e-09,
+            "conversion": 1.945310916526984e-24,
+            "reaction": 3.921818434734083e-12
+          },
+          "max_accounted_closure_over_source": 5.2386927130664e-16,
+          "max_raw_material_residue_over_source": 8.853152967887562e-14,
+          "max_net_clamped_over_source": 6.507750880170499e-14,
+          "max_solver_defect_over_source": 6.413273763192692e-14
+        },
+        "I": {
+          "records": 30000,
+          "final": {
+            "time": 60.00000000002736,
+            "initial": 0.0,
+            "released": 1.147096679195889e-10,
+            "transport": 5.537921089045819e-19,
+            "removed": 0.0,
+            "clamped": -1.6227454737836526e-24,
+            "solverDefect": -9.814143459323205e-24,
+            "restart": 0.0,
+            "gas": 8.093935848175794e-12,
+            "wall": 1.0661573151763239e-10,
+            "sample": 0.0,
+            "held": 1.1470966736580818e-10,
+            "supplied": 1.147096673658082e-10,
+            "closure": -1.2924697071141057e-26,
+            "pairClosure": -1.555892189312917e-26,
+            "reference": 2.2589468135048156e-10,
+            "conversion": -3.4521491906660946e-26,
+            "reaction": 3.9218184347321546e-12
+          },
+          "max_accounted_closure_over_source": 6.268905477391624e-16,
+          "max_raw_material_residue_over_source": 9.99009774931624e-14,
+          "max_net_clamped_over_source": 1.43713788834094e-14,
+          "max_solver_defect_over_source": 8.706762613947682e-14
+        }
+      },
+      "log": {
+        "sha256": "4f57a250e8e5b604192f30ad8fd56d98f9d4f688a3202a652e036109397c2e6e",
+        "pairs": {
+          "Y_PbI2_g": {
+            "steps": 30000,
+            "unconverged_steps": 29999,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 2.5086925538581354e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29999,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 1.5211975660533802e-15,
+            "p95_initial_residual": 1.7259363542830464e-15
+          },
+          "Y_BiI3_g": {
+            "steps": 30000,
+            "unconverged_steps": 29997,
+            "unconverged_with_significant_regime_changes": 0,
+            "max_initial_residual": 3.263986413544494e-15,
+            "tolerance": 1e-16,
+            "summary_unconverged_steps": 29997,
+            "guard_passes": 0,
+            "projected_elements": 0,
+            "significant_projected_elements": 0,
+            "complementarity_violations": 0,
+            "significant_complementarity_violations": 0,
+            "median_initial_residual": 2.1551944462797345e-15,
+            "p95_initial_residual": 2.2911307249260002e-15
+          }
+        },
+        "max_respeciation_failures": 0,
+        "max_invalid_element_cells": 0,
+        "max_equilibrium_element_residue": 6.230367784187951e-16,
+        "max_sum_of_species_mole_fraction_maxima": 9.086257229190446e-05,
+        "normal_end": true,
+        "steps_with_invalid_element_cells": 0,
+        "first_invalid_time_s": null,
+        "last_invalid_time_s": null,
+        "final_invalid_element_cells": 0,
+        "max_negative_gas_mass_kg": 4.178913315051834e-163,
+        "max_negative_I_over_supplied_I": 1.960135369186742e-150,
+        "final_execution_s": 31009.67,
+        "final_clock_s": 31048.0
+      },
+      "stationarity": {
+        "PbI2": {
+          "last_10s_rate_mol_s_wedge": 9.364838176152015e-13,
+          "last_two_10s_rate_relative_change": 1.5979321314687077e-13,
+          "last_two_10s_rate_spatial_L1": 2.4489297906411675e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 2.0062414173810576e-12,
+          "40_vs_60_cumulative_shape_L1": 0.002325922987648129
+        },
+        "BiI3": {
+          "last_10s_rate_mol_s_wedge": 1.2953384035396978e-14,
+          "last_two_10s_rate_relative_change": 9.752280484458097e-08,
+          "last_two_10s_rate_spatial_L1": 9.752280474737563e-08,
+          "20_30_vs_50_60_rate_spatial_L1": 5.469960505653604e-08,
+          "40_vs_60_cumulative_shape_L1": 0.002878017975494583
+        },
+        "Pb": {
+          "last_10s_rate_mol_s_wedge": 7.684895071044195e-12,
+          "last_two_10s_rate_relative_change": 6.34891315919098e-14,
+          "last_two_10s_rate_spatial_L1": 1.3246742304866548e-13,
+          "20_30_vs_50_60_rate_spatial_L1": 2.1855965135562498e-12,
+          "40_vs_60_cumulative_shape_L1": 0.0002538381057720474
+        },
+        "Bi": {
+          "last_10s_rate_mol_s_wedge": 2.830723817869849e-11,
+          "last_two_10s_rate_relative_change": 1.822937891739199e-08,
+          "last_two_10s_rate_spatial_L1": 1.209359584498762e-07,
+          "20_30_vs_50_60_rate_spatial_L1": 1.7092231895346143e-07,
+          "40_vs_60_cumulative_shape_L1": 0.0005797049774571813
+        },
+        "I": {
+          "last_10s_rate_mol_s_wedge": 1.9118277873365945e-12,
+          "last_two_10s_rate_relative_change": 1.9821099723533747e-09,
+          "last_two_10s_rate_spatial_L1": 1.9825054808896387e-09,
+          "20_30_vs_50_60_rate_spatial_L1": 1.1137997346558695e-09,
+          "40_vs_60_cumulative_shape_L1": 0.002644509814946493
+        }
+      },
+      "shape": {
+        "raw_L1_percentage_points": 181.903501483739,
+        "observed_scan_sum_pct": 102.24489795918367,
+        "model_scan_sum_pct": 92.99143607119956,
+        "normalised_scan_total_variation": 0.9283115031343541,
+        "normalised_scan_overlap": 0.07168849686564596,
+        "normalised_scan_Wasserstein_m": 0.04098172768454155,
+        "normalised_scan_centroid_difference_m": 0.03227099851974637,
+        "scope": "Secondary normalisation over common scan; observed retains KI; no alignment fitting."
+      },
+      "transport_scales": {
+        "max_axial_velocity_m_s": 0.3015197827627005,
+        "median_axial_velocity_m_s": 0.07382715431030995,
+        "axial_cell_size_m": 0.0032552083333333335,
+        "max_cell_Peclet": 9.81509709513999,
+        "max_advective_Courant": 0.18525375452940315,
+        "max_1D_upwind_diffusion_over_physical_D": 4.907548547569995,
+        "median_1D_upwind_diffusion_over_physical_D": 1.2016138396860343,
+        "scope": "Local 1D Taylor-series estimate D_num = |Ux| dx/2 for upwind advection; not a measured CFD error or a full variable-density/radial analysis."
+      }
+    }
+  },
+  "source_sha256": "7b64bd64eb05874abbee749d18141bb8ee4b34d9e98655ece79aa89cb6167250",
+  "input_sha256": {
+    "run/034-liu2025/work/prepared/cases/validation.json": "a905c76200fa0926cf1e40f5d016b7bd3222b81e3f1be084f5de40dc714b8495",
+    "run/034-liu2025/work/prepared/cases/peaks.csv": "a0a6168bd94b21881fc0b80ffe64ca66d460e56850b4d3a83acaac594bb730f8",
+    "/home/jan/LESTO/thermochemistry/benchmarks/liu2025/targets.csv": "76e5b1354715b3d9644cf00c1bf17af1dd1c2b02f261db435cdd0242479de2e4",
+    "/home/jan/LESTO/thermochemistry/benchmarks/liu2025/digitized/figure_checks.csv": "3981e25055d4de882a1f5de10ec5046eb68d7471cd4fb6f83a6a21bc4352fd97"
+  }
+}

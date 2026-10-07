@@ -1,0 +1,42 @@
+{
+  "status": "COMPLETED",
+  "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+  "dt_s": 0.002,
+  "end_time_s": 0.01,
+  "results": [
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.1",
+      "events": [
+        {
+          "time_s": 0.008,
+          "invalid_cells": 96,
+          "positive_I_over_supplied_I_upper_bound": 1.003153788414887e-225
+        }
+      ],
+      "maximum_logged_invalid_cells": 96
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+      "events": [
+        {
+          "time_s": 0.006,
+          "invalid_cells": 1170,
+          "positive_I_over_supplied_I_upper_bound": 3.9077817508590026e-225
+        }
+      ],
+      "maximum_logged_invalid_cells": 1170
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01",
+      "events": [
+        {
+          "time_s": 0.01,
+          "invalid_cells": 633,
+          "positive_I_over_supplied_I_upper_bound": 1.2428619363780944e-235
+        }
+      ],
+      "maximum_logged_invalid_cells": 633
+    }
+  ],
+  "scope": "Five-step startup replay; original physical inputs and source rates; positive iodine bound uses entire axial-slice volume per affected radial cell."
+}

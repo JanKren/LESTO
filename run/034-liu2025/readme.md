@@ -1,5 +1,11 @@
 # M10e: Liu (2025) physical carriers and provisional validation
 
+**Latest status (2026-10-07):** the available full-size matrix is complete:
+15 PASS, zero FAIL, one missing-profile case NOTRUN. Mesh/time-step and
+experimental qualification remain open. See the
+[full analysis](full_analysis/report.html) and
+[completion evidence](full_size_completion.json).
+
 This case prepares physical laminar helium carriers with `rhoSimpleFoam`,
 then runs Q1 deposition and Q2 metal-vapour sensitivities using the M10d
 kernel and shared wall condensates. The full mesh is 384 × 48 × 1 (18,432
@@ -211,3 +217,71 @@ thermodynamic tables, meshes, sources, end time and time step. Field/profile
 writes now occur every 1 s (500 steps), with the latest two field checkpoints
 retained; the case manifests record these execution overrides. The complete
 60 s numerical and experimental comparisons remain pending.
+
+## Completed full-size matrix and analysis (2026-10-07)
+
+Attempt three finished at 00:28 UTC (02:28 Zurich). All fifteen available
+cases reached 60 s, with 18,432 cells and 2 ms steps. The maximum accounted
+element-ledger closure is 8.63e-16 relative to its reference; independently,
+the raw material residue before numerical corrections is at most 5.98e-13
+relative to supplied atoms. Gas-equilibrium solver failures are zero.
+
+All five available Q1 printed peaks lie within the paper's uncertainties:
+350.73 °C for pure PbI2; 288.09 / 166.41 °C for steel PbI2 / BiI3;
+287.59 / 152.77 °C for silica PbI2 / BiI3. Q1 LBE sources prescribe an
+observed-deposit split, so this is conditional evidence. Silica's Q1 peaks
+remain 5 / 4 cm downstream of the observed scan maxima, and its normalised
+profile overlap is only about 7%. Figure 7C's +63 / +108 K curve/label
+discrepancy remains unresolved; no coordinates or temperatures were fitted.
+
+The low-loading steel Q2 baseline has the lowest raw iodine-profile error
+among the tested scenarios (36.80 percentage points L1), but predicts a
+56.47% BiI3 share of iodide iodine versus the paper's 65.63%. At 1% / 10%
+metal saturation, the baseline gives roughly 94.5% BiI3 in both columns;
+the +29 kJ/mol BiI surrogate gives roughly 2%. Source and thermodynamic
+assumptions therefore remain consequential and unqualified.
+
+The largest coarse-to-full iodide profile change is 67.95% L1. Mesh,
+time step and solver revision changed together, so this comparison does
+not establish independent convergence. First-order upwind advection has
+estimated numerical diffusion comparable to or greater than the imposed
+1e-4 m²/s physical diffusivity even on the full mesh. Isolated time-step
+and fixed-step mesh comparisons are the next numerical priority.
+
+Most paired-gas steps miss the strict 1e-16 outer criterion, with median
+residuals near 1–2e-15 and no significant regime changes. Twelve short
+matched restarts across four cases compare nCorr 3 / 8 and outer tolerances
+1e-16 / 1e-14. The largest species-scaled gas-field change is 3.60e-8;
+new iodide/iodine wall-profile increments differ by at most 9.38e-14 L1.
+Three five-step startup replays reproduce transient invalid-element skips
+and bound iodine in skipped cells below 4e-225 of supply. These probes
+support a round-off interpretation without changing gates or adding floors;
+they do not replace full-run refinement.
+
+Relevant deposition-rate profiles are steady: comparing 20–30 and 50–60 s
+windows changes iodide/iodine rates by less than 0.001%. Cumulative profiles
+retain startup differences, and the experiment's shutdown/cooling stage is
+not represented. Fifteen Python benchmark/analysis tests pass.
+
+The report includes all case metrics, source-conditioned splits, independent
+material audits, transient diagnostics, refinement limits, input discrepancies
+and prioritised next work. Its figures are embedded for standalone viewing;
+[a six-page figure PDF](full_analysis/analysis_figures.pdf), CSV tables,
+machine-readable results and final numerical profiles are saved beside it.
+Licensed thermodynamic inputs and raw CFD fields/logs remain outside git.
+
+Regenerate the analysis from retained local CFD outputs:
+
+```bash
+MPLCONFIGDIR=/tmp/lesto-matplotlib python3 thermochemistry/benchmarks/liu2025/analyse_matrix.py \
+  --full-root run/034-liu2025/work/prepared/cases \
+  --coarse-root /tmp/lesto-m10e-final-coarse \
+  --half-root /tmp/lesto-m10e-final-half-step \
+  --corrector-summary run/034-liu2025/work/corrector-probe/comparison.json \
+  --positivity-summary run/034-liu2025/work/positivity-probe/comparison.json \
+  --out run/034-liu2025/full_analysis
+```
+
+`corrector_probe.py` and `positivity_probe.py` reproduce the diagnostics
+using the unchanged private solver in an OpenFOAM v2412 environment; each
+requires a fresh `--out` directory. Both preserve the original sources.

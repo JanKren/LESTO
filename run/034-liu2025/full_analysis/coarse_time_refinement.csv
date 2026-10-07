@@ -1,0 +1,4 @@
+case,species,cells,dt_s_1,dt_s_2,profile_L1_relative_to_10ms,peak_change_K
+PbI2_SS_Q1_baseline,PbI2,2048,0.02,0.01,0.00024259655618437357,0.0
+LBE-I_SS_II_Q2_baseline_sat0.01,PbI2,2048,0.02,0.01,0.0317459938304296,0.0
+LBE-I_SS_II_Q2_baseline_sat0.01,BiI3,2048,0.02,0.01,0.0199984293927114,0.0

@@ -8372,3 +8372,36 @@ tables, 18,432 cells, 60 s and 2 ms. One-second field/profile writes retain
 two field checkpoints. Final full-size conservation, refinement and
 experimental validation remain pending; no journal-ready physical validation
 is inferred from these numerical checks.
+
+### 36.15 Full-size matrix completion and analysis (2026-10-07)
+
+Attempt three completed all fifteen available cases at 60 s / 2 ms /
+18,432 cells: 15 PASS, zero FAIL, missing BiI3_SiO2_800 profile NOTRUN.
+Run/034's `full_size_completion.json` preserves final evidence; the launch
+record remains a historical snapshot. Maximum accounted element closure
+is 8.63e-16; independent raw material residue before numerical corrections
+is at most 5.98e-13 of supplied atoms. Gas-equilibrium solver failures
+are zero. Most paired-gas outer residuals remain at a 1–2e-15 floor above
+the 1e-16 criterion, with no significant regime changes. Twelve short
+matched late-time restarts have species-scaled gas differences below
+3.60e-8 and new wall-profile increment differences below 9.38e-14 L1.
+Three startup replays bound iodine in transient skipped cells below
+4e-225 of supply. No species, positive bulk or numerical gate was changed.
+
+Five available Q1 peak temperatures fall within the reported uncertainty,
+but LBE Q1 splits are source-conditioned. Silica's Q1 deposit positions
+are displaced 4–5 cm, with only about 7% normalised scan overlap; the
+published curve/label discrepancy remains. Q2 is strongly sensitive to
+metal source and BiI thermodynamics: at higher saturation, the baseline
+and +29 kJ/mol surrogate give about 94.5% and 2% BiI3 iodide-iodine shares.
+Neither is an independently qualified physical source/data combination.
+
+Coarse-to-full iodide profiles differ by up to 67.95% L1. Mesh, time step
+and solver revision changed together. First-order upwind numerical-diffusion
+estimates are comparable to or exceed the prescribed physical D on the
+full mesh. Isolated time-step and fixed-step spatial refinement remain
+necessary. Rate stationarity does not qualify the three-hour release and
+post-experiment cooling. The full analysis, six exportable figures, CSVs,
+final profiles and reproducible analysis/probe scripts are saved in run/034
+and the benchmark package. Fifteen Python checks pass. M10e scientific
+acceptance remains open despite completed numerical matrix execution.

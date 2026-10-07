@@ -1,0 +1,450 @@
+{
+  "status": "PASS",
+  "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+  "start_time_s": 59,
+  "end_time_s": 59.04,
+  "steps": 20,
+  "dt_s": 0.002,
+  "cases": [
+    "PbI2_SS_Q1_baseline",
+    "LBE-I_SS_II_Q2_baseline_sat0.01",
+    "LBE-I_SS_II_Q2_shift29k_sat0.01",
+    "LBE-I_SiO2_I_Q1_baseline"
+  ],
+  "configurations": [
+    [
+      "control",
+      3,
+      "1e-16"
+    ],
+    [
+      "more_correctors",
+      8,
+      "1e-16"
+    ],
+    [
+      "tolerance_1e14",
+      3,
+      "1e-14"
+    ]
+  ],
+  "comparisons": [
+    {
+      "case": "PbI2_SS_Q1_baseline",
+      "variant": "more_correctors",
+      "gas_fields": {
+        "PbI2_g": {
+          "max_difference_over_max_control": 1.3998238323425006e-14,
+          "unweighted_cell_L1_relative_to_control": 3.379136675343199e-15
+        },
+        "BiI3_g": {
+          "max_difference_over_max_control": null,
+          "unweighted_cell_L1_relative_to_control": null
+        },
+        "Pb_g": {
+          "max_difference_over_max_control": 1.2922201796999572e-14,
+          "unweighted_cell_L1_relative_to_control": 4.807379834859713e-15
+        },
+        "PbI_g": {
+          "max_difference_over_max_control": 7.934085450836193e-15,
+          "unweighted_cell_L1_relative_to_control": 5.6921482409343706e-15
+        },
+        "Bi_g": {
+          "max_difference_over_max_control": null,
+          "unweighted_cell_L1_relative_to_control": null
+        },
+        "Bi2_g": {
+          "max_difference_over_max_control": null,
+          "unweighted_cell_L1_relative_to_control": null
+        },
+        "BiI_g": {
+          "max_difference_over_max_control": null,
+          "unweighted_cell_L1_relative_to_control": null
+        },
+        "I_g": {
+          "max_difference_over_max_control": 5.850419215934672e-15,
+          "unweighted_cell_L1_relative_to_control": 4.3775761549944404e-15
+        },
+        "I2_g": {
+          "max_difference_over_max_control": 7.908341353618144e-14,
+          "unweighted_cell_L1_relative_to_control": 2.359704809337386e-14
+        }
+      },
+      "cumulative_wall_profile_L1": {
+        "PbI2_g": 3.637610177473492e-33,
+        "BiI3_g": null,
+        "element_I": 1.5777261560971054e-32
+      },
+      "wall_increment_profile_L1": {
+        "PbI2_g": 5.270922755085406e-30,
+        "BiI3_g": null,
+        "element_I": 2.2861363070081567e-29
+      }
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline",
+      "variant": "tolerance_1e14",
+      "gas_fields": {
+        "PbI2_g": {
+          "max_difference_over_max_control": 1.4523172260553444e-14,
+          "unweighted_cell_L1_relative_to_control": 3.5331151671617343e-15
+        },
+        "BiI3_g": {
+          "max_difference_over_max_control": null,
+          "unweighted_cell_L1_relative_to_control": null
+        },
+        "Pb_g": {
+          "max_difference_over_max_control": 1.3729839409312046e-14,
+          "unweighted_cell_L1_relative_to_control": 7.328192390792809e-15
+        },
+        "PbI_g": {
+          "max_difference_over_max_control": 1.2329997660083272e-14,
+          "unweighted_cell_L1_relative_to_control": 7.279261267761363e-15
+        },
+        "Bi_g": {
+          "max_difference_over_max_control": null,
+          "unweighted_cell_L1_relative_to_control": null
+        },
+        "Bi2_g": {
+          "max_difference_over_max_control": null,
+          "unweighted_cell_L1_relative_to_control": null
+        },
+        "BiI_g": {
+          "max_difference_over_max_control": null,
+          "unweighted_cell_L1_relative_to_control": null
+        },
+        "I_g": {
+          "max_difference_over_max_control": 1.21113941663209e-14,
+          "unweighted_cell_L1_relative_to_control": 5.822898171169111e-15
+        },
+        "I2_g": {
+          "max_difference_over_max_control": 8.395461747139976e-14,
+          "unweighted_cell_L1_relative_to_control": 2.7741816367408813e-14
+        }
+      },
+      "cumulative_wall_profile_L1": {
+        "PbI2_g": 1.7352930432015548e-32,
+        "BiI3_g": null,
+        "element_I": 1.9139169570257595e-32
+      },
+      "wall_increment_profile_L1": {
+        "PbI2_g": 2.514451835656909e-29,
+        "BiI3_g": null,
+        "element_I": 2.773279144258453e-29
+      }
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "variant": "more_correctors",
+      "gas_fields": {
+        "PbI2_g": {
+          "max_difference_over_max_control": 5.026381287248817e-10,
+          "unweighted_cell_L1_relative_to_control": 2.1939338396785578e-12
+        },
+        "BiI3_g": {
+          "max_difference_over_max_control": 3.4211863429386275e-08,
+          "unweighted_cell_L1_relative_to_control": 1.537386596970361e-10
+        },
+        "Pb_g": {
+          "max_difference_over_max_control": 3.836853643784368e-12,
+          "unweighted_cell_L1_relative_to_control": 2.109151029867336e-14
+        },
+        "PbI_g": {
+          "max_difference_over_max_control": 4.4304821545674985e-10,
+          "unweighted_cell_L1_relative_to_control": 1.4389627426640752e-12
+        },
+        "Bi_g": {
+          "max_difference_over_max_control": 4.7844045206883686e-12,
+          "unweighted_cell_L1_relative_to_control": 2.6448027224740516e-14
+        },
+        "Bi2_g": {
+          "max_difference_over_max_control": 6.357513070455557e-11,
+          "unweighted_cell_L1_relative_to_control": 4.3014813549760846e-13
+        },
+        "BiI_g": {
+          "max_difference_over_max_control": 2.911994571795675e-09,
+          "unweighted_cell_L1_relative_to_control": 5.242473969771897e-12
+        },
+        "I_g": {
+          "max_difference_over_max_control": 2.9201918283512265e-09,
+          "unweighted_cell_L1_relative_to_control": 3.4659448260691342e-12
+        },
+        "I2_g": {
+          "max_difference_over_max_control": 3.5954637987288064e-08,
+          "unweighted_cell_L1_relative_to_control": 7.020357589074246e-09
+        }
+      },
+      "cumulative_wall_profile_L1": {
+        "PbI2_g": 1.8819189273259057e-17,
+        "BiI3_g": 9.955314568594185e-23,
+        "element_I": 5.119861107834674e-19
+      },
+      "wall_increment_profile_L1": {
+        "PbI2_g": 2.6041872774528993e-14,
+        "BiI3_g": 1.3599045316484995e-19,
+        "element_I": 6.99866852145326e-16
+      }
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "variant": "tolerance_1e14",
+      "gas_fields": {
+        "PbI2_g": {
+          "max_difference_over_max_control": 2.6466122570717953e-10,
+          "unweighted_cell_L1_relative_to_control": 1.8902263296433263e-12
+        },
+        "BiI3_g": {
+          "max_difference_over_max_control": 4.776892361111544e-09,
+          "unweighted_cell_L1_relative_to_control": 2.2021969780862768e-11
+        },
+        "Pb_g": {
+          "max_difference_over_max_control": 2.8754962015670935e-12,
+          "unweighted_cell_L1_relative_to_control": 2.0175592516301467e-14
+        },
+        "PbI_g": {
+          "max_difference_over_max_control": 2.1318290390867704e-10,
+          "unweighted_cell_L1_relative_to_control": 1.1997190595322051e-12
+        },
+        "Bi_g": {
+          "max_difference_over_max_control": 2.6553117078418977e-12,
+          "unweighted_cell_L1_relative_to_control": 2.28880647396414e-14
+        },
+        "Bi2_g": {
+          "max_difference_over_max_control": 2.19888005886088e-11,
+          "unweighted_cell_L1_relative_to_control": 3.6519547571167624e-13
+        },
+        "BiI_g": {
+          "max_difference_over_max_control": 4.0659269201838147e-10,
+          "unweighted_cell_L1_relative_to_control": 9.066626999185936e-13
+        },
+        "I_g": {
+          "max_difference_over_max_control": 2.6910815593217194e-09,
+          "unweighted_cell_L1_relative_to_control": 3.1931376316128224e-12
+        },
+        "I2_g": {
+          "max_difference_over_max_control": 3.313373528816654e-08,
+          "unweighted_cell_L1_relative_to_control": 5.9595815295688935e-09
+        }
+      },
+      "cumulative_wall_profile_L1": {
+        "PbI2_g": 2.1171587932424094e-17,
+        "BiI3_g": 1.034984806596371e-22,
+        "element_I": 8.70376493614479e-18
+      },
+      "wall_increment_profile_L1": {
+        "PbI2_g": 2.929710687135571e-14,
+        "BiI3_g": 1.4137981466883014e-19,
+        "element_I": 1.1897737925646126e-14
+      }
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "variant": "more_correctors",
+      "gas_fields": {
+        "PbI2_g": {
+          "max_difference_over_max_control": 3.899186925290086e-12,
+          "unweighted_cell_L1_relative_to_control": 1.8879651478960954e-14
+        },
+        "BiI3_g": {
+          "max_difference_over_max_control": 6.197170129577848e-10,
+          "unweighted_cell_L1_relative_to_control": 1.685844110061187e-12
+        },
+        "Pb_g": {
+          "max_difference_over_max_control": 2.9202604012686565e-14,
+          "unweighted_cell_L1_relative_to_control": 4.025367668806572e-15
+        },
+        "PbI_g": {
+          "max_difference_over_max_control": 1.1148229406910715e-11,
+          "unweighted_cell_L1_relative_to_control": 4.5192597285066494e-14
+        },
+        "Bi_g": {
+          "max_difference_over_max_control": 9.852876663181602e-14,
+          "unweighted_cell_L1_relative_to_control": 3.197753625399566e-15
+        },
+        "Bi2_g": {
+          "max_difference_over_max_control": 1.1381755922569988e-12,
+          "unweighted_cell_L1_relative_to_control": 1.430617670695629e-14
+        },
+        "BiI_g": {
+          "max_difference_over_max_control": 1.2001304733900024e-11,
+          "unweighted_cell_L1_relative_to_control": 7.599378241928554e-14
+        },
+        "I_g": {
+          "max_difference_over_max_control": 2.7968972493089326e-11,
+          "unweighted_cell_L1_relative_to_control": 5.2847273658535684e-14
+        },
+        "I2_g": {
+          "max_difference_over_max_control": 8.677498488615158e-09,
+          "unweighted_cell_L1_relative_to_control": 8.704779324230447e-12
+        }
+      },
+      "cumulative_wall_profile_L1": {
+        "PbI2_g": 2.5718179872364364e-18,
+        "BiI3_g": 8.300772613423906e-23,
+        "element_I": 1.5123097509694466e-18
+      },
+      "wall_increment_profile_L1": {
+        "PbI2_g": 3.572232321506959e-15,
+        "BiI3_g": 1.1267060876037235e-19,
+        "element_I": 2.0996082085848543e-15
+      }
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "variant": "tolerance_1e14",
+      "gas_fields": {
+        "PbI2_g": {
+          "max_difference_over_max_control": 2.9612584515818805e-12,
+          "unweighted_cell_L1_relative_to_control": 1.7914703917959818e-14
+        },
+        "BiI3_g": {
+          "max_difference_over_max_control": 2.5160797438718474e-10,
+          "unweighted_cell_L1_relative_to_control": 1.163753876824886e-12
+        },
+        "Pb_g": {
+          "max_difference_over_max_control": 2.4898808465976587e-14,
+          "unweighted_cell_L1_relative_to_control": 3.9788502842476e-15
+        },
+        "PbI_g": {
+          "max_difference_over_max_control": 8.402174760079642e-12,
+          "unweighted_cell_L1_relative_to_control": 4.170085589955526e-14
+        },
+        "Bi_g": {
+          "max_difference_over_max_control": 7.378314148274679e-14,
+          "unweighted_cell_L1_relative_to_control": 3.500099907616169e-15
+        },
+        "Bi2_g": {
+          "max_difference_over_max_control": 9.705782214908136e-13,
+          "unweighted_cell_L1_relative_to_control": 1.3559629514855325e-14
+        },
+        "BiI_g": {
+          "max_difference_over_max_control": 5.043834905172738e-12,
+          "unweighted_cell_L1_relative_to_control": 5.731903883389854e-14
+        },
+        "I_g": {
+          "max_difference_over_max_control": 1.1353033844349435e-11,
+          "unweighted_cell_L1_relative_to_control": 3.987933464850758e-14
+        },
+        "I2_g": {
+          "max_difference_over_max_control": 3.5223294598669685e-09,
+          "unweighted_cell_L1_relative_to_control": 5.630149481909336e-12
+        }
+      },
+      "cumulative_wall_profile_L1": {
+        "PbI2_g": 6.583854047322198e-17,
+        "BiI3_g": 1.2160349539461484e-21,
+        "element_I": 6.754947128709868e-17
+      },
+      "wall_increment_profile_L1": {
+        "PbI2_g": 9.144914743053538e-14,
+        "BiI3_g": 1.650586095003142e-18,
+        "element_I": 9.37819942700513e-14
+      }
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "variant": "more_correctors",
+      "gas_fields": {
+        "PbI2_g": {
+          "max_difference_over_max_control": 1.4781526509591145e-14,
+          "unweighted_cell_L1_relative_to_control": 4.035266124428074e-15
+        },
+        "BiI3_g": {
+          "max_difference_over_max_control": 1.3017000779540267e-14,
+          "unweighted_cell_L1_relative_to_control": 3.900054055722053e-15
+        },
+        "Pb_g": {
+          "max_difference_over_max_control": 8.235066852605274e-15,
+          "unweighted_cell_L1_relative_to_control": 3.6648503072457934e-15
+        },
+        "PbI_g": {
+          "max_difference_over_max_control": 1.3098414549482842e-14,
+          "unweighted_cell_L1_relative_to_control": 3.498147394238608e-15
+        },
+        "Bi_g": {
+          "max_difference_over_max_control": 2.16697383485397e-14,
+          "unweighted_cell_L1_relative_to_control": 5.998184535594536e-15
+        },
+        "Bi2_g": {
+          "max_difference_over_max_control": 4.3419496550233475e-14,
+          "unweighted_cell_L1_relative_to_control": 1.2113941767775389e-14
+        },
+        "BiI_g": {
+          "max_difference_over_max_control": 1.8919452494280513e-14,
+          "unweighted_cell_L1_relative_to_control": 3.9928046982547995e-15
+        },
+        "I_g": {
+          "max_difference_over_max_control": 1.527654308107978e-14,
+          "unweighted_cell_L1_relative_to_control": 4.274890512397899e-15
+        },
+        "I2_g": {
+          "max_difference_over_max_control": 1.6099481448459685e-14,
+          "unweighted_cell_L1_relative_to_control": 4.353675122850426e-15
+        }
+      },
+      "cumulative_wall_profile_L1": {
+        "PbI2_g": 6.318259668499378e-30,
+        "BiI3_g": 3.327276811928419e-22,
+        "element_I": 5.991620659673696e-24
+      },
+      "wall_increment_profile_L1": {
+        "PbI2_g": 8.65592883278867e-27,
+        "BiI3_g": 4.46649542460554e-19,
+        "element_I": 8.16033853475806e-21
+      }
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "variant": "tolerance_1e14",
+      "gas_fields": {
+        "PbI2_g": {
+          "max_difference_over_max_control": 1.41902654492075e-14,
+          "unweighted_cell_L1_relative_to_control": 3.408701980180448e-15
+        },
+        "BiI3_g": {
+          "max_difference_over_max_control": 1.3657181145747165e-14,
+          "unweighted_cell_L1_relative_to_control": 3.4353745905134644e-15
+        },
+        "Pb_g": {
+          "max_difference_over_max_control": 7.567358729421063e-15,
+          "unweighted_cell_L1_relative_to_control": 3.2336014662689913e-15
+        },
+        "PbI_g": {
+          "max_difference_over_max_control": 9.511943899029206e-15,
+          "unweighted_cell_L1_relative_to_control": 2.932200708807496e-15
+        },
+        "Bi_g": {
+          "max_difference_over_max_control": 1.7430006932521062e-14,
+          "unweighted_cell_L1_relative_to_control": 5.64398085394417e-15
+        },
+        "Bi2_g": {
+          "max_difference_over_max_control": 3.523073184997015e-14,
+          "unweighted_cell_L1_relative_to_control": 1.1347237411662424e-14
+        },
+        "BiI_g": {
+          "max_difference_over_max_control": 1.5951695240275724e-14,
+          "unweighted_cell_L1_relative_to_control": 3.673947627944543e-15
+        },
+        "I_g": {
+          "max_difference_over_max_control": 9.829093610307146e-15,
+          "unweighted_cell_L1_relative_to_control": 3.565139107727093e-15
+        },
+        "I2_g": {
+          "max_difference_over_max_control": 1.3771845576393225e-14,
+          "unweighted_cell_L1_relative_to_control": 3.9176148726504465e-15
+        }
+      },
+      "cumulative_wall_profile_L1": {
+        "PbI2_g": 1.9193796088868956e-31,
+        "BiI3_g": 3.2679438239427576e-22,
+        "element_I": 8.812269083546605e-25
+      },
+      "wall_increment_profile_L1": {
+        "PbI2_g": 2.629523661470001e-28,
+        "BiI3_g": 4.386847552082262e-19,
+        "element_I": 1.2001944559861163e-21
+      }
+    }
+  ],
+  "scope": "Short matched late-time restarts; source, transport discretisation and linear solver tolerances unchanged. No full-run iteration-independence claim."
+}
