@@ -1,0 +1,44 @@
+{
+  "case": "LBE-I_SS_II_Q2_baseline_sat0.001__D5e-05",
+  "status": "PASS",
+  "scientific_validation_status": "PROVISIONAL_ONLY",
+  "element_gates": {
+    "Pb": {
+      "max_relative_closure": 3.371438309989792e-16,
+      "max_relative_solver_defect": 6.622027292526167e-14,
+      "status": "PASS"
+    },
+    "Bi": {
+      "max_relative_closure": 4.2150195847951837e-16,
+      "max_relative_solver_defect": 1.6054975361038997e-13,
+      "status": "PASS"
+    },
+    "I": {
+      "max_relative_closure": 3.968018780772876e-16,
+      "max_relative_solver_defect": 9.610922486957383e-14,
+      "status": "PASS"
+    }
+  },
+  "max_respeciation_failures": 0,
+  "BiI3_fraction_of_modelled_iodide_wall_iodine": 0.5647334989263935,
+  "excluded_KI_yield_pct": 6.6,
+  "Q1_split_is_conditioned": false,
+  "iodine_profile_L1_percent_over_digitized_scan": 37.935229782111534,
+  "iodine_profile_comparison_scope": "Digitized scan range; observed includes KI, model excludes its stated yield; no shape fitting.",
+  "last_deposition_rate_window_s": 1.0,
+  "relative_change_in_last_two_net_deposition_rates": {
+    "PbI2": 8.304750721328435e-15,
+    "BiI3": 3.7817030040805056e-14,
+    "Pb": 0.0,
+    "Bi": 4.832673937280677e-14
+  },
+  "spatial_L1_change_in_last_two_deposition_rate_profiles": {
+    "PbI2": 1.2066262546867714e-14,
+    "BiI3": 3.7111020194528295e-14,
+    "Pb": 0.0,
+    "Bi": 6.384605713940313e-14
+  },
+  "integrated_rate_stationarity": "REPORTED",
+  "quasi_steady_qualification": "PRELIMINARY_WITHIN_1_PERCENT",
+  "note": "End-of-window wall inventory; no cooling/shutdown or clean-He flush simulated."
+}

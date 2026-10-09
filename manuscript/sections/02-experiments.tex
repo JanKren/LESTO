@@ -1,49 +1,92 @@
-%==============================================================================
-\section{Reference experiments: thermosublimatography}
+\section{Experimental basis and input reconstruction}
 \label{sec:experiments}
-%==============================================================================
+\subsection{Available configurations}
+The experimental columns of Liu et al.\ \cite{Liu2025chemical} were
+1.25 m long, with an inner diameter of 4.8 mm for 316L stainless steel
+and 5.0 mm for fused silica. A 15 mm sample boat was inserted into a
+hot starting furnace, followed by a furnace providing a decreasing
+temperature profile. Helium carried the evaporated material downstream.
+The source was withdrawn after three hours; the furnaces and gas flow
+were then turned off and the column cooled before deposit analysis.
+Temperature measurements and radiotracer scans used 1 cm increments.
 
-The reference configuration is the thermosublimatography setup of
-\citet{Liu2025chemical}, used for model assessment by
-\citet{Lobresco2026assessment}: a stainless-steel column with an active
-section of length $L = \SI{0.7}{m}$ and inner diameter
-$D = \SI{4.8}{mm}$, through which dried helium flows at standard volumetric
-rates of \SIlist{5;106;540}{mL/min} (\SI{273.15}{K}, \SI{1.01325}{bar}).
-A sample of \ce{PbI2} (or of LBE loaded with iodine) is placed in a boat at
-the hot end, the evaporation furnace is kept at \SI{1073}{K}, and a gradient
-oven imposes a negative axial wall-temperature profile.  After the experiment
-the deposition profile along the column is measured by $\gamma$-spectroscopy of
-\ce{^{126}I}.
-\todo{Figure: sketch of the setup (redraw, do not copy Fig.~1 of Liu et
-al.) and the measured wall-temperature profile(s).}
-
-\begin{table}[h]
-  \centering
-  \caption{\ce{PbI2} thermosublimatography experiments used for validation
-    (from \citet{Lobresco2026assessment}, Table~1).  $\Tdep^\mathrm{calc}$ is
-    the deposition temperature from the semi-empirical formula of
-    \citet{Liu2025chemical}.}
-  \label{tab:experiments}
-  \begin{tabular}{lrrrrr}
-    \toprule
-    Case & Flow [mL/min] & Duration [s] & Mass [mg] & Moles [\SI{e-6}{mol}]
-         & $\Tdep^\mathrm{calc}$ [K] \\
-    \midrule
-    T106\_6   & 106 &   6 & 2.23 & 4.84 & 775 \\
-    T106\_60  & 106 &  60 & 2.04 & 4.43 & 712 \\
-    T106\_300 & 106 & 300 & 1.37 & 2.97 & 666 \\
-    T5\_60    &   5 &  60 & 1.45 & 3.15 & 788 \\
-    T540\_60  & 540 &  60 & 1.81 & 3.93 & 671 \\
-    \bottomrule
-  \end{tabular}
+\Cref{tab:experiments} lists the three configurations for which both
+temperature curves and iodine scans could be reconstructed. The
+stand-alone BiI$_3$ experiment at 800\,$^\circ$C was considered in case
+preparation but was not run, because its required axial temperature
+profile was not available in the supplied figures. The missing case is
+not assigned a surrogate profile or counted as an unsuccessful simulation.
+\begin{table}[tb]
+\centering
+\caption{Published configurations used for the baseline matrix. Masses
+refer to the initial sample, not to the amount released in a 60 s run.
+All experimental evaporation periods were 10,800 s.}
+\label{tab:experiments}
+\begin{tabular}{llrrr}
+\toprule
+Identifier & Column & Diameter (mm) & Sample (mg) & He (mL/min) \\
+\midrule
+PbI2\_SS & Steel & 4.8 & 14.6 & 100 \\
+LBE-I\_SS\_II & Steel & 4.8 & 346.0 & 45 \\
+LBE-I\_SiO2\_I & Silica & 5.0 & 368.3 & 45 \\
+\bottomrule
+\end{tabular}
 \end{table}
 
-\todo{Measured deposition temperatures (Table~2 of Lobresco et al.) go in
-\cref{sec:validation}.  Obtain the raw deposition profiles and the
-per-flow-rate wall-temperature profiles from the experimental team; only one
-measured wall profile is currently available (T-Flows branch
-\texttt{advanced\_scalar\_model}, \texttt{LESTO\_HKS/wall\_x\_profile\_complete.dat}).}
+The two LBE samples had reported iodine mole fraction
+$9.04\times10^{-4}$ and a 900\,$^\circ$C starting furnace. Their
+reported deposited iodine amounts were 0.191 and 0.203 mg, respectively.
+These deposited amounts constrain the prescribed mean iodine source in
+the present cases; they are not direct measurements of a time-resolved
+evaporation rate or an independent inlet-speciation measurement.
 
-\decide{Multi-species validation: which Pb--Bi--I experiments from
-\citet{Liu2025chemical} (iodine evaporated from LBE; \ce{PbI2} and \ce{BiI3}
-deposits, \ce{BiI} disproportionation) are used for \cref{sec:multispecies}?}
+\subsection{Digitisation and coordinate assumptions}
+Axial temperature curves and iodine histograms were digitised from the
+published figures. Temperatures are linearly interpolated at cell centres
+and wall faces; values beyond the plotted interval are held at the nearest
+endpoint. The computational coordinate is identified with the plotted
+coordinate. Its origin relative to the physical boat and furnace has not
+been independently confirmed. \Cref{fig:temperature} displays the
+reconstructed curves. These assumptions are retained in the original
+baseline matrix and varied explicitly in the silica-coordinate study.
+
+The recorded digitisation resolutions are approximately 1 mm in position,
+4 K in temperature and 0.4 percentage points in histogram height. They
+describe raster extraction, not the full experimental uncertainty. They
+do not include coordinate registration, detector response, occluded curve
+segments, temperature reproducibility or calibration. Likewise, the
+uncertainties printed alongside experimental deposition temperatures
+must not be interpreted as uncertainties on every digitised profile bin.
+The reconstructed histogram sums are 99.17\%, 96.70\% and 102.24\%
+for pure PbI$_2$, steel LBE and silica LBE. The primary comparison keeps
+those values without silently renormalising them.
+
+In the LBE scans, the paper assigns 6.6\% and 7.0\% of iodine to KI,
+which is outside the Pb--Bi--I species set. The model profile is scaled
+to the remaining 93.4\% or 93.0\%, while the measured histogram retains
+all its published deposits. A second, explicitly conditional comparison
+normalises both profiles over their common scanned range
+(\cref{sec:comparison}). Neither comparison supplies the omitted
+potassium chemistry.
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=.88\textwidth]{temperature_profiles.pdf}
+\caption{Temperature curves digitised from Liu et al.\
+\cite{Liu2025chemical}, with the assumed computational source interval.
+Unplotted parts of the CFD domain use constant endpoint extensions.
+The curves are experimental figure reconstructions, not temperature
+fields predicted by a conjugate heat-transfer calculation.}
+\label{fig:temperature}
+\end{figure}
+
+\subsection{Simulation duration and measurement protocol}
+All source-driven cases run for 60 s while retaining a source rate based
+on the 10,800 s experimental period. Thus they release $1/180$ of the
+assumed three-hour inventory; the experimental inventory is not compressed
+into a one-minute calculation. Continuous-source stationarity can inform
+deposition rates and conditional shapes, but cumulative wall inventories
+retain the initial filling transient. Four additional cases stop the
+source and carrier flow at 60 s and continue to 80 s under the original
+temperature profile. This probes residual-gas relaxation, not the
+experimental cooling history.

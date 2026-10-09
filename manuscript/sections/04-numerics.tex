@@ -1,45 +1,109 @@
-%==============================================================================
-\section{Numerical implementation}
+\section{Numerical implementation and study design}
 \label{sec:numerics}
-%==============================================================================
+\subsection{Geometry and carrier preparation}
+A structured axisymmetric 5$^\circ$ wedge represents the 1.25 m column
+(\cref{fig:geometry}). The steel and silica radii are 2.4 and 2.5 mm,
+respectively. The baseline mesh has $384\times48\times1=18{,}432$
+cells. Coarse and fine meshes have $256\times32\times1=8{,}192$ and
+$576\times72\times1=41{,}472$ cells, refining axial and radial spacing
+by a factor of 1.5 between successive levels. The source spans
+$x=0.09$--0.105 m and the radial interval $r=0.25R$--$0.75R$.
+Its position and selection are computational assumptions; the physical
+boat is omitted from the carrier geometry. Full-column source and inlet
+rates are multiplied by $5/360=1/72$ for the wedge.
 
-\todo{Describe the OpenFOAM implementation (\texttt{rhoFixedFlowFoam}):}
-\begin{itemize}
-  \item \textbf{Carrier flow.}  Physical mode: \texttt{rhoSimpleFoam}
-        (SIMPLEC recommended: 66 instead of 236 iterations for case 001), then
-        frozen; continuity of the frozen flux to $5\times10^{-7}$ per cell.
-        Paper mode: analytic $\rho$, $\vect{u}$ and $\phi$ generated directly
-        (exactly divergence-free on the extruded mesh).  Only $\phi$ and $\rho$
-        enter the species equations; frozen fields are not re-written.
-  \item \textbf{Species.}  Implicit Euler on \cref{eq:species} in conservative
-        form (\texttt{fvm::ddt(rho,Y)}, \texttt{fvm::div(phi,Y)},
-        \texttt{fvm::laplacian(rho*D,Y)}); bounded TVD convection (SuperBee, as in
-        \citet{Lobresco2026assessment}; not the 0--1 bounded variants, since
-        $Y$ can exceed 1); $\Delta t=\SI{1}{ms}$ (Courant $\le0.5$ at
-        \SI{106}{mL/min}; \SI{0.33}{ms} at \SI{540}{mL/min} in physical mode).
-        First-order upwind would add axial numerical diffusion of 0.3--3 times
-        $D_{\ce{PbI2}}$ at the target flows.
-  \item \textbf{Phase-change coupling.}  The thermochemistry interface returns
-        a linearized source $(S_u, S_p)$ per species and receives a per-cell
-        context ($\rho$, $V$, $\Delta t$, wall-layer and sample flags,
-        $A_I/V_I$).  The gas equation carries
-        $+\,$\texttt{fvm::Sp}$(\lambda\rho, Y) = S_u$ ($\lambda\ge0$;
-        never \texttt{fvm::SuSp}: the HKS law is affine in $Y$, so it enters as
-        \texttt{fvm::Sp}$(S_p,Y)$ plus $S_u$ with $S_u, S_p \ge 0$ on every branch).  The deposit is
-        updated from the \emph{realized} exchange after the last outer
-        iteration, so the gas and solid balance closes exactly.
-        Evaporation is limited to the available condensate.
-  \item \textbf{GEMS3K coupling.}  One \texttt{TNode} per MPI rank;
-        DCH/IPM/DBR system files; calls only in interfacial and sample cells;
-        warm start from the previous cell solution; a unit test that
-        reproduces tabulated $p_v(T)$ points and fixes the Pa/bar convention.
-  \item \textbf{Mesh.}  Block-structured O-grid, 228\,960 hexahedra (424 axial
-        $\times$ 540 per cross-section), first cell $57.46\,\mu\mathrm{m}$, max
-        non-orthogonality \ang{30}, max skewness 0.51 -- identical to the mesh
-        of \citet{Lobresco2026assessment}.
-  \item \textbf{Cost.}  Currently \SI{0.88}{s} per step serially (with a
-        redundant tracer, relaxation 0.995 and up to 47 outer iterations on a
-        linear equation).  Expected \SIrange{0.5}{2.5}{h} for 60--\SI{300}{s}
-        on about 20 ranks after cleanup \todo{measure}.  Versions: OpenFOAM
-        v2412/v2606 (identical results), GEMS3K \todo{version}.
-\end{itemize}
+\begin{figure}[tb]
+\centering
+\includegraphics[width=.94\textwidth]{experiment_schematic.pdf}
+\caption{Computational geometry and prescribed source region. The source
+is distributed in selected cells; the sketch does not represent a
+resolved boat surface. Tube length and material-specific diameters are
+retained, and the 5$^\circ$ wedge supplies the axisymmetric reduction.}
+\label{fig:geometry}
+\end{figure}
+
+The inlet flow rates are converted to helium mass flow assuming a
+controller reference of 298.15 K and 101,325 Pa. Full-column rates are
+$2.727\times10^{-7}\units{kg\,s^{-1}}$ at 100 mL/min and
+$1.227\times10^{-7}\units{kg\,s^{-1}}$ at 45 mL/min. The reference
+conditions are not specified by the supplied paper. A separate study
+uses 273.15 K at the same reference pressure. Helium uses the perfect-gas
+law, constant heat capacity and Sutherland viscosity
+(\cref{app:properties}). Steady laminar carriers are prepared with
+\texttt{rhoSimpleFoam}; the reconstructed temperature profile remains
+prescribed.
+
+The converged face mass flux is retained instead of reconstructing it
+from interpolated velocity. At these low mass flows, residual discrete
+divergence is removed by a zero-initialised potential correction before
+species transport. Carrier preparation rejects an original cell or global
+flux defect exceeding $10^{-6}$ of inlet flow, or a flux/velocity
+correction exceeding $10^{-5}$ of the corresponding scale. After
+correction, inlet, global and cell continuity and impermeable-boundary
+leakage are audited against $10^{-12}$ of inlet flow. This procedure
+makes the frozen transport field discretely conservative; it is not a
+new physical flow model or evidence of convergence of the velocity field.
+
+\subsection{Discretisation and coupling}
+The transient species equations use implicit Euler time integration,
+first-order upwind advection and corrected Gauss linear diffusion. All
+nine transported gases use the same advection scheme. The baseline time
+step is 2 ms. Wall exchange is assembled implicitly with nonnegative
+source and sink coefficients and shared inventory bounds. Configured
+species correctors and active-bound guards reconcile the final gas
+solution with the realised wall transfer. Gas re-speciation then
+redistributes species under the local element constraints. This sequence
+is first order in time; a conservative equilibrium projection alone
+does not eliminate splitting or transport error.
+
+The baseline configuration requests three species correctors with a
+$10^{-16}$ tolerance and up to eight bound guards with a $10^{-13}$
+guard tolerance. These are stopping settings, not guarantees that every
+outer wall-regime iteration attains the requested tolerance. The final
+transport defect, bound status and material ledger must be examined
+independently (\cref{sec:conservation}). Additional short corrector
+replays isolate late-time iteration sensitivity but do not establish
+full-run iteration independence.
+
+The baseline diffusivity is $D_i=10^{-4}\units{m^2\,s^{-1}}$ for every
+gas. Three transport alternatives halve or double this value for all
+gases, or replace only the PbI$_2$ coefficient by a temperature- and
+pressure-dependent PbI$_2$--He estimate. The latter's collision
+parameters are estimates, not independently measured binary transport
+data. Accommodation variations change the two reversible iodide pairs
+to $\alpha=0.1$ or 0.01, retaining the baseline metal-channel coefficients.
+
+\subsection{Completed case matrix}
+The 15 baseline cases comprise Q1 for each available configuration and
+Q2 for the two LBE columns, at
+$\beta\in\{0.001,0.01,0.1\}$ with two thermodynamic branches. The
+second branch adds a constant 29 kJ/mol to BiI(g)'s standard Gibbs energy;
+it is a sensitivity surrogate, not a second experimentally qualified
+dataset. All completed calculations use the same solver executable,
+identified by its SHA-256 in the saved reports.
+
+\Cref{tab:study} describes the 64 follow-up cases. Mesh and time-step
+checks cover pure PbI$_2$ and three steel Q2 cases: baseline
+thermodynamics at 0.1\% and 1\% metal saturation and shifted BiI
+thermodynamics at 1\%. Physical transport, accommodation, source-position
+and flow-reference variations cover pure PbI$_2$, those two baseline
+steel Q2 cases, and silica Q2 at 0.1\%. Extra source-loading cases use
+both columns and both thermodynamic branches. Temperature-coordinate
+variants use silica Q1 and silica Q2 at 0.1\%. This is a structured
+set of conditional comparisons, not a factorial uncertainty study.
+\begin{table}[tb]
+\centering
+\caption{Completed follow-up matrix. The baseline cases are additional
+references. Numerical comparisons use one changed resolution at a time;
+flow-stop cases continue a 60 s baseline to 80 s.}
+\label{tab:study}
+\small\input{generated/study-table}
+\end{table}
+
+The source-position alternatives move the release region by
+$\pm1.5\units{cm}$ without adding a boat obstruction. Flow-stop cases
+restart the saved 60 s fields, remove injection, set carrier flow to
+zero and impose zero normal species flux at both ends. The original
+nonuniform temperature profile stays fixed. Their comparisons therefore
+measure redistribution of residual gas during a 20 s fixed-temperature
+flow stop, not a clean-helium purge or a full cooling calculation.

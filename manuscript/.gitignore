@@ -9,3 +9,5 @@
 *.synctex.gz
 *.toc
 main.pdf
+build/
+*.xdv

@@ -1,37 +1,136 @@
-%==============================================================================
-\section{Verification}
+\section{Numerical verification and resolution limits}
 \label{sec:verification}
-%==============================================================================
+\subsection{Completion, material balance and solver diagnostics}
+\label{sec:conservation}
+All 15 runnable baseline cases and all 64 follow-up cases completed
+with their configured numerical acceptance checks. A PASS classification
+means that the computation completed and passed those checks; it is not
+an experimental-validation classification. Element conservation is
+examined both through the solver ledger and through an independently
+formed material residue. For element $k$ the latter is
+\begin{equation}
+ R_k=N_k^{\rm gas}+N_k^{\rm wall}+N_k^{\rm sample}
+     +N_k^{\rm net\,out}+N_k^{\rm removed}
+     -N_k^{\rm initial}-N_k^{\rm released},
+ \label{eq:balance}
+\end{equation}
+where $N_k$ are molar atom inventories and outward transport is signed.
+The ledger separately records the linear-solve defect and any clamping
+correction. These terms explain bookkeeping closure but are not inserted
+into $R_k$ when assessing the raw material balance.
 
-\todo{Planned verification hierarchy:}
-\begin{enumerate}
-  \item \textbf{Conservation.}  Closed box ($\phi=0$, uniform sink rate
-        $\lambda$): $\int\rho Y\,\mathrm{d}V$ must decay as
-        $(1+\lambda\Delta t)^{-n}$ and gas plus deposit must stay constant to
-        round-off.  Open tube: $\int\dot m_\mathrm{in}\mathrm{d}t =
-        M_\mathrm{gas} + M_\mathrm{deposit} + \int\dot m_\mathrm{out}\mathrm{d}t$
-        for both deposition models and for the GEMS coupling.
-  \item \textbf{Analytical solution.}  Isothermal, fully developed laminar
-        flow with a first-order wall sink (Graetz problem with a Robin
-        condition): axial decay of the bulk value and of the wall flux against
-        the eigenfunction solution \todo{cite}; grid convergence (GCI).
-  \item \textbf{Code-to-code against T-Flows (``paper mode'').}  Constant
-        density and a uniform parabola with $U_b=\dot V^\mathrm{STP}/A$ (inlet
-        flux rescaled for the 0.51\% facet-area deficit), the digitized or
-        measured $T_w(x)$, NIST He, the published $\Omega$ fit, the same sample
-        source, $A$, $k$, $\Tdep$, $\sigma_a$, $C_e$ and $p_v(T)$ -- and, for
-        HKS, the unit convention of the reference code.  In this mode
-        \cref{eq:species} reduces term by term to Eq.~(1) of
-        \citet{Lobresco2026assessment}.  Targets: the gas line density
-        $n'\,t_\mathrm{ev} = \SI{3.38e-4}{mol.s/m}$ (their Fig.~9), the solid
-        independent of $t_\mathrm{ev}$, the Fig.~11 profiles and the Fig.~12
-        front positions.
-        \decide{Pin the reference parameter set.  The paper and the T-Flows
-        branches differ ($A_I/V_I$ multipliers $\times200$/$\times5$, $A$,
-        $k$, one or two wall layers), and Figs.~9 and 10 are not mutually
-        consistent with $A=\SI{220}{s^{-1}}$, $k=\SI{8e-3}{K^{-1}}$,
-        $\Tdep=\SI{680}{K}$.}
-  \item \textbf{Effect of each modeling change} (``physical mode''), one at a
-        time: expanding carrier; SI-consistent HKS; Neufeld collision integral;
-        mesh-independent wall flux; Soret term.
-\end{enumerate}
+Across recorded steps and represented elements, the baseline's largest
+raw residue divided by supplied material is $5.97\times10^{-13}$.
+For the 60 source-driven follow-up cases it is
+$8.85\times10^{-13}$; the largest accounted closure is
+$9.60\times10^{-16}$ and the largest recorded solver defect is
+$8.64\times10^{-13}$ on the same supplied-material scale.
+The four flow-stop cases retain their restart ledger and are excluded
+from this newly accumulated-source summary. These results support
+conservation of the executed discrete model. They do not quantify
+physical accuracy or discretisation error.
+
+The baseline logs report no gas-equilibrium solver failures and a
+maximum equilibrium element residue of $6.43\times10^{-16}$.
+Input-validity and solver-success counters are distinct: startup
+sign flags caused equilibrium to be skipped in up to 1,170 cells on
+one step. The maximum negative iodine diagnostic was
+$1.14\times10^{-124}$ of supplied iodine. Matched five-step startup
+replays identified extremely small leading-tail inventories at these
+flags, with no flagged cells remaining at the final step. Thus the
+calculations should not be described as having identically zero negative
+trace values, even though the reported amount is immaterial to the
+macroscopic balance. The sum of individual species mole-fraction maxima
+was at most $9.19\times10^{-5}$; since these maxima need not coincide,
+this is an upper bound on the reactive trace loading, not a measured
+mixture mole fraction at one location.
+
+Some paired wall-coupling iterations did not meet the requested
+$10^{-16}$ outer criterion. This is reported separately from equilibrium
+failure, the final transport defect and inventory-bound checks. Matched
+restarts of four representative cases at 59 s compared three and eight
+correctors and outer tolerances of $10^{-16}$ and $10^{-14}$ for
+20 time steps, or 40 ms. The largest species-field change, scaled by
+its control maximum, was below $3.6\times10^{-8}$, with negligible new
+wall-increment changes. This supports a residual-floor interpretation
+at the tested checkpoints, but leaves full-run iteration sensitivity
+unqualified. Planned manufactured-solution and cross-code comparisons
+are not presented as completed verification evidence.
+
+\subsection{Separate time-step and mesh comparisons}
+For profiles on the common 1 cm bins, let $a_b$ be deposited iodine
+atoms in bin $b$ for a comparison case and $a_b^0$ the corresponding
+baseline inventory. We report
+\begin{equation}
+ E_{L1}=100\frac{\sum_b|a_b-a_b^0|}{\sum_b a_b^0},
+ \qquad
+ \Delta N_I=100\frac{\sum_b a_b-\sum_b a_b^0}{\sum_b a_b^0}.
+ \label{eq:numeric-l1}
+\end{equation}
+These measures retain amount changes. Normalised shape curves are
+shown separately and must not be confused with this unnormalised
+profile difference. Source, physical coefficients, equilibrium engine
+and executable are fixed within each numerical comparison.
+
+\Cref{tab:numerical} shows that reducing the time step from 2 to 1 ms
+on 18,432 cells changes the iodine profile by 0.0043--0.3228\%.
+The fine/medium mesh differences at a fixed 2 ms are 2.06--10.58\%.
+The shifted-BiI steel case has essentially the same magnitude of
+profile change on successive refinements. Its spatial error is therefore
+not resolved by the time-step result. Total deposited iodine changes
+by less than 0.014\% from medium to fine, and the centroid changes by
+at most 0.0652 cm. Stable integrals coexist with appreciable differences
+in local profile shape.
+\begin{table}[tb]
+\centering
+\caption{Iodine inventory-profile differences from the 18,432-cell,
+2 ms reference. All entries are percentages. Coarse and fine meshes
+have 8,192 and 41,472 cells at 2 ms; $\Delta N_I$ is fine minus medium
+total deposited iodine, divided by the medium total.}
+\label{tab:numerical}
+\small\input{generated/numerical-table}
+\end{table}
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=.96\textwidth]{refinement.pdf}
+\caption{Separate mesh and time-step comparisons. Each curve is
+normalised over the common scanned interval for visual comparison;
+the unnormalised differences are in \cref{tab:numerical}. Grey
+histograms are reconstructed experimental iodine scans
+\cite{Liu2025chemical} and include any KI contribution.}
+\label{fig:refinement}
+\end{figure}
+
+Three-grid scalar checks follow the distinction between refinement
+trends and an established asymptotic range \cite{NASAGridConvergence}.
+For the 34 nontrivial or zero-valued combinations of species, total,
+centroid and width, 17 sequences are oscillatory, four have nondecreasing
+differences, one is unresolved at roundoff and 12 admit only conditional
+Richardson/GCI estimates. All four iodine-total sequences are oscillatory.
+The conditional estimates are retained in the accompanying data with
+their status; they are not promoted to confirmed uncertainty bounds.
+The current evidence does not establish mesh independence or a single
+observed convergence order for this coupled model.
+
+\subsection{Binned maxima and numerical diffusion}
+A deposition maximum selected on a 1 cm grid is particularly fragile
+when adjacent bins have similar heights. In pure PbI$_2$ the medium-grid
+maximum is at 37 cm and 350.7\,$^\circ$C, while the 36 cm bin is only
+about 0.05\% lower. The fine-grid maximum moves to 36 cm and
+366.5\,$^\circ$C despite a centroid shift of only $-0.0585$ cm.
+In the steel Q2 0.1\% case, the dominant BiI$_3$ bin changes from
+57 to 58 cm, moving its reported temperature from about 166.4 to
+138.8\,$^\circ$C. A one-bin switch can therefore create a temperature
+change of nearly 28 K without a comparable displacement of the profile
+as a whole. Peak temperature alone is an insufficient convergence metric.
+
+First-order upwind advection also adds spatial smoothing. The local
+one-dimensional estimate $D_{\rm num}\simeq|u_x|\Delta x/2$ is
+comparable to or greater than the prescribed $10^{-4}\units{m^2\,s^{-1}}$
+diffusivity in parts of the baseline carriers. This is a Taylor-series
+screening estimate, not a measured truncation error for the radial,
+variable-density coupled problem. It explains why halving the time
+step cannot establish convergence of profile widths. Further spatial
+refinement or a separately verified bounded higher-order transport
+scheme is needed before precise profile-shape prediction is claimed.

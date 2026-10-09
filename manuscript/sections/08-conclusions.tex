@@ -1,23 +1,41 @@
-%==============================================================================
 \section{Conclusions}
 \label{sec:conclusions}
-%==============================================================================
+A conservative finite-volume treatment of nine Pb--Bi--I gases and four
+shared condensed wall inventories has been exercised in 15 baseline
+and 64 follow-up cases. The reported calculations use a specialised
+ideal-gas equilibrium kernel, a prescribed helium carrier and reversible
+iodide wall exchange with half-cell diffusion resistance. Material
+bookkeeping is strong: the worst raw source-driven follow-up element
+residue is $8.85\times10^{-13}$ of supplied material. Conservation is
+a numerical property of this model, rather than evidence that all
+physical pathways have been represented.
 
-\todo{Write last.  Checklist of intended contributions (keep in sync with
-the last paragraph of the Introduction):}
-\begin{enumerate}
-  \item An open OpenFOAM framework for volatile-species transport and
-        deposition on a variable-density carrier flow, with exact gas--solid
-        mass conservation and a mesh-independent wall treatment.
-  \item Quantification of carrier-gas expansion (velocity and partial
-        pressure scale with $T/\SI{273.15}{K}$) and of the physics omitted
-        so far: Soret drift, non-dilute loading, nucleation, collision
-        integral and $p_v$ data uncertainty.
-  \item Direct GEMS3K equilibrium coupling for multiple condensing species
-        (Pb--Bi--I), reducing to the published HKS model for pure \ce{PbI2}.
-  \item Verification (analytical, code-to-code against T-Flows) and
-        validation against PSI thermosublimatography experiments.
-  \item \decide{Surrogate/tabulation strategy and its cost--accuracy trade-off.}
-  \item Outlook: Cs and Po species, reactor-hall scale, reduced-order models
-        (LESTO Task 3.4).
-\end{enumerate}
+The isolated time-step comparisons give iodine profile changes below
+0.323\%, while medium-to-fine mesh comparisons give 2.06--10.58\%.
+Stable total deposition and small centroid changes therefore do not
+establish spatial convergence of local profiles. Closely competing
+1 cm bins can also make a reported peak temperature switch by tens of
+kelvin under refinement. Further spatial and full-run iteration checks
+are required before claiming precise local predictive accuracy.
+
+Thermodynamic and source assumptions materially affect the computed
+iodide partition. On the refined steel case, a $+29$ kJ/mol BiI gas
+Gibbs-energy surrogate changes the BiI$_3$ iodine share from 94.57\%
+to 2.00\%. This sensitivity survives refinement but does not determine
+which thermodynamic branch represents the experiment. Q1 agreement is
+conditioned on inferred deposit masses, and Q2 retains a deposit-derived
+iodine source and an unmeasured metal saturation.
+
+For silica, input-derived temperature-coordinate shifts reduce the
+original 4--5 cm position discrepancies to 0--1 cm. The improvement
+identifies coordinate registration as a consequential uncertainty;
+it does not establish a corrected experimental dataset. The supplied
+paper does not resolve that registration or the flow-reference conditions.
+
+The present evidence supports a methods and input-sensitivity study.
+An independent predictive validation would require better-constrained
+source and thermodynamic inputs, consistent experimental coordinates,
+spatially qualified profile calculations and treatment of the
+three-hour release and cooling protocol. The completed cases identify
+where that additional evidence is needed without hiding the original
+profile discrepancies.

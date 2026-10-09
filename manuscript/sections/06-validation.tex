@@ -1,48 +1,80 @@
-%==============================================================================
-\section{Validation: \ce{PbI2} thermosublimatography}
-\label{sec:validation}
-%==============================================================================
+\section{Conditional comparison with deposition measurements}
+\label{sec:comparison}
+\subsection{Comparison measures}
+The primary comparison uses reconstructed relative iodine yields per
+1 cm bin. Let $e_b$ be the experimental percentage and let
+\begin{equation}
+ m_b=(100-y_{\rm KI})\frac{a_b}{\sum_{\rm full\ column}a_b}
+ \label{eq:yield}
+\end{equation}
+be the modelled percentage, with the stated excluded KI yield
+$y_{\rm KI}=0$, 6.6 or 7.0. Over the common scanned bins $\mathcal B$,
+we report the raw discrepancy
+\begin{equation}
+ L_{\rm raw}=\sum_{b\in\mathcal B}|m_b-e_b|
+ \quad\text{(percentage points)}.
+ \label{eq:raw-l1}
+\end{equation}
+This preserves the experimental digitisation sum and the model's
+explicit KI exclusion. It is neither an absolute deposited-mass error
+nor a percentage relative to an experimental uncertainty.
 
-\todo{Simulate the five experiments of \cref{tab:experiments} with both
-deposition models in physical mode and compare deposition profiles and
-deposition temperatures.  As in \citet{Lobresco2026assessment}, $\Tdep$ is the
-wall temperature at the first axial position where the deposit exceeds 1\% of
-its peak (linear interpolation).  Simulated profiles are also rebinned to the
-\SI{1}{cm} bins of the $\gamma$-scan.}
+A secondary shape diagnostic sets
+$\widehat m_b=m_b/\sum_{\mathcal B}m_b$ and
+$\widehat e_b=e_b/\sum_{\mathcal B}e_b$, and calculates
+\begin{equation}
+ O=100\sum_{b\in\mathcal B}\min(\widehat m_b,\widehat e_b).
+ \label{eq:overlap}
+\end{equation}
+Overlap $O$ is conditional on the common scanned range and discards
+capture and total-yield differences. The experimental normalisation
+still contains KI. It is a descriptive shape measure, not a validation
+probability or a fitted goodness-of-fit statistic.
 
-\begin{table}[h]
-  \centering
-  \caption{Deposition temperatures [K]: experiment and T-Flows models from
-    \citet{Lobresco2026assessment} (Table~2), and the present work.}
-  \label{tab:tdep}
-  \begin{tabular}{lrrrrr}
-    \toprule
-    Case & Experiment & T-based & VP-based & This work (HKS) &
-      This work (GEMS) \\
-    \midrule
-    T106\_6   & 814 & 775 & 841 & -- & -- \\
-    T106\_60  & 723 & 713 & 760 & -- & -- \\
-    T106\_300 & 667 & 666 & 701 & -- & -- \\
-    T5\_60    & 847 & 787 & 797 & -- & -- \\
-    T540\_60  & 700 & 670 & 685 & -- & -- \\
-    \bottomrule
-  \end{tabular}
+\subsection{Q1 peaks and complete profiles}
+\Cref{tab:peaks} compares the five available Q1 iodide maxima with the
+printed peak temperatures. All calculated peak temperatures lie within
+the stated temperature ranges. Pure PbI$_2$ is near the low-temperature
+edge of its range, and its binned maximum changes under refinement
+as described above. Steel LBE places both iodide maxima at the measured
+positions, while silica LBE places PbI$_2$ and BiI$_3$ respectively
+5 and 4 cm downstream. Agreement with a printed temperature is therefore
+not sufficient to establish the correct spatial location.
+\begin{table}[tb]
+\centering
+\caption{Original 18,432-cell Q1 comparisons. Positions are in cm and
+temperatures in $^\circ$C. Experimental temperature ranges are those
+printed by Liu et al.\ \cite{Liu2025chemical}; they are not statistical
+confidence intervals for model error.}
+\label{tab:peaks}
+\small\input{generated/peaks-table}
 \end{table}
 
-\paragraph{What the targets test.}  The temperature-based column equals the
-input $\Tdep^\mathrm{calc}$ of \cref{tab:experiments} to within $\pm\SI{1}{K}$,
-so it only checks that the onset follows the imposed $\Tdep$.  The
-vapor-pressure column is set by equilibrium thermochromatography
-(\cref{eq:equilibrium-front}) and is insensitive to the kinetic parameters.
-Kinetics show only in the peak height, width and tail of the profiles.
-Acceptance criteria are therefore profile-based: onset position, peak
-position and height, and integral $\approx n_0$.  $\Tdep$ agreement is only
-testable to the accuracy of the wall-temperature data ($\pm\SI{15}{K}$
-thermocouples; a \SI{1}{cm} shift corresponds to \SIrange{12}{15}{K} at
-\SIrange{1200}{1500}{K/m}).
-\todo{T5\_60: the published HKS value comes from an upstream back-diffusion
-deposit on the steep rising branch; evaluate on the main deposit instead.}
+\Cref{fig:baseline} retains the full profile comparison. The raw
+$L_{\rm raw}$ values are 53.90, 53.45 and 181.84 percentage points for
+pure PbI$_2$, steel LBE and silica LBE. Corresponding normalised overlaps
+are 72.93\%, 71.88\% and 7.20\%. The silica case therefore has a
+large profile discrepancy even though both printed temperature ranges
+contain its calculated maxima.
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\textwidth]{baseline_profiles.pdf}
+\caption{Original Q1 iodine profiles. Solid black lines are total
+modelled wall iodine; dashed lines show its two iodide contributions.
+Grey histograms are digitised published scans \cite{Liu2025chemical}.
+Model totals use 100\%, 93.4\% and 93.0\% normalisations for pure,
+steel LBE and silica LBE, respectively, to expose the omitted KI yield;
+experimental bars retain their digitised values.}
+\label{fig:baseline}
+\end{figure}
 
-\todo{Sensitivity: $\sigma_a$/$C_e$, wall temperature ($\pm\SI{15}{K}$), flow
-rate ($\pm5\%$), $D$ ($\pm15\%$), Soret term, $p_v$ source (GEMS vs
-Binnewies--Milke: \SIrange{15}{25}{K} in $\Tdep$).}
+The Q1 steel BiI$_3$ share of deposited iodide iodine is 65.34\%, close
+to the measured iodide-only share of $61.3/(61.3+32.1)=65.63\%$.
+For silica the corresponding values are 28.68\% and
+$27/(27+66)=29.03\%$. These agreements are substantially conditioned
+by the source masses inferred from those same deposits. They cannot
+serve as independent validation of gas speciation or LBE release.
+Likewise, source-driven calculations capture 91.27--98.20\% of supplied
+iodine on the wall by 60 s, but that does not establish experimental
+three-hour capture: the remaining inventory, release history and
+post-release cooling are different questions.

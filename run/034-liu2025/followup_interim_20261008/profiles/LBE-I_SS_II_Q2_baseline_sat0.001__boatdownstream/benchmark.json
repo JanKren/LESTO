@@ -1,0 +1,144 @@
+{
+  "experiment": "LBE-I_SS_II",
+  "status": "PREPARED_PROVISIONAL",
+  "source_mode": "Q2",
+  "table_directory": "/home/jan/LESTO/run/034-liu2025/work/prepared/tables/baseline",
+  "table_sha256": {
+    "pv_BiI_phases.csv": "ae7d39d4286b1bcfdb205a4e6b641a7656d3c767e62d81f3707f0ed9c2f278f3",
+    "pv_Bi_phases.csv": "5a0484a3dec3d72712b0d0441d655f16b1624ef4b7e0d290d7790adcceb9def3",
+    "logK_BiI_disp.csv": "b8442f1bea2fc55adc8759e277c0d8458cae024d0cf7934cf229fd69758cae0d",
+    "pv_Pb_phases.csv": "5dba5c03ebd9b6f08b167010b442a156e316e443b02e6880a0144bbe80d42215",
+    "log10Kf_PbBiI.csv": "41fec90f986f2833d7175fb75341ee1a333c8a6cbca8202ecbf21ee1192da1f0",
+    "pv_PbI2_phases.csv": "52abefff2100d206d7da35fc81866476106f51be58cedee4f72ca09eb398814f",
+    "pv_Bi2_phases.csv": "7f61ef188623ff77742369637a3d643fa3b950ab68e0d2e154f11025e868c735",
+    "pv_BiI3_phases.csv": "c96e65d877fce6ba435104af688e218451b5e85c7cb2a344f486772817369194"
+  },
+  "carrier": {
+    "experiment": "LBE-I_SS_II",
+    "status": "PROVISIONAL_INPUTS",
+    "cells": 18432,
+    "flow_reference_temperature_K": 298.15,
+    "flow_reference_pressure_Pa": 101325.0,
+    "flow_reference_status": "ASSUMED, not confirmed by authors",
+    "full_column_mass_flow_kg_s": 1.227018379575493e-07,
+    "wedge_mass_flow_kg_s": 1.7041921938548514e-09,
+    "wedge_angle_degrees": 5,
+    "wedge_fraction": 0.013888888888888888,
+    "radius_m": 0.0024,
+    "temperature_csv_sha256": "39abb678c58589765b8eb1311b820ba97707520189595d47d2d18ccf60d863c9",
+    "temperature_coverage_m": [
+      0.016,
+      0.7360000000000005
+    ],
+    "assumptions": [
+      "Plot x=0 is mesh x=0; coordinate origin unconfirmed.",
+      "Constant temperature extension at both unplotted ends.",
+      "Helium hConst/Sutherland properties from case 007; ideal gas at 101325 Pa.",
+      "Empty tube: boat obstruction omitted."
+    ],
+    "scientific_validation_status": "NOTRUN"
+  },
+  "carrier_audit": {
+    "status": "PASS",
+    "time": 3000,
+    "target_mass_flow_kg_s": 1.7041921938548514e-09,
+    "relative_tolerance": 1e-12,
+    "inlet_mass_flow_kg_s": 1.7041921938548518e-09,
+    "outlet_mass_flow_kg_s": 1.704192193854853e-09,
+    "relative_inlet_error": 2.220446049250313e-16,
+    "relative_flow_imbalance": 7.280698288043091e-16,
+    "max_cell_flux_defect_over_inflow": 9.657554735654648e-18,
+    "wall_and_axis_absolute_flux_over_inflow": 0,
+    "wedge_net_flux_over_inflow": -4.770866710379595e-16
+  },
+  "carrier_projection": {
+    "original_max_cell_flux_defect_over_inflow": 2.2422732002387636e-08,
+    "original_relative_flow_imbalance": 9.966934576522762e-08,
+    "max_internal_face_flux_correction_over_inflow": 1.4722192268255885e-08,
+    "max_velocity_correction_over_max_velocity": 1.2423469000953745e-08
+  },
+  "source_wedge_mol_s": {
+    "Pb_g": 3.8907540710204623e-13,
+    "Bi_g": 6.76074256030285e-13,
+    "I_g": 1.8034585125309692e-12
+  },
+  "source_full_column_mol_s": {
+    "Pb_g": 2.801342931134733e-11,
+    "Bi_g": 4.8677346434180525e-11,
+    "I_g": 1.298490129022298e-10
+  },
+  "source_temperature_K": 1173.15,
+  "metal_saturation_fraction": 0.001,
+  "source_box_m": [
+    [
+      0.105,
+      0.0006,
+      -1
+    ],
+    [
+      0.12,
+      0.0018,
+      1
+    ]
+  ],
+  "excluded_KI_iodine_yield_pct": 6.6,
+  "dt_s": 0.002,
+  "end_time_s": 60,
+  "gas_diffusivity_m2_s": 0.0001,
+  "targets": [
+    {
+      "experiment": "LBE-I_SS_II",
+      "species": "BiI3",
+      "source_species_mass_mg": "0.181",
+      "mass_basis": "inferred_deposit",
+      "measured_peak_C": "154",
+      "uncertainty_K": "14",
+      "published_eq3_C": "176",
+      "published_gem_C": "",
+      "iodine_yield_pct": "61.3",
+      "scope": "M10",
+      "source_table": "5",
+      "source_page": "5213"
+    },
+    {
+      "experiment": "LBE-I_SS_II",
+      "species": "PbI2",
+      "source_species_mass_mg": "0.111",
+      "mass_basis": "inferred_deposit",
+      "measured_peak_C": "288",
+      "uncertainty_K": "18",
+      "published_eq3_C": "297",
+      "published_gem_C": "",
+      "iodine_yield_pct": "32.1",
+      "scope": "M10",
+      "source_table": "5",
+      "source_page": "5213"
+    }
+  ],
+  "scientific_validation_status": "NOTRUN",
+  "assumptions": [
+    "Source at 9\u201310.5 cm in interior radial cells; exact boat position unconfirmed.",
+    "Mean three-hour release rate, no terminal clean-helium flush.",
+    "Constant gas diffusivity is provisional; transport properties need qualification.",
+    "Q1 LBE sources are conditioned on deposited masses and cannot validate split prediction.",
+    "Q2 uses ideal LBE activities; iodine source conditioned on deposits, release history unknown.",
+    "BiI +29 kJ/mol is a sensitivity surrogate, not an independently qualified dataset."
+  ],
+  "execution_overrides": {
+    "field_write_interval_steps": 500,
+    "field_write_period_s": 1.0,
+    "purge_write": 2
+  },
+  "execution": {
+    "field_write_period_s": 1,
+    "purge_write": 2
+  },
+  "followup": {
+    "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+    "category": "source_geometry",
+    "changes": {
+      "source_axial_shift_m": 0.015
+    },
+    "scientific_scope": "Sensitivity only; no experimental fit or dataset qualification."
+  }
+}

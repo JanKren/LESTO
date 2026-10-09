@@ -1,89 +1,65 @@
 \documentclass{article}
-
 \usepackage{arxiv}
-
-\usepackage[utf8]{inputenc}
+\usepackage{iftex}
+\ifPDFTeX\usepackage[utf8]{inputenc}\fi
 \usepackage[T1]{fontenc}
-\usepackage{hyperref}
-\usepackage{url}
-\usepackage{booktabs}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{nicefrac}
-\usepackage{microtype}
-\usepackage{graphicx}
-\usepackage{xcolor}
+\usepackage{amsmath,amssymb,booktabs,graphicx,microtype}
 \usepackage[version=4]{mhchem}
-\usepackage{siunitx}
 \usepackage[numbers,sort&compress]{natbib}
-\usepackage{doi}
+\usepackage{url}
+\usepackage{hyperref}
 \usepackage{cleveref}
-
-\graphicspath{{figures/}}
-
-%------------------------------------------------------------------------------
-% Drafting aids -- remove before submission
-%------------------------------------------------------------------------------
-\newcommand{\todo}[1]{{\color{red}\textbf{[TODO:} #1\textbf{]}}}
-\newcommand{\decide}[1]{{\color{orange}\textbf{[DECIDE:} #1\textbf{]}}}
-
-%------------------------------------------------------------------------------
-% Notation
-%------------------------------------------------------------------------------
-\newcommand{\vect}[1]{\mathbf{#1}}
-\newcommand{\PbIg}{\ce{PbI2}(g)}
-\newcommand{\PbIs}{\ce{PbI2}(s)}
-\newcommand{\Tdep}{T_\mathrm{dep}}
-
-%------------------------------------------------------------------------------
-% Title and authors
-%------------------------------------------------------------------------------
-\title{Coupling compressible-flow CFD with Gibbs-energy minimization for the
-       transport and deposition of volatile fission products under strong
-       thermal gradients\\
-       {\normalsize\decide{working title}}}
-
 \usepackage{authblk}
+\graphicspath{{figures/}}
+\input{generated/numbers}
+\newcommand{\vect}[1]{\mathbf{#1}}
+\newcommand{\units}[1]{\,\mathrm{#1}}
+\title{Conservative CFD modelling of iodine deposition in thermal-gradient
+columns: numerical verification and input sensitivity}
 \renewcommand\Authfont{\bfseries}
 \setlength{\affilsep}{0em}
 \author[1]{Jan Kren}
 \author[1]{Bojan Ni\v{c}eno}
-% \decide{co-authors and order: candidates from Lobresco et al. (2026) are
-%   F. Lobresco (T-Flows models), N.I. Prasianakis and O. Marinich (GEMS),
-%   J. Neuhausen, G. Tiebel, G.C. Conigliaro, P. Steinegger (experiments)}
-\affil[1]{PSI Center for Scientific Computing, Theory and Data,
-          5232 Villigen PSI, Switzerland \todo{check affiliations}}
-
-\renewcommand{\shorttitle}{CFD--GEMS coupling for volatile fission-product
-                           deposition}
-
-\hypersetup{
-  colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue,
-  pdftitle={Coupling compressible-flow CFD with Gibbs-energy minimization for
-            volatile fission-product transport and deposition},
-  pdfauthor={J. Kren, B. Niceno},
-  pdfkeywords={fission products, PbI2, thermosublimatography, CFD, OpenFOAM,
-               GEMS, Gibbs energy minimization, deposition},
-}
-
+\affil[1]{Paul Scherrer Institute, 5232 Villigen PSI, Switzerland}
+\date{9 October 2026}
+\renewcommand{\shorttitle}{Conservative CFD modelling of iodine deposition}
+\renewcommand{\headeright}{Working manuscript}
+\renewcommand{\undertitle}{Working manuscript for author review}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue,
+  pdftitle={Conservative CFD modelling of iodine deposition in thermal-gradient columns},
+  pdfauthor={Jan Kren and Bojan Niceno}}
 \begin{document}
+\raggedbottom
 \maketitle
-
 \begin{abstract}
-  \todo{Write last.  One paragraph: safety motivation (volatile fission
-  products in LFR/LBE systems); gap (CFD with calibrated or offline
-  thermodynamics, Lobresco et al.\ 2026); what we do (OpenFOAM framework with
-  variable-density carrier, conservative gas--solid phase change, direct
-  GEMS3K equilibrium coupling \decide{and surrogates}); how we check it
-  (verification against analytical solutions and T-Flows, validation against
-  PSI thermosublimatography of \ce{PbI2} \decide{and Pb--Bi--I}); key
-  quantitative results.}
+Interpreting iodine deposition in thermal-gradient columns requires a
+consistent treatment of transport, gas speciation and exchange with
+condensed wall inventories. We present a finite-volume model in OpenFOAM
+for nine Pb--Bi--I gases in a frozen helium carrier, with element-conserving
+gas equilibrium and shared wall reservoirs. Reversible iodide exchange
+uses a Hertz--Knudsen--Schrage law coupled to the diffusive resistance
+between a cell centre and its wall face. Published thermosublimatography
+measurements supply three temperature profiles and deposition scans;
+unreported source histories and flow-reference conditions are treated as
+assumptions. Fifteen baseline and 64 follow-up simulations separate
+numerical refinement from selected input sensitivities. For the 60 s
+follow-up runs, the largest raw element-balance residue is
+$8.85\times10^{-13}$ of supplied material. Halving the time step from
+2 to 1 ms changes iodine deposition profiles by at most 0.323\%, whereas
+refining from 18,432 to 41,472 cells changes them by 2.06--10.58\%; spatial
+convergence remains unresolved. A $+29\units{kJ\,mol^{-1}}$ BiI gas Gibbs-energy
+perturbation changes the refined steel-case BiI$_3$ share of deposited
+iodide iodine from 94.57\% to 2.00\%, demonstrating strong conditional
+thermochemical sensitivity. Two shifts derived from discrepancies between
+the published silica temperature curve and its peak labels reduce
+4--5 cm position errors to 0--1 cm, but do not establish a corrected
+experimental coordinate system. The results support a conservative
+computational method and an explicit assessment of uncertain inputs;
+they do not establish independent predictive validation or reproduce
+the three-hour experiment and subsequent cooling.
 \end{abstract}
-
-\keywords{Volatile fission products \and \ce{PbI2} deposition \and
-          Thermosublimatography \and Computational fluid dynamics \and
-          Gibbs energy minimization \and GEMS3K}
-
+\keywords{Iodine deposition \and Thermosublimatography \and OpenFOAM
+  \and Gas equilibrium \and Element conservation \and Input sensitivity}
 \input{sections/01-introduction}
 \input{sections/02-experiments}
 \input{sections/03-model}
@@ -92,20 +68,22 @@
 \input{sections/06-validation}
 \input{sections/07-multispecies}
 \input{sections/08-conclusions}
-
-\section*{Acknowledgments}
-This work was supported by the Swiss State Secretariat for Education,
-Research and Innovation (SBFI) within the EURATOM LESTO project
-\todo{confirm grant number -- Lobresco et al.\ (2026) cite SBFI grant
-No.~207103024001; check other funding}.
-
-\section*{Data availability}
-\todo{OpenFOAM solver and cases: repository URL / Zenodo DOI.}
-
-\bibliographystyle{unsrtnat}
-\bibliography{references}
-
+\section*{Data and software availability}
+The solver and benchmark preparation scripts are maintained in the
+LESTO repository, \url{https://github.com/JanKren/LESTO}. The accompanying
+working-manuscript files contain the completed baseline and follow-up
+metrics, saved axial profiles, generated tables, figure-generation code
+and SHA-256 provenance records. Experimental curves were digitised from
+Liu et al.\ \cite{Liu2025chemical}; they are reconstructions of published
+figures, rather than author-supplied measurements. Figure data are
+adapted under the source paper's CC BY 4.0 licence. Some thermodynamic
+coefficient files are external inputs and are not redistributed. Their
+local identifiers and derived-table provenance are recorded with the
+benchmark. Reproducing the CFD calculation from coefficients requires
+access to those inputs; regenerating the manuscript figures uses the
+saved results and does not require them.
 \appendix
 \input{sections/A-properties}
-
+\bibliographystyle{unsrtnat}
+\bibliography{references}
 \end{document}

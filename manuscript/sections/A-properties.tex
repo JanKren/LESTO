@@ -1,15 +1,91 @@
-%==============================================================================
-\section{Physical properties}
+\section{Properties, thermodynamic provenance and units}
 \label{app:properties}
-%==============================================================================
+\subsection{Helium and transported molecular masses}
+The executed helium carrier uses
+$M_{\rm He}=0.0040026\units{kg\,mol^{-1}}$,
+$C_p=5193\units{J\,kg^{-1}\,K^{-1}}$ and
+\begin{equation}
+ \rho=\frac{pM_{\rm He}}{RT},\qquad
+ \mu(T)=\frac{A_s\sqrt T}{1+T_s/T},\quad
+ A_s=1.4683\times10^{-6},\quad T_s=83.40\units{K}.
+\end{equation}
+The numerical value of $A_s$ gives viscosity in Pa\,s when $T$ is in K.
+These are case inputs to the perfect-gas, constant-heat-capacity,
+Sutherland model. They are not newly fitted measured helium properties.
+Pressure used in partial-pressure conversions is absolute, while
+thermodynamic activities use $p^\circ=10^5\units{Pa}$. The assumed
+controller reference pressure, 101,325 Pa, is a separate quantity.
+\Cref{tab:masses} records the species masses used in transport and
+stoichiometric conversion.
+\begin{table}[tb]
+\centering
+\caption{Transported gas molar masses. Condensed iodide reservoirs use
+the same formula masses; shared Pb and Bi inventories use atomic masses.}
+\label{tab:masses}
+\begin{tabular}{lr@{\qquad}lr@{\qquad}lr}
+\toprule
+Gas & kg/mol & Gas & kg/mol & Gas & kg/mol \\
+\midrule
+Pb & 0.207200 & Bi & 0.2089804 & I & 0.12690447 \\
+PbI & 0.33410447 & Bi$_2$ & 0.4179608 & I$_2$ & 0.25380894 \\
+PbI$_2$ & 0.46100894 & BiI & 0.33588487 & BiI$_3$ & 0.58969381 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\todo{Helium: $\rho$, $\mu$, $\kappa$, $c_p$ versus $T$ (NIST); fit used in
-OpenFOAM and its maximum deviation over \SIrange{300}{1250}{K}.}
+\subsection{Thermodynamic records and phase treatment}
+Pb--I--He functions are evaluated from external NASA-nine-coefficient
+records labelled with Gurvich source information. Bi--I functions use
+an external ThermoFun compilation labelled HERACLES/Barin. The common
+property evaluator converts records to a consistent absolute
+$G^\circ(T)=H^\circ(T)-TS^\circ(T)$ convention before forming reaction
+Gibbs energies; mixing this convention with an apparent formation-Gibbs
+value would give inconsistent equilibrium constants. Tables used by the
+solver store formation constants and phase-resolved vapour pressures
+logarithmically. Input-file hashes, record identifiers and table-generation
+scripts are recorded in the benchmark provenance.
 
-\todo{\ce{PbI2}--He Lennard-Jones parameters: $\sigma_{\ce{PbI2}}$,
-$\varepsilon_{\ce{PbI2}}/k_B$ from the polarizability correlation (state the
-correlation, its source and the electron count $N$ used); mixing rules;
-resulting $D(T)$ table with both collision-integral options.}
+For an iodide with one gas molecule per condensed formula unit,
+\begin{equation}
+ p_{\rm eq}(T)=p^\circ\exp\left[-\frac{G_g^\circ(T)
+                                  -G_c^\circ(T)}{RT}\right],
+ \label{eq:pv}
+\end{equation}
+using the stable available condensed branch. The BiI$_3$ liquid branch
+is constructed at $T_{\rm fus}=680.85\units{K}$ from the crystalline
+record with $\Delta H_{\rm fus}=31.798\units{kJ\,mol^{-1}}$ and
+$C_{p,l}=150.624\units{J\,mol^{-1}\,K^{-1}}$, as recorded in the
+input-generation metadata. It is a constructed phase record, rather
+than an independently confirmed liquid thermodynamic dataset. Bi and
+Bi$_2$ share condensed Bi but have different gas chemical potentials
+and stoichiometry.
 
-\todo{Thermodynamic data: source database, species list, $p_v(T)$ of
-\ce{PbI2} from GEMS versus literature measurements.}
+The BiI $+29$ kJ/mol variant alters the gas record and regenerates all
+formation and disproportionation constants consistently. Baseline and
+perturbed functions are hypotheses for the sensitivity calculation;
+independent confirmation of the BiI source record remains needed.
+External coefficient files are not reproduced in the manuscript data
+package. Numerical conservation of their derived model cannot establish
+their physical correctness or complete the provenance assessment.
+
+\subsection{Optional \texorpdfstring{PbI$_2$}{PbI2}--He diffusion estimate}
+Only the PbI$_2$--He transport variant uses the following implemented
+correlation:
+\begin{align}
+ D_{\rm PbI_2-He}&=
+ \frac{1.86\times10^{-7}T^{3/2}\sqrt{1/4.0026+1/461}}
+ {(p/101325)\sigma^2\Omega(T^*)},\\
+ T^*&=T/71.117857,\qquad \sigma=4.258468,\\
+ \Omega(T^*)&=0.5313-1.2946e^{-0.9922T^*}
+                     +\frac{1.5591}{T^*}-\frac{0.1918}{(T^*)^2}.
+\end{align}
+In this numerical expression $T$ is in K, $p$ in Pa, $\sigma$ in
+\AA\ and the mass values in g/mol; the resulting $D$ is in
+$\mathrm{m^2\,s^{-1}}$. The implementation retains 461 g/mol to
+reproduce the original correlation, rather than the more precise
+transport formula mass in \cref{tab:masses}. Its estimated collision
+parameters use the original polarizability/electron-count construction
+recorded in the code. Other eight gases retain the constant baseline
+coefficient in this variant. The correlation is a screening alternative,
+not an experimentally validated binary diffusivity or a replacement
+for all missing Pb--Bi--I transport data.
