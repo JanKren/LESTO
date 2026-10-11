@@ -11,7 +11,7 @@ The five peak matches are from the available Q1 cases, not five independently pr
 
 03. Experiment: a source and a temperature gradient
 
-Steel and silica inner diameters are respectively 4.8 and 5.0 mm in the paper. The CFD benchmark currently uses a common 4.8 mm diameter wedge, so the schematic must not imply a geometry-qualified silica simulation. Sample boat obstruction is omitted in the current empty-tube carrier.
+Steel and silica inner diameters are respectively 4.8 and 5.0 mm in the paper, and the CFD case manifests use the same values (wedge radii 2.4 and 2.5 mm). Sample boat obstruction is omitted in the current empty-tube carrier, so the schematic must not imply a boat-resolved simulation.
 
 04. Three published temperature profiles are available
 

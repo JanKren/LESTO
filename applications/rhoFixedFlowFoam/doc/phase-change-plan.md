@@ -6927,7 +6927,7 @@ e. The comparison of run/015's excerpt: exact with the bridge that wrote
 
 ---
 
-## 36. M10 (Pb-Bi-I) design (pending the researcher's sign-off)
+## 36. M10 (Pb-Bi-I) design (signed off by the researcher, 2026-10-11)
 
 Section 6 gives M10 one paragraph: several pairs and samples, a balance per
 element, BiI3 and Bi tables, an optional operator-split re-speciation, and
@@ -8432,3 +8432,402 @@ scalar convergence examples reject oscillatory and non-decreasing sequences;
 any reported Richardson/GCI estimate remains conditional on the convergence
 assumptions. Nineteen Python checks pass. Full follow-up results are pending;
 this entry adds no new core-solver Alltest or optional-build qualification.
+
+
+---
+
+## 37. M10 as built and the M10e results (signed off by the researcher, 2026-10-11)
+
+Section 36 is the design of M10 (signed off together with this section,
+item 38).  Items
+36.8 to 36.16 record the stages as they were built.  This section
+consolidates them for the sign-off: what each of M10a to M10e implemented,
+where it departs from the design of 36.4 and 36.5, the acceptance criteria
+with their test ids and status, the M10e results, the open items, and the
+decisions needed.  It adds no code and no result of its own.  Sources:
+
+- commits 5b8815c (M10a, M10b), e921aaf (M10c), 7e22166 (M10d), 75af9cd,
+  98049dd, fe214c6, 0f01969, 361f02d (M10e, and two repairs of the kernel),
+  093aa7a (M10e results, manuscript);
+- `tests/{multiSpecies,speciation,gasGems,wallChannels}`, the cases
+  `run/030` to `run/034`, `manuscript/review-notes.md`, and the generated
+  `manuscript/generated/{numbers,numerical-table,peaks-table,
+  alignment-table,sensitivity-table,study-table}.tex` and `results.json`.
+
+No test was run for this section.  The statuses below are those recorded in
+36.8 to 36.15 and in the commit messages; they refer to the sources of the
+commit named, and item 37.4 lists what they do not cover.
+
+### 37.1 What was built, stage by stage
+
+**Production configuration of the results.**  All reported cases use
+`respeciation { engine kernel; }`, the bridge-free exact gas kernel
+(`gasSpeciation.H`).  The GEMS3K gas engine of M10c exists, is qualified
+(37.1.3) and is optional; it is not the per-cell engine behind any M10e
+result (`manuscript/review-notes.md`).
+
+**M10a: independent pairs of different formulas (5b8815c; 36.8).**
+- Implemented: `formula` per species with molar-mass validation, per-pair
+  `HKS` overrides, multi-species samples, shared-cell inventory elements,
+  Chapman-Enskog diffusivity, element ledgers and profiles, bin-based
+  `Tpeak`, the extended generators (`make_pv_tables.py`,
+  `make_gems3k_input.py`, `make_kf_tables.py`) with no Bi data in the
+  repository, and `run/030-pbi2-bii3-channel`.
+- Deviations from 36.5: the case is named 030-pbi2-bii3-channel (design:
+  030-pbi2-bii3-pairs); legacy formula-free cases keep their files and
+  defaults; restart formulas are compared by element values rather than
+  dictionary text.
+- Tests (`tests/multiSpecies`; Alltest M10a): M10a.0 Chapman-Enskog against
+  an independent SI expression; M10a.1 two pairs equal two single-pair runs
+  byte for byte (temperature and HKS, serial and 4 ranks) with element
+  closure; M10a.2 shared inventory samples, depletion and restart across
+  removal; M10a.3 solver path and refusals; M10a.4 external tables (nodes
+  exact, crossings 680.850000, 544.512416, 600.650043 K, worst
+  6.074e-5 decades against 2e-3); M10a.5 generator (default PbI2He files
+  byte-identical, 11 of 11); M10a.6 the 1000 to 350 K channel (1% onsets
+  561.164 and 449.979 K against plug flow 567.057 and 450.383 K, i.e.
+  -5.892 and -0.404 K against the 10 K gate; closure within 1e-14).
+- Status: all seven PASS with the external data (36.8: 310 PASS, 0 FAIL,
+  1 NOTRUN, the NOTRUN being M0.4).  M10a.4, M10a.5 and M10a.6 are NOTRUN
+  without `LESTO_M10_NASA`, `LESTO_M10_THERMOFUN` and `LESTO_M10_DATA`.
+
+**M10b: re-speciation with the kernel (5b8815c, repaired in 98049dd and
+fe214c6; 36.9, 36.13, 36.14).**
+- Implemented: `gasSpeciation.H`, the log10 K_f table and generator,
+  ledgered gas-only species, the split re-speciation step, species and
+  condensate ledgers, the element ledger with CONVERSION, restart records,
+  the refusal of `speciation lagged` with re-speciation, `run/031-pbbi-gas-
+  speciation` (design name 031-pbbii-respeciation).
+- Deviations: (i) the kernel is mixed precision with an extended-precision
+  fallback; two later repairs changed it: the dilute-bulk precision loss
+  (a Pb bulk of 3.0847e-310 mol/m3; 98049dd) and the loss of positivity of
+  the iodine Schur derivative in strongly bound, nearly stoichiometric
+  iodides, with bisection when Newton steps fail to contract (fe214c6).
+  (ii) The 160,740-point comparison needed the oracle polished to 2e-15;
+  at its original 1e-13 the 1.8e-9 minor-I2 difference was oracle error
+  amplified by nearly exhausted iodine, not a kernel error.  (iii) The
+  20 us timing gate is the stored 432-point set (16.2 us cold); the broader
+  map costs 26-30 us.
+- Tests (`tests/speciation`; Alltest M10b): M10b.0 Decimal reference;
+  M10b.1 closed boxes at 450 and 1000 K; M10b.2 engine none and
+  sub-threshold equal the disabled transport; M10b.3 serial/4 ranks and
+  binary restart; M10b.4 refusals; M10b.5 432 stored points (7.1e-11
+  against 1e-9); M10b.6 the 1173 K channel (deposit L1 against M10a 8.5e-7
+  PbI2 and 1.333e-3 BiI3, gate 1e-2; dt 2 and 1 ms 3.31e-4 and 5.76e-4);
+  M10b.7 the 160,740 gas-map inputs (1.8e-10); M10b.8 cold cost.  The
+  helper programs `testStrongBinding.C` and `testTinyBulk.C` were added by
+  the two repairs.
+- Status: all nine PASS in the full run of 5b8815c's session (319 PASS,
+  0 FAIL, 1 NOTRUN; 36.9).  The two repairs were qualified by targeted
+  checks only (24 tiny bulks, 54 strong-binding cases, 600,000 and 30,000
+  stress inputs; 36.13, 36.14), see 37.4.
+
+**M10c: GEMS3K gas engines (e921aaf; 36.10).**
+- Implemented: `respeciation { engine GEMS; }` in modes frozen and local;
+  nine bridge additions (39 exported C functions, the 30 originals
+  unchanged); dual-based HKS pressures for Bi systems; the upper
+  mole-fraction and chi guards; fault fallback to the kernel;
+  `run/032-pbbi-gems-speciation` (design name 032-pbbii-gems).
+- Deviations: (i) the bridge exports no exact-oracle or polish functions;
+  mode local initialises the kernel refinement from valid duals instead of
+  a polished IPM result, with a canonical cold final refinement for
+  restart exactness.  (ii) Mode local restarts are exact after that
+  refinement; the design allowed 1e-12.  (iii) The reduced map matches the
+  independent fixed-volume reference to 6.82e-10, with the 70-digit
+  Decimal oracle needed because the double oracle's KKT residue of
+  1.55e-14 left 1.14e-8 in a near-exhausted minor gas.
+- Tests (`tests/gasGems`; Alltest M10c): M10c.0 ABI and 800 bit-identical
+  calls; M10c.1 reduced map (3 mixes x 24 T x 13 dilutions; GEMS and open
+  K_f within 3.69e-4 decades against 1e-3); M10c.2 open Pb-I system;
+  M10c.3 external Pb-Bi-I; M10c.4 prescribed-source study (frozen against
+  kernel 1.0332e-10 PbI2 and 1.0637e-7 BiI3, local against frozen zero);
+  M10c.5 Bi HKS duals (8.37e-5 decades) and guards (2000 checks per mode);
+  M10c.6 refusals; M10c.7 injected faults; M10c.8 cost (mean 132.24 us over
+  5,814,420 calls against 150 us).
+- Status: all nine PASS in `Alltest M0 M9 M10c`: 78 PASS, 0 FAIL,
+  2 NOTRUN (M0.4, and M9.8's historical excerpt, whose bridge hash changed).
+
+**M10d: shared condensates and reactive wall channels (7e22166; 36.11).**
+- Implemented: the opt-in `wallChannels` block (per-condensate stores,
+  Gauss-Seidel bounds, Bi_g and Bi2_g sharing Bi_s, the irreversible
+  `3 BiI_g = 2 Bi_s + BiI3_g` channel, optional BiI(cr), CAPPED stores),
+  the `gasSources` Q2 source, `make_wall_tables.py`, and
+  `run/033-lbe-metal-vapour`.
+- Deviations: the carrier of run/033 is a 0.1 m plane channel of 200 x 2
+  cells with zero molecular diffusion and unit HKS coefficients; the
+  second BiI(g) data set is the +29 kJ/mol surrogate generated consistently
+  in the formation, pressure and reaction tables, not an HSC record.  The
+  1 ms/0.5 ms deposit L1 differences (0.29-6.45%) are reported, not gated.
+- Tests (`tests/wallChannels`; Alltest M10d): M10d.0 closed forms to 1e-14
+  and 1e-15, with zero and subnormal product pressures under FPE traps;
+  M10d.1 Q2 release, ledgers, profiles, restart and changed-decomposition
+  recovery; M10d.2 refusals; M10d.3 five onsets against plug flow for both
+  BiI data sets (baseline 919.93, 882.89, 533.12, 541.35, 450.82 K against
+  921, 885, 537, 544, 451 K; shifted 882.89, 899.35, 582.50, 541.35,
+  409.67 K against 882, 902, 585, 544, 408 K; all within 3.9 K against the
+  10 K gate; closure 4.05e-16).
+- Status: all four PASS (`Alltest M0 M10a M10b M10c M10d`: 43 PASS,
+  0 FAIL, 13 NOTRUN, the NOTRUNs being the external-data studies not
+  selected in that invocation and M0.4; 36.11).  M10d.3 is NOTRUN without
+  `LESTO_M10D_*`.
+
+**M10e: the Liu et al. (2025) cases (75af9cd, 98049dd, fe214c6, 0f01969,
+361f02d, 093aa7a; 36.12 to 36.16).**
+- Implemented: `thermochemistry/benchmarks/liu2025` (digitised paper
+  curves with provenance, laminar helium carriers at 45 and 100 mL/min,
+  case preparation, matrix runner, analysis, follow-up study, input audit,
+  report scripts), `run/034-liu2025`, and the manuscript in `manuscript/`.
+  Fifteen baseline cases and a 64-case follow-up study make the 79
+  computational cases of the manuscript (`results.json`: `baseline_cases`
+  15, `followup_cases` 64; `numbers.tex`).  They are not 79 independent
+  experiments.
+- Deviations from 36.5 (these matter for the sign-off):
+  1. The scheme is implicit Euler in time and first-order upwind in space,
+     on a 5-degree wedge of the column (18,432 cells, 384 x 48), at 2 ms
+     for 60 s.  The design's SuperBee and the 228,960-cell pipe of the
+     paper plan were not used, and no manufactured solution or T-Flows
+     comparison was run.
+  2. Production results use the kernel, not GEMS3K per cell.
+  3. The geometry follows the manifests: 4.8 mm steel (radius 2.4 mm) and
+     5.0 mm silica (radius 2.5 mm); the boat is not modelled.  An earlier
+     deck wording of a common 4.8 mm diameter was wrong and has been
+     corrected in `presentations/m10-project-review`.
+  4. `BiI3_SiO2_800` has no plotted temperature profile and was not run
+     (NOTRUN).  Five Q1 comparisons are available, plus the Q2 cases.
+  5. The flow reference is the nominal Brooks 5850E convention (273.15 K,
+     101325 Pa) with an explicit 298.15 K variant, an assumption from Eq. 3
+     of the paper.
+- Acceptance: M10e has no Alltest id.  Its code gates are in
+  `run/034-liu2025/verification.json`, `full_size_completion.json` and the
+  benchmark's Python tests (19 pass at 361f02d).  Recorded: 15 of 15
+  available cases PASS at 60 s and 2 ms; maximum accounted element closure
+  8.63e-16 (36.15) and 9.60e-16 in the 60 s follow-up cases, against the
+  1e-12 gate; solver defect up to 8.64e-13 of the source in the follow-up
+  cases (`results.json`, `integrity_60s_followup`), against 1e-8; zero
+  re-speciation failures.
+
+### 37.2 The M10e results
+
+All numbers in this item are from `manuscript/generated/` (tables are
+cited by file).  Lengths in cm, temperatures in degrees C for the peak
+table; L1 values are percent of the iodine profile unless stated.
+
+**Q1 peaks** (`peaks-table.tex`; Q1 imposes the measured deposited split,
+so the split is not a prediction).  Calculated and printed values:
+
+| case | species | x exp / CFD (cm) | T exp / CFD (C) |
+|---|---|---|---|
+| pure PbI2, steel | PbI2 | 36 / 37 | 368 +- 18 / 350.7 |
+| LBE, steel | PbI2 | 51 / 51 | 288 +- 18 / 288.1 |
+| LBE, steel | BiI3 | 57 / 57 | 154 +- 14 / 166.4 |
+| LBE, silica | PbI2 | 51 / 56 | 306 +- 24 / 287.6 |
+| LBE, silica | BiI3 | 59 / 63 | 127 +- 39 / 152.8 |
+
+All five calculated temperatures lie in the printed ranges and inside the
+science targets of 36.5 (PbI2 within 20 K: differences 17.3, 0.1, 18.4 K;
+BiI3 within 40 K: 12.4 and 25.8 K).  The silica deposits lie 5 and 4 cm
+downstream of the measured positions.  The targets are reported, not
+gated; the peak comparison alone does not establish the position.
+
+**Profiles** (`06-validation.tex`, `alignment-table.tex`).  Raw L1 of the
+iodine profile over the common scan is 53.90, 53.45 and 181.84 percentage
+points for pure PbI2, steel LBE and silica LBE, with overlaps 72.93%,
+71.88% and 7.20%.  The BiI3 share of deposited iodide iodine in Q1 is
+65.34% (steel; measured 65.63%) and 28.68% (silica; measured 29.03%),
+conditioned on the source masses taken from the same deposits.
+
+**Numerical resolution** (`numerical-table.tex`, `numbers.tex`).
+
+| case | 2 to 1 ms | coarse/medium | fine/medium | change of total I |
+|---|---|---|---|---|
+| pure PbI2 | 0.0043 | 6.57 | 5.06 | -0.0028 |
+| steel Q2, 0.1% | 0.2326 | 9.02 | 5.26 | -0.0016 |
+| steel Q2, 1% | 0.3228 | 9.72 | 2.06 | -0.0133 |
+| steel Q2, 1%, shifted BiI | 0.1536 | 10.47 | 10.58 | -0.0064 |
+
+The time step changes the iodine profiles by 0.0043 to 0.3228%
+(`numbers.tex`: TimeMin 0.0043, TimeMax 0.323); the mesh (256 x 32,
+384 x 48, 576 x 72 at fixed 2 ms) by 2.06 to 10.58% (MeshMin, MeshMax).
+Integral deposition is far more stable than the local shape.  Three-grid
+Richardson and GCI estimates are conditional, or refused where the
+differences oscillate or do not decrease; no mesh independence is claimed.
+
+**Input sensitivities** (`sensitivity-table.tex`, `study-table.tex`; L1
+change of the iodine profile, minimum to maximum, in percent):
+gas diffusion (12 cases) 0.15 to 14.20; iodide accommodation (8)
+0.25 to 4.21; source position (8) 0.08 to 0.19; Q2 metal loading (12)
+0.00 to 112.14; flow reference (4) 5.09 to 10.93; silica temperature
+coordinates (4) 184.68 to 192.50; flow-stop relaxation (4) 1.10 to 4.63.
+
+**Q2 split and the BiI thermodynamics** (`results.json`, `chemistry`;
+BiI3 share of the iodide iodine; measured: 65.63% steel, 29.03% silica).
+- Steel, baseline data: 56.47% (0.1% of saturation), 94.56% (1%),
+  94.56% (10%); with +29 kJ/mol BiI: 56.49%, 2.00%, 1.99%.
+- Silica, baseline: 23.97%, 94.49%, 94.49%; shifted: 20.44%, 1.98%, 1.98%.
+- Steel loadings 0.2%, 0.316%, 0.562%: baseline 52.50%, 70.58%, 94.56%;
+  shifted 47.66%, 37.43%, 15.88% (`07-multispecies.tex`).
+The split is set by the unmeasured metal-vapour loading and by BiI(g),
+not by the numerics: it spans 2% to 95% for loadings of 1% and above.  The
+design's reference range (13 to 66%, 36.5) is reached only at a loading
+that is not identified, so no branch is selected.
+
+**Silica temperature-coordinate mismatch** (`alignment-table.tex`).  With
+the printed peak labels as the target, shifts of -4.10 and -4.65 cm of the
+digitised temperature trace move the PbI2/BiI3 peaks from 56/63 cm to
+52/59 and 51/58 cm (Q1), reducing raw L1 from 181.84 to 46.28 and 37.05
+percentage points and raising the overlap from 7.20% to 75.29% and 81.00%
+(Q2: 39.40 and 34.31; 79.16% and 83.33%).  The shifts are input-derived
+hypotheses, not a confirmed correction and not a fit.  The Figure 7C trace
+and its printed labels disagree by about 63 K (PbI2) and 108 K (BiI3); both
+are kept.
+
+**What the results are.**  A conservative method with a numerical
+resolution and input-sensitivity assessment (`results.json`, `scope`:
+"Completed numerical studies and conditional input sensitivities; no
+fitting or experimental qualification").  Not independent validation.
+
+### 37.3 Open items
+
+1. **Mesh dependence, 2.06 to 10.58%.**  The worst case is the shifted-BiI
+   steel profile (fine/medium 10.58%); the branches of pure PbI2 and low
+   loading switch their binned maxima.  The scheme is first-order upwind;
+   its numerical diffusion is comparable to or larger than the prescribed
+   D on the full mesh (36.15).  The corrector (iteration) sensitivity of
+   a full run is untested: the saved 40 ms restarts diagnose late-time
+   checkpoints only.
+2. **Silica temperature-coordinate mismatch**, 37.2: the original T(x)
+   and its coordinate registration are needed.
+3. **Missing external inputs** (not in the workspace; none to be
+   substituted): the original T(x) and scan coordinates; the controller
+   reference conditions of the flow; the source release history (the 60 s
+   runs hold the three-hour mean rate, the four 60 to 80 s restarts hold
+   the temperature fixed and do not reproduce evaporation or cooling);
+   boat geometry; the temperature profile of `BiI3_SiO2_800`; surface
+   coefficients; a qualified BiI record.
+4. **BiI(g).**  The +29 kJ/mol value is a sensitivity surrogate (an
+   HSC-like one, not an HSC record).  The BiI3 liquid record is
+   constructed, and the Bi thermodynamic provenance is unqualified.
+   Outside the represented physics: KI, water and oxygen chemistry,
+   surface chemistry, gas-phase kinetics, boat obstruction.
+5. **Bi data licence.**  The Bi-I data derive from HERACLES (Barin 1995);
+   provenance and redistribution terms are unconfirmed (36.7, item 1).
+   No licensed record or derived table is in the repository, so M10a.4 to
+   M10a.6, M10b.5 to M10b.8, M10c.1, M10c.3 to M10c.5 and M10d.3 are
+   NOTRUN for anyone without the external files.
+6. **Test coverage after the last aggregate run.**  The last aggregate
+   Alltest of 319 PASS, 0 FAIL, 1 NOTRUN (5b8815c) predates the two kernel
+   repairs (98049dd, fe214c6) and all of M10e.  Later entries claim only
+   targeted checks: the interrupted v2412 session of 36.13 (22 PASS,
+   0 FAIL, nine external NOTRUN, then SIGTERM; the remaining M10d.3 check
+   was run separately) and no new v2606 or optional-build qualification.
+7. **Unreported science target.**  Whether HKS and transport move the
+   BiI3 peak 23 to 40 K below the equilibrium onset (36.5) is not
+   answered by `manuscript/generated/` and is not claimed.
+8. **Manuscript matters** (`manuscript/review-notes.md`): the author list,
+   funding and acknowledgments are unconfirmed; no journal is selected;
+   nothing has been submitted.
+
+### 37.4 Decisions needed (recommendation first)
+
+1. **Sign-off of M10a to M10d as built.**
+   - **Recommended:** accept them with the deviations of 37.1 (case
+     names, bridge without polish exports, kernel refinement in mode
+     local, plane carrier for run/033, +29 kJ/mol surrogate), after
+     decision 2.
+   - Alternative: hold M10c's mode local until the polish exports of 36.4
+     are implemented.
+2. **Re-run the aggregate suite on the final sources.**
+   - **Recommended:** `tests/Alltest all` with the external data
+     (`LESTO_M10_*`, `LESTO_M10D_*`) under v2412, and the v2606 pass for
+     M0.4 and the optional builds, before the sign-off; the repairs of
+     98049dd and fe214c6 have only targeted evidence.
+   - Alternative: accept the targeted checks and the commit messages.
+3. **How M10e is described.**
+   - **Recommended:** a conservative method with a resolution and
+     sensitivity assessment and a conditional comparison, as the
+     manuscript has it; scientific acceptance of 36.5 stays open, and no
+     validation or mesh-independence claim is made.
+   - Alternative: wait for the missing inputs and describe M10e as
+     validation.
+4. **The production engine.**
+   - **Recommended:** the kernel is the engine of record; GEMS3K per cell
+     (frozen, local) is a qualified capability and the 36.7 item 3
+     reading, stated explicitly in the paper.
+   - Alternative: one full-size case in mode local (about 23 h serial)
+     to show the equivalence at production scale.
+5. **Mesh dependence.**
+   - **Recommended:** one further spatial study of the shifted-BiI steel
+     case and the pure-PbI2 and low-loading branches, with a separately
+     verified bounded higher-order scheme (the design's SuperBee) or a
+     finer first-order grid; do not claim GCI before it.
+   - Alternative: keep 2.06 to 10.58% as a stated limit.
+6. **The silica temperature coordinates.**
+   - **Recommended:** ask the authors of Liu et al. (2025) for the T(x)
+     and the registration; report the two shifts only as hypotheses.
+   - Alternative: drop the shifted cases from the paper.
+7. **Missing external inputs.**
+   - **Recommended:** request together with decision 6: release history,
+     controller reference conditions (the flow-reference choice moves the
+     profiles by 5.09 to 10.93%), the `BiI3_SiO2_800` profile and the boat
+     geometry.  Substitute nothing.
+8. **BiI(g).**
+   - **Recommended:** keep Barin as the default and +29 kJ/mol as a
+     required sensitivity; ask PSI which BiI(g) HSC's MainDB holds and read
+     Cubicciotti (1961) and Oppermann et al. (1991) before any predicted
+     split is published (36.7, item 2).
+9. **Bi data licence.**
+   - **Recommended:** ask PSI (the HERACLES maintainers) before any Bi-I
+     file or derived table enters the repository or the CFD input package
+     of the paper; keep the external-file mechanism.
+   - Alternative: wait for a licensed source.
+10. **Case and manuscript housekeeping.**
+    - **Recommended:** keep the built case names 030 to 034 and record the
+      renaming against 36.5; the author list, funding and journal are
+      settled with the coauthors before circulation, and no message is sent
+      by the assistant.
+
+## 38. Researcher decisions of 2026-10-11 (signed off)
+
+1. **Section 36** (the M10 design) and **section 37** (M10 as built, the
+   M10e results) are signed off, with every decision of 36.7 and 37.4 as
+   recommended, except 37.4 item 5, which item 2 below settles.
+2. **Spatial scheme and mesh (37.4 item 5, 37.3 item 1).**  A study on the
+   three existing levels (8,192, 18,432, 41,472 cells) compared upwind with
+   the bounded `Gauss limitedLinear 1` for the pure-PbI2 case and the
+   shifted-BiI steel case (Q2, 1 %), with the M10e solver binary unchanged
+   (sha256 16fd804e...).  Relative L1 of the iodine profile between
+   successive levels:
+
+   | case | scheme | 8,192 to 18,432 | 18,432 to 41,472 |
+   |---|---|---|---|
+   | pure PbI2 | upwind | 6.57 % | 5.06 % |
+   | pure PbI2 | limitedLinear | 5.70 % | 2.15 % |
+   | steel, shifted BiI | upwind | 10.47 % | 10.58 % |
+   | steel, shifted BiI | limitedLinear | 15.35 % | 8.95 % |
+
+   - At equal mesh the two schemes differ by 9 to 21 %: upwind's numerical
+     diffusion is the dominant spatial error.
+   - The total deposit changes by at most 0.011 %, the centroid by less
+     than 1 mm.  A full limitedLinear run costs about as much as upwind.
+   - The pure-PbI2 peak is stable under limitedLinear (36 cm, 366.5 C at
+     all levels).  The steel PbI2 binned maximum alternates between two
+     nearly tied 1 cm bins (306 / 288 / 307 C); its 3 cm smoothed maximum
+     and its centroid temperature (288 to 291 C) are stable.
+   - Evidence (outside the repository): the session scratch study A,
+     `results.json`, `successive_differences.csv`,
+     `profiles_up_vs_limitedLinear.png`.
+3. **Decision.**
+   - Production: `Gauss limitedLinear 1` on 576 x 72 (41,472 cells); the
+     baseline cases of the manuscript and the silica alignment cases are
+     re-run that way.  The 64 sensitivity cases stay at 18,432 cells,
+     upwind, as differences against their own baseline, and the paper says
+     so.
+   - A fourth level (864 x 108, 93,312 cells) of the shifted-BiI steel case
+     under both schemes, and `Gauss vanLeer` on the three levels for both
+     cases, as a second bounded scheme.
+   - Peaks are reported as the 3 cm smoothed maximum and the centroid wall
+     temperature, not as a single 1 cm bin.  No GCI or mesh-independence
+     claim for the steel profile unless the fourth level supports it.
+4. **Aggregate suite (37.4 item 2):** `tests/Alltest` re-run on the
+   current sources before any further commit of results.
+

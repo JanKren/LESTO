@@ -75,8 +75,8 @@ python3 package_deck.py
 - The flow-stop simulations and three-hour analytical projections are
   explicitly distinguished from experimental cooling and native three-hour
   CFD runs.
-- The silica CFD uses a common 4.8 mm empty-tube carrier; the paper's silica
-  tube is 5.0 mm. Boat obstruction and surface-specific kinetics remain
+- The CFD uses empty-tube carriers with the paper's diameters (4.8 mm steel,
+  5.0 mm silica; wedge radii 2.4 and 2.5 mm in the run/034 manifests). Boat obstruction and surface-specific kinetics remain
   provisional.
 - `status_snapshot.json` freezes the execution counts and their timestamp.
   These counts are not live in the PDF. Unfinished follow-up scientific
