@@ -52,6 +52,11 @@ share the following, in any machine-readable form (CSV or Excel)?
    inferred from the deposits, and cannot test the release shape.
 4. **Boat dimensions and axial position** relative to the scan coordinate.
    Why: boat obstruction is omitted and the source position is assumed.
+5. **Column orientation** (horizontal, vertical or inclined) and the
+   absolute gas pressure in the column. Why: at the low flow rates the
+   estimated Richardson number reaches about 1 where the wall temperature
+   falls most steeply, so buoyancy-driven secondary flow matters only if the
+   column is horizontal; the pressure fixes the Peclet number.
 
 I will cite the data as you prefer and send you the manuscript draft before
 anything is circulated.
