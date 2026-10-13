@@ -10,6 +10,15 @@
 \usepackage{hyperref}
 \usepackage{cleveref}
 \usepackage{authblk}
+% Shared sections use table* for wide tables (needed in two-column layouts);
+% give table* the same caption spacing that arxiv.sty gives table.
+\makeatletter
+\renewenvironment{table*}
+  {\setlength{\abovecaptionskip}{\@belowcaptionskip}%
+   \setlength{\belowcaptionskip}{\@abovecaptionskip}%
+   \@dblfloat{table}}
+  {\end@dblfloat}
+\makeatother
 \graphicspath{{figures/}}
 \input{generated/numbers}
 \newcommand{\vect}[1]{\mathbf{#1}}
@@ -34,29 +43,31 @@ columns: numerical verification and input sensitivity}
 \begin{abstract}
 Interpreting iodine deposition in thermal-gradient columns requires a
 consistent treatment of transport, gas speciation and exchange with
-condensed wall inventories. We present a finite-volume model in OpenFOAM
-for nine Pb--Bi--I gases in a frozen helium carrier, with element-conserving
-gas equilibrium and shared wall reservoirs. Reversible iodide exchange
-uses a Hertz--Knudsen--Schrage law coupled to the diffusive resistance
-between a cell centre and its wall face. Published thermosublimatography
-measurements supply three temperature profiles and deposition scans;
-unreported source histories and flow-reference conditions are treated as
-assumptions. Fifteen baseline and 64 follow-up simulations separate
-numerical refinement from selected input sensitivities. For the 60 s
-follow-up runs, the largest raw element-balance residue is
-$8.85\times10^{-13}$ of supplied material. Halving the time step from
-2 to 1 ms changes iodine deposition profiles by at most 0.323\%, whereas
-refining from 18,432 to 41,472 cells changes them by 2.06--10.58\%; spatial
-convergence remains unresolved. A $+29\units{kJ\,mol^{-1}}$ BiI gas Gibbs-energy
-perturbation changes the refined steel-case BiI$_3$ share of deposited
-iodide iodine from 94.57\% to 2.00\%, demonstrating strong conditional
-thermochemical sensitivity. Two shifts derived from discrepancies between
-the published silica temperature curve and its peak labels reduce
-4--5 cm position errors to 0--1 cm, but do not establish a corrected
-experimental coordinate system. The results support a conservative
-computational method and an explicit assessment of uncertain inputs;
-they do not establish independent predictive validation or reproduce
-the three-hour experiment and subsequent cooling.
+condensed wall deposits. We present an OpenFOAM finite-volume model
+for nine Pb--Bi--I gases in a frozen helium carrier, with
+element-conserving gas equilibrium and shared wall inventories. Reversible iodide exchange
+follows a Hertz--Knudsen--Schrage law in series with the diffusive
+resistance between a cell centre and its wall face. Published
+thermosublimatography measurements supply three temperature profiles
+and deposition scans; unreported source histories and flow-reference
+conditions are treated as assumptions. Fifteen baseline and 64
+follow-up simulations separate numerical refinement from selected
+input sensitivities. In 60 s follow-up runs, the largest raw
+element-balance residue is $8.85\times10^{-13}$ of supplied material.
+Halving the time step from 2 to 1 ms changes iodine deposition
+profiles by at most 0.323\%, whereas refining the mesh from 18,432 to
+41,472 cells changes them by 2.06--10.58\%; spatial convergence
+remains unresolved. A $+29\units{kJ\,mol^{-1}}$ shift in the BiI gas
+Gibbs energy changes the BiI$_3$ share of deposited iodide iodine in
+the refined steel case from 94.57\% to 2.00\%, a strong but
+conditional thermochemical sensitivity. For silica, two shifts derived
+from discrepancies between the published temperature curve and its
+peak labels reduce 4--5 cm position errors to 0--1 cm, but they do not
+establish a corrected experimental coordinate system. The results
+support a conservative computational method and an explicit assessment
+of uncertain inputs; they neither establish independent predictive
+validation nor reproduce the three-hour experiment and subsequent
+cooling.
 \end{abstract}
 \keywords{Iodine deposition \and Thermosublimatography \and OpenFOAM
   \and Gas equilibrium \and Element conservation \and Input sensitivity}
@@ -74,14 +85,14 @@ LESTO repository, \url{https://github.com/JanKren/LESTO}. The accompanying
 working-manuscript files contain the completed baseline and follow-up
 metrics, saved axial profiles, generated tables, figure-generation code
 and SHA-256 provenance records. Experimental curves were digitised from
-Liu et al.\ \cite{Liu2025chemical}; they are reconstructions of published
-figures, rather than author-supplied measurements. Figure data are
-adapted under the source paper's CC BY 4.0 licence. Some thermodynamic
-coefficient files are external inputs and are not redistributed. Their
-local identifiers and derived-table provenance are recorded with the
+Liu et al.\ \cite{Liu2025chemical}; they reconstruct published figures
+and are not author-supplied measurements. Figure data are adapted under
+the source paper's CC BY 4.0 licence. Some thermodynamic coefficient
+files are external inputs and are not redistributed; their local
+identifiers and derived-table provenance are recorded with the
 benchmark. Reproducing the CFD calculation from coefficients requires
-access to those inputs; regenerating the manuscript figures uses the
-saved results and does not require them.
+access to those inputs. Regenerating the manuscript figures uses only
+the saved results and does not require them.
 \appendix
 \input{sections/A-properties}
 \bibliographystyle{unsrtnat}

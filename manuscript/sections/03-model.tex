@@ -1,10 +1,15 @@
 \section{Transport, speciation and wall exchange}
 \label{sec:model}
+This section states the model: trace-species transport in a frozen
+carrier, homogeneous gas equilibrium, reversible and reactive wall
+exchange, and the two prescribed source models.
+
 \subsection{Frozen carrier and trace-species equations}
-The carrier fields $\rho$, $\vect{u}$, $T$ and $p$ are prepared from a
-steady laminar helium calculation and then held fixed. The reconstructed
-axial temperature is imposed throughout each cross-section. A gas species
-$i$ is represented by $Y_i$, its mass per unit carrier mass, and satisfies
+The carrier fields $\rho$, $\vect{u}$, $T$ and $p$ come from a steady
+laminar helium calculation and are then held fixed. The reconstructed
+axial temperature is imposed over each whole cross-section. A gas
+species $i$ is represented by $Y_i$, its mass per unit carrier mass,
+and satisfies
 \begin{equation}
  \frac{\partial(\rho Y_i)}{\partial t}
  +\nabla\cdot(\rho\vect{u}Y_i)
@@ -12,18 +17,23 @@ $i$ is represented by $Y_i$, its mass per unit carrier mass, and satisfies
  \label{eq:transport}
 \end{equation}
 Gas equilibrium is applied as a local redistribution between transport
-steps. Species do not alter the carrier density, momentum or temperature.
-The represented gases are Pb, PbI, PbI$_2$, Bi, Bi$_2$, BiI, BiI$_3$,
-I and I$_2$. Helium is inert. Condensed PbI$_2$, BiI$_3$, Pb and Bi
-are stored as immobile wall inventories. The solid-state identifiers in
-the code label these reservoirs; the equilibrium-pressure tables select
-between crystalline and liquid states where applicable.
+steps. The species do not alter the carrier density, momentum or
+temperature. The transported gases are Pb, PbI, PbI$_2$, Bi, Bi$_2$,
+BiI, BiI$_3$, I and I$_2$; helium is inert. Condensed PbI$_2$,
+BiI$_3$, Pb and Bi are stored as immobile wall inventories. In the
+code, solid-state identifiers label these inventories; the
+equilibrium-pressure tables select the crystalline or liquid state
+where applicable.
 
-No bulk nucleation, aerosols, thermal diffusion, hydrogen/oxygen chemistry,
-latent-heat feedback or chemical reaction with the steel or silica
-substrate is represented. Consequently, differences between the column
-cases arise from their prescribed thermal profiles, dimensions and source
-inputs, rather than a fitted substrate-specific sticking law.
+The model does not represent bulk nucleation, aerosols and their
+thermophoretic deposition
+\cite{Walker1979thermophoretic,Batchelor1985thermophoretic}, thermal
+(Soret) diffusion \cite{Rosner2000heavy,Rosner2007soret},
+hydrogen/oxygen chemistry, latent-heat feedback or chemical
+reaction with the steel or silica substrate. Differences between the
+column cases therefore come from their prescribed thermal profiles,
+dimensions and source inputs, not from a fitted substrate-specific
+sticking law.
 
 \subsection{Homogeneous ideal-gas equilibrium}
 \label{sec:equilibrium}
@@ -34,38 +44,39 @@ transported element concentrations are
  b_k=\sum_i\nu_{ki}\frac{\rho Y_i}{M_i}.
  \label{eq:elements}
 \end{equation}
-The equilibrium solver seeks gas partial pressures and dimensionless
-element potentials $\lambda_k$ satisfying
+The equilibrium solver finds the gas partial pressures and
+dimensionless element potentials $\lambda_k$ that satisfy
 \begin{equation}
+ \begin{gathered}
  \frac{p_i}{p^\circ}=K_{f,i}(T)
- \exp\!\left(\sum_k\nu_{ki}\lambda_k\right),
- \qquad
+ \exp\!\left(\sum_k\nu_{ki}\lambda_k\right),\\
  \sum_i\nu_{ki}\frac{p_i}{RT}=b_k,
  \qquad p^\circ=10^5\units{Pa}.
+ \end{gathered}
  \label{eq:equilibrium}
 \end{equation}
-The tabulated $K_{f,i}$ use a common elemental reference and the stated
-pressure standard. Concentrations convert back through
-$Y_i=M_i p_i/(\rho RT)$. This enforces elemental rather than individual
-species conservation during re-speciation. The helium pressure is not
-an additional reactive element constraint; its field remains prescribed
-under the trace-species approximation.
+The tabulated $K_{f,i}$ share a common elemental reference and the
+stated standard pressure. Concentrations are converted back through
+$Y_i=M_i p_i/(\rho RT)$. Re-speciation therefore conserves elements,
+not individual species. The helium pressure is not an additional
+reactive element constraint; under the trace-species approximation its
+field stays prescribed.
 
-The executed solver uses logarithmic variables and a safeguarded Newton
-iteration. Pb and Bi subproblems are reduced at fixed iodine potential,
-with a Schur-complement treatment of the remaining coupling. Canonical
-initialisation avoids dependence on an unsaved equilibrium warm state
-when restarting a case. Re-speciation is requested every time step for
-cells with $T\ge350\units{K}$; below this threshold the transported gas
-composition is retained. This cutoff is a numerical modelling choice,
-not a demonstration that reactions cease at 350 K. Homogeneous condensed
-phases are excluded, and instantaneous gas equilibrium substitutes for
-unmeasured finite reaction rates.
+The solver works in logarithmic variables with a safeguarded Newton
+iteration. The Pb and Bi subproblems are reduced at fixed iodine
+potential, and a Schur complement treats the remaining coupling.
+Canonical initialisation makes a restarted case independent of an
+unsaved equilibrium warm state. Re-speciation is requested at every
+time step in cells with $T\ge350\units{K}$; below this threshold the
+transported gas composition is kept. This cutoff is a numerical
+modelling choice, not a demonstration that reactions cease at 350 K.
+Homogeneous condensed phases are excluded, and instantaneous gas
+equilibrium stands in for unmeasured finite reaction rates.
 
 \subsection{Reversible iodide exchange}
 \label{sec:wall}
-For PbI$_2$ and BiI$_3$, the kinetic wall law uses a positive flux from
-condensate into gas:
+For PbI$_2$ and BiI$_3$, the kinetic wall law defines the flux as
+positive from condensate to gas:
 \begin{equation}
  j_i=G_i\,[p_{{\rm eq},i}(T_w)-p_{i,w}],
  \qquad
@@ -77,38 +88,41 @@ Here $j_i$ is in $\mathrm{kg\,m^{-2}\,s^{-1}}$, $M_i$ is in
 $\mathrm{kg\,mol^{-1}}$, pressures are in Pa, $\alpha_i$ is the
 accommodation coefficient and $C_e$, $s_i$ are dimensionless
 multipliers. The baseline uses $C_e=s_i=\alpha_i=1$.
-This is the Hertz--Knudsen--Schrage form used in vapour-pressure-driven
-deposition modelling \cite{Lobresco2026assessment}. The condensed-state
-pressure is calculated from the gas and condensed Gibbs energies, using
-the stable tabulated condensed branch. The wall temperature, rather than
-a prescribed deposition threshold, selects that pressure.
+This is the Hertz--Knudsen--Schrage (HKS) form
+\cite{Hertz1882verdunstung,Knudsen1915maximale,Schrage1953theoretical}
+used in vapour-pressure-driven deposition modelling
+\cite{Lobresco2026assessment}. The condensed-state pressure follows from
+the gas and condensed Gibbs energies on the stable tabulated condensed
+branch. The wall temperature selects this pressure; no deposition
+threshold is prescribed.
 
-The kinetic law must also communicate with the cell-centre concentration
-through molecular diffusion. With $d_f$ the cell-centre-to-wall distance,
-$p_{i,c}=\chi_{i,c}Y_{i,c}$ and
-$\chi_{i,c}=\rho_cRT_c/M_i$, elimination of the wall concentration gives
+The kinetic law must also connect to the cell-centre concentration
+through molecular diffusion. With $d_f$ the cell-centre-to-wall
+distance, $p_{i,c}=\chi_{i,c}Y_{i,c}$ and
+$\chi_{i,c}=\rho_cRT_c/M_i$, eliminating the wall concentration gives
 \begin{equation}
+ \begin{gathered}
  G_{i,f}^{\rm eff}=
- \frac{G_i}{1+G_i\chi_{i,c}d_f/(\rho D_i)_f},
- \qquad
+ \frac{G_i}{1+G_i\chi_{i,c}d_f/(\rho D_i)_f},\\
  j_{i,f}=G_{i,f}^{\rm eff}
  [p_{{\rm eq},i}(T_w)-\chi_{i,c}Y_{i,c}].
+ \end{gathered}
  \label{eq:halfcell}
 \end{equation}
-This combines kinetic and half-cell diffusion resistances in series.
+This places the kinetic and half-cell diffusion resistances in series.
 The gas equation receives the face flow $A_f j_{i,f}$ as an implicit
-cell contribution, while the wall reservoir receives its negative.
-Evaporation is limited by the available face inventory over the time
-step; a bare wall cannot evaporate. Inventory updates use the exchange
-actually realised by the final gas solve, including active bounds,
-rather than an independently evaluated explicit predictor. Reversal
+cell contribution, and the wall inventory receives its negative.
+Evaporation is limited by the face inventory available over the time
+step, so a bare wall cannot evaporate. Inventory updates use the
+exchange actually realised by the final gas solve, including active
+bounds, not an independently evaluated explicit predictor. Switching
 between deposition and evaporation therefore does not create material.
 
 \subsection{Shared metal inventories and a reactive channel}
-Additional wall channels connect Pb(g) to condensed Pb and Bi(g) and
-Bi$_2$(g) to a common condensed Bi inventory, with their own equilibrium
-pressures and stoichiometric mass conversion. They use the baseline
-interfacial coefficients. The reactive channel
+Additional wall channels connect Pb(g) to condensed Pb, and Bi(g) and
+Bi$_2$(g) to one common condensed Bi inventory. Each channel has its own
+equilibrium pressure and stoichiometric mass conversion, and all use the
+baseline interfacial coefficients. The reactive channel
 \begin{equation}
  3\ce{BiI}(g)\longrightarrow 2\ce{Bi}(\mathrm{condensed})
                           +\ce{BiI3}(g)
@@ -126,19 +140,20 @@ effective reactant equilibrium pressure are
                   [p_{{\rm eq},\rm BiI}-p_{\rm BiI,c}]\}.
  \label{eq:reactive-flux}
 \end{align}
-All Gibbs energies in $K_r$ are evaluated at $T_w$.
-This is a phenomenological HKS-conductance treatment of the reaction
-driving force, with the same half-cell resistance as the other channels.
-The coproduct pressure is evaluated from the beginning-of-step gas
-field, and the minimum suppresses reverse reaction. The formula consumes three
-BiI molecules, supplies one BiI$_3$ molecule to the gas and adds two Bi
-atoms to the shared wall reservoir. All channels access that same Bi
-inventory; a separate inventory for each reaction would duplicate a
-physical material. Coproducts are applied after the transported reactants
-have been solved. This irreversible channel is a model assumption and
-must not be interpreted as a fully reversible surface-equilibrium model.
+All Gibbs energies in $K_r$ are evaluated at $T_w$. This channel is a
+phenomenological treatment: it applies the HKS conductance to the
+reaction driving force, with the same half-cell resistance as the other
+channels. The coproduct pressure is taken from the beginning-of-step
+gas field, and the minimum suppresses the reverse reaction. The
+reaction consumes three BiI molecules, returns one BiI$_3$ molecule to
+the gas and adds two Bi atoms to the shared wall inventory. All
+channels draw on this one Bi inventory; a separate inventory for each
+reaction would duplicate a physical material. Coproducts are applied
+after the transported reactants have been solved. This irreversible
+channel is a model assumption and must not be read as a fully
+reversible surface-equilibrium model.
 
-\subsection{Prescribed release constructions}
+\subsection{Prescribed source models}
 \label{sec:source}
 Source model Q1 releases PbI$_2$ and, for LBE, BiI$_3$ at constant rates
 \begin{equation}
@@ -146,17 +161,17 @@ Source model Q1 releases PbI$_2$ and, for LBE, BiI$_3$ at constant rates
  \qquad \tau_{\rm exp}=10{,}800\units{s}.
  \label{eq:q1}
 \end{equation}
-For pure PbI$_2$, $m_i=14.6\units{mg}$ is the initial sample mass;
+For pure PbI$_2$, $m_i=14.6\units{mg}$ is the initial sample mass, and
 complete uniform release over the experimental period is assumed.
 For steel LBE, $m_{\rm PbI_2}=0.111\units{mg}$ and
 $m_{\rm BiI_3}=0.181\units{mg}$; for silica LBE, they are 0.243 and
-0.085 mg. These compound masses were inferred from deposited material
-in the experimental paper. Their use conditions both iodine loading and
-much of the Q1 species split on the measurements.
+0.085 mg. These compound masses were inferred from the deposits
+reported in the experimental paper. Q1 therefore conditions both the
+iodine loading and much of the species split on the measurements.
 
-Source model Q2 supplies atomic Pb, Bi and I to the gas-equilibrium
-system. With $q_{\rm He}$ the full-column helium molar flow and $p_h$
-the source pressure, its elemental rates are
+Source model Q2 instead supplies atomic Pb, Bi and I to the
+gas-equilibrium system. With $q_{\rm He}$ the full-column helium molar
+flow and $p_h$ the source pressure, its elemental rates are
 \begin{align}
  q_{2,\rm Pb}&=q_{1,\rm PbI_2}
              +q_{\rm He}\beta p_{\rm Pb}(T_h)/p_h,\\
@@ -168,8 +183,9 @@ the source pressure, its elemental rates are
 The metal pressures use ideal LBE activities $a_{\rm Pb}=0.447$ and
 $a_{\rm Bi}=0.553$ at $T_h=1173.15\units{K}$. The multiplicative
 metal saturation $\beta$ is unmeasured. Q2 changes the metal supply and
-allows the iodide split to emerge from the model, but still fixes its
-iodine source from deposited iodine. It is therefore a source hypothesis,
-not independently identified LBE evaporation. Rates are distributed over
-an assumed source region without resolving a liquid surface, depletion
-of the physical boat or its obstruction of the flow.
+lets the iodide split emerge from the model, but its iodine source is
+still fixed by the deposited iodine. Q2 is therefore a source
+hypothesis, not an independent identification of LBE evaporation. The
+rates are distributed over an assumed source region, without resolving
+a liquid surface, depletion of the physical boat or the boat's
+obstruction of the flow.

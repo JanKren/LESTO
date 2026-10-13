@@ -1,26 +1,29 @@
 \section{Experimental basis and input reconstruction}
 \label{sec:experiments}
+This section summarises the published experiments and explains how the
+model inputs were reconstructed from them.
+
 \subsection{Available configurations}
-The experimental columns of Liu et al.\ \cite{Liu2025chemical} were
-1.25 m long, with an inner diameter of 4.8 mm for 316L stainless steel
-and 5.0 mm for fused silica. A 15 mm sample boat was inserted into a
-hot starting furnace, followed by a furnace providing a decreasing
-temperature profile. Helium carried the evaporated material downstream.
-The source was withdrawn after three hours; the furnaces and gas flow
-were then turned off and the column cooled before deposit analysis.
+Liu et al.\ \cite{Liu2025chemical} used 1.25 m columns with an inner
+diameter of 4.8 mm for 316L stainless steel and 5.0 mm for fused
+silica. A 15 mm sample boat was inserted into a hot starting furnace,
+followed by a second furnace that imposed a decreasing temperature
+profile. Helium carried the evaporated material downstream. After
+three hours the source was withdrawn, the furnaces and gas flow were
+turned off, and the column cooled before the deposits were analysed.
 Temperature measurements and radiotracer scans used 1 cm increments.
 
 \Cref{tab:experiments} lists the three configurations for which both
 temperature curves and iodine scans could be reconstructed. The
-stand-alone BiI$_3$ experiment at 800\,$^\circ$C was considered in case
-preparation but was not run, because its required axial temperature
-profile was not available in the supplied figures. The missing case is
-not assigned a surrogate profile or counted as an unsuccessful simulation.
-\begin{table}[tb]
+stand-alone BiI$_3$ experiment at 800\,$^\circ$C was considered during
+case preparation but was not run, because the supplied figures do not
+include its axial temperature profile. This case is neither given a
+surrogate profile nor counted as an unsuccessful simulation.
+\begin{table*}[tb]
 \centering
-\caption{Published configurations used for the baseline matrix. Masses
-refer to the initial sample, not to the amount released in a 60 s run.
-All experimental evaporation periods were 10,800 s.}
+\caption{Published configurations used in the baseline matrix. Sample
+masses are initial masses, not the amounts released in a 60 s run.
+Every experimental evaporation period was 10,800 s.}
 \label{tab:experiments}
 \begin{tabular}{llrrr}
 \toprule
@@ -31,62 +34,65 @@ LBE-I\_SS\_II & Steel & 4.8 & 346.0 & 45 \\
 LBE-I\_SiO2\_I & Silica & 5.0 & 368.3 & 45 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
-The two LBE samples had reported iodine mole fraction
+Both LBE samples had a reported iodine mole fraction of
 $9.04\times10^{-4}$ and a 900\,$^\circ$C starting furnace. Their
-reported deposited iodine amounts were 0.191 and 0.203 mg, respectively.
-These deposited amounts constrain the prescribed mean iodine source in
-the present cases; they are not direct measurements of a time-resolved
-evaporation rate or an independent inlet-speciation measurement.
+reported deposited iodine amounts were 0.191 and 0.203 mg,
+respectively. These amounts set the prescribed mean iodine source in
+the present cases. They are not direct measurements of a time-resolved
+evaporation rate, nor an independent measurement of inlet speciation.
 
 \subsection{Digitisation and coordinate assumptions}
-Axial temperature curves and iodine histograms were digitised from the
-published figures. Temperatures are linearly interpolated at cell centres
-and wall faces; values beyond the plotted interval are held at the nearest
-endpoint. The computational coordinate is identified with the plotted
-coordinate. Its origin relative to the physical boat and furnace has not
-been independently confirmed. \Cref{fig:temperature} displays the
-reconstructed curves. These assumptions are retained in the original
-baseline matrix and varied explicitly in the silica-coordinate study.
+We digitised the axial temperature curves and iodine histograms from
+the published figures. Temperatures are interpolated linearly to cell
+centres and wall faces; beyond the plotted interval they are held at
+the nearest endpoint value. The computational coordinate is taken to
+be the plotted coordinate. Its origin relative to the physical boat
+and furnace has not been independently confirmed.
+\Cref{fig:temperature} shows the reconstructed curves. The original
+baseline matrix keeps these assumptions; the silica-coordinate study
+varies them explicitly.
 
-The recorded digitisation resolutions are approximately 1 mm in position,
-4 K in temperature and 0.4 percentage points in histogram height. They
-describe raster extraction, not the full experimental uncertainty. They
-do not include coordinate registration, detector response, occluded curve
-segments, temperature reproducibility or calibration. Likewise, the
-uncertainties printed alongside experimental deposition temperatures
-must not be interpreted as uncertainties on every digitised profile bin.
-The reconstructed histogram sums are 99.17\%, 96.70\% and 102.24\%
-for pure PbI$_2$, steel LBE and silica LBE. The primary comparison keeps
-those values without silently renormalising them.
+The recorded digitisation resolutions are approximately 1 mm in
+position, 4 K in temperature and 0.4 percentage points in histogram
+height. They describe raster extraction only, not the full experimental
+uncertainty: coordinate registration, detector response, occluded curve
+segments, temperature reproducibility and calibration are not included.
+Likewise, the uncertainties printed with the experimental deposition
+temperatures must not be read as uncertainties on every digitised
+profile bin. The reconstructed histograms sum to 99.17\%, 96.70\% and
+102.24\% for pure PbI$_2$, steel LBE and silica LBE. The primary
+comparison keeps these sums and does not silently renormalise them.
 
-In the LBE scans, the paper assigns 6.6\% and 7.0\% of iodine to KI,
-which is outside the Pb--Bi--I species set. The model profile is scaled
-to the remaining 93.4\% or 93.0\%, while the measured histogram retains
-all its published deposits. A second, explicitly conditional comparison
-normalises both profiles over their common scanned range
+In the LBE scans, the paper assigns 6.6\% and 7.0\% of the iodine to
+KI, which lies outside the Pb--Bi--I species set. We scale the model
+profile to the remaining 93.4\% or 93.0\%, while the measured histogram
+keeps all its published deposits. A second, explicitly conditional
+comparison normalises both profiles over their common scanned range
 (\cref{sec:comparison}). Neither comparison supplies the omitted
 potassium chemistry.
 
-\begin{figure}[tb]
+\begin{figure*}[tb]
 \centering
 \includegraphics[width=.88\textwidth]{temperature_profiles.pdf}
-\caption{Temperature curves digitised from Liu et al.\
-\cite{Liu2025chemical}, with the assumed computational source interval.
-Unplotted parts of the CFD domain use constant endpoint extensions.
-The curves are experimental figure reconstructions, not temperature
-fields predicted by a conjugate heat-transfer calculation.}
+\caption{Axial temperature curves digitised from Liu et al.\
+\cite{Liu2025chemical} for the three configurations, with the assumed
+computational source interval. Beyond the plotted range, the CFD domain
+holds the endpoint values constant. The curves reconstruct published
+figures; they are not temperature fields predicted by a conjugate
+heat-transfer calculation.}
 \label{fig:temperature}
-\end{figure}
+\end{figure*}
 
 \subsection{Simulation duration and measurement protocol}
-All source-driven cases run for 60 s while retaining a source rate based
-on the 10,800 s experimental period. Thus they release $1/180$ of the
-assumed three-hour inventory; the experimental inventory is not compressed
-into a one-minute calculation. Continuous-source stationarity can inform
-deposition rates and conditional shapes, but cumulative wall inventories
-retain the initial filling transient. Four additional cases stop the
-source and carrier flow at 60 s and continue to 80 s under the original
-temperature profile. This probes residual-gas relaxation, not the
-experimental cooling history.
+All source-driven cases run for 60 s with a source rate based on the
+10,800 s experimental period. They therefore release $1/180$ of the
+assumed three-hour inventory; the experimental inventory is not
+compressed into a one-minute calculation. With a stationary continuous
+source, the results can inform deposition rates and conditional
+profile shapes, but the cumulative wall inventories still contain the
+initial filling transient. Four additional cases stop the source and
+the carrier flow at 60 s and continue to 80 s with the original
+temperature profile. They probe the relaxation of residual gas, not
+the experimental cooling history (\cref{sec:numerics}).

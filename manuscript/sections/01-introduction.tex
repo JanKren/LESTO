@@ -1,72 +1,88 @@
 \section{Introduction}
 \label{sec:intro}
-Iodine released from lead--bismuth eutectic (LBE) can be transported in
-different chemical forms before depositing on cooler surfaces. The
-chemical form matters because it determines both the gas-phase inventory
-available for transport and the equilibrium pressure governing wall
-exchange. Liu et al.\ \cite{Liu2025chemical} investigated this behaviour
-by evaporating pure iodides and iodine-containing LBE into helium,
-separating the products along a negative temperature gradient and
-characterising the deposits. Their observations provide spatially
-resolved evidence for PbI$_2$ and BiI$_3$ deposition, together with
-potassium-containing deposits in some LBE experiments. Connecting such
-measurements to a transport calculation requires more information than
-a single deposition temperature: the temperature-coordinate mapping,
-carrier flow, source history and gas composition all enter the predicted
-distribution.
+Iodine released from lead--bismuth eutectic (LBE) can travel in several
+chemical forms before it deposits on cooler surfaces. The chemical form
+matters because it sets both the gas-phase inventory available for
+transport and the equilibrium pressure that governs wall exchange.
+Liu et al.\ \cite{Liu2025chemical} studied this behaviour by evaporating
+pure iodides and iodine-containing LBE into helium, separating the
+products along a negative temperature gradient and characterising the
+deposits. Their measurements give spatially resolved evidence for
+PbI$_2$ and BiI$_3$ deposition, and for potassium-containing deposits in
+some LBE experiments. Linking such measurements to a transport
+calculation needs more than a single deposition temperature: the
+temperature-coordinate mapping, the carrier flow, the source history
+and the gas composition all affect the predicted distribution.
+
+Seen as a fluid-dynamics problem, a thermal-gradient column is a slow
+laminar flow of an inert carrier through a long, narrow tube whose wall
+temperature falls by several hundred kelvin along its length
+(\cref{fig:temperature}). Trace vapours released near the hot end are
+advected downstream by a carrier whose density and velocity vary with
+the imposed temperature, and they diffuse radially towards the wall.
+Where the local vapour pressure exceeds the equilibrium pressure at the
+wall temperature, material is lost to the wall; where it falls below
+that pressure, existing deposits can evaporate again. The deposition
+profile is therefore set by the competition between axial advection,
+radial diffusion to the wall and the interfacial exchange law. This is
+a Graetz-type wall mass-transfer problem \cite{Shah1978circular}, but
+with a nonlinear wall condition that depends on the local wall
+temperature and condensed inventory. The same coupling underlies the
+interpretation of thermochromatographic experiments
+\cite{Eichler1975verfluchtigung,Zvara1985simulation,Zvara2008inorganic}.
 
 Lobresco et al.\ \cite{Lobresco2026assessment} compared temperature-based
-and vapour-pressure-driven CFD deposition models. The former require
-calibration of a deposition law; the latter connect deposition to
-vapour-pressure information through interfacial kinetics. Their study
-also motivates extending transport models to multiple chemical species
-and thermodynamic equilibrium. A multispecies calculation introduces
-an additional consistency requirement. Changes in chemical form must
-preserve the transported elements, and different gas pathways leading
-to the same condensed material must use one physical wall inventory.
-An internally consistent implementation can nevertheless give uncertain
-experimental predictions if the thermodynamic or source inputs are
-poorly constrained.
+and vapour-pressure-driven CFD deposition models. Temperature-based
+models require a calibrated deposition law; vapour-pressure-driven
+models link deposition to vapour-pressure data through interfacial
+kinetics. Their study also motivates extending transport models to
+multiple chemical species and to thermodynamic equilibrium. A
+multispecies model adds a consistency requirement. Changes in chemical
+form must conserve the transported elements, and different gas pathways
+that lead to the same condensed material must share one physical wall
+inventory. Even an internally consistent implementation can give
+uncertain experimental predictions if its thermodynamic or source
+inputs are poorly constrained.
 
-The present work addresses these issues in the finite-volume framework
-of OpenFOAM \cite{Weller1998tensorial}. Nine Pb--Bi--I gases are transported
-in a prescribed helium carrier. Homogeneous gas equilibrium redistributes
-the local elemental inventory, while separate interfacial channels
-exchange material with immobile condensed wall reservoirs. The wall
-flux includes both interfacial kinetic conductance and diffusion through
-the distance from the neighbouring cell centre to the wall. This avoids
-representing deposition by an arbitrarily chosen volumetric wall-layer
-thickness. It does not remove spatial discretisation error.
+We address these issues in the finite-volume framework of OpenFOAM
+\cite{Weller1998tensorial}. The model transports nine Pb--Bi--I gases in
+a prescribed helium carrier. Homogeneous gas equilibrium redistributes
+the local elemental inventory, and separate interfacial channels
+exchange material with immobile condensed wall inventories. The wall
+flux combines interfacial kinetic conductance with diffusion over the
+distance from the neighbouring cell centre to the wall. This avoids
+representing deposition through an arbitrarily chosen volumetric
+wall-layer thickness. It does not remove spatial discretisation error.
 
-Equilibrium-based reactive transport is also supported by general
-thermodynamic packages such as GEM-Selektor and its GEMS3K kernel
-\cite{Kulik2013gemselektor}. The software developed here contains a
-GEMS3K interface, but the calculations reported in this paper use a
-specialised ideal-gas element-potential solver with tabulated formation
-constants. We therefore distinguish the thermodynamic formulation from
-the particular numerical engine used in the reported simulations.
-Condensed phases are handled through wall exchange rather than through
-homogeneous cell equilibrium.
+General thermodynamic packages such as GEM-Selektor and its GEMS3K
+kernel \cite{Kulik2013gemselektor} also support equilibrium-based
+reactive transport. The software developed here has a GEMS3K interface,
+but the calculations reported in this paper use a specialised ideal-gas
+element-potential solver with tabulated formation constants. We
+therefore distinguish the thermodynamic formulation from the numerical
+engine used for the reported simulations. Condensed phases enter
+through wall exchange, not through homogeneous cell equilibrium.
 
-The study uses the published paper as its experimental input. No
-author-supplied temperature files, release histories or mass-flow-controller
-reference conditions are available. Instead of inferring a unique physical
-source from deposition data, we report the consequences of two explicit
-source constructions and selected variations in flow, diffusion,
-interfacial accommodation and thermodynamic information. Separate
-time-step and mesh studies identify which conclusions survive numerical
-refinement. A temperature-coordinate discrepancy in the silica experiment
-is examined as an input-consistency problem, with alternate mappings
-defined from published quantities before comparing the resulting CFD
-profiles.
+All experimental input comes from the published paper. No
+author-supplied temperature files, release histories or
+mass-flow-controller reference conditions are available. We therefore
+do not infer a unique physical source from the deposition data.
+Instead, we report the consequences of two explicit source models and
+of selected variations in flow, diffusion, interfacial accommodation
+and thermodynamic data. Separate time-step and mesh studies show which
+conclusions survive numerical refinement. We treat a
+temperature-coordinate discrepancy in the silica experiment as an
+input-consistency problem: alternative mappings are defined from
+published quantities before the resulting CFD profiles are compared.
 
-The contribution is a documented conservative transport--equilibrium--wall
-coupling and a completed numerical and input-sensitivity assessment.
-The evidence comprises 15 baseline and 64 follow-up simulations of three
-available experimental configurations. These are computational cases,
-not independent experimental replicates. The scope is deliberately
-restricted to the executed model: a fixed carrier and temperature field,
-prescribed release, ideal-gas speciation, and wall deposits without aerosol
-formation or surface-material-specific chemistry. Experimental comparisons
-are conditional assessments of that model, rather than a claim of
+The contribution is a documented, conservative coupling of transport,
+gas equilibrium and wall exchange, together with a completed numerical
+and input-sensitivity assessment. The evidence comprises 15 baseline
+and 64 follow-up simulations of the three available experimental
+configurations. These are computational cases, not independent
+experimental replicates. The scope is deliberately limited to the
+executed model: a fixed carrier and temperature field, prescribed
+release, ideal-gas speciation, and wall deposits without aerosol
+formation or surface-material-specific chemistry. Comparisons with
+experiment are conditional assessments of this model, not a claim of
 independent predictive validation.

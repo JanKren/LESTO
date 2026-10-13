@@ -1,48 +1,110 @@
 \section{Numerical implementation and study design}
 \label{sec:numerics}
+This section describes the geometry and carrier preparation, the
+discretisation and coupling, and the completed case matrix.
+
 \subsection{Geometry and carrier preparation}
 A structured axisymmetric 5$^\circ$ wedge represents the 1.25 m column
-(\cref{fig:geometry}). The steel and silica radii are 2.4 and 2.5 mm,
-respectively. The baseline mesh has $384\times48\times1=18{,}432$
-cells. Coarse and fine meshes have $256\times32\times1=8{,}192$ and
-$576\times72\times1=41{,}472$ cells, refining axial and radial spacing
-by a factor of 1.5 between successive levels. The source spans
-$x=0.09$--0.105 m and the radial interval $r=0.25R$--$0.75R$.
-Its position and selection are computational assumptions; the physical
-boat is omitted from the carrier geometry. Full-column source and inlet
-rates are multiplied by $5/360=1/72$ for the wedge.
+(\cref{fig:geometry}). The steel and silica radii are 2.4 and 2.5 mm.
+The baseline (medium) mesh has $384\times48\times1=18{,}432$ cells. The
+coarse and fine meshes have $256\times32\times1=8{,}192$ and
+$576\times72\times1=41{,}472$ cells; successive levels refine the axial
+and radial spacing by a factor of 1.5. The source occupies
+$x=0.09$--0.105 m and the radial interval $r=0.25R$--$0.75R$. Its
+position and cell selection are computational assumptions, and the
+physical boat is omitted from the carrier geometry. Full-column source
+and inlet rates are multiplied by $5/360=1/72$ for the wedge.
 
-\begin{figure}[tb]
+\begin{figure*}[tb]
 \centering
 \includegraphics[width=.94\textwidth]{experiment_schematic.pdf}
-\caption{Computational geometry and prescribed source region. The source
-is distributed in selected cells; the sketch does not represent a
-resolved boat surface. Tube length and material-specific diameters are
-retained, and the 5$^\circ$ wedge supplies the axisymmetric reduction.}
+\caption{Computational geometry and prescribed source region. The
+source is distributed over selected cells; the sketch does not show a
+resolved boat surface. The model keeps the tube length and the
+material-specific diameters, and the 5$^\circ$ wedge provides the
+axisymmetric reduction.}
 \label{fig:geometry}
-\end{figure}
+\end{figure*}
 
 The inlet flow rates are converted to helium mass flow assuming a
-controller reference of 298.15 K and 101,325 Pa. Full-column rates are
+controller reference of 298.15 K and 101,325 Pa. The supplied paper
+does not specify these reference conditions. Full-column rates are
 $2.727\times10^{-7}\units{kg\,s^{-1}}$ at 100 mL/min and
-$1.227\times10^{-7}\units{kg\,s^{-1}}$ at 45 mL/min. The reference
-conditions are not specified by the supplied paper. A separate study
-uses 273.15 K at the same reference pressure. Helium uses the perfect-gas
-law, constant heat capacity and Sutherland viscosity
-(\cref{app:properties}). Steady laminar carriers are prepared with
-\texttt{rhoSimpleFoam}; the reconstructed temperature profile remains
-prescribed.
+$1.227\times10^{-7}\units{kg\,s^{-1}}$ at 45 mL/min. A separate study
+uses 273.15 K at the same reference pressure. Helium follows the
+perfect-gas law with constant heat capacity and Sutherland viscosity
+(\cref{app:properties}). Steady laminar carriers are computed with
+\texttt{rhoSimpleFoam}, while the reconstructed temperature profile
+stays prescribed.
 
-The converged face mass flux is retained instead of reconstructing it
-from interpolated velocity. At these low mass flows, residual discrete
-divergence is removed by a zero-initialised potential correction before
-species transport. Carrier preparation rejects an original cell or global
-flux defect exceeding $10^{-6}$ of inlet flow, or a flux/velocity
-correction exceeding $10^{-5}$ of the corresponding scale. After
-correction, inlet, global and cell continuity and impermeable-boundary
-leakage are audited against $10^{-12}$ of inlet flow. This procedure
-makes the frozen transport field discretely conservative; it is not a
-new physical flow model or evidence of convergence of the velocity field.
+The converged face mass flux is kept, rather than reconstructed from
+interpolated velocity. At these low mass flows, a zero-initialised
+potential correction removes residual discrete divergence before
+species transport. Carrier preparation rejects a carrier if its
+original cell or global flux defect exceeds $10^{-6}$ of the inlet
+flow, or if a flux or velocity correction exceeds $10^{-5}$ of the
+corresponding scale. After correction, inlet, global and cell continuity and leakage
+through impermeable boundaries are checked against $10^{-12}$ of the
+inlet flow. This procedure makes the frozen transport field discretely
+conservative. It is neither a new physical flow model nor evidence that
+the velocity field has converged.
+
+The stated inputs fix the transport regime. With the full-column
+helium mass flow $\dot m$, the tube diameter $d$ and the Sutherland
+viscosity of \cref{app:properties}, $\mathrm{Re}=4\dot m/(\pi d\mu)$ is
+1.5--3.0 for the 100 mL/min steel case and 0.7--1.3 for the 45 mL/min
+cases between the source-furnace temperature of 1173 K and 400 K; the
+carrier is laminar throughout. With the baseline diffusivity, the
+radial diffusion time $R^2/D_i$ is 58 ms in steel and 63 ms in silica.
+Placing the conductance of \cref{eq:hks} in series with diffusion over
+the tube radius, as in \cref{eq:halfcell} with $d_f$ replaced by $R$
+and $T_c=T_w$, defines a wall Damk\"ohler number
+\begin{equation}
+ \begin{aligned}
+ \mathrm{Da}_i&=\frac{G_i\chi_iR}{\rho D_i}\\
+ &=C_es_i\frac{2\alpha_i}{2-\alpha_i}
+  \sqrt{\frac{RT_w}{2\pi M_i}}\,\frac{R}{D_i},
+ \end{aligned}
+ \label{eq:damkohler}
+\end{equation}
+where $R$ is the gas constant under the square root and the tube
+radius in the last factor. Because $\chi_i/\rho=RT_w/M_i$, it does not
+depend on pressure. For
+PbI$_2$ and BiI$_3$ between 400 and 1173 K, the baseline coefficients
+give $\mathrm{Da}_i\approx1.4\times10^3$--$2.9\times10^3$, and the
+tested accommodation coefficients $\alpha_i=0.1$ and 0.01 give about
+76--150 and 7--15. This tube-scale estimate places the interfacial
+resistance well below the radial diffusion resistance for
+$\alpha_i=1$ and 0.1, and about an order of magnitude below it for
+$\alpha_i=0.01$. It is a scaling estimate, not a substitute for the
+resolved near-wall gradients of the calculations.
+
+Two effects that the model omits can be bounded with the same inputs,
+the digitised wall profiles and the computed absolute pressure of
+101.33 kPa. The first is buoyancy. Neither experimental paper states
+the column orientation. For developed laminar flow with a linearly
+varying wall temperature, the wall-to-bulk temperature difference is
+$(11/192)\,U d^2|\mathrm{d}T_w/\mathrm{d}x|/a$, with $a$ the thermal
+diffusivity of helium; it stays below 2.6 K. A Grashof number based
+on the axial temperature change over one diameter,
+$\mathrm{Gr}=g d^4|\mathrm{d}T_w/\mathrm{d}x|/(T\nu^2)$, stays below
+2.2, and below 1.4 where the wall temperature lies between 400 and
+750 K. Because Re is also of order one, the Richardson number
+$\mathrm{Gr}/\mathrm{Re}^2$ reaches 0.15 (pure PbI$_2$) to 0.78
+(silica) in that range, and about 1.2 in the steepest cold section of
+the silica profile. Compositional buoyancy at the largest computed
+trace mole fraction, $9.2\times10^{-5}$ evaluated with the molar mass
+of BiI$_3$, gives $\mathrm{Gr}/\mathrm{Re}^2\le0.32$. Buoyancy-driven
+secondary flow is therefore weak, but in a horizontal column it cannot
+be excluded, and the frozen carrier does not represent it. The second
+effect is thermal (Soret) diffusion. Taking a thermal diffusion factor
+$\alpha_T=1$ as a generous bound, the Soret drift velocity
+$D_i\alpha_T|\mathrm{d}T_w/\mathrm{d}x|/T$ is at most 2.2\% of the
+carrier velocity. The radial Soret flux, relative to a Fickian flux
+$x_iD_i/R$ towards the wall, is at most $\alpha_T\Delta T_r/T\le0.7\%$,
+with $\Delta T_r$ the wall-to-bulk difference above. Both are small
+compared with the factor-of-two diffusivity variations examined in
+\cref{sec:sensitivity}.
 
 \subsection{Discretisation and coupling}
 The transient species equations use implicit Euler time integration,
@@ -52,58 +114,68 @@ step is 2 ms. Wall exchange is assembled implicitly with nonnegative
 source and sink coefficients and shared inventory bounds. Configured
 species correctors and active-bound guards reconcile the final gas
 solution with the realised wall transfer. Gas re-speciation then
-redistributes species under the local element constraints. This sequence
-is first order in time; a conservative equilibrium projection alone
-does not eliminate splitting or transport error.
+redistributes species under the local element constraints. The
+sequence is first order in time; a conservative equilibrium projection
+alone does not remove splitting or transport error.
 
 The baseline configuration requests three species correctors with a
 $10^{-16}$ tolerance and up to eight bound guards with a $10^{-13}$
-guard tolerance. These are stopping settings, not guarantees that every
-outer wall-regime iteration attains the requested tolerance. The final
-transport defect, bound status and material ledger must be examined
-independently (\cref{sec:conservation}). Additional short corrector
-replays isolate late-time iteration sensitivity but do not establish
-full-run iteration independence.
+guard tolerance. These are stopping settings. They do not guarantee
+that every outer wall-regime iteration reaches the requested
+tolerance, so the final transport defect, bound status and material
+ledger are examined separately (\cref{sec:conservation}). Short
+corrector replays isolate late-time iteration sensitivity but do not
+establish full-run iteration independence.
 
-The baseline diffusivity is $D_i=10^{-4}\units{m^2\,s^{-1}}$ for every
-gas. Three transport alternatives halve or double this value for all
-gases, or replace only the PbI$_2$ coefficient by a temperature- and
-pressure-dependent PbI$_2$--He estimate. The latter's collision
-parameters are estimates, not independently measured binary transport
-data. Accommodation variations change the two reversible iodide pairs
-to $\alpha=0.1$ or 0.01, retaining the baseline metal-channel coefficients.
+Every gas has the baseline diffusivity $D_i=10^{-4}\units{m^2\,s^{-1}}$.
+Three transport alternatives halve or double this value for all gases,
+or replace only the PbI$_2$ coefficient with a temperature- and
+pressure-dependent PbI$_2$--He estimate. The collision parameters of
+that estimate are themselves estimates, not independently measured
+binary transport data. Accommodation variations set $\alpha=0.1$ or
+0.01 for the two reversible iodide pairs and keep the baseline
+metal-channel coefficients.
 
 \subsection{Completed case matrix}
-The 15 baseline cases comprise Q1 for each available configuration and
-Q2 for the two LBE columns, at
-$\beta\in\{0.001,0.01,0.1\}$ with two thermodynamic branches. The
-second branch adds a constant 29 kJ/mol to BiI(g)'s standard Gibbs energy;
-it is a sensitivity surrogate, not a second experimentally qualified
-dataset. All completed calculations use the same solver executable,
-identified by its SHA-256 in the saved reports.
+The 15 baseline cases are Q1 for each available configuration, plus Q2
+for the two LBE columns at $\beta\in\{0.001,0.01,0.1\}$ with two
+thermodynamic branches. The second branch adds a constant 29 kJ/mol to
+the standard Gibbs energy of BiI(g). It is a sensitivity surrogate, not
+a second experimentally qualified dataset. All completed calculations
+use the same solver executable, identified by its SHA-256 in the saved
+reports.
 
-\Cref{tab:study} describes the 64 follow-up cases. Mesh and time-step
-checks cover pure PbI$_2$ and three steel Q2 cases: baseline
-thermodynamics at 0.1\% and 1\% metal saturation and shifted BiI
-thermodynamics at 1\%. Physical transport, accommodation, source-position
-and flow-reference variations cover pure PbI$_2$, those two baseline
-steel Q2 cases, and silica Q2 at 0.1\%. Extra source-loading cases use
-both columns and both thermodynamic branches. Temperature-coordinate
-variants use silica Q1 and silica Q2 at 0.1\%. This is a structured
-set of conditional comparisons, not a factorial uncertainty study.
-\begin{table}[tb]
+\Cref{tab:study} lists the 64 follow-up cases. The studies cover the
+following cases:
+\begin{itemize}
+\item mesh and time-step checks: pure PbI$_2$ and three steel Q2 cases
+  (baseline thermodynamics at 0.1\% and 1\% metal saturation, and
+  shifted BiI thermodynamics at 1\%);
+\item physical transport, accommodation, source-position and
+  flow-reference variations: pure PbI$_2$, the two steel Q2 cases with
+  baseline thermodynamics, and silica Q2 at 0.1\%;
+\item extra source-loading cases: both columns and both thermodynamic
+  branches;
+\item temperature-coordinate variants: silica Q1 and silica Q2 at
+  0.1\%.
+\end{itemize}
+This is a structured set of conditional comparisons, not a factorial
+uncertainty study.
+\begin{table*}[tb]
 \centering
-\caption{Completed follow-up matrix. The baseline cases are additional
-references. Numerical comparisons use one changed resolution at a time;
-flow-stop cases continue a 60 s baseline to 80 s.}
+\caption{Completed follow-up matrix: number of cases and the variation
+applied in each study. The baseline cases serve as additional
+references. Each numerical comparison changes one resolution setting
+at a time; flow-stop cases continue a 60 s baseline to 80 s.}
 \label{tab:study}
 \small\input{generated/study-table}
-\end{table}
+\end{table*}
 
 The source-position alternatives move the release region by
-$\pm1.5\units{cm}$ without adding a boat obstruction. Flow-stop cases
-restart the saved 60 s fields, remove injection, set carrier flow to
-zero and impose zero normal species flux at both ends. The original
-nonuniform temperature profile stays fixed. Their comparisons therefore
-measure redistribution of residual gas during a 20 s fixed-temperature
-flow stop, not a clean-helium purge or a full cooling calculation.
+$\pm1.5\units{cm}$ without adding a boat obstruction. The flow-stop
+cases restart from the saved 60 s fields, remove injection, set the
+carrier flow to zero and impose zero normal species flux at both ends.
+The original nonuniform temperature profile stays fixed. These cases
+therefore measure how residual gas redistributes during a 20 s flow
+stop at fixed temperature; they are neither a clean-helium purge nor a
+full cooling calculation.

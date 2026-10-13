@@ -1,0 +1,7 @@
+Pr = 0.6666641466696752
+PbI2_SS {'maxdTdx': 4470.0, 'dTr': 2.55, 'Ri_r': 0.0238, 'Ri_ax': 0.2, 'Gr_ax': 1.94, 'Ri_c': 0.054, 'soret_rad': 0.00679, 'soret_ax': 0.0103}
+LBE-I_SS_II {'maxdTdx': 3920.0, 'dTr': 0.943, 'Ri_r': 0.0448, 'Ri_ax': 0.815, 'Gr_ax': 1.69, 'Ri_c': 0.262, 'soret_rad': 0.00244, 'soret_ax': 0.0181}
+LBE-I_SiO2_I {'maxdTdx': 4310.0, 'dTr': 1.05, 'Ri_r': 0.0606, 'Ri_ax': 1.17, 'Gr_ax': 2.16, 'Ri_c': 0.322, 'soret_rad': 0.00274, 'soret_ax': 0.0224}
+PbI2_SS max Ri_ax at x=0.487 m T=375 K dTdx=-4474 | deposition zone: Gr_ax<=1.35 Ri_ax<=0.15 Re 2.00-2.97
+LBE-I_SS_II max Ri_ax at x=0.597 m T=360 K dTdx=-3259 | deposition zone: Gr_ax<=0.93 Ri_ax<=0.54 Re 0.90-1.33
+LBE-I_SiO2_I max Ri_ax at x=0.648 m T=367 K dTdx=-3870 | deposition zone: Gr_ax<=1.20 Ri_ax<=0.78 Re 0.86-1.28

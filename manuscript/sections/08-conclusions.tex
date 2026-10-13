@@ -1,41 +1,51 @@
 \section{Conclusions}
 \label{sec:conclusions}
-A conservative finite-volume treatment of nine Pb--Bi--I gases and four
-shared condensed wall inventories has been exercised in 15 baseline
-and 64 follow-up cases. The reported calculations use a specialised
-ideal-gas equilibrium kernel, a prescribed helium carrier and reversible
-iodide wall exchange with half-cell diffusion resistance. Material
-bookkeeping is strong: the worst raw source-driven follow-up element
-residue is $8.85\times10^{-13}$ of supplied material. Conservation is
-a numerical property of this model, rather than evidence that all
-physical pathways have been represented.
+We have applied a conservative finite-volume treatment of nine
+Pb--Bi--I gases and four shared condensed wall inventories in 15
+baseline and 64 follow-up cases. The columns are treated as laminar
+helium flows ($\mathrm{Re}\approx0.7$--3) in tubes with a steep axial
+wall-temperature gradient, where axial advection, radial diffusion to
+the wall and a reversible interfacial exchange law together set the
+deposition profile. The reported calculations use a
+specialised ideal-gas equilibrium kernel, a prescribed helium carrier
+and reversible iodide wall exchange with half-cell diffusion
+resistance. Material bookkeeping is tight: the worst raw element
+residue in the source-driven follow-up cases is $8.85\times10^{-13}$
+of supplied material. Conservation is a numerical property of this
+model; it is not evidence that all physical pathways are represented.
 
-The isolated time-step comparisons give iodine profile changes below
-0.323\%, while medium-to-fine mesh comparisons give 2.06--10.58\%.
-Stable total deposition and small centroid changes therefore do not
-establish spatial convergence of local profiles. Closely competing
-1 cm bins can also make a reported peak temperature switch by tens of
-kelvin under refinement. Further spatial and full-run iteration checks
-are required before claiming precise local predictive accuracy.
+Integral results are much less sensitive to resolution than local
+profiles. The isolated time-step comparisons change iodine profiles by
+less than 0.323\%, while the medium-to-fine mesh comparisons change
+them by 2.06--10.58\%. Stable total deposition and small centroid
+changes therefore do not establish spatial convergence of local
+profiles. Closely competing 1 cm bins can also make a reported peak
+temperature switch by tens of kelvin under refinement. Because the
+first-order upwind numerical diffusion is comparable to the prescribed
+molecular diffusivity in parts of the carriers, the computed axial
+spreading of the deposits is itself resolution-dependent. Further spatial
+and full-run iteration checks are required before precise local
+predictive accuracy can be claimed.
 
-Thermodynamic and source assumptions materially affect the computed
-iodide partition. On the refined steel case, a $+29$ kJ/mol BiI gas
-Gibbs-energy surrogate changes the BiI$_3$ iodine share from 94.57\%
-to 2.00\%. This sensitivity survives refinement but does not determine
-which thermodynamic branch represents the experiment. Q1 agreement is
-conditioned on inferred deposit masses, and Q2 retains a deposit-derived
-iodine source and an unmeasured metal saturation.
+Thermodynamic and source assumptions substantially affect the computed
+iodide partition. In the refined steel case, a $+29$ kJ/mol surrogate
+shift of the BiI gas Gibbs energy changes the BiI$_3$ iodine share from
+94.57\% to 2.00\%. This sensitivity survives refinement, but it does
+not determine which thermodynamic branch represents the experiment.
+Q1 agreement is conditioned on inferred deposit masses, and Q2 keeps a
+deposit-derived iodine source and an unmeasured metal saturation.
 
-For silica, input-derived temperature-coordinate shifts reduce the
-original 4--5 cm position discrepancies to 0--1 cm. The improvement
-identifies coordinate registration as a consequential uncertainty;
-it does not establish a corrected experimental dataset. The supplied
-paper does not resolve that registration or the flow-reference conditions.
+For silica, temperature-coordinate shifts derived from the published
+inputs reduce the original 4--5 cm position discrepancies to 0--1 cm.
+This identifies coordinate registration as a consequential
+uncertainty, but it does not establish a corrected experimental
+dataset. The supplied paper resolves neither that registration nor the
+flow-reference conditions.
 
 The present evidence supports a methods and input-sensitivity study.
-An independent predictive validation would require better-constrained
+Independent predictive validation would require better-constrained
 source and thermodynamic inputs, consistent experimental coordinates,
-spatially qualified profile calculations and treatment of the
-three-hour release and cooling protocol. The completed cases identify
-where that additional evidence is needed without hiding the original
-profile discrepancies.
+spatially qualified profile calculations and a treatment of the
+three-hour release and cooling protocol. The completed cases show where
+this additional evidence is needed, without hiding the original profile
+discrepancies.

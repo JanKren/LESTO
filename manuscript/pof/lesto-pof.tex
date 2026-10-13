@@ -1,0 +1,123 @@
+% Physics of Fluids (AIP Publishing) version of the LESTO iodine methods paper.
+% Shares ../sections, ../generated, ../figures and ../references.bib with the
+% arXiv build (../main.tex).  Build with ./build.sh in this folder.
+% For a single-column double-spaced review copy, replace "reprint" by
+% "preprint" in the class options below.
+\documentclass[aip,pof,reprint,amsmath,amssymb]{revtex4-2}
+\usepackage{iftex}
+\ifPDFTeX\usepackage[utf8]{inputenc}\fi
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{booktabs,graphicx,microtype,xcolor}
+\usepackage[version=4]{mhchem}
+\usepackage{url}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{cleveref}
+% Shared section files \input generated/... relative to the manuscript root.
+\makeatletter
+\def\input@path{{../}}
+\makeatother
+\graphicspath{{../figures/}}
+\setlength{\emergencystretch}{1.5em}
+\input{../generated/numbers}
+\newcommand{\vect}[1]{\mathbf{#1}}
+\newcommand{\units}[1]{\,\mathrm{#1}}
+% Clearly visible placeholder for information only the authors can supply.
+\newcommand{\confirm}[1]{\textcolor{red}{[AUTHOR TO CONFIRM: #1]}}
+\hypersetup{
+  pdftitle={Conservative CFD modelling of iodine deposition in
+    thermal-gradient columns},
+  pdfauthor={Jan Kren and Bojan Niceno}}
+
+\begin{document}
+\preprint{Submitted to Physics of Fluids}
+
+\title{Conservative CFD modelling of iodine deposition in thermal-gradient
+columns: numerical verification and input sensitivity}
+
+\author{Jan Kren}
+% \email reads its argument verbatim: keep it on one line, no macros.
+\email[Author to whom correspondence should be addressed: ]{[AUTHOR TO CONFIRM: corresponding e-mail]}
+\affiliation{Paul Scherrer Institute, 5232 Villigen PSI, Switzerland}
+\author{Bojan Ni\v{c}eno}
+\affiliation{Paul Scherrer Institute, 5232 Villigen PSI, Switzerland}
+
+\date{\today}
+
+\begin{abstract}
+In thermal-gradient columns, laminar helium carries trace vapours
+along a tube whose wall temperature falls steeply. Interpreting the
+iodine deposits requires a consistent treatment of transport, gas
+speciation and wall exchange. We present an OpenFOAM finite-volume
+model for nine Pb--Bi--I gases in a frozen helium carrier, with
+element-conserving gas equilibrium and shared wall inventories.
+Reversible iodide exchange follows a Hertz--Knudsen--Schrage law in
+series with the near-wall diffusive resistance. Published
+thermosublimatography measurements supply three temperature profiles
+and deposition scans; unreported source histories and flow-reference
+conditions are treated as assumptions. Fifteen baseline and 64
+follow-up simulations separate numerical refinement from selected
+input sensitivities. In 60 s follow-up runs, the largest raw
+element-balance residue is $8.85\times10^{-13}$ of supplied material.
+Halving the time step from 2 to 1 ms changes iodine profiles by at
+most 0.323\%, whereas refining the mesh from 18,432 to 41,472 cells
+changes them by 2.06--10.58\%; spatial convergence remains unresolved.
+A $+29\units{kJ\,mol^{-1}}$ shift in the BiI gas Gibbs energy changes
+the BiI$_3$ share of deposited iodide iodine in the refined steel case
+from 94.57\% to 2.00\%, a strong but conditional thermochemical
+sensitivity. For silica, two shifts derived from discrepancies between
+the published temperature curve and its peak labels reduce 4--5 cm
+position errors to 0--1 cm, but do not establish a corrected
+experimental coordinate system. The results support a conservative
+computational method and an explicit assessment of uncertain inputs;
+they neither establish independent predictive validation nor reproduce
+the three-hour experiment and subsequent cooling.
+\end{abstract}
+
+\maketitle
+
+\input{../sections/01-introduction}
+\input{../sections/02-experiments}
+\input{../sections/03-model}
+\input{../sections/04-numerics}
+\input{../sections/05-verification}
+\input{../sections/06-validation}
+\input{../sections/07-multispecies}
+\input{../sections/08-conclusions}
+
+\begin{acknowledgments}
+\confirm{acknowledgments and any funding statement with grant numbers.
+The funding statements of an earlier draft were removed until the authors
+confirm that they apply to this work.}
+\end{acknowledgments}
+
+\section*{Author Declarations}
+\subsection*{Conflict of Interest}
+\confirm{The authors have no conflicts to disclose.}
+
+\subsection*{Author Contributions}
+\textbf{Jan Kren}: \confirm{CRediT roles}.
+\textbf{Bojan Ni\v{c}eno}: \confirm{CRediT roles}.
+
+\section*{Data Availability}
+The solver, the benchmark preparation scripts and the data that support
+the findings of this study are openly available in the LESTO repository
+at \url{https://github.com/JanKren/LESTO},
+\confirm{archived release or DOI, and that the branch holding these
+files is public}. These files comprise the completed baseline and
+follow-up metrics, saved axial profiles, generated tables,
+figure-generation code and SHA-256 provenance records. The experimental
+curves were digitised from Liu et al.\ \cite{Liu2025chemical}; they
+reconstruct published figures, are not author-supplied measurements,
+and are adapted under the source paper's CC BY 4.0 licence. Some
+thermodynamic coefficient files are external inputs that are not
+redistributed; their local identifiers and the provenance of the derived
+tables are recorded with the benchmark. Reproducing the CFD calculations
+from the coefficients requires access to those inputs, whereas
+regenerating the figures from the saved results does not.
+
+\appendix
+\input{../sections/A-properties}
+
+\bibliography{../references}
+\end{document}

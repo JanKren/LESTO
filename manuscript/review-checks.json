@@ -6,12 +6,12 @@
   "undefined_zero_reference_comparisons_confirmed": 12,
   "iodine_stoichiometry_profiles_checked": 79,
   "input_and_artifact_hashes_checked": 618,
-  "pdf_pages": 16,
+  "pdf_pages": 19,
   "undefined_latex_references": 0,
   "overfull_latex_boxes": 0,
   "bibliography_warnings": 0,
   "draft_placeholders": 0,
-  "pdf_sha256": "12a8afb70afeb24d29b865be0d4fa433f3b788766e51e2ff3f6055203525bcde",
+  "pdf_sha256": "989cada785936aa502d5184ca5b7ee2d8806f7aeb16c79220b22525efcc5352a",
   "checker_sha256": "7ed0b9c91055454a21997c74abfdc7e8e8498bcc20dcc0da66183ea4040592c8",
   "scope": "Saved-results and manuscript consistency checks; not new CFD runs or experimental validation."
 }
