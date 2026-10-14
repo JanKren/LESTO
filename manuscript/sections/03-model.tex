@@ -17,13 +17,17 @@ and satisfies
  \label{eq:transport}
 \end{equation}
 Gas equilibrium is applied as a local redistribution between transport
-steps. The species do not alter the carrier density, momentum or
-temperature. The transported gases are Pb, PbI, PbI$_2$, Bi, Bi$_2$,
-BiI, BiI$_3$, I and I$_2$; helium is inert. Condensed PbI$_2$,
-BiI$_3$, Pb and Bi are stored as immobile wall inventories. In the
-code, solid-state identifiers label these inventories; the
-equilibrium-pressure tables select the crystalline or liquid state
-where applicable.
+steps. Species do not alter the carrier density, momentum or temperature.
+Here $D_i$ is the molecular diffusivity and $S_i^{\rm rel}$ and
+$S_i^{\rm wall}$ are volumetric mass sources
+($\mathrm{kg\,m^{-3}\,s^{-1}}$); the latter is positive for net wall
+release. Because $Y_i$ is defined relative to carrier mass, the nine
+reactive-species variables are not constrained to sum to unity.
+The represented gases are Pb, PbI, PbI$_2$, Bi, Bi$_2$, BiI, BiI$_3$,
+I and I$_2$. Helium is inert. Condensed PbI$_2$, BiI$_3$, Pb and Bi
+are stored as immobile wall inventories. The solid-state identifiers in
+the code label these reservoirs; the equilibrium-pressure tables select
+between crystalline and liquid states where applicable.
 
 The model does not represent bulk nucleation, aerosols and their
 thermophoretic deposition
@@ -109,7 +113,13 @@ $\chi_{i,c}=\rho_cRT_c/M_i$, eliminating the wall concentration gives
  \end{gathered}
  \label{eq:halfcell}
 \end{equation}
-This places the kinetic and half-cell diffusion resistances in series.
+This combines kinetic and half-cell diffusion resistances in series.
+In particular, $1/G_{i,f}^{\rm eff}=1/G_i+
+\chi_{i,c}d_f/(\rho D_i)_f$: the smaller conductance limits transfer.
+As $G_i$ increases, the effective conductance approaches the finite
+diffusive limit $(\rho D_i)_f/(\chi_{i,c}d_f)$. This separates the
+physical interfacial coefficient from the mesh-dependent distance used
+to connect the wall to the resolved gas field.
 The gas equation receives the face flow $A_f j_{i,f}$ as an implicit
 cell contribution, and the wall inventory receives its negative.
 Evaporation is limited by the face inventory available over the time

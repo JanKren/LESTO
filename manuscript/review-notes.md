@@ -1,5 +1,32 @@
 # Author review: 14 October 2026 (update of 9 October)
 
+## Scientific reassessment on 12 October
+
+Saved profiles now support 28 mass-preserving bin-aggregation comparisons
+and four matched-resolution thermodynamic comparisons. A new verification
+table shows that 4 cm grouping does not robustly remove the shifted-BiI
+mesh sensitivity (0.52--10.02%, depending on bin origin). Binned transport
+distances are small, but do not bound continuum error. The BiI perturbation
+changes iodide partition by at least 92.555 percentage points at every
+tested matched resolution. These are new analyses of existing CFD results.
+
+The current Windows workspace and its accessible Ubuntu environment lack
+the original OpenFOAM installation, private executable, prepared case
+directories and external Bi thermodynamic input. No new CFD checks were launched in this workspace during that assessment.
+The pulled 14 October results now include the production, scheme/mesh
+and three full-duration corrector checks described below. See `scientific-gap-register.md` and
+`next-study.json` for the outstanding evidence and a specified next study.
+
+## Editorial revision on 12 October
+
+The revised manuscript states three research questions, clarifies the
+transport-source units and the limiting wall conductance, and distinguishes
+the three profile comparison metrics. A new discussion connects numerical
+resolution, input identifiability and the evidence needed for predictive
+validation. The conclusions now state the principal findings directly.
+No new simulations, experimental inputs or fitted parameters were introduced;
+the scientific submission issues below remain open.
+
 The working draft is framed as a conservative CFD method plus
 numerical-resolution and input-sensitivity assessment, now with an
 independent single-species comparison. It reports completed computational

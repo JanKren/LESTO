@@ -6,6 +6,14 @@ conditional on the reconstructed inputs and assumptions of
 \cref{sec:experiments,sec:model}; they are not independent validation.
 
 \subsection{Comparison measures}
+Three measures serve different purposes in this study. The inventory
+difference $E_{L1}$ in \cref{eq:numeric-l1} compares two simulations
+and retains changes in deposited amount. The discrepancy $L_{\rm raw}$
+below compares modelled and experimental relative yields. The overlap
+$O$ compares their shapes after normalisation over the scanned interval.
+These measures have different denominators and cannot be interpreted
+as interchangeable percentages of model accuracy.
+
 The primary comparison uses reconstructed relative iodine yields per
 1 cm bin. Let $e_b$ be the experimental percentage and let
 \begin{equation}
@@ -35,6 +43,11 @@ The overlap $O$ is conditional on the common scanned range and discards
 differences in capture and total yield. The experimental normalisation
 still contains KI. $O$ is a descriptive shape measure, not a validation
 probability or a fitted goodness-of-fit statistic.
+For nonnegative normalised profiles, it also satisfies
+$O=100[1-\tfrac12\sum_{b\in\mathcal B}
+|\widehat m_b-\widehat e_b|]$: identical binned shapes give 100\%
+and disjoint shapes give zero. This interpretation does not depend on
+the absolute amount deposited.
 
 \subsection{Q1 peaks and complete profiles}
 \Cref{tab:peaks} compares the five available Q1 iodide maxima with the

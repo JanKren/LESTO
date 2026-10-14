@@ -16,10 +16,12 @@ def main():
         'main.tex', 'arxiv.sty', 'references.bib', 'README.md', 'review-notes.md',
         'prepare_results.py', 'check_results.py', 'build.sh', 'package_review.py', 'lesto-iodine-methods.pdf',
         'notes-for-authors.md', 'literature-review.md',
-        'review-checks.json']}
+        'review-checks.json', 'assess_resolution.py', 'test_resolution.py',
+        'scientific-gap-register.md', 'next-study.json', 'workstation_preflight.py']}
     for folder in ['sections', 'figures', 'generated']:
         files.update(p for p in (HERE / folder).iterdir() if p.is_file())
-    for result in ['full_analysis', 'followup_results']:
+    for result in ['full_analysis', 'followup_results', 'production_576x72_limitedLinear',
+                   'scheme_mesh_study', 'iteration_check']:
         root = REPO / 'run/034-liu2025' / result
         files.update(p for p in root.glob('*') if p.is_file() and not p.name.startswith('.'))
         files.update(p for p in (root / 'profiles').rglob('*') if p.is_file())
@@ -30,6 +32,12 @@ def main():
         'analyse_matrix.py', 'report.py', 'prepare.py', 'carriers.py', 'README.md',
         'experiments.csv', 'targets.csv', 'sublimation.csv'])
     files.update(p for p in (bench / 'digitized').iterdir() if p.suffix in {'.csv', '.json'})
+    lob_run = REPO / 'run/035-lobresco2026'
+    files.update(p for p in lob_run.rglob('*') if p.is_file()
+                 and '__pycache__' not in p.parts and p.suffix != '.pyc')
+    lob_bench = REPO / 'thermochemistry/benchmarks/lobresco2026'
+    files.update(p for p in lob_bench.rglob('*') if p.is_file()
+                 and '__pycache__' not in p.parts and p.suffix != '.pyc')
     for path in files:
         if not path.is_file():
             raise FileNotFoundError(path)

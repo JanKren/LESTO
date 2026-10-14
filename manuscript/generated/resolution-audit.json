@@ -1,0 +1,313 @@
+{
+  "scope": "Saved-profile reassessment only; bin aggregation is not mesh refinement and tested-grid ranges are not continuum uncertainty bounds.",
+  "input_sha256": {
+    "run/034-liu2025/followup_results/profiles/PbI2_SS_Q1_baseline__grid256x32/element_I_native.dat": "d14bc9ffb5683e7cf8e84a0c2cb3375f03cac5f86210f9f69690cd20b97b8db8",
+    "run/034-liu2025/followup_results/profiles/PbI2_SS_Q1_baseline__grid256x32/BiI3_g_native.dat": "fd617cdc775c899c6752941686d784da54324cbe822e652cf3c0e6c5d09fada0",
+    "run/034-liu2025/full_analysis/profiles/PbI2_SS_Q1_baseline/element_I_native.dat": "710e42d34bb970f96d9581c46a7484990770192e9e57cecb75c3132d9e558e1e",
+    "run/034-liu2025/full_analysis/profiles/PbI2_SS_Q1_baseline/BiI3_g_native.dat": "78965eda5f9c58b121ac8db9f9c8a38b433a4c1ecbeda30f4c243e5b5e0acd2f",
+    "run/034-liu2025/followup_results/profiles/PbI2_SS_Q1_baseline__grid576x72/element_I_native.dat": "7f4b40447c9358292217f48bc0e8c0a1eecfdeb743f91a2dab7fe3bf17010f3a",
+    "run/034-liu2025/followup_results/profiles/PbI2_SS_Q1_baseline__grid576x72/BiI3_g_native.dat": "f0086d1b95dd5980c0dd4710a63dc8f8439abf207d78a34b45bb413f41d994fe",
+    "run/034-liu2025/followup_results/profiles/PbI2_SS_Q1_baseline__dt1ms/element_I_native.dat": "31a79468fe53a5b23f1c6f529364552ff6305a51a5880d4bd589e97da04f4008",
+    "run/034-liu2025/followup_results/profiles/PbI2_SS_Q1_baseline__dt1ms/BiI3_g_native.dat": "770fdf2e76d5c54d08d1083b5e98def8507c89868c7ed965af95b346162bda12",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.001__grid256x32/element_I_native.dat": "304dd7f857debadc5baba5767c5fc3d0218e8ced7cdddf680e6ec8b8efc1412e",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.001__grid256x32/BiI3_g_native.dat": "582c20e0a9fae98443dec64e5e947942ec499866756ff22cde529aaa655964b2",
+    "run/034-liu2025/full_analysis/profiles/LBE-I_SS_II_Q2_baseline_sat0.001/element_I_native.dat": "b36d805a81b2d722a0c3dcea578be63ec5b214dea1184d3540d0b605926849d0",
+    "run/034-liu2025/full_analysis/profiles/LBE-I_SS_II_Q2_baseline_sat0.001/BiI3_g_native.dat": "00204a6cb20103223ac6650c51da5880b135f445e52a3e7d9cd12b5d98cd3d2a",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.001__grid576x72/element_I_native.dat": "614021564146e34a77480b4b31d4ca00578d8ecafbb857df6952f9cd8f7e1827",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.001__grid576x72/BiI3_g_native.dat": "6ffd8cd9cf486f6c568f27c4b7e667209b35ef0519b0d6ad530940f3ea9871bb",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.001__dt1ms/element_I_native.dat": "de5f4f3c7f6d9dd4d94d78024499470696d642873cacc956e8a249a3758cb8d3",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.001__dt1ms/BiI3_g_native.dat": "d0ecaddfad53322604bc5167fa545f424aa4e7bf13595c1fbd07a130723c0616",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.01__grid256x32/element_I_native.dat": "4f1f835f7859a0bb7e84723841ccd145d890b3496bbb0691b66333d6a768f128",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.01__grid256x32/BiI3_g_native.dat": "c4dd18f1c5a0695127b45dbc39854c2226f539bbfb163ac35a8db6fa8168734b",
+    "run/034-liu2025/full_analysis/profiles/LBE-I_SS_II_Q2_baseline_sat0.01/element_I_native.dat": "c9a914f66a62600379e59acb627f0d1e352f8fedbde31bbcedc6af5e9cb2a56b",
+    "run/034-liu2025/full_analysis/profiles/LBE-I_SS_II_Q2_baseline_sat0.01/BiI3_g_native.dat": "f7512ca81b9cebfae1df6359ce980fbb97e854fd3f9ee889cab2bae1c75e18fc",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.01__grid576x72/element_I_native.dat": "723ffc2a3255e7367d559ff5c70ceff713100ce78fd2d90cff7b8215f8351e6e",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.01__grid576x72/BiI3_g_native.dat": "b54d0b999497a258ef5ccb27f27be0311f4abaeae5914aff64b9bb8aba85e86d",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.01__dt1ms/element_I_native.dat": "67c38481aa28fe4ac7006979c5e361481f61117c61711b1c0e67a0e23d7acb28",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.01__dt1ms/BiI3_g_native.dat": "0c1d2debb032c236d0299586e121e21313b472e084b6c2e290580ae3450ecead",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01__grid256x32/element_I_native.dat": "fcb2cb293fd40983a70a2f641134e98f1302be805b9f6ecc3bf744da3d5932fe",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01__grid256x32/BiI3_g_native.dat": "9a395a1fec219a5a4265e19727e655c977ef54f53bae2188ebc24df199b922cf",
+    "run/034-liu2025/full_analysis/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01/element_I_native.dat": "f7afec2c3c4ca6e6dfdd88a09bc1c2b7751a021e0aa87585c0fa612a7deaeb37",
+    "run/034-liu2025/full_analysis/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01/BiI3_g_native.dat": "2ccc57e1e209fc3ac1ed956b590fb67845a84216c6959867ea855b76d3bd9bfd",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01__grid576x72/element_I_native.dat": "f7c08e97d2caab120bce9ea3f6b26c0e513601cd8820aeae09fe4834189e0d3d",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01__grid576x72/BiI3_g_native.dat": "e40fd200b4f18ab1e41433bdacd55c43de0bee6b4aba9d829d22c380168b71ff",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01__dt1ms/element_I_native.dat": "1eae8ba3aa943bd80752fbfe15369119fcd1754cbb9e3b4040fc5e0495d1b406",
+    "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01__dt1ms/BiI3_g_native.dat": "0e628edda955a4798bc678e9ba68f1c9462a1df126acfca330a163082d6b9f6e",
+    "manuscript/assess_resolution.py": "db2654a4d77333e14c0d529686a6da15cbe62ad749e7ec62bf81eba5fd8f2a73"
+  },
+  "aggregation": [
+    {
+      "base_case": "PbI2_SS_Q1_baseline",
+      "width_cm": 1,
+      "offset_native_bins": 0,
+      "coarse_medium_L1_pct_medium_denominator": 6.567757054377145,
+      "fine_medium_L1_pct": 5.06357418754727,
+      "successive_difference_ratio": 0.7709746486698381
+    },
+    {
+      "base_case": "PbI2_SS_Q1_baseline",
+      "width_cm": 2,
+      "offset_native_bins": 0,
+      "coarse_medium_L1_pct_medium_denominator": 4.209901287296098,
+      "fine_medium_L1_pct": 4.094288989789617,
+      "successive_difference_ratio": 0.9725380027661561
+    },
+    {
+      "base_case": "PbI2_SS_Q1_baseline",
+      "width_cm": 2,
+      "offset_native_bins": 1,
+      "coarse_medium_L1_pct_medium_denominator": 6.567757054377144,
+      "fine_medium_L1_pct": 4.810994988515483,
+      "successive_difference_ratio": 0.7325171970709772
+    },
+    {
+      "base_case": "PbI2_SS_Q1_baseline",
+      "width_cm": 4,
+      "offset_native_bins": 0,
+      "coarse_medium_L1_pct_medium_denominator": 1.2960264944481108,
+      "fine_medium_L1_pct": 1.2189647719289494,
+      "successive_difference_ratio": 0.9405400099077629
+    },
+    {
+      "base_case": "PbI2_SS_Q1_baseline",
+      "width_cm": 4,
+      "offset_native_bins": 1,
+      "coarse_medium_L1_pct_medium_denominator": 6.567757054377142,
+      "fine_medium_L1_pct": 4.810994988515486,
+      "successive_difference_ratio": 0.7325171970709778
+    },
+    {
+      "base_case": "PbI2_SS_Q1_baseline",
+      "width_cm": 4,
+      "offset_native_bins": 2,
+      "coarse_medium_L1_pct_medium_denominator": 4.209901287296102,
+      "fine_medium_L1_pct": 3.8417097907578266,
+      "successive_difference_ratio": 0.9125415368646912
+    },
+    {
+      "base_case": "PbI2_SS_Q1_baseline",
+      "width_cm": 4,
+      "offset_native_bins": 3,
+      "coarse_medium_L1_pct_medium_denominator": 2.7160152709674574,
+      "fine_medium_L1_pct": 1.797378323764624,
+      "successive_difference_ratio": 0.6617703305933141
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "width_cm": 1,
+      "offset_native_bins": 0,
+      "coarse_medium_L1_pct_medium_denominator": 9.022094895685392,
+      "fine_medium_L1_pct": 5.257061627492795,
+      "successive_difference_ratio": 0.5826874676309227
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "width_cm": 2,
+      "offset_native_bins": 0,
+      "coarse_medium_L1_pct_medium_denominator": 8.734970359265024,
+      "fine_medium_L1_pct": 4.116342483566981,
+      "successive_difference_ratio": 0.47124859206887304
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "width_cm": 2,
+      "offset_native_bins": 1,
+      "coarse_medium_L1_pct_medium_denominator": 4.044902822750236,
+      "fine_medium_L1_pct": 1.7695079052477685,
+      "successive_difference_ratio": 0.4374661105071081
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "width_cm": 4,
+      "offset_native_bins": 0,
+      "coarse_medium_L1_pct_medium_denominator": 1.7529937136535931,
+      "fine_medium_L1_pct": 2.4517063445852365,
+      "successive_difference_ratio": 1.3985825080201715
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "width_cm": 4,
+      "offset_native_bins": 1,
+      "coarse_medium_L1_pct_medium_denominator": 1.844626767285667,
+      "fine_medium_L1_pct": 0.5113711025433484,
+      "successive_difference_ratio": 0.27722198962547917
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "width_cm": 4,
+      "offset_native_bins": 2,
+      "coarse_medium_L1_pct_medium_denominator": 7.193419289484844,
+      "fine_medium_L1_pct": 1.8412642836802806,
+      "successive_difference_ratio": 0.2559650994307803
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "width_cm": 4,
+      "offset_native_bins": 3,
+      "coarse_medium_L1_pct_medium_denominator": 2.7682501412435037,
+      "fine_medium_L1_pct": 1.2608643169134388,
+      "successive_difference_ratio": 0.45547340470722636
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "width_cm": 1,
+      "offset_native_bins": 0,
+      "coarse_medium_L1_pct_medium_denominator": 9.720940716686938,
+      "fine_medium_L1_pct": 2.055621914951745,
+      "successive_difference_ratio": 0.21146327036261733
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "width_cm": 2,
+      "offset_native_bins": 0,
+      "coarse_medium_L1_pct_medium_denominator": 9.700314646348414,
+      "fine_medium_L1_pct": 1.4303091333241569,
+      "successive_difference_ratio": 0.1474497668859208
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "width_cm": 2,
+      "offset_native_bins": 1,
+      "coarse_medium_L1_pct_medium_denominator": 2.5457499937148236,
+      "fine_medium_L1_pct": 0.8460671978756117,
+      "successive_difference_ratio": 0.33234496708807165
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "width_cm": 4,
+      "offset_native_bins": 0,
+      "coarse_medium_L1_pct_medium_denominator": 0.24435761741931547,
+      "fine_medium_L1_pct": 0.10891866232918233,
+      "successive_difference_ratio": 0.44573467150106844
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "width_cm": 4,
+      "offset_native_bins": 1,
+      "coarse_medium_L1_pct_medium_denominator": 0.21921975264494994,
+      "fine_medium_L1_pct": 0.15331994410565275,
+      "successive_difference_ratio": 0.6993892760839437
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "width_cm": 4,
+      "offset_native_bins": 2,
+      "coarse_medium_L1_pct_medium_denominator": 9.19598495490903,
+      "fine_medium_L1_pct": 1.30822689328958,
+      "successive_difference_ratio": 0.14226066046260963
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "width_cm": 4,
+      "offset_native_bins": 3,
+      "coarse_medium_L1_pct_medium_denominator": 2.3394794817927735,
+      "fine_medium_L1_pct": 0.5790324441096866,
+      "successive_difference_ratio": 0.24750481832222204
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "width_cm": 1,
+      "offset_native_bins": 0,
+      "coarse_medium_L1_pct_medium_denominator": 10.47170589129745,
+      "fine_medium_L1_pct": 10.576198622318971,
+      "successive_difference_ratio": 1.0099785777127641
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "width_cm": 2,
+      "offset_native_bins": 0,
+      "coarse_medium_L1_pct_medium_denominator": 2.5397091356469703,
+      "fine_medium_L1_pct": 3.374342910073427,
+      "successive_difference_ratio": 1.3286336071763747
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "width_cm": 2,
+      "offset_native_bins": 1,
+      "coarse_medium_L1_pct_medium_denominator": 9.40718942392597,
+      "fine_medium_L1_pct": 10.021215372369786,
+      "successive_difference_ratio": 1.065271987282633
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "width_cm": 4,
+      "offset_native_bins": 0,
+      "coarse_medium_L1_pct_medium_denominator": 2.514191112302478,
+      "fine_medium_L1_pct": 2.8563376219429495,
+      "successive_difference_ratio": 1.136086118500012
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "width_cm": 4,
+      "offset_native_bins": 1,
+      "coarse_medium_L1_pct_medium_denominator": 1.892221813114168,
+      "fine_medium_L1_pct": 0.5226162947296066,
+      "successive_difference_ratio": 0.27619187724588096
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "width_cm": 4,
+      "offset_native_bins": 2,
+      "coarse_medium_L1_pct_medium_denominator": 0.6706958349094494,
+      "fine_medium_L1_pct": 0.6895404189352413,
+      "successive_difference_ratio": 1.0280970643396588
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "width_cm": 4,
+      "offset_native_bins": 3,
+      "coarse_medium_L1_pct_medium_denominator": 7.527772368846983,
+      "fine_medium_L1_pct": 10.019223602283542,
+      "successive_difference_ratio": 1.330967929336866
+    }
+  ],
+  "fine_medium_shapes": [
+    {
+      "base_case": "PbI2_SS_Q1_baseline",
+      "total_variation_pct": 2.531377197725741,
+      "binned_W1_cm": 0.061019726857271264
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "total_variation_pct": 2.628541009108348,
+      "binned_W1_cm": 0.03112276486749479
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "total_variation_pct": 1.0254018700709644,
+      "binned_W1_cm": 0.011471543496286376
+    },
+    {
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "total_variation_pct": 5.287262907696082,
+      "binned_W1_cm": 0.07107160248961164
+    }
+  ],
+  "thermodynamic_resolution": [
+    {
+      "resolution": "coarse",
+      "baseline_BiI3_iodine_pct": 94.53162207100935,
+      "shifted_BiI3_iodine_pct": 1.9765226080517606,
+      "separation_percentage_points": 92.55509946295759
+    },
+    {
+      "resolution": "medium",
+      "baseline_BiI3_iodine_pct": 94.56004535260288,
+      "shifted_BiI3_iodine_pct": 1.9961603017719385,
+      "separation_percentage_points": 92.56388505083095
+    },
+    {
+      "resolution": "fine",
+      "baseline_BiI3_iodine_pct": 94.56893281817757,
+      "shifted_BiI3_iodine_pct": 2.0043590381995577,
+      "separation_percentage_points": 92.56457377997802
+    },
+    {
+      "resolution": "half_step",
+      "baseline_BiI3_iodine_pct": 94.54104958250254,
+      "shifted_BiI3_iodine_pct": 1.9221661313220975,
+      "separation_percentage_points": 92.61888345118044
+    }
+  ],
+  "minimum_tested_thermodynamic_separation_pp": 92.55509946295759
+}

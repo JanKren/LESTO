@@ -200,6 +200,12 @@ def main():
     iteration = check_iteration(full)
     lobresco = check_lobresco(generated)
     source = '\n'.join(p.read_text() for p in [HERE / 'main.tex', *sorted((HERE / 'sections').glob('*.tex'))])
+    from assess_resolution import evaluate
+    resolution = json.loads((HERE / 'generated/resolution-audit.json').read_text())
+    assert resolution == evaluate(), 'Saved-profile resolution reassessment is stale'
+    for name, expected in resolution['input_sha256'].items():
+        assert hashlib.sha256((REPO / name).read_bytes()).hexdigest() == expected, name
+        hashes += 1
     assert not re.search(r'\\(?:todo|decide)\b', source)
     log = (HERE / 'build/main.log').read_text()
     assert not re.search(r'undefined|Overfull|LaTeX Error|^!', log, re.MULTILINE), 'LaTeX issue'
@@ -220,6 +226,8 @@ def main():
         'iodine_stoichiometry_profiles_checked': stoichiometric,
         'production_cases_checked': production, 'scheme_mesh_differences_recomputed': scheme_checks,
         'iteration_check_cases_recomputed': iteration, 'lobresco_onsets_recomputed': lobresco,
+        'resolution_aggregation_comparisons': len(resolution['aggregation']),
+        'thermodynamic_resolution_pairs': len(resolution['thermodynamic_resolution']),
         'input_and_artifact_hashes_checked': hashes, 'pdf_pages': pages,
         'undefined_latex_references': 0, 'overfull_latex_boxes': 0,
         'bibliography_warnings': 0, 'draft_placeholders': 0,

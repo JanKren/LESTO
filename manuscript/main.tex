@@ -10,6 +10,7 @@
 \usepackage{hyperref}
 \usepackage{cleveref}
 \usepackage{authblk}
+\usepackage{placeins}
 % Shared sections use table* for wide tables (needed in two-column layouts);
 % give table* the same caption spacing that arxiv.sty gives table.
 \makeatletter
@@ -87,6 +88,8 @@ the three-hour experiment and subsequent cooling.
 \input{sections/05-verification}
 \input{sections/06-validation}
 \input{sections/07-multispecies}
+\FloatBarrier
+\input{sections/07b-discussion}
 \input{sections/08-conclusions}
 \section*{Data and software availability}
 The solver and benchmark preparation scripts are maintained in the
@@ -110,5 +113,8 @@ the saved results and does not require them.
 \appendix
 \input{sections/A-properties}
 \bibliographystyle{unsrtnat}
+\begingroup
+\small
 \bibliography{references}
+\endgroup
 \end{document}

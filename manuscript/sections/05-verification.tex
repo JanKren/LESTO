@@ -213,3 +213,49 @@ differ from the 18,432-cell upwind profiles by 9.1--22.3\%. The
 follow-up sensitivities of \cref{sec:sensitivity} remain upwind
 differences on 18,432 cells, taken against baselines with the same
 numerical error.
+
+\subsection{Dependence on comparison-bin width}
+\label{sec:bin-audit}
+To distinguish sensitivity of the reported observable from a change in
+the CFD mesh, the saved 1 cm iodine inventories of the original upwind campaign
+were summed into groups
+of two and four consecutive bins. Every possible integer-bin offset was
+tested for each width, retaining partial end groups and the full deposited
+inventory. No CFD field was recomputed and no sub-bin reconstruction was
+introduced. \Cref{tab:bin-audit} gives the fine/medium inventory differences
+for these coarser observables. Ranges reflect bin origin, not statistical
+uncertainty.
+\begin{table*}[tbp]
+\centering
+\caption{Original upwind fine/medium iodine inventory-profile differences
+(percent, 41,472 versus 18,432 cells) after
+aggregation of native bins. The 2 and 4 cm ranges cover all respective
+integer-bin offsets. $W_1$ uses the original 1 cm bin centres and separately
+normalised profiles; it measures redistribution distance, not position error
+against the experiment.}
+\label{tab:bin-audit}
+\small\input{generated/resolution-audit-table}
+\end{table*}
+
+For the shifted-BiI case, a 4 cm comparison gives differences from
+0.52\% to 10.02\% depending on the grouping origin. Thus a favourable
+aggregation can hide a substantial local difference. Summing signed
+bin differences before taking their absolute values necessarily allows
+cancellation; reduced aggregated L1 is not additional convergence evidence.
+The largest difference remains appreciable even at 4 cm resolution.
+
+As a complementary position-sensitive measure, let $p_b$ and $q_b$ be
+the fine and medium iodine inventories normalised separately over the
+whole column, and $x_b$ their common native bin centres. The
+one-dimensional transport distance for these discrete distributions is
+\begin{equation}
+ W_1=\sum_{b=1}^{B-1}\left|\sum_{j=1}^{b}(p_j-q_j)\right|
+                  (x_{b+1}-x_b).
+ \label{eq:binned-wasserstein}
+\end{equation}
+It is the minimum mean distance needed to redistribute one normalised
+binned inventory into the other. Values of 0.0115--0.0711 cm indicate
+small average spatial redistribution between the two tested meshes,
+despite larger local L1 differences. This is a distance between computed
+binned profiles, not a bound on continuum error or evidence that the
+experimental position uncertainty has been resolved.

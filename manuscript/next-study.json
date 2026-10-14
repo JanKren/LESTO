@@ -1,0 +1,161 @@
+{
+  "status": "SPECIFIED_BLOCKED_ON_ORIGINAL_RUN_ENVIRONMENT",
+  "scope": "Minimum next study; completion does not automatically establish convergence or submission readiness.",
+  "expected_solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+  "cases": [
+    {
+      "case": "PbI2_SS_Q1_baseline__grid864x108",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "kind": "spatial_refinement",
+      "nx": 864,
+      "nr": 108,
+      "cells": 93312,
+      "dt_s": 0.002,
+      "end_s": 60,
+      "species_correctors": 3,
+      "outer_tolerance": 1e-16,
+      "status": "NOT_PREPARED_NOT_RUN"
+    },
+    {
+      "case": "PbI2_SS_Q1_baseline__correctors8_full60s",
+      "base_case": "PbI2_SS_Q1_baseline",
+      "kind": "full_duration_iteration",
+      "nx": 384,
+      "nr": 48,
+      "cells": 18432,
+      "dt_s": 0.002,
+      "end_s": 60,
+      "species_correctors": 8,
+      "outer_tolerance": 1e-16,
+      "status": "NOT_PREPARED_NOT_RUN"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__grid864x108",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "kind": "spatial_refinement",
+      "nx": 864,
+      "nr": 108,
+      "cells": 93312,
+      "dt_s": 0.002,
+      "end_s": 60,
+      "species_correctors": 3,
+      "outer_tolerance": 1e-16,
+      "status": "NOT_PREPARED_NOT_RUN"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__correctors8_full60s",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+      "kind": "full_duration_iteration",
+      "nx": 384,
+      "nr": 48,
+      "cells": 18432,
+      "dt_s": 0.002,
+      "end_s": 60,
+      "species_correctors": 8,
+      "outer_tolerance": 1e-16,
+      "status": "NOT_PREPARED_NOT_RUN"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__grid864x108",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "kind": "spatial_refinement",
+      "nx": 864,
+      "nr": 108,
+      "cells": 93312,
+      "dt_s": 0.002,
+      "end_s": 60,
+      "species_correctors": 3,
+      "outer_tolerance": 1e-16,
+      "status": "NOT_PREPARED_NOT_RUN"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__correctors8_full60s",
+      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+      "kind": "full_duration_iteration",
+      "nx": 384,
+      "nr": 48,
+      "cells": 18432,
+      "dt_s": 0.002,
+      "end_s": 60,
+      "species_correctors": 8,
+      "outer_tolerance": 1e-16,
+      "status": "NOT_PREPARED_NOT_RUN"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__grid864x108",
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "kind": "spatial_refinement",
+      "nx": 864,
+      "nr": 108,
+      "cells": 93312,
+      "dt_s": 0.002,
+      "end_s": 60,
+      "species_correctors": 3,
+      "outer_tolerance": 1e-16,
+      "status": "NOT_PREPARED_NOT_RUN"
+    },
+    {
+      "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__correctors8_full60s",
+      "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "kind": "full_duration_iteration",
+      "nx": 384,
+      "nr": 48,
+      "cells": 18432,
+      "dt_s": 0.002,
+      "end_s": 60,
+      "species_correctors": 8,
+      "outer_tolerance": 1e-16,
+      "status": "NOT_PREPARED_NOT_RUN"
+    }
+  ],
+  "preconditions": [
+    "Original v2412 environment and private solver available; verify executable hash.",
+    "Prepared baseline 0/constant/system inputs, original tables and source/physics manifests available.",
+    "Audit all new carriers and preserve source rates, temperature mapping, thermodynamics and diffusivity.",
+    "Use fresh isolated case paths. Do not overwrite baseline or follow-up cases.",
+    "If the original binary cannot be reproduced, establish new paired controls before attributing differences to resolution."
+  ],
+  "execution": [
+    "Run ten-step smoke tests on every case before full duration.",
+    "All new runs start from t=0, not a late checkpoint.",
+    "Keep baseline numerical acceptance criteria unchanged; preserve logs, element ledgers and final native profiles."
+  ],
+  "analysis": [
+    "Recompute raw element residues, solver defects, equilibrium failures and inventory bounds.",
+    "Compare full iodine and iodide profiles, totals, centroids, widths, native-bin maxima and normalised transport distances.",
+    "Spatial: assess 18432/41472/93312-cell sequences alongside all four meshes; reject oscillatory or nondecreasing extrapolations.",
+    "Iteration: compare eight-corrector full-run outputs against matched three-corrector baselines and inspect startup as well as late time.",
+    "Report all outcomes including unsuccessful convergence; retain original figures and assumptions."
+  ],
+  "contingencies": [
+    "If spatial differences remain nondecreasing, refine further or verify a bounded higher-order scheme separately.",
+    "If time-space interaction becomes material, add matched 1 ms runs on refined meshes.",
+    "Any altered solver or transport scheme needs regression qualification and new matched controls."
+  ],
+  "estimated_completion_date": null,
+  "current_evidence": {
+    "reconciled_date": "2026-10-14",
+    "scope": "Original specification and case statuses above describe the 12 October plan. The original runner archive is preserved. No new CFD runs were launched during reconciliation.",
+    "full_duration_iteration": {
+      "results": "run/034-liu2025/iteration_check/summary.json",
+      "completed_pass": [
+        "PbI2_SS_Q1_baseline__correctors8_full60s",
+        "LBE-I_SS_II_Q2_baseline_sat0.001__correctors8_full60s",
+        "LBE-I_SS_II_Q2_baseline_sat0.01__correctors8_full60s"
+      ],
+      "unreported": [
+        "LBE-I_SS_II_Q2_shift29k_sat0.01__correctors8_full60s"
+      ]
+    },
+    "spatial_refinement": {
+      "results": "run/034-liu2025/scheme_mesh_study/results.json",
+      "completed_branch": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+      "cells": 93312,
+      "schemes": [
+        "Gauss upwind",
+        "Gauss limitedLinear 1"
+      ],
+      "scope": "Saved L4 profiles are available for this branch only; other planned L4 runs are not included in the pulled evidence."
+    }
+  }
+}

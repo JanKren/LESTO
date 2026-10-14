@@ -24,12 +24,25 @@ remain insufficient for independent predictive validation. See
 [author review notes](review-notes.md) for the remaining decisions and evidence.
 The [source and saved-results package](lesto-iodine-review.zip) is portable.
 
-The manuscript contains eight figures, eight tables and a property/provenance
+The manuscript contains eight figures, nine tables and a property/provenance
 appendix. Six tables and all figures are generated from the saved completed
-reports by `prepare_results.py`; `generated/results.json` records the values
+reports by `prepare_results.py`; a seventh generated table comes from
+`assess_resolution.py`; `generated/results.json` records the values
 and hashes of their inputs. No CFD cases are rerun or altered by this script.
 
 ## Build
+
+The 12 October scientific reassessment adds a mass-preserving bin-width
+audit and a matched-resolution thermodynamic comparison, using the original
+79 CFD cases. These analyses concern the original upwind campaign; the
+14 October production, scheme/mesh and iteration results are also retained.
+`assess_resolution.py` reproduces those calculations and
+`test_resolution.py` checks them against analytical examples. Build now
+requires Python and NumPy even without figure regeneration. The precise
+remaining dependencies and next numerical study are recorded in
+`scientific-gap-register.md` and `next-study.json`; their current evidence
+notes distinguish completed checks from the original study specification.
+No CFD run was launched while merging these results.
 
 From the repository root:
 
@@ -69,7 +82,7 @@ Run `python3 manuscript/package_review.py` to rebuild the review ZIP.
 - `figures/`: eight scientific figures, as vector PDFs and PNG previews. They
   are drawn at their printed size (5.4 in wide or less, text 8-9 pt) and
   included without scaling.
-- `generated/`: six result tables, `numbers.tex` (macros used in the text),
+- `generated/`: seven result tables, `numbers.tex` (macros used in the text),
   numerical values and SHA-256 manifests.
 - `pof/`: Physics of Fluids (REVTeX) version sharing `sections/`,
   `generated/` and `figures/`; `bash manuscript/pof/build.sh`.

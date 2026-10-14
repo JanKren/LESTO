@@ -2,6 +2,7 @@
 set -euo pipefail
 manuscript_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$manuscript_dir"
+python3 assess_resolution.py
 if [[ "${1:-}" == "--figures" ]]; then
     MPLCONFIGDIR="${MPLCONFIGDIR:-/tmp/lesto-manuscript-mpl}" python3 prepare_results.py
 elif [[ -n "${1:-}" ]]; then
