@@ -109,8 +109,8 @@ and checks the PoF log), and recount the abstract (≤ 250 words).
 
 ## 4. Dimensionless numbers (added, Sec. 4.1)
 
-Computed in the session scratchpad (`pof/dimensionless.py`, not part of
-the repository) from inputs stated in the paper only: d = 4.8/5.0 mm,
+Computed by `manuscript/estimates/dimensionless.py` (output in
+`dimensionless.txt`) from inputs stated in the paper only: d = 4.8/5.0 mm,
 ṁ = 2.727e-7 and 1.227e-7 kg/s, Sutherland A_s = 1.4683e-6,
 T_s = 83.40 K, D_i = 1e-4 m²/s, α ∈ {1, 0.1, 0.01}, M(PbI2), M(BiI3),
 T = 400 K (lowest printed peak label) to 1173.15 K (T_h).

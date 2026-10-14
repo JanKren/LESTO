@@ -8925,3 +8925,25 @@ been updated to it, uncommitted, for review.
    corrector case (still in `~/lesto-submission-followup`) into the paper;
    requests to the Lobresco authors (thermocouple tables, boat, inlet
    origin, C_e of Table 2).
+7. **Aggregate suite on the final sources (38 item 4).**  On f7c11cc
+   (solver sources identical to fe214c6), 2026-10-11/12, v2412, bound to
+   four cores while other runs loaded the machine (load 26-53):
+   - `tests/Alltest -fresh all`: 324 PASS, 6 FAIL, 3 NOTRUN (177 min).  The
+     six FAILs (M3.1b, M3.2a-c, M3.4c, M3.5c) are the parallel pipe runs
+     stopped by `runParallel`'s `MPI_TIMEOUT` of 1800 s; their logs end
+     mid-solve without an error, and the serial pipe ended normally.
+   - `MPI_TIMEOUT=7200 tests/Alltest M3`: 34 PASS, 0 FAIL, 0 NOTRUN.
+     Together: 330 PASS, 0 FAIL, 3 NOTRUN.
+   - NOTRUN: M0.4 (needs v2606; see below), M9.8 (excerpt of another
+     bridge: start-up and step 1 identical, by design), M10b.8 (timing
+     benchmark refused on a loaded machine).
+   - v2606 (local minimal build): `tests/Alltest M0` 27 PASS, 0 FAIL;
+     M4.6 (compile against v2606) PASS in the v2412 run.
+   - `M4LONG_RUNS=ended M7LONG_RUNS=ended tests/Alltest M4long M7long`
+     (evaluation only, no re-run): 18 PASS, 0 FAIL, 31 NOTRUN (runs made
+     under an older key; `*_REVALIDATE=yes` needs 16 cores and was not
+     run).
+   - External data: `LESTO_M10_*`, `LESTO_M10D_*` from
+     `~/opt/gems-data/m10-design-2026-10-04`.  Previous aggregate: 319
+     PASS, 0 FAIL, 1 NOTRUN at 5b8815c.
+
