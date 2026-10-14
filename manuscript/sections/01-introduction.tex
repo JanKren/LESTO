@@ -36,7 +36,10 @@ and vapour-pressure-driven CFD deposition models. Temperature-based
 models require a calibrated deposition law; vapour-pressure-driven
 models link deposition to vapour-pressure data through interfacial
 kinetics. Their study also motivates extending transport models to
-multiple chemical species and to thermodynamic equilibrium. A
+multiple chemical species and to thermodynamic equilibrium. Its five
+PbI$_2$ experiments, with measured deposition temperatures at three
+flows and three durations, also provide a single-species test of the
+transport and wall-exchange model used here. A
 multispecies model adds a consistency requirement. Changes in chemical
 form must conserve the transported elements, and different gas pathways
 that lead to the same condensed material must share one physical wall
@@ -79,8 +82,12 @@ The contribution is a documented, conservative coupling of transport,
 gas equilibrium and wall exchange, together with a completed numerical
 and input-sensitivity assessment. The evidence comprises 15 baseline
 and 64 follow-up simulations of the three available experimental
-configurations. These are computational cases, not independent
-experimental replicates. The scope is deliberately limited to the
+configurations, production re-runs of the baselines with a bounded
+advection scheme on a finer mesh, a scheme and mesh study up to 93,312
+cells and a full-run iteration check. These are computational cases,
+not independent experimental replicates. In addition, the same model
+is compared, without adjustment, with five single-species PbI$_2$
+experiments of Lobresco et al.\ and with the two models of that study. The scope is deliberately limited to the
 executed model: a fixed carrier and temperature field, prescribed
 release, ideal-gas speciation, and wall deposits without aerosol
 formation or surface-material-specific chemistry. Comparisons with

@@ -1,0 +1,44 @@
+/*------------------------------------------------------------------------------
+
+system/fvSolution
+
+  - select linear solvers
+  - solver tolerances
+  - under-relaxation factors (none: a paired species is never relaxed)
+
+  Loose outer correctors plus one tight final solve (Y_PbI2_gFinal, relTol
+  0) at 1e-14, the final tolerance of HKS cases (plan section 28, item 8;
+  1e-12 until the M7 integration, plan section 33): the solver defect of
+  the ledger stays at 2e-16 of the inventory over the first 25 steps and
+  1.4e-10 after the 16 s of the case (3e-14 and 2.2e-8 with a final
+  tolerance of 1e-12), at a fraction of the cost of tight solves
+  everywhere.
+
+------------------------------------------------------------------------------*/
+FoamFile{version 2.0;  format ascii; class dictionary; object fvSolution;}
+/*----------------------------------------------------------------------------*/
+
+solvers {
+
+  Y_PbI2_g {
+    solver          GAMG;
+    tolerance       1e-8;
+    relTol          0.1;
+    smoother        GaussSeidel;
+
+    directSolveCoarsest   yes;
+  }
+
+  Y_PbI2_gFinal {
+    solver          GAMG;
+    tolerance       1e-14;
+    relTol          0;
+    smoother        GaussSeidel;
+
+    directSolveCoarsest   yes;
+  }
+
+  Y_PbI2_s {
+    solver          diagonal;
+  }
+}

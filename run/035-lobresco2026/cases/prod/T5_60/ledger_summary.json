@@ -1,0 +1,11 @@
+{
+ "case": "T5_60",
+ "level": "prod",
+ "records": 30000,
+ "max_abs_closure_over_initial": 3.28097505957841e-16,
+ "max_abs_solver_defect_over_initial": 3.350515959582746e-12,
+ "last_line": "Phase change summary Y_PbI2_g: 0 steps without outer convergence, 1 guard passes, 159644 projected elements (0 significant), 28845 complementarity violations (0 significant), 24 significant regime changes in final predictors",
+ "max_PbI2_mole_fraction": 0.3624646526852117,
+ "min_Y_PbI2_g": -5.852941549622906e-10,
+ "most_negative_mass_kg_wedge": -1.975648926196203e-21
+}

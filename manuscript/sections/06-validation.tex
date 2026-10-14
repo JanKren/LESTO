@@ -38,35 +38,50 @@ probability or a fitted goodness-of-fit statistic.
 
 \subsection{Q1 peaks and complete profiles}
 \Cref{tab:peaks} compares the five available Q1 iodide maxima with the
-printed peak temperatures. All calculated peak temperatures lie within
-the stated temperature ranges. Pure PbI$_2$ lies near the
-low-temperature edge of its range, and its binned maximum moves under
-refinement (\cref{sec:verification}). Steel LBE places both iodide
+printed peak temperatures. Besides the 1 cm binned maximum it lists
+the maximum of the 3 cm smoothed profile ($x_3$, $T_3$) and the wall
+temperature at the deposit centroid ($T_{\rm c}$). All calculated binned
+peak temperatures lie within the stated temperature ranges. For pure
+PbI$_2$ the binned maximum (36 cm, 366.5\,$^\circ$C) matches the
+published 36 cm and 368\,$^\circ$C, but the smoothed maximum and the
+centroid temperature (350.5 and 348.7\,$^\circ$C) lie at the
+low-temperature edge (350\,$^\circ$C) of the printed range. For steel
+PbI$_2$ the binned value is 288.1\,$^\circ$C, whereas the smoothed and
+centroid temperatures, 269.2 and 274.5\,$^\circ$C, lie at the lower
+limit of the printed 288$\pm$18\,$^\circ$C. The steel BiI$_3$
+smoothed maximum (138.8\,$^\circ$C) falls just below its range,
+while the centroid temperature (158.1\,$^\circ$C) lies inside it. The
+agreement of a binned peak temperature therefore depends on which of
+two nearly equal bins is the larger (\cref{sec:verification}). Steel LBE places both iodide
 maxima at the measured positions, whereas silica LBE places the
 PbI$_2$ and BiI$_3$ maxima 5 and 4 cm downstream, respectively.
 Agreement with a printed temperature is therefore not sufficient to
 establish the correct spatial location.
-\begin{table}[tb]
+\begin{table*}[tb]
 \centering
-\caption{Q1 iodide maxima on the original 18,432-cell mesh, compared
-with the published peaks. Positions are in cm and temperatures in
-$^\circ$C. Experimental temperature ranges are those printed by Liu et
+\caption{Q1 iodide maxima on the production mesh (41,472 cells,
+limited-linear advection), compared with the published peaks. Subscript
+bin: 1 cm binned maximum; subscript 3: maximum of the 3 cm smoothed
+profile; $T_{\rm c}$: wall temperature at the deposit centroid.
+Positions are in cm and temperatures in $^\circ$C. Experimental temperature ranges are those printed by Liu et
 al.\ \cite{Liu2025chemical}; they are not statistical confidence
 intervals for model error.}
 \label{tab:peaks}
 \small\input{generated/peaks-table}
-\end{table}
+\end{table*}
 
 \Cref{fig:baseline} shows the complete profiles. The raw discrepancies
-$L_{\rm raw}$ are 53.90, 53.45 and 181.84 percentage points for pure
-PbI$_2$, steel LBE and silica LBE, and the corresponding normalised
-overlaps are 72.93\%, 71.88\% and 7.20\%. The silica case therefore
+$L_{\rm raw}$ are 46.33, 52.97 and 183.84 percentage points for pure
+PbI$_2$, steel LBE and silica LBE (53.90, 53.45 and 181.84 on the
+18,432-cell upwind mesh), and the corresponding normalised overlaps are
+76.97\%, 72.13\% and 6.13\% (72.93\%, 71.88\% and 7.20\%). The silica case therefore
 has a large profile discrepancy even though both printed temperature
 ranges contain its calculated maxima.
 \begin{figure*}[tb]
 \centering
-\includegraphics[width=\textwidth]{baseline_profiles.pdf}
-\caption{Original Q1 iodine profiles compared with the digitised
+\includegraphics{baseline_profiles.pdf}
+\caption{Production Q1 iodine profiles (41,472 cells, limited-linear
+advection) compared with the digitised
 published scans (grey histograms) \cite{Liu2025chemical}. Solid black
 lines are total modelled wall iodine; dashed lines show its two iodide
 contributions. Model totals are normalised to 100\%, 93.4\% and 93.0\%
@@ -82,7 +97,114 @@ $27/(27+66)=29.03\%$. These agreements are substantially conditioned
 by the source masses, which were inferred from the same deposits. They
 cannot serve as independent validation of gas speciation or LBE
 release. Similarly, the source-driven calculations capture
-91.27--98.20\% of the supplied iodine on the wall by 60 s. This does
+91.28--98.20\% of the supplied iodine on the wall by 60 s. This does
 not establish the experimental three-hour capture, because the
 remaining inventory, the release history and post-release cooling are
 different questions.
+
+\subsection{Independent single-species comparison: Lobresco et al.}
+\label{sec:lobresco}
+The Liu et al.\ comparisons above are conditioned on deposit-derived
+sources. A cleaner test of the transport and wall-exchange model is
+offered by the five PbI$_2$ thermosublimatography experiments of
+Lobresco et al.\ \cite{Lobresco2026assessment}, which vary the helium
+flow (5, 106 and 540 mL/min) and the duration (6, 60 and 300 s) with
+1.37--2.23 mg samples in a 4.8 mm steel column. That study also
+reports deposition temperatures from two of its own CFD models: a
+temperature-based model calibrated against one reference experiment,
+and a vapour-pressure-based Hertz--Knudsen--Schrage model with a
+near-wall interaction layer and an effective rate multiplier $C_e$. We
+ran the five cases without adjusting any parameter to these data and
+compare all three models with the measurements by the paper's own
+rule: the deposition temperature is the wall temperature at the first
+position, from upstream, where the deposit exceeds 1\% of its peak,
+linearly interpolated between 1 cm points.
+
+\paragraph{Inputs.} Table 1 of the paper gives the flows, durations
+and sample amounts; its flows are standard volumetric rates at
+273.15 K and 101,325 Pa. The wall temperature of each flow rate, the
+measured deposition profiles, the sample position and both published
+model curves were digitised from its Figs.~13--14 (CC BY 4.0). Applying
+the 1\% rule to the digitised profiles reproduces the published
+experimental deposition temperatures within \LobDigitised{} K. A wall
+temperature table distributed with the T-Flows test case of that study
+differs from these published curves: its maximum of 1210 K lies at
+0.04 m, whereas the figures peak at 1060--1070 K at 0.13--0.15 m, and
+between 0.30 and 0.60 m it differs from them by up to 68--92 K. We use
+the published curves. Everything else is our model as described in
+\cref{sec:model,sec:numerics}, reduced to one species: an expanding
+laminar helium carrier computed with the wall temperature, HKS exchange
+with $C_e=\alpha=1$ in series with the half-cell diffusion resistance,
+the PbI$_2$--He diffusivity correlation of the same paper, and our own
+phase-resolved PbI$_2$ vapour-pressure table. The sample is an
+evaporating inventory of the Table 1 amount, 1 cm long and 0.48 mm in
+radius at the digitised position; this geometry is an assumption, but
+the sample empties in less than 0.5 s, so release is not rate-limiting.
+The 0.69 m wedge has \LobCellsProd{} cells at the axial and radial
+spacing of the production mesh and \LobCellsCoarse{} cells at that of
+the 18,432-cell mesh, with limited-linear advection, a zero-total-flux
+inlet that lets vapour diffuse upstream, 2 ms time steps (0.5 ms at
+540 mL/min) and the sample removed at the end of the experiment.
+
+\paragraph{Results.} \Cref{tab:lobresco,fig:lobresco} summarise the
+comparison. Our onset temperatures differ from the measurements by
+\LobDiffA, \LobDiffB, \LobDiffC, \LobDiffD{} and \LobDiffE{} K, an RMS
+deviation of \LobRMS{} K, against \LobRMSTemp{} K for the calibrated
+temperature-based model and \LobRMSVap{} K for the vapour-pressure-based
+model of the paper. The two meshes agree within \LobCoarse{} K. The
+experimental decrease of the onset temperature with duration at
+106 mL/min is reproduced, with a warm offset of 16--26 K, and the
+onsets at 5 and 540 mL/min are 11--14 K too cold. Three of the five
+deviations exceed the stated $\pm15$ K experimental temperature
+uncertainty. The agreement in profile shape is only moderate: the
+computed peaks lie \LobShiftMin--\LobShiftMax{} cm upstream of the
+measured peaks, and the absolute profile difference is
+\LobLOneMin--\LobLOneMax{} of the sample amount.
+
+Three qualifications apply. First, at 5 mL/min vapour diffuses
+upstream against the slow carrier and deposits near the cold inlet;
+applied from the inlet, the 1\% rule then picks this small deposit, at
+\LobFiveInlet{} K. We apply the rule to the main deposit downstream of
+the sample. The paper's vapour-pressure model shows a similar upstream
+deposit, so its Table 2 value for this case evidently refers to the
+main deposit as well.
+Second, the experiments end by stopping the flow, withdrawing the
+sample and pulling the column out of the furnace; this transient is not
+simulated. Counting the vapour still in the tube at the end time where
+it is changes only T5\_60 noticeably, to \LobFiveGas{} K, because
+\LobFiveGasFraction\% of its inventory is still gaseous (RMS
+\LobRMSGas{} K). Third, next to the sample the computed PbI$_2$ mole
+fraction reaches 0.33--0.36, far outside the dilute, passive-carrier
+assumption of the model; the boat itself is not represented. The
+comparison therefore tests the model in a regime it was not built for
+near the source, and it rests on digitised rather than tabulated wall
+temperatures. It is an independent comparison with published
+measurements and published models, not a validation.
+\begin{table*}[tb]
+\centering
+\caption{Deposition-onset temperatures for the five PbI$_2$ experiments
+of Lobresco et al.\ \cite{Lobresco2026assessment}: flow $\dot V$
+(mL/min, standard), duration $t$ (s), measured onset $T_{\rm exp}$ (K,
+their Table 2), and the onset of this work and of their
+temperature-based and vapour-pressure-based models minus $T_{\rm exp}$
+(K; the latter two from their Table 2). $\Delta x_{\rm pk}$ is our
+deposit peak minus the measured peak (cm), and $L_1/n_0$ the summed
+absolute difference of our deposit and the digitised measured profile
+divided by the sample amount. This work: \LobCellsProd{} cells,
+deposit at the end of the experiment; for T5\_60 the main deposit
+downstream of the sample.}
+\label{tab:lobresco}
+\small\input{generated/lobresco-table}
+\end{table*}
+\begin{figure*}[tb]
+\centering
+\includegraphics{lobresco_comparison.pdf}
+\caption{Deposited PbI$_2$ for the five experiments of Lobresco et al.\
+\cite{Lobresco2026assessment}: measured profiles, their
+temperature-based and vapour-pressure-based model results (all
+digitised from their Figs.~13--14 and adapted under CC BY 4.0), and the
+deposit of this work at the end of each experiment (1 cm bins,
+\LobCellsProd{} cells). Dashed red lines: digitised wall temperature
+used as input (right axes).}
+\label{fig:lobresco}
+\end{figure*}

@@ -1,0 +1,602 @@
+{
+  "source": "Lobresco et al. (2026), Nucl. Eng. Des. 459, 115201",
+  "pdf_sha256": "a4adf1e95bf37214ca3754966c3b9042b57eff8bbd2ac818631f8c54e026cc5f",
+  "extraction": "pdfimages -j -f 9 -l 10 (embedded 300 ppi JPEG, no resampling)",
+  "method": "axis calibration: least-squares line through detected gridlines (x, left y) and right-spine major ticks (T); wall T = median of salmon dashed-curve pixels per image column, gaps between dashes linearly interpolated; experiment = centroids of blue circular markers after binary opening (removes the dash-dot line); band = vertical extent of light-blue fill at each marker column (marker pixels bridged); model curves = median of green/orange pixels per column; arrow = column of the black arrow shaft.",
+  "table1_verbatim": {
+    "T106_6": {
+      "flow_mL_min": 106,
+      "duration_s": 6,
+      "mass_mg": 2.23,
+      "moles_1e_6_mol": 4.84,
+      "T_dep_calc_K": 775
+    },
+    "T106_60": {
+      "flow_mL_min": 106,
+      "duration_s": 60,
+      "mass_mg": 2.04,
+      "moles_1e_6_mol": 4.43,
+      "T_dep_calc_K": 712
+    },
+    "T106_300": {
+      "flow_mL_min": 106,
+      "duration_s": 300,
+      "mass_mg": 1.37,
+      "moles_1e_6_mol": 2.97,
+      "T_dep_calc_K": 666
+    },
+    "T5_60": {
+      "flow_mL_min": 5,
+      "duration_s": 60,
+      "mass_mg": 1.45,
+      "moles_1e_6_mol": 3.15,
+      "T_dep_calc_K": 788
+    },
+    "T540_60": {
+      "flow_mL_min": 540,
+      "duration_s": 60,
+      "mass_mg": 1.81,
+      "moles_1e_6_mol": 3.93,
+      "T_dep_calc_K": 671
+    }
+  },
+  "table2_verbatim": {
+    "T106_6": {
+      "experiment_K": 814,
+      "temperature_based_K": 775,
+      "vapour_pressure_based_K": 841
+    },
+    "T106_60": {
+      "experiment_K": 723,
+      "temperature_based_K": 713,
+      "vapour_pressure_based_K": 760
+    },
+    "T106_300": {
+      "experiment_K": 667,
+      "temperature_based_K": 666,
+      "vapour_pressure_based_K": 701
+    },
+    "T5_60": {
+      "experiment_K": 847,
+      "temperature_based_K": 787,
+      "vapour_pressure_based_K": 797
+    },
+    "T540_60": {
+      "experiment_K": 700,
+      "temperature_based_K": 670,
+      "vapour_pressure_based_K": 685
+    }
+  },
+  "stated_experimental_uncertainty": "paper Sec. 2.4: +-15 K temperature, +-5 % He flow, +-0.05 mg sample mass, +-1 cm axial position",
+  "panels": {
+    "T106_60": {
+      "figure": "13",
+      "image": "img-001.jpg",
+      "image_sha256": "0989d1a69788f611dfd59a5abe0519221ea811f04420e2f710125fd208e469d6",
+      "image_size": [
+        925,
+        604
+      ],
+      "frame_px": [
+        98,
+        36,
+        807,
+        525
+      ],
+      "x_gridlines_px": [
+        130.5,
+        224.0,
+        317.5,
+        410.5,
+        503.5,
+        597.0,
+        690.5,
+        783.5
+      ],
+      "x_m_per_px": 0.0010721116528684459,
+      "x_fit_max_residual_m": 0.0003064104682433677,
+      "y_gridlines_px": [
+        41.0,
+        98.0,
+        156.0,
+        214.0,
+        271.5,
+        329.0,
+        386.5,
+        444.5
+      ],
+      "y_values": [
+        0.00016,
+        0.00014000000000000001,
+        0.00012000000000000002,
+        0.0001,
+        8e-05,
+        6.000000000000001e-05,
+        3.9999999999999996e-05,
+        1.9999999999999998e-05
+      ],
+      "y_per_px": -3.468556583022396e-07,
+      "y_fit_max_residual": 1.4232110331750553e-07,
+      "T_ticks_px": [
+        39.5,
+        99.5,
+        159.5,
+        217.5,
+        277.0,
+        337.0,
+        396.5,
+        456.0,
+        516.0
+      ],
+      "T_values": [
+        1100.0,
+        1000.0,
+        900.0,
+        800.0,
+        700.0,
+        600.0,
+        500.0,
+        400.0,
+        300.0
+      ],
+      "T_K_per_px": -1.6811283516191327,
+      "T_fit_max_residual_K": 1.4400624698739648,
+      "wall_T_coverage_m": [
+        0.002,
+        0.6890000000000001
+      ],
+      "wall_T_max_dash_gap_px": 27.0,
+      "wall_T_max_dash_gap_mm": 28.947014627448038,
+      "arrow_x_m": 0.1300830972053602,
+      "arrow_tip_px": 498,
+      "n_markers": 21,
+      "max_marker_x_offset_mm": 1.07
+    },
+    "T106_6": {
+      "figure": "14(i)",
+      "image": "img-002.jpg",
+      "image_sha256": "a4a45a0d758e0af35f325ff1480a679d2385138ed13f1a80470eb4871b273f93",
+      "image_size": [
+        1917,
+        1333
+      ],
+      "frame_px": [
+        110,
+        184,
+        845,
+        621
+      ],
+      "x_gridlines_px": [
+        143.5,
+        240.5,
+        337.5,
+        434.0,
+        530.0,
+        627.0,
+        723.5,
+        820.5
+      ],
+      "x_m_per_px": 0.0010346724722686898,
+      "x_fit_max_residual_m": 0.0004251607276578029,
+      "y_gridlines_px": [
+        223.5,
+        303.0,
+        382.5,
+        463.0,
+        542.0
+      ],
+      "y_values": [
+        0.0001,
+        8e-05,
+        6e-05,
+        3.9999999999999996e-05,
+        1.9999999999999998e-05
+      ],
+      "y_per_px": -2.5093944865737963e-07,
+      "y_fit_max_residual": 1.2534378232185398e-07,
+      "T_ticks_px": [
+        241.0,
+        347.0,
+        454.0,
+        561.0
+      ],
+      "T_values": [
+        1000.0,
+        800.0,
+        600.0,
+        400.0
+      ],
+      "T_K_per_px": -1.87440436716894,
+      "T_fit_max_residual_K": 0.7492347353302193,
+      "wall_T_coverage_m": [
+        0.001,
+        0.6900000000000001
+      ],
+      "wall_T_max_dash_gap_px": 6.0,
+      "wall_T_max_dash_gap_mm": 6.208034833612139,
+      "arrow_x_m": 0.13006743261338688,
+      "arrow_tip_px": 601,
+      "n_markers": 21,
+      "max_marker_x_offset_mm": 0.99
+    },
+    "T106_300": {
+      "figure": "14(ii)",
+      "image": "img-002.jpg",
+      "image_sha256": "a4a45a0d758e0af35f325ff1480a679d2385138ed13f1a80470eb4871b273f93",
+      "image_size": [
+        1917,
+        1333
+      ],
+      "frame_px": [
+        1050,
+        184,
+        1785,
+        621
+      ],
+      "x_gridlines_px": [
+        1083.5,
+        1180.5,
+        1277.0,
+        1374.0,
+        1470.0,
+        1566.5,
+        1663.5,
+        1760.5
+      ],
+      "x_m_per_px": 0.0010346724722686905,
+      "x_fit_max_residual_m": 0.0004251607276579694,
+      "y_gridlines_px": [
+        223.5,
+        303.0,
+        382.5,
+        463.0,
+        542.0
+      ],
+      "y_values": [
+        0.0001,
+        8e-05,
+        6e-05,
+        3.9999999999999996e-05,
+        1.9999999999999998e-05
+      ],
+      "y_per_px": -2.5093944865737963e-07,
+      "y_fit_max_residual": 1.2534378232185398e-07,
+      "T_ticks_px": [
+        241.0,
+        347.0,
+        454.0,
+        561.0
+      ],
+      "T_values": [
+        1000.0,
+        800.0,
+        600.0,
+        400.0
+      ],
+      "T_K_per_px": -1.87440436716894,
+      "T_fit_max_residual_K": 0.7492347353302193,
+      "wall_T_coverage_m": [
+        -0.0,
+        0.6900000000000001
+      ],
+      "wall_T_max_dash_gap_px": 5.0,
+      "wall_T_max_dash_gap_mm": 5.173362361343452,
+      "arrow_x_m": 0.13019676667241953,
+      "arrow_tip_px": 601,
+      "n_markers": 14,
+      "max_marker_x_offset_mm": 1.73
+    },
+    "T5_60": {
+      "figure": "14(iii)",
+      "image": "img-002.jpg",
+      "image_sha256": "a4a45a0d758e0af35f325ff1480a679d2385138ed13f1a80470eb4871b273f93",
+      "image_size": [
+        1917,
+        1333
+      ],
+      "frame_px": [
+        110,
+        807,
+        845,
+        1244
+      ],
+      "x_gridlines_px": [
+        143.5,
+        337.5,
+        434.0,
+        530.0,
+        627.0,
+        723.5,
+        820.5
+      ],
+      "x_m_per_px": 0.001034619967395444,
+      "x_fit_max_residual_m": 0.0004434101242585531,
+      "y_gridlines_px": [
+        845.5,
+        925.0,
+        1005.0,
+        1085.0,
+        1164.0
+      ],
+      "y_values": [
+        0.0001,
+        8e-05,
+        6e-05,
+        3.9999999999999996e-05,
+        1.9999999999999998e-05
+      ],
+      "y_per_px": -2.5093984370572346e-07,
+      "y_fit_max_residual": 1.002814808285569e-07,
+      "T_ticks_px": [
+        863.0,
+        968.0,
+        1073.5,
+        1179.0
+      ],
+      "T_values": [
+        1000.0,
+        800.0,
+        600.0,
+        400.0
+      ],
+      "T_K_per_px": -1.8984312263554903,
+      "T_fit_max_residual_K": 0.3795510935458424,
+      "wall_T_coverage_m": [
+        0.001,
+        0.687
+      ],
+      "wall_T_max_dash_gap_px": 5.0,
+      "wall_T_max_dash_gap_mm": 5.17309983697722,
+      "arrow_x_m": 0.14974703172188183,
+      "arrow_tip_px": 1223,
+      "n_markers": 27,
+      "max_marker_x_offset_mm": 1.67
+    },
+    "T540_60": {
+      "figure": "14(iv)",
+      "image": "img-002.jpg",
+      "image_sha256": "a4a45a0d758e0af35f325ff1480a679d2385138ed13f1a80470eb4871b273f93",
+      "image_size": [
+        1917,
+        1333
+      ],
+      "frame_px": [
+        1050,
+        807,
+        1785,
+        1244
+      ],
+      "x_gridlines_px": [
+        1083.5,
+        1180.5,
+        1277.0,
+        1374.0,
+        1470.0,
+        1567.0,
+        1663.5,
+        1760.5
+      ],
+      "x_m_per_px": 0.0010344818800051981,
+      "x_fit_max_residual_m": 0.00034486975975056566,
+      "y_gridlines_px": [
+        845.5,
+        925.0,
+        1005.0,
+        1085.0,
+        1164.0
+      ],
+      "y_values": [
+        0.0001,
+        8e-05,
+        6e-05,
+        3.9999999999999996e-05,
+        1.9999999999999998e-05
+      ],
+      "y_per_px": -2.5093984370572346e-07,
+      "y_fit_max_residual": 1.002814808285569e-07,
+      "T_ticks_px": [
+        858.0,
+        963.5,
+        1071.0,
+        1177.0
+      ],
+      "T_values": [
+        1000.0,
+        800.0,
+        600.0,
+        400.0
+      ],
+      "T_K_per_px": -1.8787939625322276,
+      "T_fit_max_residual_K": 1.2200247314240187,
+      "wall_T_coverage_m": [
+        0.001,
+        0.6900000000000001
+      ],
+      "wall_T_max_dash_gap_px": 5.0,
+      "wall_T_max_dash_gap_mm": 5.172409400025991,
+      "arrow_x_m": 0.14982775621899425,
+      "arrow_tip_px": 1223,
+      "n_markers": 21,
+      "max_marker_x_offset_mm": 1.41
+    }
+  },
+  "estimated_digitisation_error": {
+    "x_mm": "+-1 (calibration residual <= 0.44 mm, 1.03-1.07 mm/px; nonzero markers sit 0.1-1.7 mm right of the nominal cm, systematic +0.6 mm)",
+    "wall_T_K": "+-2 to 3 (1.68-1.90 K/px, tick-fit residual <= 1.44 K) plus slope x position error: about +-1.5 K/mm in the deposition zone; T106_60 (Fig. 13) curve hidden by the legend at 0.105-0.135 m and linearly bridged there (do not use it in that range)",
+    "deposit_mol_per_m": "+-3e-7 (one marker radius is about 6 px = 7.5e-7; 1.0-1.25e-7 per px)",
+    "band": "light-blue fill at the marker column only; where the band is not wider than the marker the counting uncertainty is unresolved (band_note); clipped at the frame top for T106_6 0.40 m and T106_300 0.49-0.50 m"
+  },
+  "notes": [
+    "Zero-valued points are assigned at the nominal 1 cm positions of the plotted marker ranges (markers_cm); only the nonzero markers are located individually.",
+    "T5_60 scan points exist at 0.02-0.05, 0.15-0.16 and 0.28-0.48 m only (all plotted markers); there is no plotted point at 0.06-0.14 m.",
+    "Model curves (green, orange) are digitised for reference only; where curves overlap (orange/green/blue) the per-column median can follow the other curve.",
+    "The integral of each digitised experimental profile is 0.994-0.998 n0 (Table 1 moles): the paper normalised the scan to n0."
+  ],
+  "tdep_checks": [
+    {
+      "case": "T106_60",
+      "peak_mol_per_m": 0.00012210582687160107,
+      "x_peak_m": 0.45,
+      "x_onset_m": 0.43012224128784254,
+      "T_dep_digitised_K": 723.7259446814529,
+      "T_at_first_bin_above_K": 711.008979363309,
+      "T_at_last_bin_below_K": 723.9376945375631,
+      "T_dep_table2_K": 723,
+      "difference_K": 0.7259446814529156,
+      "exp_integral_trapz_mol": 4.402534319105948e-06,
+      "exp_sum_bins_mol": 4.402534319105949e-06,
+      "table1_moles": 4.43e-06,
+      "integral_over_n0": 0.9938000720329456,
+      "model_onsets_digitised_reference_only": {
+        "vapour_pressure_based": {
+          "x_onset_m": 0.40562,
+          "T_K": 759.2676024907248,
+          "peak_x_m": 0.43027,
+          "peak_mol_per_m": 7.094461727202072e-05
+        },
+        "temperature_based": {
+          "x_onset_m": 0.43778,
+          "T_K": 712.7939086256001,
+          "peak_x_m": 0.45386,
+          "peak_mol_per_m": 0.0001531494082896515
+        }
+      },
+      "model_T_dep_table2_K": {
+        "temperature_based": 713,
+        "vapour_pressure_based": 760
+      }
+    },
+    {
+      "case": "T106_6",
+      "peak_mol_per_m": 0.0001073648209340804,
+      "x_peak_m": 0.41,
+      "x_onset_m": 0.3701382550666125,
+      "T_dep_digitised_K": 812.9772721709206,
+      "T_at_first_bin_above_K": 799.209452153832,
+      "T_at_last_bin_below_K": 813.1347581288758,
+      "T_dep_table2_K": 814,
+      "difference_K": -1.022727829079372,
+      "exp_integral_trapz_mol": 4.83105581975705e-06,
+      "exp_sum_bins_mol": 4.831055819757052e-06,
+      "table1_moles": 4.839999999999999e-06,
+      "integral_over_n0": 0.9981520288754241,
+      "model_onsets_digitised_reference_only": {
+        "vapour_pressure_based": {
+          "x_onset_m": 0.3489,
+          "T_K": 840.2748893806654,
+          "peak_x_m": 0.38511,
+          "peak_mol_per_m": 3.5483215866174e-05
+        },
+        "temperature_based": {
+          "x_onset_m": 0.39443,
+          "T_K": 775.9350350099176,
+          "peak_x_m": 0.40891,
+          "peak_mol_per_m": 4.752830940172822e-05
+        }
+      },
+      "model_T_dep_table2_K": {
+        "temperature_based": 775,
+        "vapour_pressure_based": 841
+      }
+    },
+    {
+      "case": "T106_300",
+      "peak_mol_per_m": 9.307381933304262e-05,
+      "x_peak_m": 0.5,
+      "x_onset_m": 0.47021475444024896,
+      "T_dep_digitised_K": 667.3728461460834,
+      "T_at_first_bin_above_K": 655.3308354130406,
+      "T_at_last_bin_below_K": 667.7450334589093,
+      "T_dep_table2_K": 667,
+      "difference_K": 0.3728461460833614,
+      "exp_integral_trapz_mol": 2.9631428270191913e-06,
+      "exp_sum_bins_mol": 2.9631428270191888e-06,
+      "table1_moles": 2.97e-06,
+      "integral_over_n0": 0.9976911875485485,
+      "model_onsets_digitised_reference_only": {
+        "vapour_pressure_based": {
+          "x_onset_m": 0.44629,
+          "T_K": 701.405084934318,
+          "peak_x_m": 0.46905,
+          "peak_mol_per_m": 4.8908476369343806e-05
+        },
+        "temperature_based": {
+          "x_onset_m": 0.47009,
+          "T_K": 667.5890559707815,
+          "peak_x_m": 0.48664,
+          "peak_mol_per_m": 0.00010549532204158293
+        }
+      },
+      "model_T_dep_table2_K": {
+        "temperature_based": 666,
+        "vapour_pressure_based": 701
+      }
+    },
+    {
+      "case": "T5_60",
+      "peak_mol_per_m": 6.225324103224463e-05,
+      "x_peak_m": 0.39,
+      "x_onset_m": 0.3601513361740035,
+      "T_dep_digitised_K": 847.5455085935018,
+      "T_at_first_bin_above_K": 836.0862262289072,
+      "T_at_last_bin_below_K": 847.840331752433,
+      "T_dep_table2_K": 847,
+      "difference_K": 0.545508593501836,
+      "exp_integral_trapz_mol": 3.1341122289843595e-06,
+      "exp_sum_bins_mol": 3.13411222898436e-06,
+      "table1_moles": 3.15e-06,
+      "integral_over_n0": 0.9949562631696381,
+      "model_onsets_digitised_reference_only": {
+        "vapour_pressure_based": {
+          "x_onset_m": 0.07267,
+          "T_K": 482.34440030950515,
+          "peak_x_m": 0.0975,
+          "peak_mol_per_m": 0.00010213279975819083
+        },
+        "temperature_based": {
+          "x_onset_m": 0.40582,
+          "T_K": 788.1702640434605,
+          "peak_x_m": 0.43582,
+          "peak_mol_per_m": 5.081560172037037e-05
+        }
+      },
+      "model_T_dep_table2_K": {
+        "temperature_based": 787,
+        "vapour_pressure_based": 797
+      }
+    },
+    {
+      "case": "T540_60",
+      "peak_mol_per_m": 8.306393224720592e-05,
+      "x_peak_m": 0.52,
+      "x_onset_m": 0.48013900098597023,
+      "T_dep_digitised_K": 699.682437876488,
+      "T_at_first_bin_above_K": 686.3002879272067,
+      "T_at_last_bin_below_K": 699.7651507546839,
+      "T_dep_table2_K": 700,
+      "difference_K": -0.3175621235119479,
+      "exp_integral_trapz_mol": 3.916950316692352e-06,
+      "exp_sum_bins_mol": 3.916950316692349e-06,
+      "table1_moles": 3.93e-06,
+      "integral_over_n0": 0.9966794698962721,
+      "model_onsets_digitised_reference_only": {
+        "vapour_pressure_based": {
+          "x_onset_m": 0.49069,
+          "T_K": 685.2977626173265,
+          "peak_x_m": 0.52897,
+          "peak_mol_per_m": 8.406768134103118e-06
+        },
+        "temperature_based": {
+          "x_onset_m": 0.5,
+          "T_K": 671.8961037021281,
+          "peak_x_m": 0.53517,
+          "peak_mol_per_m": 5.759097750042489e-05
+        }
+      },
+      "model_T_dep_table2_K": {
+        "temperature_based": 670,
+        "vapour_pressure_based": 685
+      }
+    }
+  ]
+}

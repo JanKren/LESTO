@@ -1,5 +1,94 @@
 {
   "baseline_cases": 15,
+  "baseline_cells": 41472,
+  "baseline_scheme": "Gauss limitedLinear 1",
+  "q1_peaks": [
+    {
+      "case": "PbI2_SS_Q1_baseline",
+      "experiment": "PbI2_SS",
+      "species": "PbI2",
+      "predicted_peak_C": 366.49212611188375,
+      "published_peak_C": 368.0,
+      "error_K": -1.5078738881162508,
+      "uncertainty_K": 18.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 35.99999999999999,
+      "figure_x_cm": 36.0,
+      "offset_cm": -7.105427357601002e-15,
+      "smoothed_peak_x_cm": 36.99999999999999,
+      "smoothed_peak_C": 350.45650855289375,
+      "centroid_cm": 37.11274592953945,
+      "centroid_T_C": 348.7089225299811
+    },
+    {
+      "case": "LBE-I_SS_II_Q1_baseline",
+      "experiment": "LBE-I_SS_II",
+      "species": "PbI2",
+      "predicted_peak_C": 288.0735094806398,
+      "published_peak_C": 288.0,
+      "error_K": 0.07350948063981377,
+      "uncertainty_K": 18.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 50.99999999999999,
+      "figure_x_cm": 51.0,
+      "offset_cm": -7.105427357601002e-15,
+      "smoothed_peak_x_cm": 51.99999999999999,
+      "smoothed_peak_C": 269.2258867204371,
+      "centroid_cm": 51.71841544829042,
+      "centroid_T_C": 274.5330861261598
+    },
+    {
+      "case": "LBE-I_SS_II_Q1_baseline",
+      "experiment": "LBE-I_SS_II",
+      "species": "BiI3",
+      "predicted_peak_C": 166.8694829605339,
+      "published_peak_C": 154.0,
+      "error_K": 12.869482960533901,
+      "uncertainty_K": 14.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 56.999999999999986,
+      "figure_x_cm": 56.99999999999999,
+      "offset_cm": -7.105427357601002e-15,
+      "smoothed_peak_x_cm": 57.999999999999986,
+      "smoothed_peak_C": 138.77624116487226,
+      "centroid_cm": 57.311527266598425,
+      "centroid_T_C": 158.11767213404227
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "experiment": "LBE-I_SiO2_I",
+      "species": "PbI2",
+      "predicted_peak_C": 287.8186750628464,
+      "published_peak_C": 306.0,
+      "error_K": -18.18132493715359,
+      "uncertainty_K": 24.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 55.99999999999999,
+      "figure_x_cm": 51.0,
+      "offset_cm": 4.999999999999993,
+      "smoothed_peak_x_cm": 55.99999999999999,
+      "smoothed_peak_C": 287.8186750628464,
+      "centroid_cm": 55.95069483496531,
+      "centroid_T_C": 288.753705940768
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "experiment": "LBE-I_SiO2_I",
+      "species": "BiI3",
+      "predicted_peak_C": 152.82833369694998,
+      "published_peak_C": 127.0,
+      "error_K": 25.828333696949983,
+      "uncertainty_K": 39.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 62.999999999999986,
+      "figure_x_cm": 59.0,
+      "offset_cm": 3.999999999999986,
+      "smoothed_peak_x_cm": 63.99999999999999,
+      "smoothed_peak_C": 119.7878205968417,
+      "centroid_cm": 63.17400233972148,
+      "centroid_T_C": 147.0792071119326
+    }
+  ],
   "followup_cases": 64,
   "numerical": [
     {
@@ -39,6 +128,136 @@
       "fine_centroid_shift_cm": -0.06515570365208667
     }
   ],
+  "scheme_mesh_study": {
+    "families": {
+      "pure.up": {
+        "levels": [
+          1,
+          2,
+          3
+        ],
+        "successive_L1_pct": [
+          6.567757054377145,
+          5.063714035589575
+        ]
+      },
+      "pure.ll": {
+        "levels": [
+          1,
+          2,
+          3
+        ],
+        "successive_L1_pct": [
+          5.704346785757395,
+          2.1524789379872624
+        ]
+      },
+      "pure.vl": {
+        "levels": [
+          1,
+          2,
+          3
+        ],
+        "successive_L1_pct": [
+          4.935832816761812,
+          2.229044725245916
+        ]
+      },
+      "steel.up": {
+        "levels": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "successive_L1_pct": [
+          10.47170589129745,
+          10.576876012391345,
+          2.1349674924076507
+        ]
+      },
+      "steel.ll": {
+        "levels": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "successive_L1_pct": [
+          15.353528489881466,
+          8.954837883182247,
+          1.9772554791885741
+        ]
+      },
+      "steel.vl": {
+        "levels": [
+          1,
+          2,
+          3
+        ],
+        "successive_L1_pct": [
+          16.834942592438587,
+          9.16570221538727
+        ]
+      },
+      "LBE-I_SS_II_Q2_baseline_sat0.001.up": {
+        "levels": [
+          1,
+          2,
+          3
+        ],
+        "successive_L1_pct": [
+          9.022094895685392,
+          5.257144662054918
+        ]
+      },
+      "LBE-I_SS_II_Q2_baseline_sat0.01.up": {
+        "levels": [
+          1,
+          2,
+          3
+        ],
+        "successive_L1_pct": [
+          9.720940716686938,
+          2.0558953244269915
+        ]
+      }
+    },
+    "vanLeer_vs_limitedLinear_L1_pct": {
+      "pure.L1": 1.8181451939313031,
+      "pure.L2": 0.5977542964571588,
+      "pure.L3": 0.26760976544232945,
+      "steel.L1": 2.775759882436532,
+      "steel.L2": 1.9134064387410332,
+      "steel.L3": 1.164387163912072
+    },
+    "upwind_vs_limitedLinear_L1_pct": {
+      "pure.L1.ll_vs_up": 13.168046016325444,
+      "pure.L2.ll_vs_up": 12.233184355779004,
+      "pure.L3.ll_vs_up": 8.965994624222628,
+      "steel.L1.ll_vs_up": 20.79706008210788,
+      "steel.L2.ll_vs_up": 14.071739726689634,
+      "steel.L3.ll_vs_up": 11.265981028437666,
+      "steel.L4.ll_vs_up": 7.724485301833953
+    },
+    "steel_ll_apparent_orders": [
+      1.329710927110457,
+      3.725312339130655
+    ],
+    "steel_ll_L3_error_estimate_apparent_order_pct": 2.537555451818576,
+    "steel_ll_L3_error_estimate_second_order_pct": 3.5590598625394336,
+    "steel_ll_centroid_range_mm": 0.5932179824418293,
+    "steel_ll_centroid_wall_T_range_K": 0.936795487663403,
+    "steel_ll_total_range_pct": 0.015143095361565655,
+    "steel_ll_L3_L4_3cm_L1_pct": 0.6654726253483415,
+    "steel_ll_L3_L4_total_change_pct": 0.01514538884224148
+  },
+  "iteration_check_iodine_L1_pct": {
+    "PbI2_SS_Q1_baseline": 1.088590255043677e-13,
+    "LBE-I_SS_II_Q2_baseline_sat0.001": 4.88599429250703e-13,
+    "LBE-I_SS_II_Q2_baseline_sat0.01": 0.02142375302177902
+  },
+  "production_max_raw_residue": 1.4083973977770984e-12,
   "sensitivity": [
     {
       "category": "transport",
@@ -73,8 +292,8 @@
     {
       "category": "silica_alignment",
       "label": "Silica temperature coordinates",
-      "min_L1_pct": 184.68456508980148,
-      "max_L1_pct": 192.50007892108755
+      "min_L1_pct": 187.0957224271734,
+      "max_L1_pct": 193.95896398870738
     },
     {
       "category": "shutdown",
@@ -90,21 +309,29 @@
       "shift_cm": 0,
       "PbI2_x_cm": 55.99999999999999,
       "BiI3_x_cm": 62.999999999999986,
-      "PbI2_C": 287.58800869032245,
-      "BiI3_C": 152.76694283199407,
-      "raw_L1_pp": 181.84449909251248,
-      "overlap_pct": 7.200159410804188
+      "PbI2_C": 287.8186750628464,
+      "BiI3_C": 152.82833369694998,
+      "PbI2_smoothed_x_cm": 55.99999999999999,
+      "BiI3_smoothed_x_cm": 63.99999999999999,
+      "PbI2_smoothed_C": 287.8186750628464,
+      "BiI3_smoothed_C": 119.7878205968417,
+      "raw_L1_pp": 183.83554293431644,
+      "overlap_pct": 6.132223907750821
     },
     {
       "case": "LBE-I_SiO2_I_Q1_baseline__curveShiftPbI2",
       "mode": "Q1",
       "shift_cm": -4.096367986080896,
-      "PbI2_x_cm": 51.99999999999999,
+      "PbI2_x_cm": 50.99999999999999,
       "BiI3_x_cm": 59.0,
-      "PbI2_C": 286.0971796720438,
-      "BiI3_C": 149.9066982118103,
-      "raw_L1_pp": 46.28151439143169,
-      "overlap_pct": 75.28942641981254
+      "PbI2_C": 304.8496424449223,
+      "BiI3_C": 149.91561126909295,
+      "PbI2_smoothed_x_cm": 51.99999999999999,
+      "BiI3_smoothed_x_cm": 59.999999999999986,
+      "PbI2_smoothed_C": 285.8717445499482,
+      "BiI3_smoothed_C": 115.97129058288243,
+      "raw_L1_pp": 40.17175605455173,
+      "overlap_pct": 77.7979370276043
     },
     {
       "case": "LBE-I_SiO2_I_Q1_baseline__curveShiftBiI3",
@@ -112,21 +339,29 @@
       "shift_cm": -4.6531462799495715,
       "PbI2_x_cm": 50.99999999999999,
       "BiI3_x_cm": 57.999999999999986,
-      "PbI2_C": 294.2145234078629,
-      "BiI3_C": 162.12060634505855,
-      "raw_L1_pp": 37.05430884432432,
-      "overlap_pct": 80.99766562716374
+      "PbI2_C": 294.19161684523283,
+      "BiI3_C": 161.81745532832758,
+      "PbI2_smoothed_x_cm": 51.99999999999999,
+      "BiI3_smoothed_x_cm": 59.0,
+      "PbI2_smoothed_C": 276.02001570415064,
+      "BiI3_smoothed_C": 131.8315184658515,
+      "raw_L1_pp": 51.44050820430271,
+      "overlap_pct": 73.26314974021126
     },
     {
       "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
       "mode": "Q2",
       "shift_cm": 0,
-      "PbI2_x_cm": 55.99999999999999,
+      "PbI2_x_cm": 54.999999999999986,
       "BiI3_x_cm": 62.999999999999986,
-      "PbI2_C": 287.58800869032245,
-      "BiI3_C": 152.76694283199407,
-      "raw_L1_pp": 181.84462801563353,
-      "overlap_pct": 7.196301142119905
+      "PbI2_C": 306.78283180512256,
+      "BiI3_C": 152.82833369694998,
+      "PbI2_smoothed_x_cm": 55.99999999999999,
+      "BiI3_smoothed_x_cm": 63.99999999999999,
+      "PbI2_smoothed_C": 287.8186750628464,
+      "BiI3_smoothed_C": 119.7878205968417,
+      "raw_L1_pp": 183.8404339703751,
+      "overlap_pct": 6.128024253899777
     },
     {
       "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftPbI2",
@@ -134,21 +369,29 @@
       "shift_cm": -4.096367986080896,
       "PbI2_x_cm": 50.99999999999999,
       "BiI3_x_cm": 59.0,
-      "PbI2_C": 304.71174580224226,
-      "BiI3_C": 149.9066982118103,
-      "raw_L1_pp": 39.396374420203536,
-      "overlap_pct": 79.15832451770147
+      "PbI2_C": 304.8496424449223,
+      "BiI3_C": 149.91561126909295,
+      "PbI2_smoothed_x_cm": 51.99999999999999,
+      "BiI3_smoothed_x_cm": 59.999999999999986,
+      "PbI2_smoothed_C": 285.8717445499482,
+      "BiI3_smoothed_C": 115.97129058288243,
+      "raw_L1_pp": 37.39818751583749,
+      "overlap_pct": 77.87619372086945
     },
     {
       "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftBiI3",
       "mode": "Q2",
       "shift_cm": -4.6531462799495715,
       "PbI2_x_cm": 50.99999999999999,
-      "BiI3_x_cm": 59.0,
-      "PbI2_C": 294.2145234078629,
-      "BiI3_C": 132.1004934777339,
-      "raw_L1_pp": 34.308134266373195,
-      "overlap_pct": 83.33060923679949
+      "BiI3_x_cm": 57.999999999999986,
+      "PbI2_C": 294.19161684523283,
+      "BiI3_C": 161.81745532832758,
+      "PbI2_smoothed_x_cm": 50.99999999999999,
+      "BiI3_smoothed_x_cm": 59.0,
+      "PbI2_smoothed_C": 294.19161684523283,
+      "BiI3_smoothed_C": 131.8315184658515,
+      "raw_L1_pp": 47.213889884532946,
+      "overlap_pct": 75.53552510729607
     }
   ],
   "integrity_60s_followup": {
@@ -157,10 +400,236 @@
     "max_net_clamped_over_source": 7.420104486993179e-13,
     "max_solver_defect_over_source": 8.641442052445532e-13
   },
-  "baseline_trace_mole_fraction_upper_bound": 9.185175769835115e-05,
-  "baseline_max_negative_I_over_supplied_I": 1.135919801709971e-124,
+  "lobresco2026": {
+    "rows": [
+      {
+        "case": "T106_6",
+        "experiment_K": 814,
+        "ours_K": 839.7416600589462,
+        "ours_minus_exp_K": 25.741660058946195,
+        "ours_coarse_minus_exp_K": 25.72822146324245,
+        "ours_with_gas_minus_exp_K": 25.745735973310047,
+        "ours_from_inlet_K": 839.7416600589462,
+        "temperature_based_minus_exp_K": -39,
+        "vapour_pressure_based_minus_exp_K": 27,
+        "peak_shift_cm": -3.9999999999999982,
+        "L1_over_n0": 0.8922348359963763,
+        "deposit_over_n0": 0.9810954970478818,
+        "gas_fraction": 0.018904502951004768,
+        "cells_prod": 22896,
+        "cells_coarse": 10176
+      },
+      {
+        "case": "T106_60",
+        "experiment_K": 723,
+        "ours_K": 742.121,
+        "ours_minus_exp_K": 19.12099999999998,
+        "ours_coarse_minus_exp_K": 19.366755950267702,
+        "ours_with_gas_minus_exp_K": 19.12206342927061,
+        "ours_from_inlet_K": 742.121,
+        "temperature_based_minus_exp_K": -10,
+        "vapour_pressure_based_minus_exp_K": 37,
+        "peak_shift_cm": -2.000000000000007,
+        "L1_over_n0": 0.6612835585281361,
+        "deposit_over_n0": 0.9985737893722743,
+        "gas_fraction": 0.0014262106163296672,
+        "cells_prod": 22896,
+        "cells_coarse": 10176
+      },
+      {
+        "case": "T106_300",
+        "experiment_K": 667,
+        "ours_K": 683.1668042424176,
+        "ours_minus_exp_K": 16.166804242417584,
+        "ours_coarse_minus_exp_K": 16.15943741465901,
+        "ours_with_gas_minus_exp_K": 16.166866916564686,
+        "ours_from_inlet_K": 683.1668042424176,
+        "temperature_based_minus_exp_K": -1,
+        "vapour_pressure_based_minus_exp_K": 34,
+        "peak_shift_cm": -2.000000000000007,
+        "L1_over_n0": 0.8797248839060341,
+        "deposit_over_n0": 0.9997487416967638,
+        "gas_fraction": 0.0002512580924584387,
+        "cells_prod": 22896,
+        "cells_coarse": 10176
+      },
+      {
+        "case": "T5_60",
+        "experiment_K": 847,
+        "ours_K": 835.998,
+        "ours_minus_exp_K": -11.001999999999953,
+        "ours_coarse_minus_exp_K": -11.001999999999953,
+        "ours_with_gas_minus_exp_K": 3.0105710432281967,
+        "ours_from_inlet_K": 548.4036729444686,
+        "temperature_based_minus_exp_K": -60,
+        "vapour_pressure_based_minus_exp_K": -50,
+        "peak_shift_cm": -1.0000000000000064,
+        "L1_over_n0": 0.3691782744132958,
+        "deposit_over_n0": 0.9602105960681543,
+        "gas_fraction": 0.03978940378795714,
+        "cells_prod": 22896,
+        "cells_coarse": 10176
+      },
+      {
+        "case": "T540_60",
+        "experiment_K": 700,
+        "ours_K": 686.0766949662376,
+        "ours_minus_exp_K": -13.923305033762404,
+        "ours_coarse_minus_exp_K": -13.850084112664035,
+        "ours_with_gas_minus_exp_K": -13.923287105394138,
+        "ours_from_inlet_K": 686.0766949662376,
+        "temperature_based_minus_exp_K": -30,
+        "vapour_pressure_based_minus_exp_K": -15,
+        "peak_shift_cm": -1.0000000000000009,
+        "L1_over_n0": 0.47363555318738093,
+        "deposit_over_n0": 0.9996430878033613,
+        "gas_fraction": 0.0002453296449035371,
+        "cells_prod": 22896,
+        "cells_coarse": 10176
+      }
+    ],
+    "summary": {
+      "rms_ours_K": 17.913758344167697,
+      "rms_ours_coarse_K": 17.94997976146507,
+      "rms_ours_with_gas_K": 17.27880365259072,
+      "rms_temperature_based_K": 34.99142752160878,
+      "rms_vapour_pressure_based_K": 34.580341236025994,
+      "max_coarse_vs_prod_K": 0.24575595026772135,
+      "max_digitised_vs_table2_K": 1.022727829079372
+    }
+  },
+  "baseline_trace_mole_fraction_upper_bound": 9.1811273878198e-05,
+  "legacy_18432_upwind_q1_peaks": [
+    {
+      "case": "PbI2_SS_Q1_baseline",
+      "experiment": "PbI2_SS",
+      "species": "PbI2",
+      "predicted_peak_C": 350.72813859893336,
+      "published_peak_C": 368.0,
+      "error_K": -17.271861401066644,
+      "uncertainty_K": 18.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 36.99999999999999,
+      "figure_x_cm": 36.0,
+      "offset_cm": 0.9999999999999953
+    },
+    {
+      "case": "LBE-I_SS_II_Q1_baseline",
+      "experiment": "LBE-I_SS_II",
+      "species": "PbI2",
+      "predicted_peak_C": 288.08725858341006,
+      "published_peak_C": 288.0,
+      "error_K": 0.08725858341006187,
+      "uncertainty_K": 18.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 50.99999999999999,
+      "figure_x_cm": 51.0,
+      "offset_cm": -1.1102230246251565e-14
+    },
+    {
+      "case": "LBE-I_SS_II_Q1_baseline",
+      "experiment": "LBE-I_SS_II",
+      "species": "BiI3",
+      "predicted_peak_C": 166.41083189720092,
+      "published_peak_C": 154.0,
+      "error_K": 12.410831897200922,
+      "uncertainty_K": 14.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 56.999999999999986,
+      "figure_x_cm": 56.99999999999999,
+      "offset_cm": -1.1102230246251565e-14
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "experiment": "LBE-I_SiO2_I",
+      "species": "PbI2",
+      "predicted_peak_C": 287.58800869032245,
+      "published_peak_C": 306.0,
+      "error_K": -18.411991309677546,
+      "uncertainty_K": 24.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 55.99999999999999,
+      "figure_x_cm": 51.0,
+      "offset_cm": 4.999999999999993
+    },
+    {
+      "case": "LBE-I_SiO2_I_Q1_baseline",
+      "experiment": "LBE-I_SiO2_I",
+      "species": "BiI3",
+      "predicted_peak_C": 152.76694283199407,
+      "published_peak_C": 127.0,
+      "error_K": 25.766942831994072,
+      "uncertainty_K": 39.0,
+      "within_uncertainty": "True",
+      "model_x_cm": 62.999999999999986,
+      "figure_x_cm": 59.0,
+      "offset_cm": 3.9999999999999925
+    }
+  ],
+  "baseline_max_negative_I_over_supplied_I": 1.4900481773166788e-48,
   "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
   "study_manifest_sha256": "4d98f95da81b9afdd33bf91d4cfea5ec352946cfdc514ed4bebaf4cbce6b7143",
+  "macros": {
+    "BaselineCases": 15,
+    "FollowupCases": 64,
+    "ProductionCases": 19,
+    "TimeMin": "0.0043",
+    "TimeMax": "0.323",
+    "MeshMin": "2.06",
+    "MeshMax": "10.58",
+    "ProductionResidue": "1.41\\times10^{-12}",
+    "SteelLLOne": "15.35",
+    "SteelLLTwo": "8.95",
+    "SteelLLThree": "1.98",
+    "SteelUpOne": "10.47",
+    "SteelUpTwo": "10.58",
+    "SteelUpThree": "2.13",
+    "PureLLOne": "5.70",
+    "PureLLTwo": "2.15",
+    "PureUpOne": "6.57",
+    "PureUpTwo": "5.06",
+    "SteelOrderOne": "1.3",
+    "SteelOrderTwo": "3.7",
+    "SteelErrApparent": "2.5",
+    "SteelErrSecond": "3.6",
+    "SteelSmoothThree": "0.67",
+    "SteelTotalThree": "0.015",
+    "SteelCentroidRange": "0.6",
+    "SteelCentroidTRange": "0.9",
+    "UpLLOne": "20.8",
+    "UpLLTwo": "14.1",
+    "UpLLThree": "11.3",
+    "UpLLFour": "7.7",
+    "PureUpLLMin": "9.0",
+    "PureUpLLMax": "13.2",
+    "VLSteelMax": "2.8",
+    "VLPureMax": "1.8",
+    "VLSteelThree": "1.16",
+    "VLPureThree": "0.27",
+    "IterPure": "1.09\\times10^{-13}",
+    "IterSteelLow": "4.89\\times10^{-13}",
+    "IterSteelHigh": "0.021",
+    "LobRMS": "18",
+    "LobRMSTemp": "35",
+    "LobRMSVap": "35",
+    "LobRMSGas": "17",
+    "LobCoarse": "0.2",
+    "LobDigitised": "1.0",
+    "LobFiveInlet": "548",
+    "LobFiveGas": "+3",
+    "LobFiveGasFraction": "4.0",
+    "LobLOneMin": "0.4",
+    "LobLOneMax": "0.9",
+    "LobShiftMin": "1",
+    "LobShiftMax": "4",
+    "LobCellsProd": "22{,}896",
+    "LobCellsCoarse": "10{,}176",
+    "LobDiffA": "+26",
+    "LobDiffB": "+19",
+    "LobDiffC": "+16",
+    "LobDiffD": "$-$11",
+    "LobDiffE": "$-$14"
+  },
   "scope": "Completed numerical studies and conditional input sensitivities; no fitting or experimental qualification.",
   "chemistry": [
     {
@@ -168,84 +637,84 @@
       "experiment": "LBE-I_SS_II",
       "variant": "baseline",
       "beta": 0.001,
-      "BiI3_pct": 56.474661932483215
+      "BiI3_pct": 56.47522758257266
     },
     {
       "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
       "experiment": "LBE-I_SS_II",
       "variant": "baseline",
       "beta": 0.01,
-      "BiI3_pct": 94.56004535260291
+      "BiI3_pct": 94.5837078104629
     },
     {
       "case": "LBE-I_SS_II_Q2_baseline_sat0.1",
       "experiment": "LBE-I_SS_II",
       "variant": "baseline",
       "beta": 0.1,
-      "BiI3_pct": 94.55671872805749
+      "BiI3_pct": 94.5819575475371
     },
     {
       "case": "LBE-I_SS_II_Q2_shift29k_sat0.001",
       "experiment": "LBE-I_SS_II",
       "variant": "shift29k",
       "beta": 0.001,
-      "BiI3_pct": 56.48886855345149
+      "BiI3_pct": 56.48600607782501
     },
     {
       "case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
       "experiment": "LBE-I_SS_II",
       "variant": "shift29k",
       "beta": 0.01,
-      "BiI3_pct": 1.996160301771938
+      "BiI3_pct": 2.006013581869712
     },
     {
       "case": "LBE-I_SS_II_Q2_shift29k_sat0.1",
       "experiment": "LBE-I_SS_II",
       "variant": "shift29k",
       "beta": 0.1,
-      "BiI3_pct": 1.9925410715006082
+      "BiI3_pct": 2.00103107554514
     },
     {
       "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
       "experiment": "LBE-I_SiO2_I",
       "variant": "baseline",
       "beta": 0.001,
-      "BiI3_pct": 23.965914017704858
+      "BiI3_pct": 23.97077145391851
     },
     {
       "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01",
       "experiment": "LBE-I_SiO2_I",
       "variant": "baseline",
       "beta": 0.01,
-      "BiI3_pct": 94.49130260244912
+      "BiI3_pct": 94.52064432452563
     },
     {
       "case": "LBE-I_SiO2_I_Q2_baseline_sat0.1",
       "experiment": "LBE-I_SiO2_I",
       "variant": "baseline",
       "beta": 0.1,
-      "BiI3_pct": 94.48746960852087
+      "BiI3_pct": 94.51798178554925
     },
     {
       "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.001",
       "experiment": "LBE-I_SiO2_I",
       "variant": "shift29k",
       "beta": 0.001,
-      "BiI3_pct": 20.442914067775646
+      "BiI3_pct": 20.441687097787455
     },
     {
       "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01",
       "experiment": "LBE-I_SiO2_I",
       "variant": "shift29k",
       "beta": 0.01,
-      "BiI3_pct": 1.9799459969655473
+      "BiI3_pct": 1.9902180272089047
     },
     {
       "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.1",
       "experiment": "LBE-I_SiO2_I",
       "variant": "shift29k",
       "beta": 0.1,
-      "BiI3_pct": 1.975797887175744
+      "BiI3_pct": 1.9880163765492773
     },
     {
       "case": "LBE-I_SS_II_Q2_baseline_sat0.01__sat0.002",
@@ -333,7 +802,7 @@
     }
   ],
   "input_sha256": {
-    "manuscript/prepare_results.py": "12a22d65d79a0951030539eba423f626c6287947637a9aad88b67457962c51ec",
+    "manuscript/prepare_results.py": "aa346a0b4b250a9a1ef6e503a4cf4b9c5a21dbd7f3c10a08a8662f5d6ebb4d60",
     "run/034-liu2025/followup_results/analysis.json": "bb71e732f23010cfbc55fde073829ae7e47e3183bc9576926fc75f257b0560d1",
     "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.001__D0.0002/BiI3_g_native.dat": "facc0d1482414691eac9a11a9cb80c37dddd2079ebe70bdad05592608f4e3742",
     "run/034-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.001__D0.0002/PbI2_g_native.dat": "641afa3e9db78de09580d9bb75d46e47bf493a1a4831b5cff43121a9f301605f",
@@ -652,6 +1121,170 @@
     "run/034-liu2025/full_analysis/profiles/PbI2_SS_Q1_baseline/PbI2_g_native.dat": "3ff254d9e2250f16105c2c240d91b4ce07a7ef0f9d8e67c1c99a17663dadf851",
     "run/034-liu2025/full_analysis/profiles/PbI2_SS_Q1_baseline/element_I_native.dat": "710e42d34bb970f96d9581c46a7484990770192e9e57cecb75c3132d9e558e1e",
     "run/034-liu2025/full_analysis/profiles/PbI2_SS_Q1_baseline/iodine-comparison.csv": "b50ba3c229fa43220e97443dfcca208793be501e25f0e9e4570f59e33136aa64",
+    "run/034-liu2025/iteration_check/profiles/LBE-I_SS_II_Q2_baseline_sat0.001__correctors8_full60s/BiI3_g_native.dat": "14c9878d63ce928a98682db15573df5781f2f94b3a80b34e8eceed3de0982b94",
+    "run/034-liu2025/iteration_check/profiles/LBE-I_SS_II_Q2_baseline_sat0.001__correctors8_full60s/PbI2_g_native.dat": "0db5d0ea0b76b92237e2cc765d9eb208c5971d8e7e7f5232311e57db321453bb",
+    "run/034-liu2025/iteration_check/profiles/LBE-I_SS_II_Q2_baseline_sat0.001__correctors8_full60s/element_I_native.dat": "1a35559281b9832147a337329d2dae20758960390b92cbf9357998500ee3d312",
+    "run/034-liu2025/iteration_check/profiles/LBE-I_SS_II_Q2_baseline_sat0.01__correctors8_full60s/BiI3_g_native.dat": "d2aa809524d5198806733898013ecb225b6b04340cfb53488e07c9cc7785bd47",
+    "run/034-liu2025/iteration_check/profiles/LBE-I_SS_II_Q2_baseline_sat0.01__correctors8_full60s/PbI2_g_native.dat": "720d4085238daa1e0d8f4aa971c418011ec28dc5e6725f9d1a968e7deb9cc105",
+    "run/034-liu2025/iteration_check/profiles/LBE-I_SS_II_Q2_baseline_sat0.01__correctors8_full60s/element_I_native.dat": "def81b6c7e1b432e4bbace05ceaca7d77cb97e892a05316049a369c10182a105",
+    "run/034-liu2025/iteration_check/profiles/PbI2_SS_Q1_baseline__correctors8_full60s/BiI3_g_native.dat": "78965eda5f9c58b121ac8db9f9c8a38b433a4c1ecbeda30f4c243e5b5e0acd2f",
+    "run/034-liu2025/iteration_check/profiles/PbI2_SS_Q1_baseline__correctors8_full60s/PbI2_g_native.dat": "1a448aa424b0b9f3104e85c97d6a4b7cbc9bbfa9d39d7f2fbe7b3c6439eb3d9b",
+    "run/034-liu2025/iteration_check/profiles/PbI2_SS_Q1_baseline__correctors8_full60s/element_I_native.dat": "78937162dcc5b0fe8d298183013502ca93fee1acae2659be20d3928fb5413b57",
+    "run/034-liu2025/iteration_check/summary.json": "06b5385b9af02da10231a37ac8f0ca9b88341b97a28de45044683d34edc01788",
+    "run/034-liu2025/production_576x72_limitedLinear/analysis.json": "53f8162c390a2ae90727f09109aa1e90116d099a59e2e695a8147b1d2750b09b",
+    "run/034-liu2025/production_576x72_limitedLinear/ledger.json": "451f231d6294252f057e3707d498a4136a2a5f5a303a0d030d0045dba4025dc7",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q1_baseline/BiI3_g_native.dat": "88d8ec99eaa0c0f11dea4dce867880b012c68a59bf6900b732ccc6b39ce2aecc",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q1_baseline/PbI2_g_native.dat": "3bc8e6980085aa17d570e1ab2be7ddafa0307fe59f598d8b1454c6723ded311c",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q1_baseline/element_I_native.dat": "2496ec0ce0e440a103ffe8471b72bab5c207c4dff4cea44dd257cd412d0a5398",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q1_baseline/iodine-comparison.csv": "bf8c08d4e29701c5ad6225f4bea0ba4efacd9479e5c752daa27deaa48d3e029f",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_baseline_sat0.001/BiI3_g_native.dat": "059af46d4d36e14a54755169228a4e975699fc764fb18b1d6463afbaecac8794",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_baseline_sat0.001/PbI2_g_native.dat": "e4b5a53ed0b79398cac4e228d0eb60e60e6b4f6519e788ae611788a284f0b289",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_baseline_sat0.001/element_I_native.dat": "3227fe6f5feba269ed70250b75062befc5dd2ccf5070061787528ef57d5c9035",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_baseline_sat0.001/iodine-comparison.csv": "ab920c219dc62ecc48ba45dccecbf01efa9eb2cca9268f4d777404e1a04ea686",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_baseline_sat0.01/BiI3_g_native.dat": "4f991f49e70d2bd527992a37af5c14590823fdc9c5a04a2d87c9e747ca63447f",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_baseline_sat0.01/PbI2_g_native.dat": "7184ad82a5506adf2069d02828d8642cf8340d19d555b178c42789895dd19e37",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_baseline_sat0.01/element_I_native.dat": "a3be0fd0e67b40965f837a683d0c295e6b1a63fdb0b1da985dd3a7d53060f0a1",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_baseline_sat0.01/iodine-comparison.csv": "ef82de79c425f827533ca27fd7bc6f6489951c4c64b4f98643add54c8787cbc7",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_baseline_sat0.1/BiI3_g_native.dat": "167fc5e93ac0b3209078470f8e739076ba96e255c64898d7199590eee01d6e6f",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_baseline_sat0.1/PbI2_g_native.dat": "1b25cbeb43ae44b2105107bd1cf59e0fdf220053f68e86a2f302aa514e691f75",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_baseline_sat0.1/element_I_native.dat": "0a86bcaf4d2fc2d802d735bcfd35c1dd452ecf1483136a98bee394e1f141057c",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_baseline_sat0.1/iodine-comparison.csv": "79c2f2b635f09440466f014cffe257dcf2112844144961537ebd19f6e94b0f00",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_shift29k_sat0.001/BiI3_g_native.dat": "22362d70e6a571e1300b20e4c7e308137f70497ad06eda709ed718be164621b0",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_shift29k_sat0.001/PbI2_g_native.dat": "feaaa6942bca6c3ab5d6baef7e2043c2a9e9418aef80cfb17240c1e2482f72c8",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_shift29k_sat0.001/element_I_native.dat": "67286ce028e8e079f9f6896d3dd260f3a8e611e12bd69e1c0d8f3605786bdda9",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_shift29k_sat0.001/iodine-comparison.csv": "4694289b8c3598d3b7f03472d72193acfe83bf3d9576f2c820a952ae0c9a14ae",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01/BiI3_g_native.dat": "07d71ec58183bc7a373268a690b3aa2e9f4217510eb0a66ca6fde802c5d4b099",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01/PbI2_g_native.dat": "e963f23868f08aad7bf0d6e934bc7b8ae08d3951484b56b59a3018314d3fcadf",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01/element_I_native.dat": "e01cc6fb0992e15aacc164c9c80e460b92442d955cd2c0eda24da9e432d1fc13",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01/iodine-comparison.csv": "64cf16d6bb48a4009aed49fff17118126a9b9447012b3057afa7b4307c2a2ccb",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_shift29k_sat0.1/BiI3_g_native.dat": "d54c47d7900d342bdd86dd4013d240c930c0faa54a74a26179a59bdafd3c63a7",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_shift29k_sat0.1/PbI2_g_native.dat": "871988831d548d5d5bce2056788bdc1503106939fb2dd17f63372542b7bbbb4d",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_shift29k_sat0.1/element_I_native.dat": "feb41a318dde3f963448dc0afa93f2cddd982012da455c91d71b18c8233df3ef",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q2_shift29k_sat0.1/iodine-comparison.csv": "2582d60df4ac7855c965dd39a86364c926722ababe14b5b257e07f2c97081365",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline/BiI3_g_native.dat": "d7932993d317610f03346d9966d9242aed890ebff40e3ade3d38036e74919f68",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline/PbI2_g_native.dat": "dc1abc34449b2c9cb803647fffbe1a635c7141d403caa581e2b8a61cd435c8a0",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline/element_I_native.dat": "c3d5e886655f4a4ab6bdea4d35874343571eee5e49a3f14220b8969dcba3a544",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline/iodine-comparison.csv": "3b72ee0b43ff9cc101860a9b59d09cc59e6153e930648b9532f2f9ac5ddee246",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline__curveShiftBiI3/BiI3_g_native.dat": "30a13af47a32180058e3fc7df9e22f4e211e5c2bd2394641841280c154cb8a8e",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline__curveShiftBiI3/PbI2_g_native.dat": "9794ecf28f7a8fb9bfc56e24cd3cb1ae2e79833fc9780194637380b7e2eb8f03",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline__curveShiftBiI3/element_I_native.dat": "00fb10463415cb5be90b29f928f234c369a23a9973948827c290257dc7b4f622",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline__curveShiftBiI3/iodine-comparison.csv": "ca7d9ad43e9a22ae60df0097681f6acee8331ba29c8d4d7fa7c953f355b0441b",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline__curveShiftPbI2/BiI3_g_native.dat": "7a4923f5a85e402f5ca24d081848aa7224452a304bf15c4e75c6686fe3e1c837",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline__curveShiftPbI2/PbI2_g_native.dat": "bf51644ff79420fe1d93b834c437579cc24e8914b11edcf30be9f7967b6c2959",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline__curveShiftPbI2/element_I_native.dat": "e290ceabc25b86dc2ffdd0bd12d25ea1193bba33c5664c15e986e9a4eeb0e3d6",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline__curveShiftPbI2/iodine-comparison.csv": "382db4a6c43b4d2b61e2a756b321a985647b12f0074d2eb6c4ca6b50c7bfa238",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.001/BiI3_g_native.dat": "0db8274c72cb5ee369251b5040a135d23fbbdefc7ddf279a921be104b90aa67f",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.001/PbI2_g_native.dat": "94566303be7c9fe22ec7fadf73abe64036b269b7747b102a4344b0e4af2f70fe",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.001/element_I_native.dat": "290640f9d40247691805ef7c2b2c8d62670727e10fb8c969ab57b418cdeb39c5",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.001/iodine-comparison.csv": "7f9bbcbb2231da2f8cfd658b2e727f1ca5a925a3f2788f4df8389cbf8cfeca8b",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftBiI3/BiI3_g_native.dat": "727e0175e6e80ca0fe2c0e07382304328d2a70403467757dc7b03b692766bfc3",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftBiI3/PbI2_g_native.dat": "54a82cb5a99fbff3f4cd68ee263261e97712ac1489f053fd0d402025a68d1bca",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftBiI3/element_I_native.dat": "c853053b4f385114c9c19ed966e2ccc7b06dd9a86af2db8b9cb49d0e9fdca55c",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftBiI3/iodine-comparison.csv": "daa659bf39b2cefe18c5723b3264d8df78358f71e5d06d384fa3d739c5f10074",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftPbI2/BiI3_g_native.dat": "ce49370267eb8ddc57eaaa6110b170b1833270cdf3de6851ba39b2146db5d606",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftPbI2/PbI2_g_native.dat": "fd69bd3458ed8ec9ab6c02cfd5c20c1c7c4379f9e036cea383d4866f16d821d0",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftPbI2/element_I_native.dat": "5c39ce0abcd47c800a5337ed5013ef14d51bf07c59be33cc33c63052312c98b4",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftPbI2/iodine-comparison.csv": "4c3d911e1b0c09a6f690aae76fe5928ef01a0ce1fc3022dd95db923bf7202e7a",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.01/BiI3_g_native.dat": "893250eaf66693ab444059253d888587ab2acb29193b7b8414877e0e56db431d",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.01/PbI2_g_native.dat": "8ac58ad4d5b953437b4e7b8d108b737cc1acca3729205b7339cb9498e71db84e",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.01/element_I_native.dat": "684ed426128f171b8af0a7350a7b977aa13ccf35054d3a114a2d28e2b7d72617",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.01/iodine-comparison.csv": "82a8863572d73c379c9551713a5185809dae1bd2414b65a42280dc20474f66da",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.1/BiI3_g_native.dat": "190b8a0c24d4af49b09e388b2ce33c0248360224b29254add2deb08dc4ea1eb1",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.1/PbI2_g_native.dat": "2c0346b0c3795adbfa6239692537670343a9063c25207b0eb2d57012228ecf69",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.1/element_I_native.dat": "1245ae94148d5b7608b5e7fbea4cb583920e5b1c19dd37cf800217b8d55794de",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_baseline_sat0.1/iodine-comparison.csv": "f8373531477e5e587a690c1d87f112d0598eaa91ec2208e76f8520d713f92de3",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_shift29k_sat0.001/BiI3_g_native.dat": "df1d31ea3b31f706c598a9e14e3359733f77dd5899408e4566640b3265cdfa5c",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_shift29k_sat0.001/PbI2_g_native.dat": "cfebb40d66667bf7d7d015ed0ed169bef9af5e3701beebb93b2dec2d206e36c6",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_shift29k_sat0.001/element_I_native.dat": "9b3867067417ae055df27af82fb80071d669dda247b9000810149f933f14f0cb",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_shift29k_sat0.001/iodine-comparison.csv": "2c95669e28cd4747a135e19a61f21ae5e9a96e41e87aabfe1487bb1f8ad71878",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_shift29k_sat0.01/BiI3_g_native.dat": "e46605f965d1b639c4b318d32a7d4390797577cf83a9969bbb056424302baf88",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_shift29k_sat0.01/PbI2_g_native.dat": "54566f33d3eace9677874183a84f113c8b30768783e15bcbc5796c48b951f1da",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_shift29k_sat0.01/element_I_native.dat": "e241a21910b5327289f6872fe74c8d29c2a19f016d2a5f57e7b246b2114b6d4e",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_shift29k_sat0.01/iodine-comparison.csv": "64dea95411f48bea12a56aaf994b248812d7c6726f0c9d2f299a49d9718e6a5c",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_shift29k_sat0.1/BiI3_g_native.dat": "4b4c89910fa8368205b011c166396a60d40ef96e3bad6de92ee5ea71e3b39762",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_shift29k_sat0.1/PbI2_g_native.dat": "e51ab3a5455400124ff289b0867eae06274ef0cd7aa8bf8e94a79f20f15d4182",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_shift29k_sat0.1/element_I_native.dat": "9b0623e8098a9164ce5220cf6cb03ecfbaea589c474a91dfbbb0017e55c3b155",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q2_shift29k_sat0.1/iodine-comparison.csv": "05b756d901d374b1d4ce7c83c5189df398ec28359518d747dfa9c1c710d8ebc7",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/PbI2_SS_Q1_baseline/BiI3_g_native.dat": "f0086d1b95dd5980c0dd4710a63dc8f8439abf207d78a34b45bb413f41d994fe",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/PbI2_SS_Q1_baseline/PbI2_g_native.dat": "ff1a1eb64066be2351cb610389f092dcdfc48bcef346f090be968c4d34c116c8",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/PbI2_SS_Q1_baseline/element_I_native.dat": "0d421afc3b0cf482777b3c6c71b4deece68b0067ed42129827d373f94da8791d",
+    "run/034-liu2025/production_576x72_limitedLinear/profiles/PbI2_SS_Q1_baseline/iodine-comparison.csv": "ae7f603df4ba6485d8d40b0666902c64fab56e87edc205cd81cf0f531f644dce",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L1_ll/BiI3_g_native.dat": "fd617cdc775c899c6752941686d784da54324cbe822e652cf3c0e6c5d09fada0",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L1_ll/PbI2_g_native.dat": "1c8dd00684d1e6f554fd93075b74e8d5cb224b355f4983f17d6fe754f6e4b8dc",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L1_ll/element_I_native.dat": "826a9c6ab376182e185cf9d8ef129753f906696f06c5304a66ef9261d980bd68",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L1_vl/BiI3_g_native.dat": "fd617cdc775c899c6752941686d784da54324cbe822e652cf3c0e6c5d09fada0",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L1_vl/PbI2_g_native.dat": "5120bd56a57d6f2c6b45f91ef7ac585ba2ccce3e2826552c5b584403b72b210c",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L1_vl/element_I_native.dat": "65b527fd7e347093cd6606bf217423a2f52eb2d96d5000eee63c51d005a6eeeb",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L2_ll/BiI3_g_native.dat": "78965eda5f9c58b121ac8db9f9c8a38b433a4c1ecbeda30f4c243e5b5e0acd2f",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L2_ll/PbI2_g_native.dat": "f4a0a14e6967e19851dfb6455aea5428c6dbd0d64aa788ed47cea9d422c1888b",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L2_ll/element_I_native.dat": "e4b0f1486bf304d21d9e25b440ca09449a729912e6f6966cdd502f09e3735760",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L2_vl/BiI3_g_native.dat": "78965eda5f9c58b121ac8db9f9c8a38b433a4c1ecbeda30f4c243e5b5e0acd2f",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L2_vl/PbI2_g_native.dat": "ec7ce7f931ef1dbcaa87bfe3b231f10c390e9c607d09cf8936d27ffb46593489",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L2_vl/element_I_native.dat": "f691568b02ccdb05b05ebf2d915ee4f559ce359e69e303f8fe1d5935bcf23b12",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L3_ll/BiI3_g_native.dat": "f0086d1b95dd5980c0dd4710a63dc8f8439abf207d78a34b45bb413f41d994fe",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L3_ll/PbI2_g_native.dat": "ff1a1eb64066be2351cb610389f092dcdfc48bcef346f090be968c4d34c116c8",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L3_ll/element_I_native.dat": "0d421afc3b0cf482777b3c6c71b4deece68b0067ed42129827d373f94da8791d",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L3_vl/BiI3_g_native.dat": "f0086d1b95dd5980c0dd4710a63dc8f8439abf207d78a34b45bb413f41d994fe",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L3_vl/PbI2_g_native.dat": "9a717409ddcd3a947d86943e44912da9cf09e6bd6340e4178bbee8888a5a3089",
+    "run/034-liu2025/scheme_mesh_study/profiles/pure_L3_vl/element_I_native.dat": "56ad6babf00402b6f7888f8fdc77332326ea696205e9fe79ea2acdceb7ca0cc5",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L1_ll/BiI3_g_native.dat": "85bafbc7ae29808e3299b10feed8de6da15c942cfccd9e60547052da3b6f90f8",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L1_ll/PbI2_g_native.dat": "e7eb8f702b57b7b47c364022a145815cdce5bb878b4c5d5c3c772c5fb657fbff",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L1_ll/element_I_native.dat": "5387e1b96256da92e17a9d9e26ed2b3c1f6b802e844765e6cf8c1113bd31f1f9",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L1_vl/BiI3_g_native.dat": "f516bff2cf76f0459ada4a20c3886dd15a15d135dafbc6b51c50217e313d6d9c",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L1_vl/PbI2_g_native.dat": "81ff0f30b15cf53ba029b1609db51dbe25b286d30937a71afa3dd70c82755990",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L1_vl/element_I_native.dat": "f50fedc9dfc5c32304c738d7d1d7f76d54a5f708ca9b704d1023f19c0948745c",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L2_ll/BiI3_g_native.dat": "7fe09b2eaad57fdf0344a57a75ee336e4d006fc8453fe5cbd30860700b464b9f",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L2_ll/PbI2_g_native.dat": "cca8e5286d762ad1b5d17eac110ed1ff848e067a093f7a8912ab22663814b03a",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L2_ll/element_I_native.dat": "2c0f40c4b9f0606b0373f98cdf75328df2c2e05cd44c8b5e47822b1a4ed97856",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L2_vl/BiI3_g_native.dat": "88f62b54af0f4e34d4bcb6c9c674c836a8c4205c946f42ca83fec5fa9245acef",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L2_vl/PbI2_g_native.dat": "f2ffdcedee792875afb9f29fd0131f2c2ebdb338b397cefcca0e38aec1d47e0c",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L2_vl/element_I_native.dat": "1633cf3e920dc1561ef63584d9a1faaa0ada36bdaf465df8e23ed39d6db1ff06",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L3_ll/BiI3_g_native.dat": "07d71ec58183bc7a373268a690b3aa2e9f4217510eb0a66ca6fde802c5d4b099",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L3_ll/PbI2_g_native.dat": "e963f23868f08aad7bf0d6e934bc7b8ae08d3951484b56b59a3018314d3fcadf",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L3_ll/element_I_native.dat": "e01cc6fb0992e15aacc164c9c80e460b92442d955cd2c0eda24da9e432d1fc13",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L3_vl/BiI3_g_native.dat": "6dad0122f4ef1a76d099c24bb54081fbf43b7ee351899002f66bff508b0c7f83",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L3_vl/PbI2_g_native.dat": "3d8e6b1f53b2480f1f1f68e85729f03404e8fc5d608bf9ac72d286c73ca7e5f0",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L3_vl/element_I_native.dat": "3a0ed237af2f007167a08fbbe2fe848bedb50be2bed837911d795852d3f93266",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L4_ll/BiI3_g_native.dat": "0e61274878841a3a1b7aaebe0b6e10d25ab03093652c108744095f44045ec300",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L4_ll/PbI2_g_native.dat": "d014ef90f99290e45b970422688d552a64ab2c58b365459a7ceadffb8fe223df",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L4_ll/element_I_native.dat": "04c7c0a592c5f397918e5451eea00cd71e5a9344322dbb1ceec08b5252a96b1c",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L4_up/BiI3_g_native.dat": "6f6b16c12312e8ff68950498d1ded07682200b9542419e5bbb2187d0f9ce9a2e",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L4_up/PbI2_g_native.dat": "7593d99d1940d8c33fded9e804c7c95b6ab1c051f5cc2b0851de5ad6d0c3f8ae",
+    "run/034-liu2025/scheme_mesh_study/profiles/steel_L4_up/element_I_native.dat": "d0d18b006c9a54f89e29569527acfdb3e83374ced4649371256c0c0b8428d3d5",
+    "run/034-liu2025/scheme_mesh_study/results.json": "294e314f487ecebae62f27d898e8e7a1376483b564f0be73d2dcb981662f3873",
+    "run/035-lobresco2026/cases/coarse/T106_300/case.json": "6916fb1ffd523a43f44b44cd00e7ed99ceef2d82dbadc90f72c6d92227a501d4",
+    "run/035-lobresco2026/cases/coarse/T106_300/final_profiles/PbI2_g_gamma.dat": "408c7abf67ea140cad2db50e19717b319cecedd02a718e91ca8b10eaff494d3c",
+    "run/035-lobresco2026/cases/coarse/T106_300/final_profiles/PbI2_g_native.dat": "0e12ed0945dc95d6eaf8e02ee81aededf49c4211e40996c806e90b0df5960935",
+    "run/035-lobresco2026/cases/coarse/T106_6/case.json": "bbb57e227b7f44e321b86e20ae1c8f7644d577a85f425c1f98106f4224bacd76",
+    "run/035-lobresco2026/cases/coarse/T106_6/final_profiles/PbI2_g_gamma.dat": "18da798b8a7fc4e3e32c3d9be25652557fe34f1c72b32174dd35b31cfd51797d",
+    "run/035-lobresco2026/cases/coarse/T106_6/final_profiles/PbI2_g_native.dat": "8e7fedacdc72a24bc6fe618cd4a8c82cd1be713c63093448605e1f26dc544f3d",
+    "run/035-lobresco2026/cases/coarse/T106_60/case.json": "2903d1c2176f5e956fb32818b9df7d3720921fe83d105c588822808428dcc093",
+    "run/035-lobresco2026/cases/coarse/T106_60/final_profiles/PbI2_g_gamma.dat": "1f651e384b4d2f7936529e7ccae839594149f0b3b67b5efcc1f615a2525e4bad",
+    "run/035-lobresco2026/cases/coarse/T106_60/final_profiles/PbI2_g_native.dat": "835813856ee004801483231e0fd80efa87775a764386e98c3a9e1eb0dff6847d",
+    "run/035-lobresco2026/cases/coarse/T540_60/case.json": "08162f87f7f0810b5837de5b7ed86a761d19dc4626b4040f4c93e98d7f7e8fa1",
+    "run/035-lobresco2026/cases/coarse/T540_60/final_profiles/PbI2_g_gamma.dat": "302d14dab6b1a50834cd3448c23705f56ac70c0981678525386d6c9e8666aaaf",
+    "run/035-lobresco2026/cases/coarse/T540_60/final_profiles/PbI2_g_native.dat": "e30d1217e924179211bdb071473754bea76efc36e46c2977258f4e707619b37a",
+    "run/035-lobresco2026/cases/coarse/T5_60/case.json": "f7ce64589bbf14cf774423f37a297a036045aec9d36d2c4f3e48315bbcb7e147",
+    "run/035-lobresco2026/cases/coarse/T5_60/final_profiles/PbI2_g_gamma.dat": "137c925681c8d210656343aef199bd11fc49d50061090e91f8367857f6877cee",
+    "run/035-lobresco2026/cases/coarse/T5_60/final_profiles/PbI2_g_native.dat": "c30db84cf138a059c160bae1dcf8516dcba25694d85c51a8b39e2a9cae07eaf8",
+    "run/035-lobresco2026/cases/prod/T106_300/case.json": "ecdd7184f0a39723cda0103db0cb602a72f283ab51f36842c6e58a3c45f438e1",
+    "run/035-lobresco2026/cases/prod/T106_300/final_profiles/PbI2_g_gamma.dat": "5bf1ee706106b0562e1d335e4f11076f743d6f5e42ee1db4f93aa5cf8ee11d3d",
+    "run/035-lobresco2026/cases/prod/T106_300/final_profiles/PbI2_g_native.dat": "7a20951bc1dcd70cd096967943d6366eaa501e939d881ed01b0498438fc5d6ac",
+    "run/035-lobresco2026/cases/prod/T106_6/case.json": "b15ee2e723833452acac8eec53c85a79553f42d8ae9753796ad2823939688966",
+    "run/035-lobresco2026/cases/prod/T106_6/final_profiles/PbI2_g_gamma.dat": "5e396fa7035c2fd19836e10932e475a07ff6a4407a6ddff2f827cf607fc3c26d",
+    "run/035-lobresco2026/cases/prod/T106_6/final_profiles/PbI2_g_native.dat": "7926e3cea9d49605771b703e5a835a5dd8b67cf0064ead0e6d9dc829e4099c82",
+    "run/035-lobresco2026/cases/prod/T106_60/case.json": "16e63ecce09f19a477655876d03de760a494dafa9c29215b151eaff11be4ef7e",
+    "run/035-lobresco2026/cases/prod/T106_60/final_profiles/PbI2_g_gamma.dat": "f07c87626415828db2bec78dc0f1a9c46ac77f59995a268b4941723bfc210797",
+    "run/035-lobresco2026/cases/prod/T106_60/final_profiles/PbI2_g_native.dat": "8f824d0cb01e1ae5e8692a5ee0ffd0584d2996eef5d1dbdb90a0d464ad9cfdf6",
+    "run/035-lobresco2026/cases/prod/T540_60/case.json": "5995ba3f4bda0ebaa64239845b3714cb5e7f2a3348007089d876fa7ecf335450",
+    "run/035-lobresco2026/cases/prod/T540_60/final_profiles/PbI2_g_gamma.dat": "7f85b89eb7bb1c33f17200625c98c054c829468a63da123f0ef4562cc7d419db",
+    "run/035-lobresco2026/cases/prod/T540_60/final_profiles/PbI2_g_native.dat": "f88789e12e38540c325f2dd9e89504010b2d360c959800ee9d11a757523edcf1",
+    "run/035-lobresco2026/cases/prod/T5_60/case.json": "84240a3fe17004df8e25ff7717042de881e0f35f4827175fdcf3cb1fe806c35c",
+    "run/035-lobresco2026/cases/prod/T5_60/final_profiles/PbI2_g_gamma.dat": "fcb5db3b7ef3e3cd1c6eae42500c32bf1b7cc69ec4e8d86a157775891d393576",
+    "run/035-lobresco2026/cases/prod/T5_60/final_profiles/PbI2_g_native.dat": "62c8fbe4f024639f694eafc0c07714ce3288a7295660a0d58e7168085ab1ec15",
+    "run/035-lobresco2026/inputs/wallT_106mLmin.csv": "1156d423d0c40510b04e8d52a79767e7a10356cfc4fe4637288df73237da8139",
+    "run/035-lobresco2026/inputs/wallT_540mLmin.csv": "418987d041eb2a8c6f5ef60d831d2200271b533e70f0ea2becbc2980f56b6fb9",
+    "run/035-lobresco2026/inputs/wallT_5mLmin.csv": "c91e9ced48828d011605af6e0287ba7f85144d9d424cd855ebdc6b5f1753c010",
     "thermochemistry/benchmarks/liu2025/analyse_matrix.py": "7b64bd64eb05874abbee749d18141bb8ee4b34d9e98655ece79aa89cb6167250",
     "thermochemistry/benchmarks/liu2025/carriers.py": "13cfc7d8d5222b07a4294c05a1dcede80a7a1346d8f5cd002e958a4f7e4b9dc2",
     "thermochemistry/benchmarks/liu2025/digitized/LBE-I_SS_II_gamma.csv": "4f01db625bcba5ec6e4e104f790da40bbce1b3f6e4767e8cee040f8c310d91d0",
@@ -665,6 +1298,27 @@
     "thermochemistry/benchmarks/liu2025/experiments.csv": "d613ee1108a2a7f66b43fb17f7345e3966e5b1ecd013b1453f7029ea7068f06f",
     "thermochemistry/benchmarks/liu2025/prepare.py": "8dcd29b26b35857181b2b76af071174b9cac2364ffac37d5f23a139c442b8dc8",
     "thermochemistry/benchmarks/liu2025/report.py": "cb9f4455bb085a9cfc36dbd43807f468fd5efe2520dbfc8c42ee9d600acc0783",
-    "thermochemistry/benchmarks/liu2025/targets.csv": "76e5b1354715b3d9644cf00c1bf17af1dd1c2b02f261db435cdd0242479de2e4"
+    "thermochemistry/benchmarks/liu2025/targets.csv": "76e5b1354715b3d9644cf00c1bf17af1dd1c2b02f261db435cdd0242479de2e4",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_300_experiment.csv": "ab92d0beb8fff84ca2eb82b23b2e7afc4994088655062334760c3db7317f78bb",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_300_model_temperature_based.csv": "c789f037818b7500541ed663f7c6b99070a99f9f3ad5aaef57b94f1e9397613a",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_300_model_vapour_pressure_based.csv": "a4846bb09e7ddd9203f66451c0b39cae0480c4342ec1f007c6fd528149366115",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_300_wall_temperature.csv": "1666f17a8fed3f3a59dbb4a2508fe84afe5afaa2553e8868397e691f91379db8",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_60_experiment.csv": "3974fd7a7808e2f1900021b11c78b97bae3edfa76ceec215a3ebfe0988ac36a2",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_60_model_temperature_based.csv": "669244215cd867dc8d9c8a1601d517452b98353dc8076e5dcdec33bb40df867a",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_60_model_vapour_pressure_based.csv": "019eb1683eaaa5bb8c275be66932d3b785a57bd99334c94ead7c0b1aa1f45d92",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_60_wall_temperature.csv": "7ee412ebfb567c3057b789585179968e708d11fd395899e2fb85aa8e08906495",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_6_experiment.csv": "8be6090b2659c070330f77a1eb46f3a6963c8887001324f66250dcb52154f20d",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_6_model_temperature_based.csv": "6b761e5e87183b0a3f5f754d5dfa9ab22db0dd7e7570727832b12e47f4b27424",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_6_model_vapour_pressure_based.csv": "ccac05c4c0d17f474019b9cc21d082bfea3c3f5c2768aebe550b2966b090d792",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_6_wall_temperature.csv": "68d24284cb943fd955726ab7d56d8822d174cfaaea610fa6fb567cd78cfd7278",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T540_60_experiment.csv": "c9c79a10a79572bc130bc3ea31b6b1aed6c0af954b59aa07701bc261b652dcc1",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T540_60_model_temperature_based.csv": "475d1a1ab352907c0dad3d7be5a79c334132e95d15605f08baccf4554b6064b9",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T540_60_model_vapour_pressure_based.csv": "50370e712712020fb8c677562f13d614f80ac0096167dc820ecee91f831e2fd5",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T540_60_wall_temperature.csv": "080bb7bd39ea6f831db956f8f0844b25c75a90b69986ed4e293346018751cac4",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T5_60_experiment.csv": "3e51e3a70578cd39d2481322cbe465086f420e33e98ca9d0dc961822428469c0",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T5_60_model_temperature_based.csv": "171d7fe5050a9736aa75e041d4b148ab06d522da3d07f6a94eca278dae691833",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T5_60_model_vapour_pressure_based.csv": "278edac2969262d38215ea39ecc41096c989dff62c56a2c9f101cfee258cd7d6",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T5_60_wall_temperature.csv": "4f6c11b7d2ef27bf879151445c65e105b7e0d6d152af4494fc58dee2252d84cc",
+    "thermochemistry/benchmarks/lobresco2026/digitized/provenance.json": "735a63160a58b1234bf2517bc806606fdb7bd4320dedd32e1385ff56b54e87df"
   }
 }

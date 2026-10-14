@@ -20,10 +20,10 @@ iodine, which also contains KI. Additional metal-saturation cases fill
 selected points between the original 0.1\% and 1\% levels; line
 segments connect computed points and are not a fitted release law.
 
-At 1\% metal saturation on the fine steel mesh, the baseline
-thermodynamics give $f_{\rm BiI_3}=94.57\%$. Raising the BiI(g)
-standard Gibbs energy by 29 kJ/mol gives 2.00\% at the same numerical
-resolution. This large difference survives refinement. It therefore
+At 1\% metal saturation on the production steel mesh, the baseline
+thermodynamics give $f_{\rm BiI_3}=94.58\%$ (94.57\% with upwind
+advection). Raising the BiI(g) standard Gibbs energy by 29 kJ/mol gives
+2.01\% (2.00\%) at the same numerical resolution. This large difference survives refinement. It therefore
 reflects conditional thermodynamic sensitivity, not numerical noise.
 The perturbation is applied consistently to the formation and
 reactive-wall constants. A constant Gibbs-energy shift scales the
@@ -33,11 +33,13 @@ perturbation, not an independently measured correction to BiI
 thermodynamics.
 
 Source loading also matters. With baseline thermodynamics, the steel
-BiI$_3$ share at 0.2\%, 0.316\% and 0.562\% metal saturation is
+BiI$_3$ share at 0.2\%, 0.316\% and 0.562\% metal saturation
+(follow-up cases, 18,432 cells, upwind) is
 52.50\%, 70.58\% and 94.56\%; the shifted branch gives 47.66\%,
 37.43\% and 15.88\%. The low-loading trend is not universally
 monotonic. The original steel 0.1\% case with baseline thermodynamics
-gives 56.47\% and an 81.10\% scan overlap. This makes it a useful
+gives 56.48\% and an 80.66\% scan overlap (56.47\% and 81.10\% on the
+18,432-cell upwind mesh). This makes it a useful
 diagnostic comparison, but not an identified physical saturation. The
 published deposits alone cannot uniquely separate source loading,
 thermodynamic data and omitted chemistry. Choosing a branch because it
@@ -46,7 +48,7 @@ independent validation.
 
 \begin{figure*}[tb]
 \centering
-\includegraphics[width=.96\textwidth]{source_thermodynamics.pdf}
+\includegraphics{source_thermodynamics.pdf}
 \caption{Conditional sensitivity of the BiI$_3$ share of deposited
 iodide iodine (\cref{eq:split}) to source loading and BiI
 thermodynamics, for steel and silica LBE. Symbols denote completed Q2
@@ -79,9 +81,13 @@ derived from the published curve and labels, not optimised against the
 CFD profiles. All original unshifted results are retained.
 
 \Cref{tab:alignment,fig:alignment} show that the shifts move the Q1
-maxima from 56/63 cm to 52/59 or 51/58 cm and raise the normalised
-overlap from 7.20\% to 75.29\% or 81.00\%. The low-loading Q2 variants
-place both maxima at 51/59 cm, with overlaps of 79.16\% and 83.33\%.
+maxima from 56/63 cm to 51/59 or 51/58 cm and raise the normalised
+overlap from 6.13\% to 77.80\% or 73.26\%. The low-loading Q2 variants
+place the maxima at 51/59 or 51/58 cm, with overlaps of 77.88\% and
+75.54\%. On the 18,432-cell upwind mesh the order of the two shifts was
+the opposite (75.29\% and 81.00\% for Q1; 79.16\% and 83.33\% for Q2),
+so the ranking of the two hypotheses by overlap is not robust to the
+advection scheme and should not be used to prefer one of them.
 A plausible coordinate change thus has a larger effect than the tested
 source-position or time-step changes. This does not confirm either
 shift as the experimental truth. The two shifts also give different
@@ -100,7 +106,7 @@ saturation.}
 \end{table}
 \begin{figure*}[tb]
 \centering
-\includegraphics[width=\textwidth]{silica_alignment.pdf}
+\includegraphics{silica_alignment.pdf}
 \caption{Input-derived silica mappings and their consequences.
 Top: the original reconstructed temperature curve, the two shifts and
 the printed peak labels. Bottom: common-scan-normalised iodine
@@ -131,7 +137,10 @@ confused with the raw discrepancies against the experimental scan.
 \caption{Range of the baseline-relative iodine profile change $E_{L1}$
 (percent) within each completed sensitivity category. The flow-stop row
 compares 80 s inventories with their 60 s restart state; the other rows
-compare 60 s inventories. Case counts and variations are listed in
+compare 60 s inventories. The silica temperature-coordinate row uses
+the production cases (41,472 cells, limited-linear advection); all
+other rows are upwind follow-up cases on 18,432 cells compared with
+their own upwind baselines. Case counts and variations are listed in
 \cref{tab:study}.}
 \label{tab:sensitivity}
 \small\input{generated/sensitivity-table}
@@ -145,10 +154,18 @@ prescribed source region by $\pm1.5$ cm gives at most 0.19\%. This
 small source-position response concerns the selected empty-tube source
 model; it cannot rule out an effect of a real boat on the flow or
 thermal fields. \Cref{fig:physical} shows the maxima for these
-categories, which should be compared with the unresolved
-2.06--10.58\% fine/medium spatial differences. Where numerical and
-input changes have comparable magnitude, the present results do not
-rank their physical importance precisely.
+categories. They are differences between upwind cases on the same
+18,432-cell mesh, which itself differs from the production scheme by
+12--14\% for the two cases of the scheme study
+(\cref{sec:verification}); how much of that error cancels in the
+differences has not been quantified. Where numerical and input changes
+have comparable magnitude, the present results do not rank their
+physical importance precisely. The tube-scale Damk\"ohler numbers of
+\cref{sec:numerics} and the small accommodation response, at most
+0.41\% for $\alpha=0.1$ and 4.21\% for $\alpha=0.01$, against
+3.83--14.20\% for halving or doubling $D$, indicate that radial diffusion, not
+interfacial kinetics, limits the wall exchange in these columns; the
+wall temperature acts mainly through the equilibrium pressure.
 
 The four fixed-temperature flow-stop cases change the deposited iodine
 profiles by 1.10--4.63\% over 20 s, with centroid shifts of at most
@@ -161,7 +178,7 @@ remain unqualified kinetic approximations.
 
 \begin{figure*}[tb]
 \centering
-\includegraphics[width=.8\textwidth]{physical_sensitivity.pdf}
+\includegraphics{physical_sensitivity.pdf}
 \caption{Maximum baseline-relative iodine profile change $E_{L1}$ in
 each selected physical-input category. The flow-stop value uses an
 80 s endpoint; the others use 60 s. These maxima describe the tested

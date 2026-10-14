@@ -1,0 +1,39 @@
+FoamFile {version 2.0; format ascii; class dictionary; object thermochemistryProperties;}
+
+model HKS;
+pairs {
+  PbI2_g {
+    condensed PbI2_s;
+    vapourPressure {
+      file "<constant>/pv_PbI2_phases.csv"; phases ("PbI2(cr)" "PbI2(l)");
+      units log10Pa; interpolation logInverseT; outOfRange extrapolate;
+    }
+  }
+}
+interface {
+  patches (WALL); layer faceCells; areaPerVolume cell; areaMultiplier 1;
+  interfaceTemperature wall; wallResistance halfCell;
+}
+HKSCoeffs { accommodation 1; Ce 1; kineticScale 1; equilibrium table; speciation none; }
+samples {
+  boat {
+    pair PbI2_g;
+    selection { boat { action use; source cylinder; point1 (0.125 0 0);
+                       point2 (0.135 0 0); radius 0.00048; } }
+    mode inventory;
+    amount 6.1527777777777778e-08;   /* mol in the 5-degree wedge = Table 1 moles x 5/360 */
+    areaPerVolume 4000.0;
+    kineticScale 1; Ce 1;
+    removeTime 60;
+  }
+}
+balance { nGuard 3; guardTolerance 1e-12; moleFractionWarning 0.05; writeFile yes; }
+profiles {
+  bins {
+    native { min 0; max 0.69; nBins 212; }
+    gamma  { min -0.005; max 0.695; nBins 70; }   /* 1 cm bins centred on the scan points */
+  }
+  times (10 20 30 40 50 60);
+  onset { fraction 0.01; search (fromInlet fromPeak); }
+  observable wallPlusGas;   /* shutdown comparison (plan section 28, item 3) */
+}

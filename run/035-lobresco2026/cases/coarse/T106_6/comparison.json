@@ -1,0 +1,98 @@
+{
+ "case": "T106_6",
+ "profile_time": 6.0,
+ "solver_onsets": {
+  "inventory": {
+   "gas": 1.2713288437745622e-09,
+   "wall": 6.595089337815613e-08,
+   "sample": 0.0
+  },
+  "Tdep_fromInlet": {
+   "status": "found",
+   "T": 839.0859031960488,
+   "x": 0.35018248505685995
+  },
+  "Tdep_fromPeak": {
+   "status": "found",
+   "T": 839.0859031960488,
+   "x": 0.35018248505685995
+  },
+  "columns": [
+   "x_lo",
+   "x_hi",
+   "x",
+   "gas",
+   "wall",
+   "sample",
+   "observable",
+   "Twall",
+   "wallArea",
+   "sampleGas"
+  ]
+ },
+ "model_wallPlusGas_fromInlet": {
+  "x_m": 0.35018248505685995,
+  "T_K": 839.7343008516323,
+  "x_peak_m": 0.37,
+  "peak_mol_per_m": 0.00010488126715088854,
+  "T_peak_K": 812.9
+ },
+ "model_wallPlusGas_fromPeak": {
+  "x_m": 0.35018248505685995,
+  "T_K": 839.7343008516323,
+  "x_peak_m": 0.37,
+  "peak_mol_per_m": 0.00010488126715088854,
+  "T_peak_K": 812.9
+ },
+ "model_wall_fromInlet": {
+  "x_m": 0.35018599915419507,
+  "T_K": 839.7282214632424,
+  "x_peak_m": 0.37,
+  "peak_mol_per_m": 0.00010266996790826976,
+  "T_peak_K": 812.9
+ },
+ "model_wall_fromPeak": {
+  "x_m": 0.35018599915419507,
+  "T_K": 839.7282214632424,
+  "x_peak_m": 0.37,
+  "peak_mol_per_m": 0.00010266996790826976,
+  "T_peak_K": 812.9
+ },
+ "experiment": {
+  "x_m": 0.3701382550666125,
+  "T_K": 812.7755704400487,
+  "x_peak_m": 0.41,
+  "peak_mol_per_m": 0.0001073648209340804,
+  "T_peak_K": 754.97
+ },
+ "table2_K": 814,
+ "model_integral_over_n0": 0.9999999999956631,
+ "L1_obs_minus_exp_over_n0": 0.8966951968390087,
+ "inventory_full_column_mol": {
+  "gas": 9.153567675176848e-08,
+  "wall": 4.748464323227241e-06,
+  "sample": 0.0
+ },
+ "dT_dep_fromInlet_K": 25.73430085163227,
+ "dx_peak_m": -0.03999999999999998,
+ "ledger_last": {
+  "time": "5.999999999999561",
+  "gas": "5.8609396265993652e-10",
+  "wall": "3.0403951448316771e-08",
+  "sample": "0",
+  "initial": "3.0990045411111113e-08",
+  "released": "0",
+  "transport_INLET": "-2.6192125756289383e-54",
+  "transport_OUTLET": "8.5977422517087035e-20",
+  "transport_WALL": "0",
+  "transport_BACK": "-1.1986493412366721e-14",
+  "transport_FRONT": "1.1986493411192625e-14",
+  "removed": "0",
+  "clamped": "2.4093702564354468e-23",
+  "solverDefect": "4.8406667851631354e-20",
+  "restart": "0",
+  "projected": "0",
+  "evaporatedAboveWarning": "7.5906740554222461e-08",
+  "closure": "0"
+ }
+}

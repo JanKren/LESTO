@@ -1,0 +1,60 @@
+{
+ "case": "T5_60",
+ "table1": {
+  "flow_mL_min": 5,
+  "duration_s": 60,
+  "mass_mg": 1.45,
+  "moles": 3.15e-06
+ },
+ "wedge_moles": 4.375e-08,
+ "arrow_x_m": 0.15,
+ "boat": {
+  "x_m": [
+   0.145,
+   0.155
+  ],
+  "radius_m": 0.00048,
+  "areaPerVolume": 4000.0
+ },
+ "dt_s": 0.002,
+ "end_time_s": 60,
+ "inlet_bc": "danckwerts",
+ "scheme": "Gauss limitedLinear 1",
+ "carrier": {
+  "flow_mL_min_standard": 5,
+  "flow_reference_K": 273.15,
+  "flow_reference_Pa": 101325.0,
+  "flow_reference_source": "Lobresco et al. (2026) Sec. 2.1: standard volumetric flow at 273.15 K and 1.01325 bar",
+  "full_column_mass_flow_kg_s": 1.4881344392394627e-08,
+  "wedge_mass_flow_kg_s": 2.066853387832587e-10,
+  "wedge_angle_deg": 5.0,
+  "radius_m": 0.0024,
+  "length_m": 0.69,
+  "cells": 22896,
+  "nx": 318,
+  "nr": 72,
+  "wall_T_csv": "inputs/wallT_5mLmin.csv",
+  "wall_T_sha256": "c91e9ced48828d011605af6e0287ba7f85144d9d424cd855ebdc6b5f1753c010",
+  "thermophysical": "He, hConst Cp 5193, Sutherland (run/007), perfect gas at 101325 Pa",
+  "assumptions": [
+   "Figure x = 0 is the inlet (clean He, wall T of the curve at x=0).",
+   "Empty tube: the boat obstruction is omitted.",
+   "He properties of run/007, not the NIST tables of the paper."
+  ]
+ },
+ "carrier_audit": {
+  "status": "PASS",
+  "time": 3000,
+  "target_mass_flow_kg_s": 2.066853387832587e-10,
+  "relative_tolerance": 1e-12,
+  "inlet_mass_flow_kg_s": 2.0668533878325853e-10,
+  "outlet_mass_flow_kg_s": 2.066853387832586e-10,
+  "relative_inlet_error": 7.771561172376096e-16,
+  "relative_flow_imbalance": 3.751992419170453e-16,
+  "max_cell_flux_defect_over_inflow": 7.915387176503821e-18,
+  "wall_and_axis_absolute_flux_over_inflow": 0,
+  "wedge_net_flux_over_inflow": -4.4314062762249997e-16
+ },
+ "pv_table_sha256": "0bf13eb9319d89099f0cbffca83d96b4d09225c1361329f38cc4f851cfa99d37",
+ "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58"
+}

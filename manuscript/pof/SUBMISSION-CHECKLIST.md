@@ -1,7 +1,9 @@
 # Physics of Fluids submission checklist
 
-Prepared 13 October 2026 for `manuscript/pof/lesto-pof.tex`. Nothing has
-been submitted. Status: **done**, **placeholder** (red `[AUTHOR TO
+Prepared 13 October 2026 for `manuscript/pof/lesto-pof.tex`; updated
+14 October 2026 after integrating the completed simulation campaigns
+(production runs, scheme/mesh study, iteration check, Lobresco
+comparison). Nothing has been submitted. Status: **done**, **placeholder** (red `[AUTHOR TO
 CONFIRM: ...]` in the PDF), **blocked** (needs results or external input
 first), **decision** (author's call).
 
@@ -15,10 +17,10 @@ both read on 13 October 2026. Re-check them before submitting.
 
 | # | Item | Why it blocks |
 |---|------|---------------|
-| B1 | Pending simulation campaigns (Section 3) | Numbers in the abstract, Sections 4–8, all generated tables and five figures will change. |
+| B1 | ~~Pending simulation campaigns (Section 3)~~ **resolved 14 Oct** | All four campaigns are integrated (abstract, Secs. 1 and 4–8, Tables III–VII, Figs. 3–7). Remaining: the researcher's sign-off of plan section 39. |
 | B2 | Data are not yet public | `git branch -r --contains HEAD` is empty: the branch holding `run/034-liu2025/*` results and `manuscript/` is not on any remote. The Data Availability statement says "openly available"; it is only true after a push (author action) and ideally an archived release with a DOI (e.g. Zenodo). |
 | B3 | Author declarations | CRediT roles, conflict-of-interest statement, acknowledgments/funding, corresponding e-mail: all placeholders. Required by AIP. |
-| B4 | Figure text below 8 pt | In the PoF layout every legend renders at 5.3–6.6 pt (Section 5). AIP: "Legends or labels within figures should be a minimum of 8-point type size". |
+| B4 | ~~Figure text below 8 pt~~ **resolved 14 Oct** | Figures are drawn at printed size (≤ 5.4 in) and included unscaled; text 8–9 pt (Section 5). Only mathtext sub/superscripts are smaller. |
 | B5 | Co-author approval | Ničeno must see and approve the manuscript and the CRediT statement (AIP: corresponding author ensures all authors agree). `review-notes.md`: no messages have been sent. |
 
 ## 1. AIP / PoF requirements
@@ -30,19 +32,19 @@ both read on 13 October 2026. Re-check them before submitting.
 | `\author`/`\affiliation` | **done** | Affiliation kept as in `main.tex`: "Paul Scherrer Institute, 5232 Villigen PSI, Switzerland". **decision**: PSI's current preferred affiliation string (e.g. centre/laboratory name). |
 | Corresponding author e-mail | **placeholder** | `\email{...}` reads verbatim, so the placeholder is plain bracketed text, not red. |
 | ORCIDs | **placeholder** | Entered in the submission system, not in the TeX. Not invented here. |
-| Title | **done** (kept) | Current title kept; alternatives in Section 6. |
-| Abstract ≤ 250 words, one paragraph, no citations/equations/footnotes | **done** | 242 words (math counted as one word; 245 counting units separately). No citations or displayed equations. PoF abstract is separate from the arXiv abstract; it adds the transport framing and keeps every number and caveat. |
+| Title | **done** (changed 14 Oct) | Alternative 2 of Section 6 adopted; see Section 6 for the basis. arXiv title unchanged. |
+| Abstract ≤ 250 words, one paragraph, no citations/equations/footnotes | **done** | 247 words after the 14 Oct update (inline math counted as one word). No citations or displayed equations. It now reports the production scheme, the iteration and mesh results, the transport-limited reading and the Lobresco comparison; recount after any edit. |
 | Keywords | **decision** | AIP's instructions state no keyword requirement; the TeX has none. If the submission form asks: thermal-gradient tube flow; vapor deposition; Hertz–Knudsen–Schrage; laminar mass transfer; finite-volume method; OpenFOAM; numerical verification. |
 | Acknowledgments | **placeholder** | `acknowledgments` environment. The earlier draft's funding statements and grant numbers were removed pending confirmation; none invented. |
 | Author Declarations: Conflict of Interest | **placeholder** | AIP standard text "The authors have no conflicts to disclose." inside the placeholder; confirm or replace with AIP's disclosure template. |
 | Author Declarations: Author Contributions (CRediT) | **placeholder** | Roles must be chosen from the 14 CRediT roles (Conceptualization, Data curation, Formal analysis, Funding acquisition, Investigation, Methodology, Project administration, Resources, Software, Supervision, Validation, Visualization, Writing – original draft, Writing – review & editing). Not assigned here. |
 | Ethics approval | **done** (n/a) | No human or animal research. |
-| Data Availability | **placeholder / blocked (B2)** | Based on the existing `main.tex` availability text, worded in AIP's "openly available in [repository]" form, plus the third-party/licence facts: digitised curves from Liu et al. under CC BY 4.0, external thermodynamic coefficient files not redistributed. The repository URL `https://github.com/JanKren/LESTO` answers HTTP 200 anonymously (public), but the relevant branch is not pushed. AIP's third-party template ("Restrictions apply to the availability of these data, which were used under license...") may be preferred for the coefficient files once their licence is known (requests-draft item 2). |
+| Data Availability | **placeholder / blocked (B2)** | Now also names the production, scheme/mesh and iteration results and the Lobresco et al. digitised data (CC BY 4.0) and comparison runs. Based on the existing `main.tex` availability text, worded in AIP's "openly available in [repository]" form, plus the third-party/licence facts: digitised curves from Liu et al. under CC BY 4.0, external thermodynamic coefficient files not redistributed. The repository URL `https://github.com/JanKren/LESTO` answers HTTP 200 anonymously (public), but the relevant branch is not pushed. AIP's third-party template ("Restrictions apply to the availability of these data, which were used under license...") may be preferred for the coefficient files once their licence is known (requests-draft item 2). |
 | Reference style | **done** | `aipnum4-2` (REVTeX default for `aip`), numbered by citation order, superscript in reprint. BibTeX's only warning, `jnrlst (dependency: not reversed)`, is REVTeX's internal control entry. |
 | Cover letter | **done** (note) | AIP: "Cover letters are not accepted with submissions for Physics of Fluids." `cover-letter.md` is drafted as requested but must **not** be uploaded to PoF. |
-| Alt text for every figure | **placeholder** | AIP: "Providing alt text is a requirement for publication." Seven figures need alt text, entered at submission. Not written. |
+| Alt text for every figure | **placeholder** | AIP: "Providing alt text is a requirement for publication." Eight figures need alt text, entered at submission. Not written. |
 | Figures: format, fonts | **done** | Vector PDF, one embedded subset font (DejaVuSans, CID TrueType) per figure; no unembedded fonts. |
-| Figures: size and minimum 8 pt | **blocked (B4)** | Section 5. |
+| Figures: size and minimum 8 pt | **done** (14 Oct) | Section 5. |
 | AI-use disclosure | **decision** | Section 7. |
 | American spelling | **decision** | Text uses British spelling (modelling, vapour, digitised). AIP copy-editing normally standardises; decide whether to convert first. |
 
@@ -72,35 +74,38 @@ both read on 13 October 2026. Re-check them before submitting.
 - `main.tex`: `table*` given arxiv.sty's caption spacing. Abstract and
   everything else unchanged.
 
-## 3. Pending simulation results that must update numbers before submission (B1)
+- 14 October 2026: sections 01, 04–08 updated for the campaigns (new
+  Sec. 6.3 on Lobresco et al.); figures included at natural size;
+  `tab:peaks` is now `table*`; `main.tex` abstract, date and data
+  statement updated; `references.bib` gains van Leer (1974).
 
-Do not anticipate them; the current text describes the executed
-first-order-upwind campaign only.
+## 3. Simulation campaigns (B1): integrated 14 October 2026
 
-1. **Production limitedLinear runs on the 41,472-cell mesh.** If these
-   become the reported results, the scheme statements (Sec. 4.2, 5.3:
-   "first-order upwind", D_num ≈ |u_x|Δx/2) and every reported number
-   change: abstract, Tables III–VI (and II if cases are added), Figs. 3–7, Conclusions, and
-   `generated/*`. Cite the limiter (Sweby 1984 is in the bib; the
-   OpenFOAM limitedLinear definition should be cited, e.g. Jasak's 1996
-   thesis, also in the bib).
-2. **Fourth mesh level and van Leer study.** Changes the three-grid
-   statements (Sec. 5.2: 17 oscillatory / 4 nondecreasing / 1 roundoff /
-   12 conditional), the 2.06–10.58 % fine/medium range, and possibly the
-   "no mesh independence" scope. Add van Leer (1974) for the scheme; it
-   is not in `references.bib`.
-3. **8-versus-3 corrector check over a full run.** Sec. 4.2 and 5.1
-   currently state that full-run iteration independence is
-   "unqualified"; update only if the check supports it.
-4. **Head-to-head on Lobresco et al.'s five PbI2 cases.** The paper
-   currently says it makes no T-Flows comparison and that cross-code
-   comparisons are "planned" (Sec. 5.1). If added, this becomes new
-   results and a new section; the T-Flows case inputs requested in
-   `requests-draft.md` item 3 may be needed.
+Evidence and numbers: plan section 39 (pending the researcher's sign-off)
+and `manuscript/review-notes.md`.
 
-After each update: `bash manuscript/build.sh --figures` (regenerates
-tables and figures), `bash manuscript/pof/build.sh`, and
-`python3 manuscript/check_results.py`. Recount the abstract (≤ 250 words).
+1. **Production limitedLinear runs on 41,472 cells**: done. 19 cases
+   (`run/034-liu2025/production_576x72_limitedLinear`). Sec. 4.2 states the
+   scheme with Jasak 1996 and Sweby 1984; the follow-up sensitivities are
+   stated as 18,432-cell upwind differences from their own baselines.
+   Tables III, IV, VI, VII and Figs. 3, 4, 6, 7 regenerated.
+2. **Fourth mesh level and van Leer**: done
+   (`run/034-liu2025/scheme_mesh_study`). Table III is now the scheme/mesh
+   table; Sec. 5.2 quotes the 1.98 % L3–L4 change and no formal GCI
+   (inconsistent apparent orders). van Leer (1974) added to the bib.
+3. **8-versus-3 correctors over a full run**: done for three cases
+   (`run/034-liu2025/iteration_check`); Secs. 4.2 and 5.1 updated. The
+   fourth (shifted-BiI) case did not finish and is not used.
+4. **Head-to-head on Lobresco et al.**: done as a comparison with their
+   published measurements and published model results (new Sec. 6.3,
+   Table V, Fig. 5; `run/035-lobresco2026`,
+   `thermochemistry/benchmarks/lobresco2026`). No T-Flows inputs were
+   needed or copied; the T-Flows wall table is only described.
+
+After each further change: `bash manuscript/build.sh --figures`,
+`bash manuscript/pof/build.sh`, `python3 manuscript/check_results.py`
+(it now also recomputes the scheme/mesh, iteration and Lobresco tables
+and checks the PoF log), and recount the abstract (≤ 250 words).
 
 ## 4. Dimensionless numbers (added, Sec. 4.1)
 
@@ -128,41 +133,46 @@ and a diameter-based Péclet number Pe = Re Sc of 5.9–17.4 at 100 mL/min
 and 2.6–7.8 at 45 mL/min (400–1173 K); axial diffusion is therefore not
 negligible next to advection." It was not added.
 
-## 5. Figures (B4)
+## 5. Figures (B4): resolved 14 October 2026
 
-All seven PDFs are 6.62 in wide, drawn by `prepare_results.py` at
-`figsize` width 6.5 in, 10 pt body text and 8 pt legends. The PoF
-single-column text width is 5.48 in (396 pt), so LaTeX scales them:
+The PoF reprint text width is 396 pt = 5.48 in (measured with
+`\typeout{\the\textwidth}` for `aip,pof,reprint`; preprint 468 pt,
+arXiv 6.5 in). `prepare_results.py` now draws every figure at its printed
+size, at most 5.4 in wide (exact `figsize`, no `bbox_inches='tight'`), and
+the sections include them with `\includegraphics{...}` at natural size,
+so the font sizes are the printed sizes in all three layouts:
 
-| Figure | Width in PoF | Scale | 10 pt text | 8 pt legend |
-|---|---|---|---|---|
-| temperature_profiles | 0.88 × 5.48 in | 0.73 | 7.3 pt | 5.8 pt (legend default 10 pt → 7.3) |
-| experiment_schematic | 0.94 × | 0.78 | 7.8 pt | – |
-| refinement | 0.96 × | 0.79 | 7.9 pt | 6.4 pt |
-| source_thermodynamics | 0.96 × | 0.79 | 7.9 pt | 6.4 pt |
-| silica_alignment | 1.00 × | 0.83 | 8.3 pt | 6.6 pt |
-| baseline_profiles | 1.00 × | 0.83 | 8.3 pt | 6.6 pt |
-| physical_sensitivity | 0.80 × | 0.66 | 6.6 pt | – |
+- body text and axis labels 9 pt; tick labels, legends and the
+  annotations of the schematic 8–9 pt;
+- `Temperature (°C)`, `PbI$_2$`/`BiI$_3$` subscripts, `5° wedge`;
+- `pdf.fonttype 42`, DejaVu Sans embedded (checked with `pdffonts`).
 
-At AIP's one-column print width (3.37 in) the text would be about
-5 pt, so none of these can be printed one-column as is.
+| Figure | Size (in) |
+|---|---|
+| temperature_profiles | 4.2 × 2.7 |
+| experiment_schematic | 5.4 × 1.9 |
+| refinement (new content: scheme/mesh study) | 5.4 × 4.9 |
+| baseline_profiles | 5.4 × 6.6 |
+| lobresco_comparison (new) | 5.4 × 6.9 |
+| source_thermodynamics | 5.4 × 2.9 |
+| silica_alignment | 5.4 × 5.3 |
+| physical_sensitivity | 4.6 × 2.3 |
 
-Suggested changes to `prepare_results.py` (not edited here):
-
-- Draw at the final width: `figsize` width 5.4 in (PoF text width) or
-  3.37 in for the simple single-panel plots (temperature_profiles,
-  physical_sensitivity, source_thermodynamics), and include them at
-  `width=\linewidth` without scaling.
-- `font.size` 9 and every `fontsize=8` legend at ≥ 8 pt *at final size*.
-- Axis labels: "Temperature (°C)" instead of "degree C"; subscripts in
-  legends and titles ("PbI$_2$", "BiI$_3$"); "5° wedge" in the schematic.
-- baseline_profiles (6.92 in tall) and silica_alignment (6.59 in) fit the
-  8.25 in maximum depth but will be the largest items on their pages.
-- Keep `pdf.fonttype 42` (fonts are already embedded).
+Remaining detail: mathtext subscripts (the "2" of PbI$_2$) and the
+log-axis exponents render at about 70 % of the surrounding size
+(about 6 pt). If the production editor counts them, raise `font.size`
+to 11 for those labels.
 
 ## 6. Title
 
-Current title kept: "Conservative CFD modelling of iodine deposition in
+**Changed 14 October 2026** to alternative 2 below, because the completed
+results support the transport-limited reading: the wall Damköhler number
+is 1.4e3–2.9e3 at α = 1; α = 0.1 changes iodine profiles by at most
+0.41 % and α = 0.01 by at most 4.21 %, against 3.83–14.20 % for halving
+or doubling D; and the untuned HKS wall law with near-wall diffusion
+resistance gives a smaller onset RMS (18 K) on the Lobresco cases than
+both published models (35 K). The arXiv build keeps the descriptive title.
+Previous PoF title: "Conservative CFD modelling of iodine deposition in
 thermal-gradient columns: numerical verification and input sensitivity".
 It is accurate but reads as nuclear chemistry plus CFD; "CFD" in a PoF
 title is common but generic. Alternatives (decision):
@@ -195,13 +205,16 @@ are the usual places.
 2. HERACLES maintainers: Bi–I provenance and redistribution licence
    (needed for Data Availability and a public CFD input package), BiI3(l)
    record, BiI(g) value behind the +29 kJ/mol surrogate, Pb(g) record.
-3. T-Flows authors: parameter sets, scheme and per-case wall tables;
-   needed only if the head-to-head comparison (Section 3, item 4) is
-   added.
+3. T-Flows / Lobresco et al. authors: the thermocouple wall tables per
+   flow rate (the test-case table differs from the published curves), boat
+   geometry and position, whether the figure origin is the inlet, and the
+   C_e behind their Table 2 vapour-pressure column. The comparison is done
+   with digitised curves; these would sharpen it.
 
 ## 9. References
 
-- 18 cited entries; all articles have journal, volume, pages or article
+- 21 cited entries (Jasak 1996, Sweby 1984 and van Leer 1974 added for
+  the schemes); all articles have journal, volume, pages or article
   number, year and DOI. Books and chapters have publisher and year.
 - **Incomplete:** `NASAGridConvergence` (NPARC Alliance web page) has
   `year = {n.d.}`; it prints "(n.d.), accessed 9 October 2026". AIP
@@ -216,16 +229,16 @@ are the usual places.
   L. Graetz, Ann. Phys. (1883/1885), the original Graetz problem;
   R. Aris, Proc. R. Soc. A 235 (1956), Taylor–Aris dispersion, since
   Pe is O(1–10) (Taylor 1953 is in the bib, uncited);
-  B. van Leer, J. Comput. Phys. 14 (1974), if the van Leer study is
-  reported; a mixed-convection reference if buoyancy is discussed (below).
+  a mixed-convection reference if buoyancy is discussed (below).
 
 ## 10. What a PoF reviewer is likely to criticise
 
-1. **No spatial convergence and first-order upwind.** For a PoF methods
-   paper, 2.06–10.58 % fine/medium profile changes, oscillatory
-   three-grid sequences and numerical diffusion comparable to the
-   physical diffusivity will draw the strongest objection. The pending
-   limitedLinear, fourth-level and van Leer results matter most here.
+1. **Spatial convergence.** Partly answered: production runs use
+   limitedLinear on 41,472 cells; the most sensitive case changes by
+   1.98 % from 41,472 to 93,312 cells, and van Leer agrees within
+   2.8 %. Still open: no consistent observed order (no formal GCI), the
+   fourth level exists for one case only, and the 64 sensitivities are
+   upwind differences on 18,432 cells.
 2. **Constant diffusivity D = 1e-4 m²/s for all nine gases and all
    temperatures.** Real gas diffusivities scale roughly as T^1.75/p over
    400–1173 K (a factor of about 6), and Sc would be 2–11 at 1 atm.
@@ -261,12 +274,14 @@ are the usual places.
     and seven figures; a reviewer may ask to move the property appendix
     and the case-matrix details to supplementary material.
 
-## 11. Build record (13 October 2026)
+## 11. Build record (14 October 2026)
 
 | Build | Command | Pages | Overfull | Undefined refs | BibTeX |
 |---|---|---|---|---|---|
-| PoF reprint | `bash manuscript/pof/build.sh` | 21 | 0 | 0 | 1 benign (REVTeX `jnrlst`) |
-| PoF preprint | `bash manuscript/pof/build.sh --preprint` | 33 | 0 | 0 | same |
-| Two-column test (`jap`, not kept) | – | 16 | 0 | 0 | – |
-| arXiv | `bash manuscript/build.sh` | 19 (was 17) | 0 | 0 | 0 |
+| PoF reprint | `bash manuscript/pof/build.sh` | 26 | 0 | 0 | 1 benign (REVTeX `jnrlst`) |
+| PoF preprint | `bash manuscript/pof/build.sh --preprint` | 40 | 0 | 0 | same |
+| arXiv | `bash manuscript/build.sh --figures` | 22 | 0 | 0 | 0 |
 | Consistency | `python3 manuscript/check_results.py` | PASS | | | rewrote `review-checks.json` |
+
+The two-column `jap` test build was not repeated. The numerical table
+was narrowed to fit the 396 pt column; Tables IV and V are `table*`.

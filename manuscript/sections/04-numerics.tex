@@ -6,10 +6,12 @@ discretisation and coupling, and the completed case matrix.
 \subsection{Geometry and carrier preparation}
 A structured axisymmetric 5$^\circ$ wedge represents the 1.25 m column
 (\cref{fig:geometry}). The steel and silica radii are 2.4 and 2.5 mm.
-The baseline (medium) mesh has $384\times48\times1=18{,}432$ cells. The
-coarse and fine meshes have $256\times32\times1=8{,}192$ and
-$576\times72\times1=41{,}472$ cells; successive levels refine the axial
-and radial spacing by a factor of 1.5. The source occupies
+The production mesh has $576\times72\times1=41{,}472$ cells. The
+64 follow-up sensitivities use the original
+$384\times48\times1=18{,}432$-cell mesh. The mesh studies use
+$256\times32\times1=8{,}192$, 18,432, 41,472 and, for one case,
+$864\times108\times1=93{,}312$ cells; successive levels refine the
+axial and radial spacing by a factor of 1.5. The source occupies
 $x=0.09$--0.105 m and the radial interval $r=0.25R$--$0.75R$. Its
 position and cell selection are computational assumptions, and the
 physical boat is omitted from the carrier geometry. Full-column source
@@ -17,7 +19,7 @@ and inlet rates are multiplied by $5/360=1/72$ for the wedge.
 
 \begin{figure*}[tb]
 \centering
-\includegraphics[width=.94\textwidth]{experiment_schematic.pdf}
+\includegraphics{experiment_schematic.pdf}
 \caption{Computational geometry and prescribed source region. The
 source is distributed over selected cells; the sketch does not show a
 resolved boat surface. The model keeps the tube length and the
@@ -107,9 +109,20 @@ compared with the factor-of-two diffusivity variations examined in
 \cref{sec:sensitivity}.
 
 \subsection{Discretisation and coupling}
-The transient species equations use implicit Euler time integration,
-first-order upwind advection and corrected Gauss linear diffusion. All
-nine transported gases use the same advection scheme. The baseline time
+The transient species equations use implicit Euler time integration
+and corrected Gauss linear diffusion. The production cases (the 15
+baselines and four silica temperature-coordinate cases) use the bounded
+OpenFOAM scheme \texttt{Gauss limitedLinear 1}
+\cite{Jasak1996error,Sweby1984high} for advection on 41,472 cells. It
+blends linear and upwind interpolation through a TVD-type flux limiter,
+which reverts to upwinding near extrema and steep gradients. The 64 follow-up cases and the time-step
+comparisons keep the first-order upwind advection of the original
+campaign on 18,432 cells, and the follow-up sensitivities are always
+reported as differences from their own upwind baselines on that mesh.
+The scheme and mesh study adds the van Leer limiter
+\cite{vanLeer1974towards} (\texttt{Gauss vanLeer}) as a second bounded
+scheme. All nine transported gases use the same advection scheme
+within a case. The baseline time
 step is 2 ms. Wall exchange is assembled implicitly with nonnegative
 source and sink coefficients and shared inventory bounds. Configured
 species correctors and active-bound guards reconcile the final gas
@@ -124,8 +137,8 @@ guard tolerance. These are stopping settings. They do not guarantee
 that every outer wall-regime iteration reaches the requested
 tolerance, so the final transport defect, bound status and material
 ledger are examined separately (\cref{sec:conservation}). Short
-corrector replays isolate late-time iteration sensitivity but do not
-establish full-run iteration independence.
+corrector replays and three full runs with eight correctors test the
+effect of this stopping criterion (\cref{sec:conservation}).
 
 Every gas has the baseline diffusivity $D_i=10^{-4}\units{m^2\,s^{-1}}$.
 Three transport alternatives halve or double this value for all gases,
@@ -179,3 +192,18 @@ The original nonuniform temperature profile stays fixed. These cases
 therefore measure how residual gas redistributes during a 20 s flow
 stop at fixed temperature; they are neither a clean-helium purge nor a
 full cooling calculation.
+
+Four further sets of runs complete the evidence, all with the same
+solver executable. (i) The \ProductionCases{} production cases repeat
+the 15 baselines and the four silica temperature-coordinate cases on
+41,472 cells with the limited-linear scheme; all other inputs are
+unchanged. (ii) A scheme and mesh study takes two cases, pure PbI$_2$
+and the shifted-BiI steel case at 1\% metal saturation, which had the
+largest upwind fine/medium change. It runs them with upwind,
+limited-linear and van Leer advection on 8,192 to 41,472 cells, and the
+steel case with upwind and limited-linear also on 93,312 cells. This
+adds 12 runs to the existing upwind levels and the production runs.
+(iii) Three original 18,432-cell upwind cases are repeated over the full
+60 s with eight instead of three species correctors. (iv) Ten runs
+simulate five single-species PbI$_2$ experiments of Lobresco et al.\
+\cite{Lobresco2026assessment} on two meshes (\cref{sec:lobresco}).

@@ -1,0 +1,61 @@
+== pure.up levels [1, 2, 3]
+  L1 cells   8192 rawL1exp 60.4 ov 0.696 PbI2: bin 37cm 350.7C (2nd/1st 0.871) | smoothed 37cm 350.7C | centroid 37.35cm 345.2C
+  L2 cells  18432 rawL1exp 53.9 ov 0.729 PbI2: bin 37cm 350.7C (2nd/1st 0.999) | smoothed 37cm 350.7C | centroid 37.27cm 346.3C
+  L3 cells  41472 rawL1exp 49.1 ov 0.753 PbI2: bin 36cm 366.5C (2nd/1st 0.915) | smoothed 37cm 350.5C | centroid 37.22cm 347.1C
+  L1->L2: I L1 6.57% PbI2 6.57% 3cm 4.50% 5cm 3.10% W1 0.080cm scan rawL1 6.54pp overlap 0.9672 totI +0.0048%
+  L2->L3: I L1 5.06% PbI2 5.06% 3cm 3.57% 5cm 2.40% W1 0.061cm scan rawL1 5.04pp overlap 0.9747 totI -0.0028%
+  diff sequence [6.568, 5.064] apparent order [0.64]
+== pure.ll levels [1, 2, 3]
+  L1 cells   8192 rawL1exp 47.4 ov 0.762 PbI2: bin 36cm 366.5C (2nd/1st 0.917) | smoothed 37cm 350.7C | centroid 37.17cm 348.1C
+  L2 cells  18432 rawL1exp 45.9 ov 0.772 PbI2: bin 36cm 366.4C (2nd/1st 0.800) | smoothed 37cm 350.7C | centroid 37.12cm 348.7C
+  L3 cells  41472 rawL1exp 46.3 ov 0.770 PbI2: bin 36cm 366.5C (2nd/1st 0.771) | smoothed 37cm 350.5C | centroid 37.11cm 348.7C
+  L1->L2: I L1 5.70% PbI2 5.70% 3cm 2.56% 5cm 1.66% W1 0.042cm scan rawL1 5.70pp overlap 0.9714 totI +0.0018%
+  L2->L3: I L1 2.15% PbI2 2.15% 3cm 0.98% 5cm 0.64% W1 0.016cm scan rawL1 2.15pp overlap 0.9892 totI -0.0046%
+  diff sequence [5.704, 2.152] apparent order [2.4]
+== pure.vl levels [1, 2, 3]
+  L1 cells   8192 rawL1exp 46.3 ov 0.768 PbI2: bin 36cm 366.5C (2nd/1st 0.912) | smoothed 37cm 350.7C | centroid 37.14cm 348.5C
+  L2 cells  18432 rawL1exp 45.9 ov 0.772 PbI2: bin 36cm 366.4C (2nd/1st 0.806) | smoothed 37cm 350.7C | centroid 37.12cm 348.8C
+  L3 cells  41472 rawL1exp 46.3 ov 0.770 PbI2: bin 36cm 366.5C (2nd/1st 0.774) | smoothed 37cm 350.5C | centroid 37.11cm 348.7C
+  L1->L2: I L1 4.94% PbI2 4.94% 3cm 1.81% 5cm 1.11% W1 0.028cm scan rawL1 4.92pp overlap 0.9754 totI +0.0020%
+  L2->L3: I L1 2.23% PbI2 2.23% 3cm 0.87% 5cm 0.55% W1 0.014cm scan rawL1 2.23pp overlap 0.9888 totI -0.0042%
+  diff sequence [4.936, 2.229] apparent order [1.96]
+== steel.up levels [1, 2, 3, 4]
+  L1 cells   8192 rawL1exp 123.2 ov 0.346 PbI2: bin 51cm 288.0C (2nd/1st 0.821) | smoothed 51cm 288.0C | centroid 50.99cm 288.2C BiI3: bin 59cm 108.0C (2nd/1st 0.170) | smoothed 59cm 108.0C | centroid 58.94cm 109.9C
+  L2 cells  18432 rawL1exp 123.2 ov 0.347 PbI2: bin 51cm 288.1C (2nd/1st 0.655) | smoothed 51cm 288.1C | centroid 50.99cm 288.2C BiI3: bin 59cm 108.2C (2nd/1st 0.373) | smoothed 59cm 108.2C | centroid 58.79cm 114.5C
+  L3 cells  41472 rawL1exp 123.2 ov 0.347 PbI2: bin 51cm 288.1C (2nd/1st 0.832) | smoothed 51cm 288.1C | centroid 50.93cm 289.5C BiI3: bin 59cm 108.2C (2nd/1st 0.339) | smoothed 59cm 108.2C | centroid 58.79cm 114.6C
+  L4 cells  93312 rawL1exp 123.2 ov 0.347 PbI2: bin 51cm 288.1C (2nd/1st 0.858) | smoothed 51cm 288.1C | centroid 50.90cm 289.9C BiI3: bin 59cm 108.0C (2nd/1st 0.299) | smoothed 59cm 108.0C | centroid 58.81cm 114.0C
+  L1->L2: I L1 10.47% PbI2 10.20% 3cm 4.20% 5cm 2.51% W1 0.066cm scan rawL1 9.78pp overlap 0.9476 totI +0.0073%
+  L2->L3: I L1 10.58% PbI2 10.67% 3cm 4.64% 5cm 2.83% W1 0.071cm scan rawL1 9.88pp overlap 0.9471 totI -0.0064%
+  L3->L4: I L1 2.13% PbI2 2.07% 3cm 1.44% 5cm 0.90% W1 0.022cm scan rawL1 2.00pp overlap 0.9893 totI +0.0178%
+  diff sequence [10.472, 10.577, 2.135] apparent order [-0.02, 3.95]
+== steel.ll levels [1, 2, 3, 4]
+  L1 cells   8192 rawL1exp 123.2 ov 0.346 PbI2: bin 50cm 306.3C (2nd/1st 0.828) | smoothed 51cm 288.0C | centroid 50.81cm 291.5C BiI3: bin 59cm 108.0C (2nd/1st 0.471) | smoothed 59cm 108.0C | centroid 58.74cm 116.3C
+  L2 cells  18432 rawL1exp 123.2 ov 0.347 PbI2: bin 51cm 288.1C (2nd/1st 0.855) | smoothed 51cm 288.1C | centroid 50.87cm 290.6C BiI3: bin 59cm 108.2C (2nd/1st 0.560) | smoothed 59cm 108.2C | centroid 58.69cm 117.8C
+  L3 cells  41472 rawL1exp 123.2 ov 0.347 PbI2: bin 50cm 306.7C (2nd/1st 0.963) | smoothed 51cm 288.1C | centroid 50.83cm 291.2C BiI3: bin 59cm 108.2C (2nd/1st 0.421) | smoothed 59cm 108.2C | centroid 58.74cm 116.2C
+  L4 cells  93312 rawL1exp 123.2 ov 0.347 PbI2: bin 51cm 288.1C (2nd/1st 0.995) | smoothed 51cm 288.1C | centroid 50.84cm 291.0C BiI3: bin 59cm 108.0C (2nd/1st 0.432) | smoothed 59cm 108.0C | centroid 58.73cm 116.5C
+  L1->L2: I L1 15.35% PbI2 15.51% 3cm 5.16% 5cm 3.17% W1 0.080cm scan rawL1 14.34pp overlap 0.9232 totI +0.0032%
+  L2->L3: I L1 8.95% PbI2 8.86% 3cm 3.04% 5cm 1.85% W1 0.047cm scan rawL1 8.36pp overlap 0.9552 totI -0.0113%
+  L3->L4: I L1 1.98% PbI2 1.99% 3cm 0.67% 5cm 0.40% W1 0.010cm scan rawL1 1.85pp overlap 0.9901 totI +0.0151%
+  diff sequence [15.354, 8.955, 1.977] apparent order [1.33, 3.73]
+== steel.vl levels [1, 2, 3]
+  L1 cells   8192 rawL1exp 123.2 ov 0.347 PbI2: bin 50cm 306.3C (2nd/1st 0.848) | smoothed 51cm 288.0C | centroid 50.79cm 291.9C BiI3: bin 59cm 108.0C (2nd/1st 0.377) | smoothed 59cm 108.0C | centroid 58.76cm 115.5C
+  L2 cells  18432 rawL1exp 123.2 ov 0.347 PbI2: bin 51cm 288.1C (2nd/1st 0.824) | smoothed 51cm 288.1C | centroid 50.87cm 290.5C BiI3: bin 59cm 108.2C (2nd/1st 0.575) | smoothed 59cm 108.2C | centroid 58.67cm 118.2C
+  L3 cells  41472 rawL1exp 123.2 ov 0.347 PbI2: bin 50cm 306.7C (2nd/1st 0.989) | smoothed 51cm 288.1C | centroid 50.84cm 291.1C BiI3: bin 59cm 108.2C (2nd/1st 0.439) | smoothed 59cm 108.2C | centroid 58.72cm 116.6C
+  L1->L2: I L1 16.83% PbI2 16.82% 3cm 6.32% 5cm 3.84% W1 0.097cm scan rawL1 15.72pp overlap 0.9158 totI +0.0034%
+  L2->L3: I L1 9.17% PbI2 9.10% 3cm 3.05% 5cm 1.87% W1 0.047cm scan rawL1 8.56pp overlap 0.9542 totI -0.0104%
+  diff sequence [16.835, 9.166] apparent order [1.5]
+cross_scheme_I_profile_L1_pct {
+ "pure.L1.ll_vs_up": 13.168046016325444,
+ "pure.L2.ll_vs_up": 12.233184355779004,
+ "pure.L3.ll_vs_up": 8.965994624222628,
+ "pure.L1.vl_vs_up": 14.292190156953463,
+ "pure.L2.vl_vs_up": 12.239005727734385,
+ "pure.L3.vl_vs_up": 8.978815405812753,
+ "steel.L1.ll_vs_up": 20.79706008210788,
+ "steel.L2.ll_vs_up": 14.071739726689634,
+ "steel.L3.ll_vs_up": 11.265981028437666,
+ "steel.L4.ll_vs_up": 7.724485301833953,
+ "steel.L1.vl_vs_up": 21.04724831034458,
+ "steel.L2.vl_vs_up": 12.83002852025551,
+ "steel.L3.vl_vs_up": 10.287501977945368
+}

@@ -1,0 +1,722 @@
+{
+ "what": "Mass-ledger and solver summary of the 19 production runs (15 baselines, 4 silica alignment cases): 576 x 72 = 41,472 cells, Gauss limitedLinear 1, 60 s at 2 ms. Keys ending in _old are the 18,432-cell upwind originals.",
+ "cells": 41472,
+ "scheme": "Gauss limitedLinear 1 (species advection)",
+ "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+ "status": {
+  "LBE-I_SS_II_Q1_baseline": "PASS",
+  "LBE-I_SS_II_Q2_baseline_sat0.001": "PASS",
+  "LBE-I_SS_II_Q2_baseline_sat0.01": "PASS",
+  "LBE-I_SS_II_Q2_baseline_sat0.1": "PASS",
+  "LBE-I_SS_II_Q2_shift29k_sat0.001": "PASS",
+  "LBE-I_SS_II_Q2_shift29k_sat0.01": "PASS",
+  "LBE-I_SS_II_Q2_shift29k_sat0.1": "PASS",
+  "LBE-I_SiO2_I_Q1_baseline": "PASS",
+  "LBE-I_SiO2_I_Q2_baseline_sat0.001": "PASS",
+  "LBE-I_SiO2_I_Q2_baseline_sat0.01": "PASS",
+  "LBE-I_SiO2_I_Q2_baseline_sat0.1": "PASS",
+  "LBE-I_SiO2_I_Q2_shift29k_sat0.001": "PASS",
+  "LBE-I_SiO2_I_Q2_shift29k_sat0.01": "PASS",
+  "LBE-I_SiO2_I_Q2_shift29k_sat0.1": "PASS",
+  "PbI2_SS_Q1_baseline": "PASS",
+  "LBE-I_SiO2_I_Q1_baseline__curveShiftPbI2": "PASS",
+  "LBE-I_SiO2_I_Q1_baseline__curveShiftBiI3": "PASS",
+  "LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftPbI2": "PASS",
+  "LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftBiI3": "PASS"
+ },
+ "n_pass": 19,
+ "ledger": [
+  {
+   "case": "LBE-I_SS_II_Q1_baseline",
+   "max_closure_new": 7.109489260661058e-16,
+   "max_raw_residue_new": 6.477454500826136e-13,
+   "max_solver_defect_new": 6.428448814248519e-13,
+   "max_closure_old": 6.419324226213222e-16,
+   "max_raw_residue_old": 5.971898568961056e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 6.081858877566602e-16,
+     "max_relative_solver_defect": 6.290462020797373e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 7.109489260661058e-16,
+     "max_relative_solver_defect": 6.428448814248519e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 6.464954311614666e-16,
+     "max_relative_solver_defect": 6.016885587477699e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 30000,
+    "Y_BiI3_g": 30000
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 30000,
+    "Y_BiI3_g": 30000
+   },
+   "exec_h": 24.52039166666667,
+   "clock_h": 24.595
+  },
+  {
+   "case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+   "max_closure_new": 4.973133803364127e-16,
+   "max_raw_residue_new": 6.455911915503628e-13,
+   "max_solver_defect_new": 6.406639986545785e-13,
+   "max_closure_old": 5.087989994413029e-16,
+   "max_raw_residue_old": 5.719586302511744e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 3.376863855376934e-16,
+     "max_relative_solver_defect": 2.849965362149372e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 3.7845362665089483e-16,
+     "max_relative_solver_defect": 4.3447917756231065e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 3.5112689076764125e-16,
+     "max_relative_solver_defect": 2.850863181230107e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29992
+   },
+   "exec_h": 24.006355555555558,
+   "clock_h": 24.08111111111111
+  },
+  {
+   "case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+   "max_closure_new": 5.442724940180512e-16,
+   "max_raw_residue_new": 6.68016230442285e-13,
+   "max_solver_defect_new": 6.681299585644396e-13,
+   "max_closure_old": 4.960741130296132e-16,
+   "max_raw_residue_old": 2.1127513430783063e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 4.548264588547143e-16,
+     "max_relative_solver_defect": 1.3512400561369995e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 4.828880254343352e-16,
+     "max_relative_solver_defect": 3.9375296609743106e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 4.2316161989942163e-16,
+     "max_relative_solver_defect": 4.0688455416317754e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29990
+   },
+   "exec_h": 25.040225,
+   "clock_h": 25.114722222222223
+  },
+  {
+   "case": "LBE-I_SS_II_Q2_baseline_sat0.1",
+   "max_closure_new": 5.528388802534344e-16,
+   "max_raw_residue_new": 5.252415375070892e-13,
+   "max_solver_defect_new": 5.315105334331789e-13,
+   "max_closure_old": 5.195854266966088e-16,
+   "max_raw_residue_old": 2.211388060131589e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 5.2769884747646935e-16,
+     "max_relative_solver_defect": 1.4858821193604455e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 5.431648439682216e-16,
+     "max_relative_solver_defect": 1.7290622922472565e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 4.257190853658601e-16,
+     "max_relative_solver_defect": 3.6086093471470776e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29819
+   },
+   "exec_h": 25.32763333333333,
+   "clock_h": 25.386111111111113
+  },
+  {
+   "case": "LBE-I_SS_II_Q2_shift29k_sat0.001",
+   "max_closure_new": 4.762504886297509e-16,
+   "max_raw_residue_new": 6.092819186191138e-13,
+   "max_solver_defect_new": 5.951287156472195e-13,
+   "max_closure_old": 4.4405584936503e-16,
+   "max_raw_residue_old": 3.927067101188213e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 2.829175588788112e-16,
+     "max_relative_solver_defect": 2.182138572321909e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 4.201223795458521e-16,
+     "max_relative_solver_defect": 4.0163526599548915e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 3.180285042195161e-16,
+     "max_relative_solver_defect": 2.8175292378360345e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29994
+   },
+   "exec_h": 23.48941388888889,
+   "clock_h": 23.546388888888888
+  },
+  {
+   "case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+   "max_closure_new": 5.262348751395667e-16,
+   "max_raw_residue_new": 4.768251550430246e-13,
+   "max_solver_defect_new": 4.769469939467029e-13,
+   "max_closure_old": 5.351532800458123e-16,
+   "max_raw_residue_old": 4.720592638007916e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 3.4252280037717114e-16,
+     "max_relative_solver_defect": 1.8077362221933487e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 5.125836947632677e-16,
+     "max_relative_solver_defect": 1.690769416798718e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 3.663541299252745e-16,
+     "max_relative_solver_defect": 2.4904307522930293e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29996
+   },
+   "exec_h": 18.203430555555556,
+   "clock_h": 18.67361111111111
+  },
+  {
+   "case": "LBE-I_SS_II_Q2_shift29k_sat0.1",
+   "max_closure_new": 5.271347938497609e-16,
+   "max_raw_residue_new": 6.376623383445836e-13,
+   "max_solver_defect_new": 6.36655857431438e-13,
+   "max_closure_old": 4.661267415607279e-16,
+   "max_raw_residue_old": 4.87641572055853e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 4.594759403890451e-16,
+     "max_relative_solver_defect": 1.5102126100063335e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 5.269480933585217e-16,
+     "max_relative_solver_defect": 1.758670582340926e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 3.5164996771261784e-16,
+     "max_relative_solver_defect": 3.255352276376632e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29997
+   },
+   "exec_h": 25.59813888888889,
+   "clock_h": 25.65861111111111
+  },
+  {
+   "case": "LBE-I_SiO2_I_Q1_baseline",
+   "max_closure_new": 1.0809871002517521e-15,
+   "max_raw_residue_new": 2.218178770762616e-13,
+   "max_solver_defect_new": 1.8934220463509367e-13,
+   "max_closure_old": 6.592941951549325e-16,
+   "max_raw_residue_old": 1.7304746587422676e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 1.0809871002517194e-15,
+     "max_relative_solver_defect": 9.248728455366202e-14,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 6.659183689527587e-16,
+     "max_relative_solver_defect": 1.8934220463509367e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 9.524892452122203e-16,
+     "max_relative_solver_defect": 1.4592195542634517e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 30000,
+    "Y_BiI3_g": 30000
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 30000,
+    "Y_BiI3_g": 30000
+   },
+   "exec_h": 26.13,
+   "clock_h": 26.960555555555555
+  },
+  {
+   "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001",
+   "max_closure_new": 5.073080944634354e-16,
+   "max_raw_residue_new": 1.6619993205362023e-13,
+   "max_solver_defect_new": 1.6696844788620591e-13,
+   "max_closure_old": 5.19655796987512e-16,
+   "max_raw_residue_old": 1.5581816533208518e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 3.3082698141115713e-16,
+     "max_relative_solver_defect": 6.617041479530118e-14,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 4.45426611073344e-16,
+     "max_relative_solver_defect": 1.541854865119428e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 4.290942661120183e-16,
+     "max_relative_solver_defect": 1.1341983948714131e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29992
+   },
+   "exec_h": 27.039869444444445,
+   "clock_h": 27.091944444444444
+  },
+  {
+   "case": "LBE-I_SiO2_I_Q2_baseline_sat0.01",
+   "max_closure_new": 4.930598820023701e-16,
+   "max_raw_residue_new": 4.513698248614924e-13,
+   "max_solver_defect_new": 4.330745171145381e-13,
+   "max_closure_old": 6.615723838875692e-16,
+   "max_raw_residue_old": 1.7053542772008876e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 4.777347890109427e-16,
+     "max_relative_solver_defect": 4.19400935311403e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 4.106214859531414e-16,
+     "max_relative_solver_defect": 1.952242170955215e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 4.2626540451335e-16,
+     "max_relative_solver_defect": 1.8779474035031892e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29991
+   },
+   "exec_h": 25.359672222222223,
+   "clock_h": 25.411944444444444
+  },
+  {
+   "case": "LBE-I_SiO2_I_Q2_baseline_sat0.1",
+   "max_closure_new": 5.429389757901957e-16,
+   "max_raw_residue_new": 2.738340721595976e-13,
+   "max_solver_defect_new": 2.712919285214827e-13,
+   "max_closure_old": 6.108784036282351e-16,
+   "max_raw_residue_old": 1.5244325632477792e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 5.39935628738252e-16,
+     "max_relative_solver_defect": 1.589575388026932e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 5.037618090722601e-16,
+     "max_relative_solver_defect": 1.773923020110398e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 4.3232425507339627e-16,
+     "max_relative_solver_defect": 2.6582585596731645e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29829
+   },
+   "exec_h": 27.42501388888889,
+   "clock_h": 28.246388888888887
+  },
+  {
+   "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.001",
+   "max_closure_new": 4.562280784733082e-16,
+   "max_raw_residue_new": 1.911531787090783e-13,
+   "max_solver_defect_new": 1.9117218873351732e-13,
+   "max_closure_old": 4.761260690114975e-16,
+   "max_raw_residue_old": 1.0252170215803754e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 3.409588617081889e-16,
+     "max_relative_solver_defect": 1.1084744950856594e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 3.7575469036860954e-16,
+     "max_relative_solver_defect": 1.465059071202387e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 4.1251604880341625e-16,
+     "max_relative_solver_defect": 9.816065370509507e-14,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29995
+   },
+   "exec_h": 29.90628333333333,
+   "clock_h": 29.985277777777778
+  },
+  {
+   "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.01",
+   "max_closure_new": 5.244382050385885e-16,
+   "max_raw_residue_new": 2.2053999271980691e-13,
+   "max_solver_defect_new": 2.0892480186678347e-13,
+   "max_closure_old": 5.552640971714716e-16,
+   "max_raw_residue_old": 1.58373626211707e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 4.1349822368929635e-16,
+     "max_relative_solver_defect": 1.0662304134142364e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 4.954011225845055e-16,
+     "max_relative_solver_defect": 2.082458467452481e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 4.2476832748316828e-16,
+     "max_relative_solver_defect": 6.923049397168976e-14,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29997
+   },
+   "exec_h": 30.106977777777775,
+   "clock_h": 30.179444444444446
+  },
+  {
+   "case": "LBE-I_SiO2_I_Q2_shift29k_sat0.1",
+   "max_closure_new": 5.637414665459579e-16,
+   "max_raw_residue_new": 2.0821719363216545e-13,
+   "max_solver_defect_new": 2.069946896099902e-13,
+   "max_closure_old": 6.268905477391624e-16,
+   "max_raw_residue_old": 1.4422357014227177e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 4.820496606249848e-16,
+     "max_relative_solver_defect": 1.8544440680469638e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 4.681053013503035e-16,
+     "max_relative_solver_defect": 1.9524781775657886e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 3.8303307835349575e-16,
+     "max_relative_solver_defect": 1.2303054463249005e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29997
+   },
+   "exec_h": 30.55848333333333,
+   "clock_h": 30.624166666666667
+  },
+  {
+   "case": "PbI2_SS_Q1_baseline",
+   "max_closure_new": 7.596554498881038e-16,
+   "max_raw_residue_new": 4.305502330065192e-13,
+   "max_solver_defect_new": 4.150438727745743e-13,
+   "max_closure_old": 8.623534353012785e-16,
+   "max_raw_residue_old": 3.888867510632376e-13,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 7.596554498881038e-16,
+     "max_relative_solver_defect": 4.137238212777177e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 0.0,
+     "max_relative_solver_defect": 0.0,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 6.198165316227937e-16,
+     "max_relative_solver_defect": 4.150438727745743e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 30000
+   },
+   "unconverged_steps_old": {
+    "Y_PbI2_g": 30000,
+    "Y_BiI3_g": 0
+   },
+   "exec_h": 11.256533333333332,
+   "clock_h": 11.2775
+  },
+  {
+   "case": "LBE-I_SiO2_I_Q1_baseline__curveShiftPbI2",
+   "max_closure_new": 1.1210537905150353e-15,
+   "max_raw_residue_new": 4.225094717237851e-13,
+   "max_solver_defect_new": 4.1740039698815925e-13,
+   "max_closure_old": null,
+   "max_raw_residue_old": null,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 1.1210537905148523e-15,
+     "max_relative_solver_defect": 4.174003969880512e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 6.758327863565219e-16,
+     "max_relative_solver_defect": 4.00734676258745e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 8.95059932055731e-16,
+     "max_relative_solver_defect": 3.6926667705584225e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 30000,
+    "Y_BiI3_g": 30000
+   },
+   "unconverged_steps_old": null,
+   "exec_h": 26.89503611111111,
+   "clock_h": 26.958333333333332
+  },
+  {
+   "case": "LBE-I_SiO2_I_Q1_baseline__curveShiftBiI3",
+   "max_closure_new": 1.0936190082448533e-15,
+   "max_raw_residue_new": 1.3041643558124116e-12,
+   "max_solver_defect_new": 1.4509808719331999e-12,
+   "max_closure_old": null,
+   "max_raw_residue_old": null,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 1.0936190082437473e-15,
+     "max_relative_solver_defect": 1.155689532893192e-12,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 6.659183689527094e-16,
+     "max_relative_solver_defect": 1.4509808719331999e-12,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 1.0734863546138688e-15,
+     "max_relative_solver_defect": 1.2353207018620022e-12,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 30000,
+    "Y_BiI3_g": 30000
+   },
+   "unconverged_steps_old": null,
+   "exec_h": 26.721541666666667,
+   "clock_h": 26.78638888888889
+  },
+  {
+   "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftPbI2",
+   "max_closure_new": 5.188558264816572e-16,
+   "max_raw_residue_new": 6.483096427042025e-13,
+   "max_solver_defect_new": 5.428754467227532e-13,
+   "max_closure_old": null,
+   "max_raw_residue_old": null,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 3.313850257710693e-16,
+     "max_relative_solver_defect": 8.76030851969244e-14,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 4.43110887314069e-16,
+     "max_relative_solver_defect": 4.1880493130597526e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 3.6622575188838624e-16,
+     "max_relative_solver_defect": 1.5657994052278765e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": null,
+   "exec_h": 30.000655555555557,
+   "clock_h": 30.064166666666665
+  },
+  {
+   "case": "LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftBiI3",
+   "max_closure_new": 4.827885655829838e-16,
+   "max_raw_residue_new": 1.4083973977770984e-12,
+   "max_solver_defect_new": 1.4093494440398189e-12,
+   "max_closure_old": null,
+   "max_raw_residue_old": null,
+   "gates": {
+    "Pb": {
+     "max_relative_closure": 3.5595502701199277e-16,
+     "max_relative_solver_defect": 7.261313440321251e-13,
+     "status": "PASS"
+    },
+    "Bi": {
+     "max_relative_closure": 4.296875463696276e-16,
+     "max_relative_solver_defect": 8.806282572626777e-13,
+     "status": "PASS"
+    },
+    "I": {
+     "max_relative_closure": 4.1260135842756567e-16,
+     "max_relative_solver_defect": 7.057915185689771e-13,
+     "status": "PASS"
+    }
+   },
+   "max_respeciation_failures": 0,
+   "unconverged_steps": {
+    "Y_PbI2_g": 29999,
+    "Y_BiI3_g": 29999
+   },
+   "unconverged_steps_old": null,
+   "exec_h": 20.808722222222222,
+   "clock_h": 20.869444444444444
+  }
+ ],
+ "wall_hours": {
+  "LBE-I_SS_II_Q1_baseline": 24.595,
+  "LBE-I_SS_II_Q2_baseline_sat0.001": 24.08111111111111,
+  "LBE-I_SS_II_Q2_baseline_sat0.01": 25.114722222222223,
+  "LBE-I_SS_II_Q2_baseline_sat0.1": 25.386111111111113,
+  "LBE-I_SS_II_Q2_shift29k_sat0.001": 23.546388888888888,
+  "LBE-I_SS_II_Q2_shift29k_sat0.01": 18.67361111111111,
+  "LBE-I_SS_II_Q2_shift29k_sat0.1": 25.65861111111111,
+  "LBE-I_SiO2_I_Q1_baseline": 26.960555555555555,
+  "LBE-I_SiO2_I_Q2_baseline_sat0.001": 27.091944444444444,
+  "LBE-I_SiO2_I_Q2_baseline_sat0.01": 25.411944444444444,
+  "LBE-I_SiO2_I_Q2_baseline_sat0.1": 28.246388888888887,
+  "LBE-I_SiO2_I_Q2_shift29k_sat0.001": 29.985277777777778,
+  "LBE-I_SiO2_I_Q2_shift29k_sat0.01": 30.179444444444446,
+  "LBE-I_SiO2_I_Q2_shift29k_sat0.1": 30.624166666666667,
+  "PbI2_SS_Q1_baseline": 11.2775,
+  "LBE-I_SiO2_I_Q1_baseline__curveShiftPbI2": 26.958333333333332,
+  "LBE-I_SiO2_I_Q1_baseline__curveShiftBiI3": 26.78638888888889,
+  "LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftPbI2": 30.064166666666665,
+  "LBE-I_SiO2_I_Q2_baseline_sat0.001__curveShiftBiI3": 20.869444444444444
+ }
+}

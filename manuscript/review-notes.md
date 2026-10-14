@@ -1,45 +1,82 @@
-# Author review: 9 October 2026
+# Author review: 14 October 2026 (update of 9 October)
 
-The completed working draft is framed as a conservative CFD method plus
-numerical-resolution and input-sensitivity assessment. It reports 79 completed
-computational cases, not 79 independent experiments, and makes no claim of
-independent predictive validation. The missing BiI3_SiO2_800 temperature profile
-is stated explicitly; that case was not run.
+The working draft is framed as a conservative CFD method plus
+numerical-resolution and input-sensitivity assessment, now with an
+independent single-species comparison. It reports completed computational
+cases, not independent experiments, and makes no claim of independent
+predictive validation. The missing BiI3_SiO2_800 temperature profile is
+stated explicitly; that case was not run.
 
-## What changed from the planning draft
+## What changed on 14 October 2026
 
-- The title, abstract, model description, verification/results tables and
-  conclusions now describe completed work.
-- All reported cases use `respeciation { engine kernel; }`. GEMS3K is a software
-  capability, rather than the per-cell engine used for these results.
-- The executed scheme is implicit Euler and first-order upwind on a 5-degree
-  wedge. The main mesh has 18,432 cells; separate 8,192/41,472-cell and 1 ms
-  studies are reported. No SuperBee, 228,960-cell mesh, unrun manufactured
-  solution or completed T-Flows comparison is claimed.
-- Actual case manifests use 4.8 mm steel and **5.0 mm silica** diameters. Earlier
-  presentation wording about a common 4.8 mm diameter should be corrected when
-  that deck is next revised. Boat obstruction is still omitted.
-- The original silica mismatch remains visible. Its two temperature-coordinate
-  shifts are input-derived hypotheses, not a confirmed correction or fitted
-  validation result.
-- Funding statements and grant identifiers from the earlier draft were removed
-  until the authors confirm that they apply to this work.
+All new evidence is in the repository; plan section 39 summarises it and
+awaits sign-off.
 
-## Numerical evidence still needed
+- **Production runs** (`run/034-liu2025/production_576x72_limitedLinear`):
+  the 15 baselines and the 4 silica temperature-coordinate cases re-run on
+  41,472 cells with `Gauss limitedLinear 1`; all 19 PASS. The baseline
+  tables, Figs. 4 and 7 and the abstract numbers now come from them. The 64
+  follow-up sensitivities stay 18,432-cell upwind and are reported as
+  differences from their own upwind baselines (stated in Secs. 4.2, 5.3, 7.3).
+  Changes that matter: the pure-PbI2 binned peak is 36 cm / 366.5 C
+  (published 36 cm / 368 C) but its 3 cm smoothed maximum and centroid
+  temperature are 350.5 / 348.7 C; steel PbI2 smoothed / centroid
+  temperatures are 269.2 / 274.5 C (lower edge of 288 +- 18 C) while the
+  binned value is 288.1 C; the silica overlap ranking of the two coordinate
+  shifts reverses (Q1 77.80 vs 73.26 %, Q2 77.88 vs 75.54 %; upwind had the
+  opposite order), so neither shift is preferred. The BiI3 share, totals and
+  ledger are unchanged within the stated tolerances (largest raw residue
+  1.41e-12).
+- **Scheme and mesh study** (`run/034-liu2025/scheme_mesh_study`):
+  Table III and Fig. 3 replaced. Steel shifted-BiI iodine profile, successive
+  levels 8,192 / 18,432 / 41,472 / 93,312 cells: limitedLinear 15.35 / 8.95 /
+  1.98 %, upwind 10.47 / 10.58 / 2.13 %. Apparent orders 1.3 and 3.7 are
+  inconsistent: no formal GCI; the 1.98 % L3-L4 change is quoted, with
+  indicative 2.5 % (apparent order) and 3.6 % (second order) estimates of the
+  41,472-cell error. Upwind vs limitedLinear at equal mesh 20.8 / 14.1 / 11.3 /
+  7.7 %; van Leer vs limitedLinear at most 2.8 % (steel) and 1.8 % (pure).
+- **Iteration check** (`run/034-liu2025/iteration_check`): eight vs three
+  correctors over the full 60 s, three cases. Iodine profile change 1.1e-13 %
+  and 4.9e-13 % (pure PbI2, steel 0.1 %) and 0.021 % (steel 1 %). The
+  "full-run iteration sensitivity unqualified" caveat is replaced.
+  The fourth case (shifted BiI) was still queued and is not used.
+- **Lobresco et al. (2026)** (`run/035-lobresco2026`,
+  `thermochemistry/benchmarks/lobresco2026`): new Sec. 6.3, Table V,
+  Fig. 5, one sentence each in abstract and conclusions. Onset temperature
+  minus measurement +26 / +19 / +16 / -11 / -14 K, RMS 18 K, against 35 K for
+  both published models; coarse mesh within 0.3 K; peaks 1-4 cm upstream;
+  L1/n0 0.4-0.9. T5_60 uses the main deposit (from the inlet the rule hits a
+  back-diffused upstream deposit at 548 K). Not represented: flow stop and
+  withdrawal, the non-dilute source region (mole fraction 0.33-0.36), the
+  boat. The T-Flows test-case wall table differs from the published curves;
+  it is described, not copied.
+- **Figures** redrawn at printed size (5.4 in wide or less, 8-9 pt text) and
+  included without scaling, so the PoF layout has no text below 8 pt.
+- **PoF title** changed to the transport framing (decision below).
 
-The isolated 2/1 ms comparisons change iodine profiles by 0.0043–0.3228%.
-The 18,432/41,472-cell comparisons change them by 2.06–10.58%. Integral
-deposition is much more stable than local shape. Three-grid estimates are
-conditional or refused for oscillation/nondecreasing differences, so the
-manuscript does not claim mesh independence or confirmed GCI uncertainty.
+## Numerical evidence: current state
 
-Further spatial evidence should focus on the shifted-BiI steel case with
-10.58% fine/medium change and the pure-PbI2/low-loading branches whose binned
-maxima switch. A further refinement or a separately verified bounded
-higher-order scheme could address this. Full-run corrector sensitivity remains
-needed if iteration independence is to be claimed; the saved 40 ms restarts
-only diagnose the tested late-time checkpoints. No new long CFD study was
-launched while preparing this draft.
+Time step 2 to 1 ms: 0.0043-0.3228 %. Correctors 3 to 8 over 60 s: at most
+0.021 %. Space: see above; the upwind numerical diffusion is the dominant
+spatial error of the original campaign, and the production profiles differ
+from the 18,432-cell upwind profiles by 9.1-22.3 %. Integral deposition is
+much more stable than local shape. Mesh independence of local profile shapes
+is not claimed; the L3-L4 check exists for one case only.
+
+Not done: the upwind 93,312-cell runs of the other follow-up cases in
+`~/lesto-submission-followup` were still running and are not used; a
+manufactured-solution test; a T-Flows run with identical inputs.
+
+## Title (PoF only)
+
+`pof/lesto-pof.tex` now reads "Competition between radial diffusion and
+interfacial exchange in thermal-gradient deposition columns: conservative
+modeling of iodine transport". Basis: the wall Damkoehler number is
+1.4e3-2.9e3 at alpha = 1; alpha = 0.1 changes profiles by at most 0.41 %,
+alpha = 0.01 by at most 4.21 %, halving or doubling D by 3.83-14.20 %; and
+the untuned HKS wall law with the near-wall diffusion resistance gives the
+best onset RMS on the Lobresco cases. The arXiv title is unchanged. Revert
+if the authors prefer the descriptive title.
 
 ## Experimental and thermodynamic limits
 
@@ -61,6 +98,13 @@ The four 60–80 s restarts hold a nonuniform temperature profile fixed after
 stopping flow and source. They do not reproduce three-hour evaporation or
 the experimental cooling protocol. These omissions are explicit in the draft.
 
+The Lobresco comparison uses digitised wall curves, not the thermocouple
+tables; those tables, the boat geometry and position, whether the figure
+origin is the column inlet, and the C_e behind their Table 2
+vapour-pressure column (the paper calls C_e = 5 illustrative, not
+calibrated, and does not say which value Table 2 used) remain open
+questions for the authors of that study.
+
 ## Before circulation as a journal submission
 
 - Confirm author list/order, affiliation, funding, acknowledgments and any
@@ -70,8 +114,8 @@ the experimental cooling protocol. These omissions are explicit in the draft.
   sufficient for the intended methods contribution.
 - Confirm thermodynamic record provenance and the redistribution terms for any
   future CFD input package. External coefficient files are not included here.
-- Select a journal/template after that review. No journal is selected and
-  nothing has been submitted or published.
+- A Physics of Fluids version exists (`pof/`, checklist in
+  `pof/SUBMISSION-CHECKLIST.md`); nothing has been submitted or published.
 
 The prior `notes-for-authors.md` and `literature-review.md` are historical
 planning notes, not evidence that their proposed experiments or code comparisons

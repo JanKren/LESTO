@@ -1,0 +1,11 @@
+{
+ "case": "T106_6",
+ "level": "coarse",
+ "records": 3000,
+ "max_abs_closure_over_initial": 2.135345338361981e-16,
+ "max_abs_solver_defect_over_initial": 2.825030313831482e-12,
+ "last_line": "Phase change summary Y_PbI2_g: 0 steps without outer convergence, 0 guard passes, 0 projected elements (0 significant), 0 complementarity violations (0 significant), 13 significant regime changes in final predictors",
+ "max_PbI2_mole_fraction": 0.36288906558365164,
+ "min_Y_PbI2_g": -1.2488989565215305e-06,
+ "most_negative_mass_kg_wedge": -1.5941095504967945e-17
+}

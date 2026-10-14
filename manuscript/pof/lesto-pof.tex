@@ -25,15 +25,16 @@
 % Clearly visible placeholder for information only the authors can supply.
 \newcommand{\confirm}[1]{\textcolor{red}{[AUTHOR TO CONFIRM: #1]}}
 \hypersetup{
-  pdftitle={Conservative CFD modelling of iodine deposition in
-    thermal-gradient columns},
+  pdftitle={Competition between radial diffusion and interfacial exchange
+    in thermal-gradient deposition columns},
   pdfauthor={Jan Kren and Bojan Niceno}}
 
 \begin{document}
 \preprint{Submitted to Physics of Fluids}
 
-\title{Conservative CFD modelling of iodine deposition in thermal-gradient
-columns: numerical verification and input sensitivity}
+\title{Competition between radial diffusion and interfacial exchange in
+thermal-gradient deposition columns: conservative modeling of iodine
+transport}
 
 \author{Jan Kren}
 % \email reads its argument verbatim: keep it on one line, no macros.
@@ -45,33 +46,32 @@ columns: numerical verification and input sensitivity}
 \date{\today}
 
 \begin{abstract}
-In thermal-gradient columns, laminar helium carries trace vapours
-along a tube whose wall temperature falls steeply. Interpreting the
-iodine deposits requires a consistent treatment of transport, gas
-speciation and wall exchange. We present an OpenFOAM finite-volume
-model for nine Pb--Bi--I gases in a frozen helium carrier, with
-element-conserving gas equilibrium and shared wall inventories.
-Reversible iodide exchange follows a Hertz--Knudsen--Schrage law in
-series with the near-wall diffusive resistance. Published
-thermosublimatography measurements supply three temperature profiles
-and deposition scans; unreported source histories and flow-reference
-conditions are treated as assumptions. Fifteen baseline and 64
-follow-up simulations separate numerical refinement from selected
-input sensitivities. In 60 s follow-up runs, the largest raw
-element-balance residue is $8.85\times10^{-13}$ of supplied material.
-Halving the time step from 2 to 1 ms changes iodine profiles by at
-most 0.323\%, whereas refining the mesh from 18,432 to 41,472 cells
-changes them by 2.06--10.58\%; spatial convergence remains unresolved.
-A $+29\units{kJ\,mol^{-1}}$ shift in the BiI gas Gibbs energy changes
-the BiI$_3$ share of deposited iodide iodine in the refined steel case
-from 94.57\% to 2.00\%, a strong but conditional thermochemical
-sensitivity. For silica, two shifts derived from discrepancies between
-the published temperature curve and its peak labels reduce 4--5 cm
-position errors to 0--1 cm, but do not establish a corrected
-experimental coordinate system. The results support a conservative
-computational method and an explicit assessment of uncertain inputs;
-they neither establish independent predictive validation nor reproduce
-the three-hour experiment and subsequent cooling.
+In thermal-gradient columns, laminar helium carries trace vapours along
+a tube whose wall temperature falls steeply. We present an OpenFOAM finite-volume model for nine
+Pb--Bi--I gases in a frozen helium carrier, with element-conserving gas
+equilibrium and shared wall inventories. Reversible iodide exchange
+follows a Hertz--Knudsen--Schrage law in series with the near-wall
+diffusive resistance. Published measurements supply temperature
+profiles and deposition scans; unreported source histories are
+assumptions. Fifteen baseline and 64 follow-up simulations separate
+numerical refinement from input sensitivities. The largest raw
+element-balance residue is $1.41\times10^{-12}$ of supplied material.
+Halving the time step changes iodine profiles by at most 0.323\%, and
+eight instead of three correctors by at most 0.021\%. First-order upwind
+advection differs from a bounded limited-linear scheme by up to 20.8\%
+at equal mesh; with the bounded scheme, the most sensitive profile
+changes by 1.98\% from 41,472 to 93,312 cells, without a consistent
+observed order. Radial diffusion, not interfacial kinetics, limits wall
+exchange. A $+29\units{kJ\,mol^{-1}}$ shift in the BiI gas Gibbs energy
+changes the BiI$_3$ share of deposited iodide iodine from 94.58\% to
+2.01\%. For silica, shifts derived from inconsistent published
+temperature labels reduce 4--5 cm position errors to 0--1 cm without
+establishing corrected coordinates. Without tuning, the wall law
+reproduces deposition-onset temperatures of five independent PbI$_2$
+experiments with an RMS deviation of 18 K, against 35 K for two
+published models, although computed peaks lie 1--4 cm upstream. The
+results support a conservative method and an explicit assessment of
+uncertain inputs, not independent predictive validation.
 \end{abstract}
 
 \maketitle
@@ -104,12 +104,17 @@ The solver, the benchmark preparation scripts and the data that support
 the findings of this study are openly available in the LESTO repository
 at \url{https://github.com/JanKren/LESTO},
 \confirm{archived release or DOI, and that the branch holding these
-files is public}. These files comprise the completed baseline and
-follow-up metrics, saved axial profiles, generated tables,
+files is public}. These files comprise the completed baseline,
+follow-up, production, scheme and mesh, and iteration-check metrics,
+saved axial profiles, generated tables,
 figure-generation code and SHA-256 provenance records. The experimental
 curves were digitised from Liu et al.\ \cite{Liu2025chemical}; they
 reconstruct published figures, are not author-supplied measurements,
-and are adapted under the source paper's CC BY 4.0 licence. Some
+and are adapted under the source paper's CC BY 4.0 licence. The
+measured profiles, wall temperatures and model curves of Lobresco et
+al.\ \cite{Lobresco2026assessment} were digitised in the same way and
+are adapted under that paper's CC BY 4.0 licence; the case set-up and
+final profiles of our comparison runs are included. Some
 thermodynamic coefficient files are external inputs that are not
 redistributed; their local identifiers and the provenance of the derived
 tables are recorded with the benchmark. Reproducing the CFD calculations

@@ -1,0 +1,6 @@
+pure L1 vl_vs_ll I L1 1.82%  3cm 1.33%
+pure L2 vl_vs_ll I L1 0.60%  3cm 0.30%
+pure L3 vl_vs_ll I L1 0.27%  3cm 0.14%
+steel L1 vl_vs_ll I L1 2.78%  3cm 1.23%
+steel L2 vl_vs_ll I L1 1.91%  3cm 0.81%
+steel L3 vl_vs_ll I L1 1.16%  3cm 0.41%

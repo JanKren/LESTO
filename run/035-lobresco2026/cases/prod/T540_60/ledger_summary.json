@@ -1,0 +1,11 @@
+{
+ "case": "T540_60",
+ "level": "prod",
+ "records": 120000,
+ "max_abs_closure_over_initial": 2.629789169891092e-16,
+ "max_abs_solver_defect_over_initial": 4.4123039852138124e-13,
+ "last_line": "Phase change summary Y_PbI2_g: 135 steps without outer convergence, 0 guard passes, 0 projected elements (0 significant), 0 complementarity violations (0 significant), 0 significant regime changes in final predictors",
+ "max_PbI2_mole_fraction": 0.3308071981208796,
+ "min_Y_PbI2_g": -0.0012208553287840669,
+ "most_negative_mass_kg_wedge": -2.461548610447861e-15
+}

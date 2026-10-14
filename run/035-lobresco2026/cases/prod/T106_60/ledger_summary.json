@@ -1,0 +1,11 @@
+{
+ "case": "T106_60",
+ "level": "prod",
+ "records": 30000,
+ "max_abs_closure_over_initial": 1.166486618247403e-16,
+ "max_abs_solver_defect_over_initial": 2.0708608690390475e-11,
+ "last_line": "Phase change summary Y_PbI2_g: 40 steps without outer convergence, 12 guard passes, 7516 projected elements (0 significant), 1 complementarity violations (0 significant), 321 significant regime changes in final predictors",
+ "max_PbI2_mole_fraction": 0.36359623347344006,
+ "min_Y_PbI2_g": -1.650757199107563e-06,
+ "most_negative_mass_kg_wedge": -1.0596652608216698e-17
+}

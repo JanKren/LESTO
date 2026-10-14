@@ -1,0 +1,30 @@
+{
+ "106": {
+  "file": "inputs/wallT_106mLmin.csv",
+  "sha256": "1156d423d0c40510b04e8d52a79767e7a10356cfc4fe4637288df73237da8139",
+  "T_max_K": 1069.73,
+  "x_T_max_m": 0.13,
+  "T_at_0_K": 324.65,
+  "T_at_0p69_K": 346.34000000000003,
+  "source": "mean of the T106_6 and T106_300 digitisations (Fig. 14 i, ii); T106_60 (Fig. 13) agrees within 3.3 K over 0.2-0.6 m but its curve is hidden by the legend at 0.105-0.135 m"
+ },
+ "5": {
+  "file": "inputs/wallT_5mLmin.csv",
+  "sha256": "c91e9ced48828d011605af6e0287ba7f85144d9d424cd855ebdc6b5f1753c010",
+  "T_max_K": 1069.96,
+  "x_T_max_m": 0.15,
+  "T_at_0_K": 315.07,
+  "T_at_0p69_K": 415.73,
+  "source": "T5_60 digitisation (Fig. 14 iii)"
+ },
+ "540": {
+  "file": "inputs/wallT_540mLmin.csv",
+  "sha256": "418987d041eb2a8c6f5ef60d831d2200271b533e70f0ea2becbc2980f56b6fb9",
+  "T_max_K": 1060.49,
+  "x_T_max_m": 0.152,
+  "T_at_0_K": 311.2,
+  "T_at_0p69_K": 455.21,
+  "source": "T540_60 digitisation (Fig. 14 iv)"
+ },
+ "note": "Values below x = 0.001 m (first digitised point) are the value at 0.001 m, interpolated onto a 1 mm grid; held constant by the carrier tool outside [0, 0.69] m."
+}

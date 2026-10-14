@@ -8831,3 +8831,97 @@ fitting or experimental qualification").  Not independent validation.
 4. **Aggregate suite (37.4 item 2):** `tests/Alltest` re-run on the
    current sources before any further commit of results.
 
+
+## 39. Results of the production, scheme/mesh, iteration and Lobresco runs (pending the researcher's sign-off)
+
+All runs used the M10e solver binary unchanged (sha256 16fd804e...).  The
+evidence is in the repository; the manuscript (arXiv and PoF builds) has
+been updated to it, uncommitted, for review.
+
+1. **Production runs (38.3).**  The 15 baselines and the 4 silica
+   temperature-coordinate cases on 576 x 72 = 41,472 cells with
+   `Gauss limitedLinear 1`; all 19 PASS
+   (`run/034-liu2025/production_576x72_limitedLinear`: `analysis.json`,
+   `ledger.json`, `profiles/`).  Largest raw residue 1.41e-12, closure
+   1.12e-15.  Pure PbI2 binned peak 36 cm / 366.5 C (published 36 cm /
+   368 C); 3 cm smoothed maximum 350.5 C, centroid wall temperature
+   348.7 C.  Steel PbI2: binned 288.1 C, smoothed 269.2 C, centroid 274.5 C
+   (lower edge of 288 +- 18 C).  Silica overlaps: Q1 -4.10 / -4.65 cm
+   77.80 / 73.26 %, Q2 77.88 / 75.54 %; the upwind ranking was the
+   opposite, so neither shift is preferred.  BiI3 share of iodide iodine
+   changes by at most 0.03 percentage points, total iodine by at most
+   0.0084 %, wall capture 91.28-98.20 %.  The production profiles differ
+   from the 18,432-cell upwind profiles by 9.1-22.3 %.  The 64 follow-up
+   sensitivities stay 18,432-cell upwind, as differences from their own
+   baselines.
+2. **Scheme and mesh study (38.3, fourth level and van Leer).**
+   `run/034-liu2025/scheme_mesh_study` (results, final profiles, readme).
+   Iodine profile, successive levels 8,192 / 18,432 / 41,472 / 93,312:
+
+   | case | scheme | L1-L2 | L2-L3 | L3-L4 |
+   |---|---|---|---|---|
+   | steel, shifted BiI | limitedLinear | 15.35 % | 8.95 % | 1.98 % |
+   | steel, shifted BiI | upwind | 10.47 % | 10.58 % | 2.13 % |
+   | steel, shifted BiI | vanLeer | 16.83 % | 9.17 % | - |
+   | pure PbI2 | limitedLinear | 5.70 % | 2.15 % | - |
+   | pure PbI2 | upwind | 6.57 % | 5.06 % | - |
+   | pure PbI2 | vanLeer | 4.94 % | 2.23 % | - |
+
+   - Apparent orders (limitedLinear, steel) 1.3 and 3.7: inconsistent, and
+     the iodine total, centroid and width oscillate on both triplets.  No
+     formal GCI.  Quoted: the L3-L4 change 1.98 %; indicative error of the
+     41,472-cell profile 2.5 % (last apparent order) or 3.6 % (second
+     order).  L3-L4: 3 cm smoothed 0.67 %, total 0.015 %; over all levels
+     the centroid stays within 0.6 mm and the PbI2 centroid wall
+     temperature within 0.9 K.
+   - Upwind minus limitedLinear at equal mesh: 20.8 / 14.1 / 11.3 / 7.7 %
+     (steel L1-L4), 9.0-13.2 % (pure).  vanLeer minus limitedLinear: at most
+     2.8 % (steel) and 1.8 % (pure); 1.16 % and 0.27 % at L3.
+   - Steel PbI2 binned maximum alternates between 50 and 51 cm (306.3 /
+     288.1 / 306.7 / 288.1 C); smoothed maximum 288.0-288.1 C and centroid
+     temperature 290.6-291.5 C are stable.  Plan 38.3's rule (report smoothed
+     and centroid values) is applied in the peaks table.
+3. **Full-run iteration check.**  Eight versus three species correctors over
+   60 s, 18,432 cells, upwind (`run/034-liu2025/iteration_check`).  Iodine
+   profile L1: PbI2_SS_Q1_baseline 1.09e-13 %, LBE-I_SS_II_Q2_baseline_sat0.001
+   4.89e-13 %, LBE-I_SS_II_Q2_baseline_sat0.01 0.021 %.  With eight
+   correctors the largest outer initial residual is still 2.4e-15 to
+   4.4e-15 and nearly every step stops at the corrector limit: 1e-16 is
+   below the attainable floor.  The shifted-BiI case was still queued and
+   is not used.  The manuscript's "full-run iteration sensitivity
+   unqualified" caveat is replaced by these numbers.
+4. **Head-to-head on Lobresco et al. (2026), five PbI2 cases.**
+   `thermochemistry/benchmarks/lobresco2026` (digitised measurements, wall
+   curves and both published model curves, CC BY 4.0) and
+   `run/035-lobresco2026` (set-up, scripts, final profiles, comparison and
+   ledger summaries; prod 318 x 72 = 22,896 cells, coarse 212 x 48 =
+   10,176 cells, limitedLinear).  HKS with Ce = alpha = 1 and the half-cell
+   resistance, no tuning.  Deposition-onset temperature (paper's 1 %-of-peak
+   rule) minus measurement: T106_6 +26, T106_60 +19, T106_300 +16,
+   T5_60 -11 (main deposit; from the inlet the rule hits a back-diffused
+   deposit at 548 K), T540_60 -14 K; RMS 18 K against 35 K for both
+   published models (their Table 2).  Coarse vs production within 0.3 K.
+   Deposit + residual gas changes only T5_60 (+3 K; 4.0 % still gaseous;
+   RMS 17 K).  Peaks 1-4 cm upstream of the measured ones; L1/n0 0.4-0.9.
+   The digitised profiles reproduce Table 2's onsets within 1.0 K.  The
+   T-Flows test-case wall table (one profile, 1210 K at 0.04 m) differs from
+   the published curves (1060-1070 K at 0.13-0.15 m; up to 68-92 K in
+   0.30-0.60 m); it is described, not copied.  Not represented: flow stop
+   and withdrawal, the boat, the non-dilute source region (mole fraction
+   0.33-0.36).  The paper does not say which C_e produced its Table 2
+   vapour-pressure column (it calls C_e = 5 illustrative, not calibrated).
+5. **Manuscript.**  Abstracts, Secs. 1, 4-8, Tables III-VII, Figs. 3-7
+   updated; new Sec. 6.3, Table V and Fig. 5; figures redrawn at printed
+   size (text >= 8 pt in the PoF layout).  PoF title changed to "Competition
+   between radial diffusion and interfacial exchange in thermal-gradient
+   deposition columns: conservative modeling of iodine transport" (basis:
+   Da 1.4e3-2.9e3 at alpha = 1, alpha responses <= 0.41 % / 4.21 % versus
+   3.83-14.20 % for D x 1/2 or x 2, and the untuned wall law's onset RMS);
+   arXiv title unchanged.  `check_results.py` recomputes items 2-4 from the
+   saved profiles and PASSes; both builds have 0 overfull boxes and 0
+   undefined references.
+6. **For decision.**  Accept items 1-5; keep or revert the PoF title; whether
+   to run the remaining upwind 93,312-cell cases and the shifted-BiI
+   corrector case (still in `~/lesto-submission-followup`) into the paper;
+   requests to the Lobresco authors (thermocouple tables, boat, inlet
+   origin, C_e of Table 2).

@@ -1,0 +1,98 @@
+{
+ "case": "T540_60",
+ "profile_time": 60.0000000001,
+ "solver_onsets": {
+  "inventory": {
+   "gas": 1.3389415225774757e-11,
+   "wall": 5.456385187593346e-08,
+   "sample": 0.0
+  },
+  "Tdep_fromInlet": {
+   "status": "found",
+   "T": 686.1031907480397,
+   "x": 0.49015399110716834
+  },
+  "Tdep_fromPeak": {
+   "status": "found",
+   "T": 686.1031907480397,
+   "x": 0.49015399110716834
+  },
+  "columns": [
+   "x_lo",
+   "x_hi",
+   "x",
+   "gas",
+   "wall",
+   "sample",
+   "observable",
+   "Twall",
+   "wallArea",
+   "sampleGas"
+  ]
+ },
+ "model_wallPlusGas_fromInlet": {
+  "x_m": 0.49015399110716834,
+  "T_K": 686.0767128946059,
+  "x_peak_m": 0.51,
+  "peak_mol_per_m": 8.821258098421495e-05,
+  "T_peak_K": 660.73
+ },
+ "model_wallPlusGas_fromPeak": {
+  "x_m": 0.49015399110716834,
+  "T_K": 686.0767128946059,
+  "x_peak_m": 0.51,
+  "peak_mol_per_m": 8.821258098421495e-05,
+  "T_peak_K": 660.73
+ },
+ "model_wall_fromInlet": {
+  "x_m": 0.49015400347156024,
+  "T_K": 686.0766949662376,
+  "x_peak_m": 0.51,
+  "peak_mol_per_m": 8.818975270619691e-05,
+  "T_peak_K": 660.73
+ },
+ "model_wall_fromPeak": {
+  "x_m": 0.49015400347156024,
+  "T_K": 686.0766949662376,
+  "x_peak_m": 0.51,
+  "peak_mol_per_m": 8.818975270619691e-05,
+  "T_peak_K": 660.73
+ },
+ "experiment": {
+  "x_m": 0.48013900098597023,
+  "T_K": 699.6865994084178,
+  "x_peak_m": 0.52,
+  "peak_mol_per_m": 8.306393224720592e-05,
+  "T_peak_K": 647.55
+ },
+ "table2_K": 700,
+ "model_integral_over_n0": 0.9998883900670396,
+ "L1_obs_minus_exp_over_n0": 0.4736795643769166,
+ "inventory_full_column_mol": {
+  "gas": 9.640378962557825e-10,
+  "wall": 3.928597335067209e-06,
+  "sample": 0.0
+ },
+ "dT_dep_fromInlet_K": -13.923287105394138,
+ "dx_peak_m": -0.010000000000000009,
+ "ledger_last": {
+  "time": "60.000000000104464",
+  "gas": "6.172640120454281e-12",
+  "wall": "2.5154423515641094e-08",
+  "sample": "0",
+  "initial": "2.5163404641666657e-08",
+  "released": "0",
+  "transport_INLET": "-1.8542621640856464e-53",
+  "transport_OUTLET": "2.8084858959185983e-12",
+  "transport_WALL": "0",
+  "transport_BACK": "1.3757242416895224e-15",
+  "transport_FRONT": "-1.3757242665499819e-15",
+  "removed": "0",
+  "clamped": "1.2971348812793927e-21",
+  "solverDefect": "7.9183543951394644e-21",
+  "restart": "0",
+  "projected": "0",
+  "evaporatedAboveWarning": "3.883669098950369e-08",
+  "closure": "3.3087224502121107e-24"
+ }
+}
