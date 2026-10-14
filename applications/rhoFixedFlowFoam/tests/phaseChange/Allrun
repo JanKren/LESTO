@@ -2243,7 +2243,7 @@ check M2.6m "release sample with a key of mode inventory: FatalIOError\
 PIPE=$PC_DIR/pipe
 
 preparePipe() {
-  makeCase 012 "$1" \
+  makeCase temperature-model "$1" \
     && setControl "$1" endTime 0.1 \
     && setControl "$1" deltaT 0.004 \
     && setControl "$1" writeInterval 25 \
@@ -2267,7 +2267,7 @@ PIPE012PAR=$PC_DIR/pipeOuter012-simple411
 PIPE012HIER=$PC_DIR/pipeOuter012-hierarchical221
 for c in "$PIPE012" "$PIPE012PAR" "$PIPE012HIER"
 do
-  makeCase 012 "$c" \
+  makeCase temperature-model "$c" \
     && setControl "$c" endTime 0.1 \
     && setControl "$c" deltaT 0.004 \
     && setControl "$c" writeInterval 25 \
@@ -2298,7 +2298,7 @@ done
 # M2.5j: 2 steps in serial, in binary, with the background gas everywhere
 PIPERS=$PC_DIR/pipeRestart
 PIPERD=$PC_DIR/pipeRestartRedecomposed
-makeCase 012 "$PIPERS" \
+makeCase temperature-model "$PIPERS" \
   && setControl "$PIPERS" endTime 0.008 \
   && setControl "$PIPERS" deltaT 0.004 \
   && setControl "$PIPERS" writeInterval 2 \
@@ -2498,13 +2498,13 @@ check M2.7 "model mock in constant/thermochemistryProperties, vs the\
 # M2.8: run/012 reproduces its out_excerpt
 #------------------------------------------------------------------------------
 C012=$PC_DIR/run012
-makeCase 012 "$C012" && setControl "$C012" endTime 0.005 || exit 1
+makeCase temperature-model "$C012" && setControl "$C012" endTime 0.005 || exit 1
 runSerial "$C012" "$SOLVER_EXE"
 # run/012/out_excerpt (outside this directory, not edited by the tests)
 # holds 'Cells adjacent to WALL: 15264', which the solver prints for model
 # mock only since the final M2 pass; the excerpt is compared without it
 # (the line may also have been removed from run/012 already)
-excerpt012=$(runCaseDir 012)/out_excerpt
+excerpt012=$(runCaseDir temperature-model)/out_excerpt
 excerptNow=$PC_DIR/run012.out_excerpt
 grep -v '^Cells adjacent to WALL: ' "$excerpt012" > "$excerptNow"
 nRemoved=$(( $(wc -l < "$excerpt012") - $(wc -l < "$excerptNow") ))
@@ -2538,7 +2538,7 @@ TRACERP=$PC_DIR/run012Tracer-pristine
 
 tracerCase() {
   local c=$1 d entry
-  makeCase 012 "$c" && setControl "$c" endTime 0.005 \
+  makeCase temperature-model "$c" && setControl "$c" endTime 0.005 \
     && setControl "$c" writeInterval 5 || return 1
   cp "$(runCaseDir 010)/0/Y_tracer" "$c/0/" || return 1
   d=$c/constant/speciesTransportProperties

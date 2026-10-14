@@ -9,7 +9,7 @@ doc/phase-change-plan.md: "Deposit profile L1 change < 1 % between dt = 2
 and 1 ms"), run by tests/verification/longStudies ('tests/Alltest M7long')
 on three runs at dt = 4, 2 and 1 ms of one case: copies of run/012
 (temperature model, release sample) and run/013 (HKS, inventory sample
-with removal) on the 007 carrier (criteria M7.3b-d), and run/014 on the
+with removal) on the 007 carrier (criteria M7.3b-d), and run/022 on the
 paper-mode carrier (M7.3pb; longChecks.py imports this module).  Every
 subcommand prints its lines and exits with 0 (criterion met) or 1.  The
 profile files (postProcessing/axialProfiles) are read with

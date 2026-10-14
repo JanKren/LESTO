@@ -1,0 +1,41 @@
+#!/bin/bash
+# ./Allrun          the whole case (1.2 s at 1 ms; about 40 s) into
+#                   work/case, then the onsets and closures of expect.json
+# ./Allrun halfstep the same at 0.5 ms into work/halfstep (the onsets do not
+#                   change; the deposit L1 is reported)
+#
+# Needs LESTO_M10D_DATA: the external tables of make_wall_tables.py
+# (readme.md; not redistributed).
+. "${0%/*}/../RunFunctions"
+lestoInit
+mode=${1:-full}
+case $mode in
+  full) c=work/case; dt= ;;
+  halfstep) c=work/halfstep; dt=0.0005 ;;
+  *) lestoUsage "[full | halfstep]" ;;
+esac
+lestoNeed LESTO_M10D_DATA pv_Pb_phases.csv pv_Bi_phases.csv pv_Bi2_phases.csv \
+  pv_PbI2_phases.csv pv_BiI3_phases.csv logK_BiI_disp.csv log10Kf_PbBiI.csv
+lestoRequireOpenFOAM
+
+lestoWorkCase $c replace
+cp benchmark.json $c/
+if [ -n "$dt" ]
+then
+  lestoSetControl $c deltaT $dt
+  lestoSetControl $c writeInterval 2400
+fi
+lestoChannelCarrier $c
+lestoSolve $c
+lestoCheck $c
+if [ "$mode" = halfstep ] && [ -d work/case/postProcessing ]
+then
+  python3 - <<'PY'
+import sys
+sys.path.insert(0, '..')
+from lestoCheck import l1
+for name in ['condensate_Pb_s', 'condensate_Bi_s', 'PbI2_g', 'BiI3_g']:
+    f = f'postProcessing/axialProfiles/1.2/{name}_native.dat'
+    print(f'   {name}: deposit L1 0.5 ms against 1 ms {100 * l1("work/halfstep/" + f, "work/case/" + f, "wall"):.3g} %')
+PY
+fi

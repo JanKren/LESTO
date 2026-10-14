@@ -568,7 +568,7 @@ Per-case `0/Y_PbI2_g` settings:
 | `tests/` | `testPhaseChange.C` and `testVapourPressureTable.C` (g++ only); `regress.sh` (filtered full log vs pristine build and vs `out_excerpt`); `cmpFields.sh` (binary cmp of written fields); `phaseChange/{closedBox,channel,pipe,restartAscii,parallel,graetzWedge,layerMesh}` with an `Allrun` that asserts the milestone thresholds; `graetz.py`, `gci.py`, `summarise.py`. (As built: the verification of M7 is `tests/verification/`, section 33.) |
 | `utilities/setFrozenCarrier/` (new app) | Paper-mode carrier: rho = 1, parabolic u from Q/A with an optional facet-area rescale, phi exactly divergence-free, T from a wall table. Not solver logic. |
 | `thermochemistry/systems/make_pv_table.py` + `data/pv_PbI2_phases.csv`, `data/pv_PbI2_TFlows.csv` | Direct NASA-9 (Gurvich): per-phase cr/l columns every 5 K (270-1250 K) plus the T_m = 683 K node; T-Flows GEMS_VAPOR_PRESSURE at its 95 nodes (283.15 + 10k K, bar). |
-| `run/012-...` to `run/017-...` (new) | 012 temperature model (007 carrier, dev); 013 HKS inventory (dev); 014/015 paper-mode temperature/HKS (code-to-code); 016+ physical carriers (M8). Each has a readme and an `out_excerpt` baseline. 008-010 untouched; 011 is the coupled-mock case of the main branch (section 31). (Amended in section 32, item 12: 015 is the GEMS case of M9, `run/015-hks-gems-local`; the paper-mode HKS case of M6 becomes 016, the physical carriers 017+.) |
+| `run/012-...` to `run/017-...` (new) | 012 temperature model (007 carrier, dev); 013 HKS inventory (dev); 014/015 paper-mode temperature/HKS (code-to-code); 016+ physical carriers (M8). Each has a readme and an `out_excerpt` baseline. 008-010 untouched; 011 is the coupled-mock case of the main branch (section 31). (Amended in section 32, item 12: 015 is the GEMS case of M9, `run/015-hks-gems-local`; the paper-mode HKS case of M6 becomes 016, the physical carriers 017+.) (Renumbered in section 40: the ladder 012-024.) |
 | `readme.md`, manuscript `04-numerics.tex` | Documentation: models, sign convention, balance line, outputs, restart, GEMS build, traps. Manuscript: replace "fvm::SuSp for the sign-changing HKS term" with "fvm::Sp + Su (affine law, Su, Sp >= 0)"; add the defect, guard and final-solve text. |
 
 ---
@@ -8947,3 +8947,109 @@ been updated to it, uncommitted, for review.
      `~/opt/gems-data/m10-design-2026-10-04`.  Previous aggregate: 319
      PASS, 0 FAIL, 1 NOTRUN at 5b8815c.
 
+---
+
+## 40. Case ladder renumbering (pending the researcher's sign-off)
+
+The run/ cases after 011 jumped twice: from 015 (one PbI2 pair in the
+development pipe) to 030 (two pairs in a synthetic channel: carrier,
+geometry, second pair, profiles and element ledger changed at once), and
+no case showed the wall law of the physical runs (`wallResistance
+halfCell`, `interfaceTemperature wall`) or a physical carrier (M8) before
+both appeared inside the two large studies.  The ladder now runs from 012
+to 024 without gaps: the development steps first, then the three benchmark
+studies.  Each case changes one thing against the case it is based on.
+
+This supersedes the case numbering of section 34, item 1 (016 for the HKS
+code-to-code case of M6, 017 and later for the M8 carriers) and of 37.4,
+item 10, signed off in 38.1 ("keep the built case names 030 to 034").
+Sections 0 to 39 keep the numbers of their date; read them with this map.
+
+| old | new | note |
+|---|---|---|
+| run/012-temperature-model | (same) | |
+| run/013-hks-inventory | (same) | |
+| run/014-paper-temperature-model | run/022-paper-temperature-model | the number 014 is reused |
+| run/015-hks-gems-local | (same) | |
+| run/030-pbi2-bii3-channel | run/018-pbi2-bii3-channel | |
+| run/031-pbbi-gas-speciation | run/019-pbbi-gas-speciation | |
+| run/032-pbbi-gems-speciation | run/020-pbbi-gems-speciation | |
+| run/033-lbe-metal-vapour | run/021-lbe-metal-vapour | the template of every Liu case (`cases.py`) |
+| run/035-lobresco2026 | run/023-lobresco2026 | |
+| run/034-liu2025 | run/024-liu2025 | its git-ignored `work/` (33 GB) moved with it |
+| (new) | run/014-hks-channel | based on 013: the synthetic 1000-350 K plane channel |
+| (new) | run/016-hks-channel-halfcell | based on 014: `wallResistance halfCell` |
+| (new) | run/017-physical-carrier | based on 016: the physical carrier of Lobresco T106_6, coarse wedge |
+
+M6 (HKS code-to-code with T-Flows), if it is built, becomes 025 or later,
+based on 013 or 017.
+
+1. **The new cases, measured with the M10e solver (sha256 16fd804e...),
+   2026-10-14.**
+   - 014 (3 s, 10 s serial): 1 % onset 561.164 K against the plug-flow
+     saturation crossing 567.057 K (-5.89 K); pair closure 2.5e-16,
+     elements Pb and I 4.05e-16; released = n0 to 1e-16.  Its PbI2
+     ledger, profiles and fields are byte-identical to the PbI2 pair of
+     018 (M10a.1's property, now visible in the ladder).
+   - 016 (10 s): the wall conductance drops from 63.7-107 m/s to
+     0.985-0.991 m/s (the half cell, D/(dy/2) = 1 m/s, dominates).  Onset
+     561.159 K, 5 mK below 014's (far inside one 6.5 K bin); the peak
+     moves one bin downstream (548.25 to 541.75 K) and is 7.4 % lower;
+     deposit L1 against 014 6.6 % at 3 s; closures at round-off.
+   - 017 (carrier about 5 min, 3000 steps about 3 min serial): carrier
+     audit PASS (cell flux defect 1.2e-17 of the inflow); T_dep 839.086 K
+     (solver) / +25.73 K against the measurement; wall 6.59509e-8, gas
+     1.27133e-9 mol (wedge); closure 2.1e-16.  `comparison.json` and the
+     final profiles equal those of 023's coarse T106_6 byte for byte.
+     Its dictionaries are exactly those `make_cases.py` writes; its
+     Allrun runs the 023 tooling unchanged with the work directory
+     redirected (`physicalCarrier.py`).
+2. **Uniform run interface.**  `run/RunFunctions` (sourced by every
+   Allrun/Allclean of 012-024), `run/lestoCheck.py` (each case's
+   `expect.json`), `run/Allrun-ladder`.  Every Allrun writes only into the
+   case's git-ignored `work/` (one rule `/run/*/work/` in `.gitignore`)
+   and ends with PASS, FAIL or NOTRUN (missing external data or GEMS3K
+   build).  Default checks: excerpts for 012, 013, 015 and 022 (identical
+   on 2026-10-14; 015 with the current bridge md5 dd8b41fa...: start-up and
+   step 1, the rest NOTRUN), `expect.json` for 014, 016-021, 017's and
+   023's tracked records for 017 and 023, `smoke` for 024.  Allclean
+   removes only below `work/` and nothing git tracks; 024's `work/` is
+   removed only with `--all`, a typed confirmation and no live RUNNING
+   `run_state.json`.  Cases 001-011 stay unchanged (no Allrun; they live
+   on Bojan's branch).
+3. **Readmes.**  Bojan's form (based on case N, the change as dictionary
+   lines, modified files, run, what to check, under about 110 lines).  The
+   former readmes of 012, 013, 015, 022, 023 and 024 are kept as
+   `notes.md` in the case (paths updated); those of 018-021 were short and
+   are rewritten.  `run/readme.md` is the ladder index with this map.
+4. **References.**  The tests look the cases up by name (`makeCase
+   paper-temperature-model`; `runCaseDir` accepts a number or a name and
+   refuses an ambiguous match), so a missed `014` cannot resolve to the new
+   014.  M7long keeps numeric codes for its base column (012, 013, 022).
+   Python, manuscript, readmes and the live documentation use the new
+   paths.  Kept as written: sections 0-39 of this plan, the solver sources
+   (a comment edit would move `__LINE__` and change the cited sha256), the
+   run records with absolute paths of their date (024's JSON files,
+   `followup_interim_20261008/`, 019-021's benchmark/verification
+   records), the delivered M10 project-review deck (its
+   `prepare_figures.py` is updated) and the review package.
+   `manuscript/generated/results.json` is regenerated (its input keys are
+   paths); every generated table is unchanged.
+5. **Long runs.**  The keys of every M4long and M7long run change with the
+   test code.  Revalidate, do not re-run: `M4LONG_REVALIDATE=yes
+   M7LONG_REVALIDATE=yes tests/Alltest M4long M7long`.  The absolute links
+   of `tests/work` into the old 014 were rewritten.
+
+6. **The follow-up package** (`~/lesto-submission-followup`, started
+   2026-10-12) runs from its own copies and does not read the Liu case
+   while it runs, so the rename did not wait for it.  Its `study.json`
+   still names the case by its old number; a later `run_study.py --resume`
+   needs `--prepared /home/jan/LESTO/run/024-liu2025/work/prepared` (and
+   `--carrier-tool /home/jan/LESTO/run/024-liu2025/work/followup-20261007/bin/liuCarrierTool`).
+
+**For decision.**
+- Accept the ladder 012-024 and this map, superseding 34.1 and 37.4.10.
+- Agree the range with Bojan (his ladder continues at 025, or his next
+  cases are numbered into ours).
+- Revalidate M4long and M7long, and run `tests/Alltest M10a M10b M10c
+  M10d` with the external data, before the next aggregate claim.

@@ -34,12 +34,12 @@ def main():
     bases=['PbI2_SS_Q1_baseline','LBE-I_SS_II_Q2_baseline_sat0.001',
            'LBE-I_SS_II_Q2_baseline_sat0.01','LBE-I_SS_II_Q2_shift29k_sat0.01']
     for base in bases:
-        reference=REPO/'run/034-liu2025/followup_interim_20261008/reference_profiles'/base
+        reference=REPO/'run/024-liu2025/followup_interim_20261008/reference_profiles'/base
         copy(reference/'benchmark.json',Path('references')/base/'benchmark.json')
         for species in ['element_I','PbI2_g','BiI3_g']:
             name=species+'_native.dat'
-            copy(REPO/'run/034-liu2025/full_analysis/profiles'/base/name,Path('references')/base/name)
-            copy(REPO/'run/034-liu2025/followup_results/profiles'/(base+'__grid576x72')/name,
+            copy(REPO/'run/024-liu2025/full_analysis/profiles'/base/name,Path('references')/base/name)
+            copy(REPO/'run/024-liu2025/followup_results/profiles'/(base+'__grid576x72')/name,
                  Path('fine-references')/base/name)
     hashes={p.relative_to(stage).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(stage.rglob('*')) if p.is_file()}
     (stage/'package-manifest.json').write_text(json.dumps(hashes,indent=2)+'\n')

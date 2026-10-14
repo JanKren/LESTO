@@ -1,0 +1,28 @@
+{
+ "description": "Case 016 at 3 s: the half-cell resistance in the start-up line, the onset and deposit against case 014 (reported), closures at round-off",
+ "checks": [
+  {"id": "start-up: wallResistance halfCell", "type": "log", "file": "log.solver",
+   "pattern": "interfaceTemperature cell, wallResistance (\\S+)", "equals": "halfCell"},
+  {"id": "start-up: largest wall conductance with the half cell [m/s] (014: 106.98)", "type": "log", "file": "log.solver",
+   "pattern": "G_e beta_c/rho_c \\S+-(\\S+) m/s \\(with the half cell\\)", "value": 0.9907388780457359, "rel": 1e-9},
+  {"id": "1 % onset of the PbI2 deposit (014: 561.164 K)", "type": "header",
+   "file": "postProcessing/axialProfiles/3/PbI2_g_native.dat",
+   "pattern": "^# Tdep fromInlet status found T (\\S+)", "value": 561.15933563068927, "abs": 0.01},
+  {"id": "peak bin temperature (014: 548.25 K; the peak moves one bin downstream)", "type": "header",
+   "file": "postProcessing/axialProfiles/3/PbI2_g_native.dat",
+   "pattern": "^# Tpeak (\\S+) K", "value": 541.75, "abs": 1e-6},
+  {"id": "wall inventory [mol]", "type": "header",
+   "file": "postProcessing/axialProfiles/3/PbI2_g_native.dat",
+   "pattern": "^# inventory gas \\S+ wall (\\S+)", "value": 2.7849908018699395e-11, "rel": 1e-9},
+  {"id": "released [mol] = n0", "type": "log", "file": "log.solver",
+   "pattern": "^Balance PbI2_g \\[mol\\]: .* released (\\S+)", "value": 2.7992536908413373e-11, "rel": 1e-14},
+  {"id": "pair closure, every step", "type": "closure",
+   "file": "postProcessing/phaseChangeBalance/0/PbI2_g.dat", "max": 1e-14},
+  {"id": "element closure Pb, every step", "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/Pb.dat", "max": 1e-14},
+  {"id": "deposit L1 against case 014 at 3 s (if run; reported 0.0662)", "type": "l1", "optional": true,
+   "file": "postProcessing/axialProfiles/3/PbI2_g_native.dat",
+   "reference": "case:hks-channel/work/case/postProcessing/axialProfiles/3/PbI2_g_native.dat",
+   "value": 0.06622077461223408, "rel": 1e-6}
+ ]
+}

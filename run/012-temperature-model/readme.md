@@ -1,122 +1,84 @@
 # Case 012 — Temperature-model deposition with a sample release
 
-Development case of milestone M2 of
-`applications/rhoFixedFlowFoam/doc/phase-change-plan.md`.  It replaces the
-mock thermochemistry of case 010 by the gas/condensate exchange of
-`rhoFixedFlowFoam` (`constant/thermochemistryProperties`, `model
-temperature`).
+This case is based on case 011.
 
-## Carrier and mesh
+Case 011 moves PbI2 from the gas to the solid with a mock rate that only
+tests the coupling.  Here the exchange is a wall law: every face of `WALL`
+takes up the gas next to it with the temperature-based model of Lobresco
+et al. (2026), Eq. 5, and the PbI2 comes from a boat that releases a given
+amount over a given time.  Every kilogram is booked in a mass ledger whose
+closure stays at round-off.  Carrier, mesh and diffusivity are those of
+case 011.
 
-The frozen helium carrier of case 007 (time 261, linked from `0/`) and the
-pipe mesh of case 001 (linked `constant/polyMesh`).  This carrier is
-28 mL/min, and its `T`/`U` were overwritten in 3ce3791, so it is a
-development carrier only (plan section 8, risk 10); the log prints its
-consistency, `max |T - p W/(R rho)|/T = 0.0030285`.
+## Differences from case 011
 
-`writeFrozenFields no`: the carrier is read from `0` and never written; the
-write directories hold only `Y_*`, `c_*`, `mw_PbI2_s` and `uniform/`.
+The mock thermochemistry is replaced by `constant/thermochemistryProperties`
+(new):
 
-## Species and model
+    model temperature;
+    pairs { PbI2_g { condensed PbI2_s; } }
+    interface { patches (WALL); layer faceCells; ... }
+    temperatureCoeffs { A 220; k 8e-3; Tdep 680; }      // 1/s, 1/K, K
+    samples { boat { pair PbI2_g; selection { ... cylinder x 0.04-0.05 m,
+              radius 5e-4 ... } mode release; amount 3.16e-5; duration 6; } }
+    balance { nGuard 3; guardTolerance 1e-12; moleFractionWarning 0.05; }
 
-- `PbI2_g`: gas, PbI2-He diffusivity, `molarMass 0.46100894` (required for
-  a paired gas).  WALL must be `zeroGradient`: the exchange enters the gas
-  as a source, not through the boundary.
-- `PbI2_s`: its condensate.  With `model temperature` `Y_PbI2_s` is
-  derived output, `(deposit*area)/(rho*V)`; the state is the deposit of
-  every wall face, kept exactly in `uniform/phaseChangeDeposits` and shown
-  as `mw_PbI2_s` [kg/m2] on the WALL patch (per effective element area,
-  here the face area, since `areaMultiplier` is 1).
+The wall flux is `mdot'' = -rho v_d [1 - exp(-k (Tdep - T))]^+ Y`
+(irreversible), with `v_d = A V_I/A_I`.
 
-Temperature model (Lobresco et al. 2026, Eq. 5) as a wall flux of every
-face of `WALL` (one interaction layer, `layer faceCells`, `areaMultiplier
-1`: the multiplier would scale the applied rate too, and the start-up line
-prints it as `applied rate areaMultiplier*v_d*A_I/V_I = 220 1/s`):
+What follows from it:
+- `PbI2_s` gets a molar mass and becomes derived output (the deposit of
+  every wall face is the state); the passive `tracer` is dropped.
+- `system/controlDict`: dt 1 ms (Courant 0.12), outer loop `nCorr 10`,
+  `tolerance 1e-5`, `writeFrozenFields no` (the carrier is read, never
+  written).
+- `system/fvSolution`: loose GAMG correctors and one tight final solve
+  (`Y_PbI2_gFinal`, 1e-12, relTol 0).
 
-    mdot'' = -rho v_d [1 - exp(-k (Tdep - T))]^+ Y     (deposition, irreversible)
+## Modified files
 
-with `A = 220 1/s`, i.e. `v_d = A V_I/A_I = 0.0124421 m/s` on this layer
-(`A_I/V_I = 17681.9 1/m`), `k = 8e-3 1/K`, `Tdep = 680 K`.
+    constant/thermochemistryProperties   (new)
+    constant/speciesTransportProperties
+    0/Y_PbI2_g, 0/Y_PbI2_s               (0/Y_tracer removed)
+    system/controlDict, system/fvSchemes, system/fvSolution
 
-Sample `boat`: the 144 cells of the cylinder x = 0.04-0.05 m, r <= 0.5 mm
-(selected in memory; no `topoSet` on the linked mesh) release
-`n0 = 3.16e-5 mol` of `PbI2_g` uniformly over `t_ev = 6 s` from `t = 0`.
+## Run
 
-## Numerics
+    ./Allrun                 # 5 steps into work/excerpt, compared with
+                             # out_excerpt (about 30 s)
+    ./Allrun steps 100       # the first 100 steps
+    ./Allrun full 16         # the 16 s case on 16 ranks (about 2.2-2.5 s
+                             # per step serial)
+    ./Allclean
 
-- `dt = 1 ms` (plan section 13; Courant number about 0.12 on this carrier),
-  implicit Euler (required), `Gauss SuperBee` for `PbI2_g`.
-- Outer loop: `nCorr 10`, `tolerance 1e-5`; a step is converged when the
-  initial residual is below the tolerance and the regime changes of the
-  exchange elements carry no significant mass.  Loose correctors
-  (`Y_PbI2_g`: GAMG 1e-8, relTol 0.1) and one tight final solve
-  (`Y_PbI2_gFinal`: 1e-12, relTol 0); no relaxation.
-- `writeFormat binary`: restarts continue the mass ledger and the gas
-  exactly (the deposits are exact in any format).  In parallel,
-  `writeFrozenFields no` keeps the carrier's `phi` out of the restart
-  directories, so a binary restart repeats the continuous run bit for bit.
+The mesh is converted once from run/001's `pipe.msh` into `work/pipeMesh`
+(or set `LESTO_PIPE_MESH`); the carrier is case 007 at time 261 (links in
+`0/`).
 
-## Output
+## What to check
 
-- Every step, one exchange line, one transport line (per patch), one
-  monitor line (min Y, negative mass, carrier-validity mole fraction) and
-  the balance line
+At start-up:
 
-      Balance PbI2_g [mol]: gas ... wall ... released ... transport ...
-      solverDefect ... (relative ...) closure ... (relative ...)
+    Interface (layer faceCells): patches (WALL), 15264 elements ...
+      A_I/V_I = 17681.9 1/m
+    Temperature model: v_d = 0.0124421 m/s (from A = 220 1/s on this
+      layer) ... applied rate ... = 220 1/s ...
+    Sample boat (pair PbI2_g): 144 cells ... release of 3.16e-05 mol
+      from 0 s over 6 s
+    Carrier: max |T - p W/(R rho)|/T = 0.0030285
 
-  whose closure stays at round-off: the cumulative ledger entries are
-  compensated sums, so it does not grow with the number of steps (the
-  6 s release window of this case at dt = 1 ms, 6100 steps, closes to
-  1.8e-14 and releases n0 M to 2e-16 on the test channel, criterion M2.2g
-  of `tests/Alltest M2`);
-- `postProcessing/phaseChangeBalance/0/PbI2_g.dat`: the ledger, every
-  step, in kg with 17 digits;
-- at write times (and whenever a function object writes, e.g.
-  `runTimeControl`): `Y_PbI2_g`, `Y_PbI2_s` (derived), `c_PbI2_g`,
-  `c_PbI2_s`, `mw_PbI2_s`, `mDep_PbI2_s` (the deposit per wall area,
-  milestone M3; equal to `mw_PbI2_s` here, since `areaMultiplier` is 1),
-  and in `uniform/` the ledger `phaseChangeBalance`, its
-  `phaseChangeLayout`, and the element state `phaseChangeDeposits` and
-  `phaseChangeRegimes` (always binary, exact).
+The last line is the consistency of the 007 carrier (28 mL/min, a
+development carrier; plan section 8, risk 10).
 
-## Axial profiles (milestone M3)
+Every step ends with the balance line, whose closure stays at round-off:
 
-The case dictionaries have no `profiles` block, so that the log keeps
-reproducing `out_excerpt` (criterion M2.8).  For the axial profiles of
-the paper (Figs. 9-14), add to `constant/thermochemistryProperties`
+    Balance PbI2_g [mol]: gas 2.63333e-08 wall 5.72124e-37 ... released
+      2.63333e-08 ... closure -3.58857e-24 (relative -1.36275e-16)
 
-    profiles {
-      bins {
-        native { min 0; max 0.69; nBins 424; }   // the axial cells
-        gamma  { min 0; max 0.69; width 0.01; }  // the 1 cm gamma-scan bins
-      }
-      times (6 7 12 16);          // [s], in addition to the write times
-    }
+(step 5, `out_excerpt`; the default `./Allrun` reproduces its 123 lines
+exactly).  Over the 6 s release window (6100 steps) the closure stays at
+1.8e-14 and the released amount equals n0 M to 2e-16 (criterion M2.2g).
 
-(defaults: axis `(1 0 0)`, onset `fraction 0.01` with both search modes
-`fromInlet` and `fromPeak`, observable `wallPlusGas`).  The solver then
-writes `postProcessing/axialProfiles/<time>/PbI2_g_{native,gamma}.dat`
-[mol/m] and two log lines per set with T_dep; the profiles integrate to
-the inventories of the ledger to round-off.  Read them with
-
-    ../../applications/rhoFixedFlowFoam/utilities/axialProfiles.py . \
-      --set gamma --plot profiles.png
-
-Criterion M3.7 of `tests/Alltest M3` runs a copy of this case with such a
-dictionary for the five steps of `out_excerpt`; its log without the
-profile lines reproduces the excerpt.
-
-The full run (16 s, 16000 steps of about 2.5 s serial) is meant for a
-parallel machine.  `out_excerpt` holds the first 5 steps written on
-OpenFOAM v2412 by the build of the M4 review, round 3, which books the
-solver defect of the transport-only matrix in flux form, its face-flux
-correction included, plus the realised exchange, and computes the mole
-fraction of the monitor from the carrier's p/(R T).  The earlier builds
-wrote the same log with other round-off digits of the solver defect,
-`clamped`, `solverDefect` and the closure (M5, M4 rounds 2 and 3), a max
-mole fraction 1.6e-4 higher in relative terms (the form (Y/M)/(Y/M +
-1/M_carrier); the frozen carrier of run/007 deviates from the perfect-gas
-law by up to 0.3 %; plan section 29, item 4), and the M2 build the line
-'Cells adjacent to WALL'; `tests/Alltest M2` (criterion M2.8) checks that
-the current build reproduces it.
+Axial profiles and T_dep are not part of this case (so that the log keeps
+reproducing `out_excerpt`); they enter the ladder in case 014.  How to add
+them, the outputs and the excerpt's history: notes.md.

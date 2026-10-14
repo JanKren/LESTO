@@ -20,7 +20,7 @@
 #              every 0.5 s) differ from the cases (the first M7 study)
 #
 # The paper-mode carrier of milestone M4: copies of
-# run/014-paper-temperature-model (the temperature model of Lobresco et al.
+# run/022-paper-temperature-model (the temperature model of Lobresco et al.
 # (2026): A 220 1/s, k 8e-3 1/K, Tdep 680 K, 3.16e-5 mol released over
 # t_ev = 15 s) with their carrier written by utilities/setFrozenCarrier, run
 # to 2 t_ev = 30 s (the second M7 study):
@@ -33,7 +33,7 @@
 #              none; the flux form with halfCell as well
 #   axial x2   the flux form (none and halfCell) on the axial x2 mesh
 #              (pipeMeshes: axial2) against the base mesh
-#   paper dt   acceptance 3 of M7 on the paper-mode carrier: run/014 as
+#   paper dt   acceptance 3 of M7 on the paper-mode carrier: run/022 as
 #              distributed (100.2 mL/min, layer distance, A) at dt = 4, 2 and
 #              1 ms
 #
@@ -51,7 +51,7 @@
 #
 # The key of a run (m7Key) hashes
 #   - the solver and the utility setFrozenCarrier, without comments;
-#   - the inputs of its run/ case (014, or 012 and 013 with the linked 007
+#   - the inputs of its run/ case (022, or 012 and 013 with the linked 007
 #     carrier) without comments (system, constant, 0);
 #   - the mesh of the run: the md5 of its polyMesh files (boundary, faces,
 #     neighbour, owner, points);
@@ -194,7 +194,7 @@ LONG_DIR=$WORK_DIR/verification/long
 CHECKS="python3 $VF_SRC/longChecks.py"
 PM_CHECKS="python3 $TESTS_DIR/paperMode/checks.py"
 CARRIER_EXE=$FOAM_USER_APPBIN/setFrozenCarrier
-CASE014=$(runCaseDir 014) || exit 1
+CASE014=$(runCaseDir paper-temperature-model) || exit 1
 LONG_RANKS=${M7LONG_RANKS:-8}
 LONG_JOBS=${M7LONG_JOBS:-2}
 
@@ -209,19 +209,19 @@ mkdir -p "$LONG_DIR"
 #
 # base: the run/ case of which the run is an edit: 012 or 013 (the 007
 # carrier, linked; flow, layer, rate and wallResistance '-': the case's
-# own) or 014 (the paper-mode carrier, written by setFrozenCarrier on the
+# own) or 022 (the paper-mode carrier, written by setFrozenCarrier on the
 # run's mesh).  mesh: base, wallH2 or axial2 (tests/verification/
 # pipeMeshes).  flow: 'Q:<m3/s>' or 'mL:<mL/min>' (setFrozenCarrierDict).
-# rate: 'A' (run/014's A 220 1/s, the volumetric form) or 'vd:<m/s>'
+# rate: 'A' (run/022's A 220 1/s, the volumetric form) or 'vd:<m/s>'
 # (depositionVelocity, the flux form: 0.0124421 m/s is the v_d that A
 # gives on the base mesh with layer faceCells, as the solver prints it;
 # criterion M7.2c checks it against the log of h-A-none).  times: the
 # profile times, separated by commas, or 'every:<s>' (every <s> seconds to
 # the end); profiles are also written every second, at the write times.
 # bins: '-' or 'cells:<n>', a bin set 'cells' of n bins over the pipe
-# besides run/014's 'native' (the 424 axial cells of the base mesh) and
+# besides run/022's 'native' (the 424 axial cells of the base mesh) and
 # 'gamma' (1 cm), for the axial cells of the axial x2 mesh; the runs of
-# 012 and 013 get both sets of run/014 in a profiles dictionary of their
+# 012 and 013 get both sets of run/022 in a profiles dictionary of their
 # own (the cases have none).
 #
 # The order is the order in which the runs start: the longest of the 007
@@ -235,17 +235,17 @@ LONG_RUNS=(
   "HKS-dt2ms         013 base   -         -         -           -        2e-3 16 every:0.5 -"
   "temperature-dt4ms 012 base   -         -         -           -        4e-3 16 every:0.5 -"
   "HKS-dt4ms         013 base   -         -         -           -        4e-3 16 every:0.5 -"
-  "h-flux-none       014 base   mL:106    faceCells vd:$VD_BASE none     1e-3 30 (16,30) -"
-  "h2-flux-none      014 wallH2 mL:106    faceCells vd:$VD_BASE none     1e-3 30 (16,30) -"
-  "dt1ms             014 base   Q:1.67e-6 distance  A           none     1e-3 30 (16,30) -"
-  "dt2ms             014 base   Q:1.67e-6 distance  A           none     2e-3 30 (16,30) -"
-  "dt4ms             014 base   Q:1.67e-6 distance  A           none     4e-3 30 (16,30) -"
-  "h2-A-none         014 wallH2 mL:106    faceCells A           none     1e-3 30 (16,30) -"
-  "x2-flux-none      014 axial2 mL:106    faceCells vd:$VD_BASE none     1e-3 30 (16,30) cells:848"
-  "x2-flux-halfCell  014 axial2 mL:106    faceCells vd:$VD_BASE halfCell 1e-3 30 (16,30) cells:848"
-  "h-flux-halfCell   014 base   mL:106    faceCells vd:$VD_BASE halfCell 1e-3 30 (16,30) -"
-  "h2-flux-halfCell  014 wallH2 mL:106    faceCells vd:$VD_BASE halfCell 1e-3 30 (16,30) -"
-  "h-A-none          014 base   mL:106    faceCells A           none     1e-3 30 (16,30) -"
+  "h-flux-none       022 base   mL:106    faceCells vd:$VD_BASE none     1e-3 30 (16,30) -"
+  "h2-flux-none      022 wallH2 mL:106    faceCells vd:$VD_BASE none     1e-3 30 (16,30) -"
+  "dt1ms             022 base   Q:1.67e-6 distance  A           none     1e-3 30 (16,30) -"
+  "dt2ms             022 base   Q:1.67e-6 distance  A           none     2e-3 30 (16,30) -"
+  "dt4ms             022 base   Q:1.67e-6 distance  A           none     4e-3 30 (16,30) -"
+  "h2-A-none         022 wallH2 mL:106    faceCells A           none     1e-3 30 (16,30) -"
+  "x2-flux-none      022 axial2 mL:106    faceCells vd:$VD_BASE none     1e-3 30 (16,30) cells:848"
+  "x2-flux-halfCell  022 axial2 mL:106    faceCells vd:$VD_BASE halfCell 1e-3 30 (16,30) cells:848"
+  "h-flux-halfCell   022 base   mL:106    faceCells vd:$VD_BASE halfCell 1e-3 30 (16,30) -"
+  "h2-flux-halfCell  022 wallH2 mL:106    faceCells vd:$VD_BASE halfCell 1e-3 30 (16,30) -"
+  "h-A-none          022 base   mL:106    faceCells A           none     1e-3 30 (16,30) -"
 )
 
 
@@ -317,14 +317,14 @@ profileTimes() {
 }
 
 # setup014 <case> <mesh> <flow> <layer> <rate> <wallResistance> <dt> <end>
-#          <times> <bins>: a copy of run/014 with its carrier written by
+#          <times> <bins>: a copy of run/022 with its carrier written by
 # setFrozenCarrier on the run's mesh (header)
 setup014() {
   local c=$1 mesh=$2 flow=$3 layer=$4 rate=$5 wall=$6 dt=$7 end=$8
   local times=${9//,/ } bins=${10:--}
   local poly=$VM_DIR/$mesh/constant/polyMesh
 
-  makeCase 014 "$c" || return 1
+  makeCase paper-temperature-model "$c" || return 1
   rm -f "$c/constant/polyMesh" "$c/dynamicCode"
   ln -s "$poly" "$c/constant/polyMesh"
   mkdir -p "$c/dynamicCode"
@@ -370,7 +370,7 @@ max 0.69; nBins ${bins#cells:}; }  /* the axial cells of the mesh */|" \
 # setup007 <case> <012|013> <mesh> <dt> <end> <times>: a copy of run/012 or
 # run/013 with the linked 007 carrier (makeCase), a dynamicCode directory of
 # its own for the carrier's coded boundary conditions, writes every second
-# and the profiles dictionary of the first M7 study: run/014's bin sets
+# and the profiles dictionary of the first M7 study: run/022's bin sets
 # (native: the 424 axial cells; gamma: 1 cm), the default observable
 # (wallPlusGas), fraction and search modes (header)
 setup007() {
@@ -413,10 +413,10 @@ setupM7() {
     return 1
   }
   case "$base" in
-    014) setup014 "$c" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" \
+    022) setup014 "$c" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" \
            "${12}" ;;
     012|013) setup007 "$c" "$base" "$4" "$9" "${10}" "${11}" ;;
-    *) echo "base $base: 012, 013 or 014" >&2; return 1 ;;
+    *) echo "base $base: 012, 013 or 022" >&2; return 1 ;;
   esac
 }
 
@@ -457,11 +457,11 @@ meshSum() {
 
 # the inputs of the run/ cases without comments (system, constant and 0 with
 # the links followed: the 007 carrier of 012 and 013, the p_v table of 013,
-# the wall table of 014; not the linked mesh), computed once
+# the wall table of 022; not the linked mesh), computed once
 SOURCES_SUM=$(strippedSum "$SOLVER_DIR"/*.C "$SOLVER_DIR"/*.H \
   "$SOLVER_DIR"/utilities/setFrozenCarrier/*.C)
 declare -A INPUTS_SUMS
-for n in 012 013 014
+for n in 012 013 022
 do
   INPUTS_SUMS[$n]=$(cd "$(runCaseDir $n)" && find -L system constant 0 \
     -type f ! -path '*/polyMesh/*' | sort | while read -r f
@@ -1008,7 +1008,7 @@ notRunText() {
   spec=($(specOf "$id"))
   [ -d "$c" ] && reached=$(latestTime "$c")
   local family=paper
-  [ "${spec[1]}" = 014 ] || family=007
+  [ "${spec[1]}" = 022 ] || family=007
   python3 - "$id" "${spec[8]}" "${spec[7]}" "${reached:-0}" \
     "$(secondsPerStep "${spec[2]}" "$family")" "$LONG_RANKS" "$c" <<'EOF'
 import sys
@@ -1474,12 +1474,12 @@ axialCriterion M7.5c h-flux-halfCell x2-flux-halfCell "axial x2 vs the base\
  mesh, flux form, wallResistance halfCell, at ${PAIR_TIME} s"
 
 #------------------------------------------------------------------------------
-# M7.3pa-pc: acceptance 3 on the paper-mode carrier (run/014 as
+# M7.3pa-pc: acceptance 3 on the paper-mode carrier (run/022 as
 # distributed at dt 4, 2 and 1 ms); the measures of dtChecks.py (as M7.3b-d)
 #------------------------------------------------------------------------------
 DT_RUNS=(dt4ms dt2ms dt1ms)
 runsCriterion M7.3pa "the three runs of the time-step study on the\
- paper-mode carrier (run/014 as distributed: 100.2 mL/min, layer distance,\
+ paper-mode carrier (run/022 as distributed: 100.2 mL/min, layer distance,\
  A; dt 4, 2 and 1 ms to 30 s)" "${DT_RUNS[@]}"
 
 text="acceptance 3 on the paper-mode carrier: L1 change of the wall deposit\

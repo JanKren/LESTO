@@ -18,7 +18,7 @@ def main():
     p.add_argument('--jobs',type=int,default=6);args=p.parse_args();out=args.out.resolve()
     targets=[('grid576x72','LBE-I_SS_II',576,72,298.15,None)]
     targets += [('flow0C',experiment,384,48,273.15,None) for experiment in ['PbI2_SS','LBE-I_SS_II','LBE-I_SiO2_I']]
-    diagnostics=json.loads((REPO/'run/034-liu2025/full_analysis/analysis.json').read_text())['silica_figure_diagnostics']
+    diagnostics=json.loads((REPO/'run/024-liu2025/full_analysis/analysis.json').read_text())['silica_figure_diagnostics']
     for d in diagnostics:
         source=REPO/'thermochemistry/benchmarks/liu2025/digitized/LBE-I_SiO2_I_temperature.csv'
         root=out/'carrier_staging/temperature_hypotheses'/d['species'];root.mkdir(parents=True,exist_ok=True)

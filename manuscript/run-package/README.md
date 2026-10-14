@@ -18,7 +18,7 @@ bash launch.sh --repo "$HOME/LESTO" --carrier-tool /full/path/to/liuCarrierTool
 Replace the two paths with your actual locations. `--carrier-tool` may be
 omitted if `liuCarrierTool` is on PATH or in the prepared study's `bin` folder.
 The default original cases are under
-`$HOME/LESTO/run/034-liu2025/work/prepared`.
+`$HOME/LESTO/run/024-liu2025/work/prepared`.
 The default NEW output is `$HOME/lesto-submission-followup`.
 Use `--prepared /path/to/prepared` or `--out /new/output/path` if needed.
 The original solver defaults to `prepared/bin/rhoFixedFlowFoam`;

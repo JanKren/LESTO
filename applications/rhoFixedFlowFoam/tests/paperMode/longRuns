@@ -6,7 +6,7 @@
 # PURPOSE
 #
 # The code-to-code runs of milestone M4 (acceptance 3 to 5 of plan section 6
-# M4; 'tests/Alltest M4long', called as tests/paperMode/Allrun long): run/014
+# M4; 'tests/Alltest M4long', called as tests/paperMode/Allrun long): run/022
 # with the parameters of Fig. 9 of Lobresco et al. (2026) and of the
 # temperature-based column of their Table 2, for both layer rules, and the
 # criteria M4.3, M4.4, M4.5 and M4.5b on their profiles.  LONG_JOBS runs
@@ -21,7 +21,7 @@
 #
 # The key of a run (longKey) hashes
 #   - the solver and the utility setFrozenCarrier, without comments;
-#   - the inputs of run/014 without comments (system, constant, 0; not the
+#   - the inputs of run/022 without comments (system, constant, 0; not the
 #     linked mesh);
 #   - the mesh: the checksum of tests/work/mesh (mesh.md5, the md5 of
 #     run/001's pipe.msh that makeMesh converted), as the cache keys of the
@@ -37,7 +37,7 @@
 # Revalidation (plan sections 26 and 27; opt-in: M4LONG_REVALIDATE=yes).  A
 # run that ended under another key (the sources or the inputs have changed
 # since) is then not run again when the current build reproduces it: its
-# set-up made now (run/014 and setFrozenCarrier) must give its dictionaries
+# set-up made now (run/022 and setFrozenCarrier) must give its dictionaries
 # (without comments and without the entries a run changes: endTime,
 # decomposeParDict) and its carrier bit for bit, and the binaries it was
 # made with (kept in long/bin/<key of the binaries>/) and the current ones,
@@ -91,7 +91,7 @@ PM_DIR=$WORK_DIR/paperMode
 PM_SRC=$TESTS_DIR/paperMode
 CHECKS="python3 $PM_SRC/checks.py"
 CARRIER_EXE=$FOAM_USER_APPBIN/setFrozenCarrier
-CASE014=$(runCaseDir 014) || exit 1
+CASE014=$(runCaseDir paper-temperature-model) || exit 1
 
 mkdir -p "$PM_DIR"
 
@@ -125,11 +125,11 @@ EOF
   (cd "$c" && decomposePar -force "$@" > log.decomposePar 2>&1)
 }
 
-# case014 <destination> [<own dynamicCode: yes>]: a copy of run/014 (makeCase)
+# case014 <destination> [<own dynamicCode: yes>]: a copy of run/022 (makeCase)
 # with its carrier written by setFrozenCarrier into 0
 case014() {
   local dst=$1 own=${2:-no}
-  makeCase 014 "$dst" || return 1
+  makeCase paper-temperature-model "$dst" || return 1
   if [ "$own" = yes ]
   then
     rm -f "$dst/dynamicCode"
@@ -166,7 +166,7 @@ EOF
 #==============================================================================
 
 #------------------------------------------------------------------------------
-# The runs, as edits of run/014 (plan sections 25 and 26 pin every value),
+# The runs, as edits of run/022 (plan sections 25 and 26 pin every value),
 # in the order of plan section 25 (Fig. 9 at t_ev 6 s, the T106 cases for
 # both rules, Fig. 9 at t_ev 15 s, then the others), and the sensitivity
 # variant of plan section 26 (the parameter set of the T-Flows
@@ -183,7 +183,7 @@ EOF
 # of temperatureCoeffs and interface, name=value separated by commas (A, k,
 # distance).  The sensitivity variant runs at dt 4 ms (Courant 0.45): its
 # purpose is the position of the front and the deposit, which a 4 ms run of
-# run/014 reproduces to 4 digits at 16 s (plan section 26).
+# run/022 reproduces to 4 digits at 16 s (plan section 26).
 #------------------------------------------------------------------------------
 BOUND_WIDTH=0.05
 LONG_RUNS=(
@@ -206,7 +206,7 @@ LONG_RANKS=${M4LONG_RANKS:-8}
 LONG_JOBS=${M4LONG_JOBS:-2}
 
 # the key of a run (header): the solver and the utility, the inputs of
-# run/014 (both without comments), the mesh checksum, the set-up functions,
+# run/022 (both without comments), the mesh checksum, the set-up functions,
 # the run's parameters and the OpenFOAM installation
 longKey() {
   {
@@ -277,7 +277,7 @@ ranksOf() {
   echo $(( n > 0 ? n : 1 ))
 }
 
-# setupLong <case> <spec ...>: the copy of run/014 for one run
+# setupLong <case> <spec ...>: the copy of run/022 for one run
 setupLong() {
   local c=$1 id=$2 flow=$3 n0=$4 Tdep=$5 tev=$6 end=$7 dt=$8 layer=$9
   local times=${10//,/ } edits=${11:-} item name value
@@ -398,7 +398,7 @@ lastProfileTime() {
   (cd "$1/postProcessing/axialProfiles" && ls | sort -g | tail -1)
 }
 
-echo "== M4long code-to-code runs of run/014 (work directory $PM_DIR/long," \
+echo "== M4long code-to-code runs of run/022 (work directory $PM_DIR/long," \
      "$LONG_JOBS runs at a time, each on $LONG_RANKS rank(s))"
 
 #------------------------------------------------------------------------------
@@ -1034,7 +1034,7 @@ fi
 #------------------------------------------------------------------------------
 # M4.16 (not a gate): the positions of Figs. 9 and 10 (t_ev 15 s: the gas
 # at 16 s, the solid at 30 s), digitised from the paper (plan section 26),
-# against run/014 and against the parameter set of the T-Flows
+# against run/022 and against the parameter set of the T-Flows
 # temperature-model code (A 150, k 0.02, Tdep 638.15 K, layer R - r <= 0.24
 # mm); PASS when computed, whatever the differences
 #------------------------------------------------------------------------------

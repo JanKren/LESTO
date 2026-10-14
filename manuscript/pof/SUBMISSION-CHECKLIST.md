@@ -18,7 +18,7 @@ both read on 13 October 2026. Re-check them before submitting.
 | # | Item | Why it blocks |
 |---|------|---------------|
 | B1 | ~~Pending simulation campaigns (Section 3)~~ **resolved 14 Oct** | All four campaigns are integrated (abstract, Secs. 1 and 4–8, Tables III–VII, Figs. 3–7). Remaining: the researcher's sign-off of plan section 39. |
-| B2 | Data are not yet public | `git branch -r --contains HEAD` is empty: the branch holding `run/034-liu2025/*` results and `manuscript/` is not on any remote. The Data Availability statement says "openly available"; it is only true after a push (author action) and ideally an archived release with a DOI (e.g. Zenodo). |
+| B2 | Data are not yet public | `git branch -r --contains HEAD` is empty: the branch holding `run/024-liu2025/*` results and `manuscript/` is not on any remote. The Data Availability statement says "openly available"; it is only true after a push (author action) and ideally an archived release with a DOI (e.g. Zenodo). |
 | B3 | Author declarations | CRediT roles, conflict-of-interest statement, acknowledgments/funding, corresponding e-mail: all placeholders. Required by AIP. |
 | B4 | ~~Figure text below 8 pt~~ **resolved 14 Oct** | Figures are drawn at printed size (≤ 5.4 in) and included unscaled; text 8–9 pt (Section 5). Only mathtext sub/superscripts are smaller. |
 | B5 | Co-author approval | Ničeno must see and approve the manuscript and the CRediT statement (AIP: corresponding author ensures all authors agree). `review-notes.md`: no messages have been sent. |
@@ -85,20 +85,20 @@ Evidence and numbers: plan section 39 (pending the researcher's sign-off)
 and `manuscript/review-notes.md`.
 
 1. **Production limitedLinear runs on 41,472 cells**: done. 19 cases
-   (`run/034-liu2025/production_576x72_limitedLinear`). Sec. 4.2 states the
+   (`run/024-liu2025/production_576x72_limitedLinear`). Sec. 4.2 states the
    scheme with Jasak 1996 and Sweby 1984; the follow-up sensitivities are
    stated as 18,432-cell upwind differences from their own baselines.
    Tables III, IV, VI, VII and Figs. 3, 4, 6, 7 regenerated.
 2. **Fourth mesh level and van Leer**: done
-   (`run/034-liu2025/scheme_mesh_study`). Table III is now the scheme/mesh
+   (`run/024-liu2025/scheme_mesh_study`). Table III is now the scheme/mesh
    table; Sec. 5.2 quotes the 1.98 % L3–L4 change and no formal GCI
    (inconsistent apparent orders). van Leer (1974) added to the bib.
 3. **8-versus-3 correctors over a full run**: done for three cases
-   (`run/034-liu2025/iteration_check`); Secs. 4.2 and 5.1 updated. The
+   (`run/024-liu2025/iteration_check`); Secs. 4.2 and 5.1 updated. The
    fourth (shifted-BiI) case did not finish and is not used.
 4. **Head-to-head on Lobresco et al.**: done as a comparison with their
    published measurements and published model results (new Sec. 6.3,
-   Table V, Fig. 5; `run/035-lobresco2026`,
+   Table V, Fig. 5; `run/023-lobresco2026`,
    `thermochemistry/benchmarks/lobresco2026`). No T-Flows inputs were
    needed or copied; the T-Flows wall table is only described.
 

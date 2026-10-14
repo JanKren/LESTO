@@ -311,12 +311,18 @@ makeMesh() {
 #------------------------------------------------------------------------------
 # Cases
 #
-#   makeCase <run case number> <destination>
+#   runCaseDir <run case>
+#     the directory of a run/ case, given by its name (temperature-model:
+#     run/NNN-temperature-model) or its number (008: run/008-*); exactly one
+#     must match.  The tests name the cases of the ladder (plan section 40:
+#     the number 014 was reused), the numbers only for 008-011.
+#
+#   makeCase <run case> <destination>
 #     copies system/, the constant/*Properties files and the non-linked 0/
-#     files of run/<number>-*; links the carrier fields, the tables
+#     files of that case; links the carrier fields, the tables
 #     constant/*.csv and constant/*.dat and the GEMS3K system constant/gems
 #     (absolute links to their targets, e.g. the p_v table of run/013, the
-#     wall table of run/014, thermochemistry/systems/PbI2He of run/015),
+#     wall table of run/022, thermochemistry/systems/PbI2He of run/015),
 #     the mesh and the shared dynamicCode directory.
 #
 #   caseInputsSum <run case number> ...
@@ -336,10 +342,17 @@ makeMesh() {
 #------------------------------------------------------------------------------
 
 runCaseDir() {
-  local dir
-  dir=$(ls -d "$RUN_DIR/$1"-* 2>/dev/null | head -1)
-  [ -n "$dir" ] || { echo "No case run/$1-*" >&2; return 1; }
-  echo "$dir"
+  local dirs
+  case "$1" in
+    [0-9][0-9][0-9]) dirs=("$RUN_DIR/$1"-*) ;;
+    *) dirs=("$RUN_DIR"/[0-9][0-9][0-9]-"$1") ;;
+  esac
+  if [ ${#dirs[@]} -ne 1 ] || [ ! -d "${dirs[0]}" ]
+  then
+    echo "No unique case run/$1 (a number NNN or a name, run/NNN-<name>)" >&2
+    return 1
+  fi
+  echo "${dirs[0]}"
 }
 
 makeCase() {

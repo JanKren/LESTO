@@ -1,0 +1,54 @@
+#!/bin/bash
+# ./Allrun                          coarse T106_6 (= case 017; about 8 min)
+# ./Allrun coarse|prod [<case> ...] the carriers and the cases of Table 1
+#                                   (T106_6 T106_60 T106_300 T5_60 T540_60;
+#                                   default all five; hours per case, one
+#                                   serial run after the other) into
+#                                   work/<level>, analyse.py, and each case
+#                                   against its tracked cases/<level>/<case>
+#
+# Everything runs into work/; the tracked cases/ (dictionaries, records and
+# final profiles of the recorded runs) is never written.  The recorded runs
+# themselves were made in place with launch_full.sh (one core per case).
+. "${0%/*}/../RunFunctions"
+lestoInit
+if [ $# -eq 0 ]
+then
+  level=coarse; names=(T106_6)
+else
+  level=$1; shift
+  names=("$@")
+  [ ${#names[@]} -gt 0 ] || names=(T106_6 T106_60 T106_300 T5_60 T540_60)
+fi
+case $level in coarse|prod) ;; *) lestoUsage "[coarse | prod] [<case> ...]" ;; esac
+lestoRequireOpenFOAM
+tool=$(lestoCaseDir physical-carrier)/physicalCarrier.py
+w=work/$level
+
+lestoBuild "$LESTO_REPO/thermochemistry/benchmarks/liu2025/carrierTool" liuCarrierTool
+for name in "${names[@]}"
+do
+  lestoRemove $w/cases/$name
+done
+mkdir -p $w/bin
+cp work/bin/liuCarrierTool $w/bin/
+ln -sfn "$LESTO_SOLVER" $w/bin/rhoFixedFlowFoam
+echo "   carriers and cases (make_cases.py) in $w"
+python3 "$tool" prepare "$LESTO_CASE" $w $level "${names[@]}" > $w/log.prepare 2>&1 || {
+  tail -20 $w/log.prepare
+  lestoResult FAIL "preparation failed: $w/log.prepare"
+}
+cat $w/log.prepare
+status=0
+for name in "${names[@]}"
+do
+  c=$w/cases/$name
+  lestoSolve $c
+  python3 "$tool" analyse "$LESTO_CASE" $c > $c/log.analyse 2>&1 || {
+    tail -20 $c/log.analyse
+    lestoResult FAIL "analyse.py failed: $c/log.analyse"
+  }
+  python3 "$tool" expect "$LESTO_CASE" $level $name $c/expect.json
+  lestoCheck $c $c/expect.json || status=1
+done
+exit $status

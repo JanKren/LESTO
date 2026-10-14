@@ -1,0 +1,23 @@
+{
+ "description": "Case 019 at 3 s: onsets and peaks of the 1 mm profiles, element closure (verification.json, run031_native_profiles)",
+ "checks": [
+  {"id": "1 % onset PbI2", "type": "header",
+   "file": "postProcessing/axialProfiles/3/PbI2_g_native.dat",
+   "pattern": "^# Tdep fromInlet status found T (\\S+)", "value": 559.7784018412356, "abs": 0.01},
+  {"id": "1 % onset BiI3", "type": "header",
+   "file": "postProcessing/axialProfiles/3/BiI3_g_native.dat",
+   "pattern": "^# Tdep fromInlet status found T (\\S+)", "value": 444.56270000000006, "abs": 0.01},
+  {"id": "peak bin PbI2", "type": "header",
+   "file": "postProcessing/axialProfiles/3/PbI2_g_native.dat",
+   "pattern": "^# Tpeak (\\S+) K", "value": 543.4049999999999, "abs": 1e-6},
+  {"id": "peak bin BiI3", "type": "header",
+   "file": "postProcessing/axialProfiles/3/BiI3_g_native.dat",
+   "pattern": "^# Tpeak (\\S+) K", "value": 436.4150000000001, "abs": 1e-6},
+  {"id": "element closure Pb, every step", "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/Pb.dat", "max": 1e-14},
+  {"id": "element closure Bi, every step", "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/Bi.dat", "max": 1e-14},
+  {"id": "element closure I, every step (round-off; the M10b record: 6.26e-16 over the elements)", "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/I.dat", "max": 1e-14}
+ ]
+}

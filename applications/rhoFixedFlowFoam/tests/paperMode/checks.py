@@ -6,7 +6,7 @@ PURPOSE
 
 Numerical checks of milestone M4 (tests/paperMode/Allrun): the paper-mode
 carrier of utilities/setFrozenCarrier, the interaction layer 'distance' and
-the code-to-code case run/014 of the temperature-based model of Lobresco et
+the code-to-code case run/022 of the temperature-based model of Lobresco et
 al. (2026).  Every subcommand prints one summary line and exits with 0
 (criterion met) or 1.
 

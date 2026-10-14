@@ -137,7 +137,7 @@
     "reconciled_date": "2026-10-14",
     "scope": "Original specification and case statuses above describe the 12 October plan. The original runner archive is preserved. No new CFD runs were launched during reconciliation.",
     "full_duration_iteration": {
-      "results": "run/034-liu2025/iteration_check/summary.json",
+      "results": "run/024-liu2025/iteration_check/summary.json",
       "completed_pass": [
         "PbI2_SS_Q1_baseline__correctors8_full60s",
         "LBE-I_SS_II_Q2_baseline_sat0.001__correctors8_full60s",
@@ -148,7 +148,7 @@
       ]
     },
     "spatial_refinement": {
-      "results": "run/034-liu2025/scheme_mesh_study/results.json",
+      "results": "run/024-liu2025/scheme_mesh_study/results.json",
       "completed_branch": "LBE-I_SS_II_Q2_shift29k_sat0.01",
       "cells": 93312,
       "schemes": [

@@ -1,0 +1,17 @@
+{
+ "description": "Case 020, mode frozen, at 3 s: element closure, and the 1 cm deposits against the exact kernel of case 019 (verification.json)",
+ "checks": [
+  {"id": "element closure Pb, every step", "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/Pb.dat", "max": 1e-14},
+  {"id": "element closure Bi, every step", "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/Bi.dat", "max": 1e-14},
+  {"id": "element closure I, every step (round-off; the M10c record: 6.66e-16 over the elements)", "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/I.dat", "max": 1e-14},
+  {"id": "PbI2 deposit L1, frozen against the kernel of case 019 (recorded 1.03e-10; if 019 was run)", "type": "l1", "optional": true,
+   "file": "postProcessing/axialProfiles/3/PbI2_g_cm.dat",
+   "reference": "case:pbbi-gas-speciation/work/case/postProcessing/axialProfiles/3/PbI2_g_cm.dat", "max": 1e-8},
+  {"id": "BiI3 deposit L1, frozen against the kernel of case 019 (recorded 1.06e-7; if 019 was run)", "type": "l1", "optional": true,
+   "file": "postProcessing/axialProfiles/3/BiI3_g_cm.dat",
+   "reference": "case:pbbi-gas-speciation/work/case/postProcessing/axialProfiles/3/BiI3_g_cm.dat", "max": 1e-5}
+ ]
+}

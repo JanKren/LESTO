@@ -1,0 +1,59 @@
+#!/bin/bash
+# ./Allrun [smoke]   carriers and every available case on 128 x 16 cells,
+#                    1 s at 20 ms (a few minutes), with the report's gates
+# ./Allrun coarse    the same mesh, 60 s
+# ./Allrun prepare   the full-size carriers (384 x 48) and the 60 s / 2 ms
+#                    cases, not run
+# ./Allrun full      prepare, then run them (about 6 h per case serial;
+#                    LESTO_M10E_JOBS cases at a time)
+# ./Allrun followup <arguments>
+#                    thermochemistry/benchmarks/liu2025/followup_study.py
+#                    (prepare, finalise, smoke, run, launch, status; notes.md)
+#
+# Each mode runs into its own work/<mode>; an existing case directory is
+# refused (cases.py), so earlier results are never overwritten.  Needs the
+# external thermodynamic inputs and explicit flow reference conditions:
+# LESTO_M10E_NASA, LESTO_M10E_THERMOFUN, LESTO_M10E_FLOW_T [K] and
+# LESTO_M10E_FLOW_P [Pa] (readme.md).
+. "${0%/*}/../RunFunctions"
+lestoInit
+package=$LESTO_REPO/thermochemistry/benchmarks/liu2025
+mode=${1:-smoke}
+case $mode in
+  smoke) nx=128; nr=16; dt=.02; end=1 ;;
+  coarse) nx=128; nr=16; dt=.02; end=60 ;;
+  full|prepare) nx=384; nr=48; dt=.002; end=60 ;;
+  followup) shift; exec $(lestoTaskset) python3 "$package/followup_study.py" "$@" ;;
+  *) lestoUsage "[smoke | coarse | prepare | full | followup <arguments>]" ;;
+esac
+lestoNeed LESTO_M10E_NASA
+lestoNeed LESTO_M10E_THERMOFUN
+lestoNeed LESTO_M10E_FLOW_T
+lestoNeed LESTO_M10E_FLOW_P
+lestoRequireOpenFOAM
+
+task_work=$LESTO_CASE/work/$mode
+lestoBuild "$package/carrierTool" liuCarrierTool
+mkdir -p "$task_work/bin"
+cp work/bin/liuCarrierTool "$task_work/bin/"
+py="$(lestoTaskset) python3"
+$py "$package/carriers.py" --out "$task_work/carriers" --nx "$nx" --nr "$nr" \
+  --flow-reference-temperature "$LESTO_M10E_FLOW_T" \
+  --flow-reference-pressure "$LESTO_M10E_FLOW_P" \
+  --tool "$task_work/bin/liuCarrierTool" --run
+$py "$package/cases.py" --carrier-root "$task_work/carriers" \
+  --tables-root "$task_work/tables" --out "$task_work/cases" \
+  --nasa "$LESTO_M10E_NASA" --tf "$LESTO_M10E_THERMOFUN" \
+  --dt "$dt" --end-time "$end"
+if [ "$mode" != prepare ]
+then
+  $py "$package/run.py" "$task_work/cases" \
+    --solver "${LESTO_M10E_SOLVER:-$LESTO_SOLVER}" --jobs "${LESTO_M10E_JOBS:-1}"
+fi
+if $py "$package/report.py" "$task_work/cases"
+then
+  lestoResult PASS "$mode: $task_work/cases/validation.json, peaks.csv," \
+    "per-case iodine-comparison.csv"
+else
+  lestoResult FAIL "$mode: see $task_work/cases/validation.json"
+fi

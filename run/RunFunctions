@@ -1,0 +1,319 @@
+#------------------------------------------------------------------------------
+#
+# run/RunFunctions
+#
+# Shared helpers of the Allrun and Allclean scripts of cases 012-024, in the
+# manner of OpenFOAM's bin/tools/RunFunctions.  A case sources it and calls
+# lestoInit first:
+#
+#   . "${0%/*}/../RunFunctions"
+#   lestoInit
+#
+# Every case runs into its own git-ignored work/ and never writes a tracked
+# file.  Exit status of an Allrun: 0 for PASS or NOTRUN, 1 for FAIL, 2 for a
+# usage or environment error.  Bojan's cases 001-011 run in place, as their
+# readmes say, and do not use this file.
+#
+# Environment (all optional)
+#
+#   LESTO_SOLVER     the rhoFixedFlowFoam to run
+#                    (default $FOAM_USER_APPBIN/rhoFixedFlowFoam)
+#   LESTO_CPUS       a taskset core list for every solver and utility run
+#                    (e.g. 4-11); default: no pinning
+#   LESTO_PIPE_MESH  a case directory that already holds the gmshToFoam
+#                    conversion of run/001's pipe.msh (e.g. tests/work/mesh);
+#                    default: converted once into the case's work/pipeMesh
+#
+#------------------------------------------------------------------------------
+
+# lestoInit: strict shell, cd to the case, set LESTO_CASE, LESTO_NAME,
+# LESTO_RUN and LESTO_REPO (exported, the dictionaries use $LESTO_REPO)
+lestoInit() {
+  set -euo pipefail
+  LESTO_CASE=$(cd "$(dirname "${BASH_SOURCE[1]}")" && pwd)
+  LESTO_NAME=$(basename "$LESTO_CASE")
+  LESTO_RUN=$(dirname "$LESTO_CASE")
+  LESTO_REPO=$(dirname "$LESTO_RUN")
+  export LESTO_REPO
+  cd "$LESTO_CASE"
+}
+
+# lestoUsage <text>: print the usage of an Allrun and exit 2
+lestoUsage() {
+  echo "Usage: $LESTO_NAME/$(basename "$0") $*" >&2
+  exit 2
+}
+
+# lestoResult PASS|FAIL|NOTRUN <text>: one summary line; exit 1 on FAIL
+lestoResult() {
+  local status=$1
+  shift
+  printf '%-6s %s: %s\n' "$status" "$LESTO_NAME" "$*"
+  [ "$status" != FAIL ] || exit 1
+}
+
+# lestoNeed <variable> [<file under it> ...]: NOTRUN (exit 0) unless the
+# variable is set and every named file exists below it (or it is a file),
+# so that a sweep over the ladder continues without external data
+lestoNeed() {
+  local var=$1 value f
+  shift
+  value=${!var:-}
+  if [ -z "$value" ]
+  then
+    lestoResult NOTRUN "set $var (external input; see readme.md)"
+    exit 0
+  fi
+  for f in "$@"
+  do
+    if [ ! -e "$value/$f" ]
+    then
+      lestoResult NOTRUN "$var=$value has no $f"
+      exit 0
+    fi
+  done
+}
+
+# lestoRequireOpenFOAM: OpenFOAM loaded and the solver found; prints the
+# provenance of the run (OpenFOAM version, git HEAD, solver sha256)
+lestoRequireOpenFOAM() {
+  if [ -z "${WM_PROJECT_DIR:-}" ] || ! command -v blockMesh > /dev/null
+  then
+    echo "Load OpenFOAM first, e.g." >&2
+    echo "  set +u; source ~/OpenFOAM/OpenFOAM-v2412/etc/bashrc" >&2
+    exit 2
+  fi
+  LESTO_SOLVER=${LESTO_SOLVER:-${FOAM_USER_APPBIN:-}/rhoFixedFlowFoam}
+  if [ ! -x "$LESTO_SOLVER" ]
+  then
+    echo "No solver $LESTO_SOLVER: build applications/rhoFixedFlowFoam" \
+         "(./Allwmake) or set LESTO_SOLVER" >&2
+    exit 2
+  fi
+  echo "== $LESTO_NAME: OpenFOAM ${WM_PROJECT_VERSION:-?}," \
+       "git $(git -C "$LESTO_REPO" rev-parse --short HEAD 2>/dev/null || echo -)," \
+       "solver $LESTO_SOLVER" \
+       "(sha256 $(sha256sum < "$LESTO_SOLVER" | cut -c1-16)...)"
+}
+
+# lestoTaskset: the command prefix that pins to LESTO_CPUS (empty without)
+lestoTaskset() {
+  [ -z "${LESTO_CPUS:-}" ] || echo "taskset -c $LESTO_CPUS"
+}
+
+# lestoRun <dir> <log> <command ...>: run a command in <dir> into <dir>/<log>
+lestoRun() {
+  local dir=$1 log=$2
+  shift 2
+  echo "   $(basename "$1") in ${dir#$LESTO_CASE/} > $log"
+  (cd "$dir" && $(lestoTaskset) "$@" > "$log" 2>&1) || {
+    echo "$1 failed: see $dir/$log" >&2
+    tail -20 "$dir/$log" >&2
+    return 1
+  }
+}
+
+# lestoCaseDir <slug>: the directory run/NNN-<slug>; exactly one must exist
+lestoCaseDir() {
+  local matches=("$LESTO_RUN"/[0-9][0-9][0-9]-"$1")
+  if [ ${#matches[@]} -ne 1 ] || [ ! -d "${matches[0]}" ]
+  then
+    echo "No unique case run/NNN-$1" >&2
+    return 1
+  fi
+  echo "${matches[0]}"
+}
+
+# lestoWorkCase <dir> [replace]: a fresh copy of the case's 0, constant and
+# system in <dir>; links become absolute links to their targets (the 007
+# carrier, tables, constant/gems), as the tests' makeCase does.  An existing
+# <dir> is refused (exit 2) unless 'replace' is given.
+lestoWorkCase() {
+  local dst=$1 mode=${2:-keep} d f
+  if [ -e "$dst" ]
+  then
+    if [ "$mode" = replace ]
+    then
+      lestoRemove "$dst"
+    else
+      echo "$dst exists: ./Allclean, or remove it to run this mode again" >&2
+      exit 2
+    fi
+  fi
+  for d in 0 constant system
+  do
+    [ -d "$d" ] || continue
+    mkdir -p "$dst/$d"
+    for f in "$d"/*
+    do
+      if [ -L "$f" ]
+      then
+        ln -s "$(readlink -f "$f")" "$dst/$f"
+      elif [ -e "$f" ]
+      then
+        cp -r "$f" "$dst/$f"
+      fi
+    done
+  done
+  touch "$dst/case.foam"
+}
+
+# lestoSetControl <case> <keyword> <value>: edit a top-level entry of
+# system/controlDict with sed (foamDictionary would round the scalars)
+lestoSetControl() {
+  local dict=$1/system/controlDict
+  grep -q -E "^$2[[:space:]]" "$dict" || {
+    echo "No entry $2 in $dict" >&2
+    return 1
+  }
+  sed -i -E "s|^$2[[:space:]].*$|$2 $3;|" "$dict"
+}
+
+# lestoPipeMesh <case>: link constant/polyMesh to the gmshToFoam conversion
+# of run/001's pipe.msh (LESTO_PIPE_MESH, or work/pipeMesh of this case,
+# converted once; run/001 itself is never written)
+lestoPipeMesh() {
+  local c=$1 src mesh sum
+  src=$(lestoCaseDir first-pipe-flow-simpleFoam)
+  mesh=${LESTO_PIPE_MESH:-$LESTO_CASE/work/pipeMesh}
+  sum=$(md5sum < "$src/pipe.msh" | cut -d' ' -f1)
+  if [ -n "${LESTO_PIPE_MESH:-}" ]
+  then
+    [ -f "$mesh/constant/polyMesh/owner" ] || {
+      echo "LESTO_PIPE_MESH=$mesh holds no constant/polyMesh" >&2
+      exit 2
+    }
+  elif [ ! -f "$mesh/constant/polyMesh/owner" ] \
+    || [ "$(cat "$mesh/pipe.msh.md5" 2>/dev/null)" != "$sum" ]
+  then
+    rm -rf "$mesh"
+    mkdir -p "$mesh/constant" "$mesh/system"
+    cp "$src"/system/{controlDict,fvSchemes,fvSolution} "$mesh/system/"
+    lestoRun "$mesh" log.gmshToFoam gmshToFoam "$src/pipe.msh"
+    echo "$sum" > "$mesh/pipe.msh.md5"
+  fi
+  rm -rf "$c/constant/polyMesh"
+  ln -s "$mesh/constant/polyMesh" "$c/constant/polyMesh"
+}
+
+# lestoBuild <source dir> <executable>: copy a small OpenFOAM application
+# (Make/ and its sources) into work/<name> and wmake it into work/bin, once
+lestoBuild() {
+  local src=$1 exe=$2 name
+  name=$(basename "$src")
+  [ -x "$LESTO_CASE/work/bin/$exe" ] && return 0
+  mkdir -p "$LESTO_CASE/work/bin"
+  rm -rf "$LESTO_CASE/work/$name"
+  mkdir -p "$LESTO_CASE/work/$name"
+  cp -r "$src/Make" "$src"/*.C "$LESTO_CASE/work/$name/"
+  rm -rf "$LESTO_CASE/work/$name"/Make/linux64*
+  (export FOAM_USER_APPBIN=$LESTO_CASE/work/bin
+   lestoRun "$LESTO_CASE/work/$name" log.wmake wmake)
+}
+
+# lestoChannelCarrier <case>: the synthetic plane channel of cases 014-021:
+# blockMesh, then the frozen carrier of system/carrierDict (makeCarrier of
+# the tests, built into work/bin)
+lestoChannelCarrier() {
+  local c=$1
+  lestoBuild "$LESTO_REPO/applications/rhoFixedFlowFoam/tests/phaseChange/makeCarrier" makeCarrier
+  lestoRun "$c" log.blockMesh blockMesh
+  lestoRun "$c" log.makeCarrier "$LESTO_CASE/work/bin/makeCarrier"
+}
+
+# lestoDecompose <case> <ranks>: <ranks> slabs along x (the axis of every
+# case of ours) in the work copy's system/decomposeParDict, then decomposePar
+lestoDecompose() {
+  local c=$1 np=$2
+  printf '%s\n' \
+    'FoamFile {version 2.0; format ascii; class dictionary; object decomposeParDict;}' \
+    "numberOfSubdomains $np;" 'method simple;' "coeffs {n ($np 1 1);}" \
+    > "$c/system/decomposeParDict"
+  lestoRun "$c" log.decomposePar decomposePar -force
+}
+
+# lestoMpirun <ranks>: the mpirun prefix of a parallel run; with LESTO_CPUS
+# the ranks share the taskset list instead of binding to cores
+lestoMpirun() {
+  echo "mpirun ${LESTO_CPUS:+--bind-to none} -np $1"
+}
+
+# lestoSolve <case> [<ranks>]: rhoFixedFlowFoam into <case>/log.solver,
+# serial, or on <ranks> ranks (decomposed by lestoDecompose unless
+# processor0 exists already)
+lestoSolve() {
+  local c=$1 np=${2:-1} start end
+  start=$(date +%s)
+  if [ "$np" -le 1 ]
+  then
+    lestoRun "$c" log.solver "$LESTO_SOLVER"
+  else
+    [ -d "$c/processor0" ] || lestoDecompose "$c" "$np"
+    lestoRun "$c" log.solver $(lestoMpirun "$np") "$LESTO_SOLVER" -parallel
+  fi
+  end=$(date +%s)
+  echo "   $(( end - start )) s"
+}
+
+# lestoExcerpt <out_excerpt> <log>: the first block of the excerpt against
+# the log (tests/regress.sh -excerpt); prints the verdict, status 0 when
+# identical
+lestoExcerpt() {
+  "$LESTO_REPO/applications/rhoFixedFlowFoam/tests/regress.sh" -excerpt "$1" "$2"
+}
+
+# lestoCheck <case> [<expect.json>]: the numbers of the case's expect.json
+lestoCheck() {
+  python3 "$LESTO_RUN/lestoCheck.py" "$1" "${2:-$LESTO_CASE/expect.json}" "$LESTO_NAME"
+}
+
+# lestoRemove <path ...>: remove paths below this case's work/ only, and
+# only if git tracks nothing in them
+lestoRemove() {
+  local p real
+  for p in "$@"
+  do
+    [ -e "$p" ] || [ -L "$p" ] || continue
+    real=$(cd "$(dirname "$p")" && pwd -P)/$(basename "$p")
+    case "$real/" in
+      "$(cd "$LESTO_CASE" && pwd -P)/work/"?*) ;;
+      *) echo "Refusing to remove $p: not below $LESTO_NAME/work/" >&2; exit 2 ;;
+    esac
+    if [ -n "$(git -C "$LESTO_CASE" ls-files -- "$real" 2>/dev/null)" ]
+    then
+      echo "Refusing to remove $p: it holds tracked files" >&2
+      exit 2
+    fi
+    rm -rf -- "$p"
+  done
+}
+
+# lestoLiveRuns <dir>: list every run_state.json below <dir> that reports
+# RUNNING with a process still alive (status 0 when there is one)
+lestoLiveRuns() {
+  python3 - "$1" <<'EOF'
+import json, os, sys
+from pathlib import Path
+live = []
+for p in Path(sys.argv[1]).rglob('run_state.json'):
+    try:
+        s = json.loads(p.read_text())
+    except (OSError, ValueError):
+        continue
+    pids = [s.get('pid')] if s.get('status') == 'RUNNING' else []
+    pids += [c.get('pid') for c in (s.get('cases') or {}).values()
+             if isinstance(c, dict) and c.get('status') == 'RUNNING']
+    for pid in pids:
+        try:
+            os.kill(int(pid), 0)
+            live.append(f'{p} pid {pid}')
+        except (TypeError, ValueError, ProcessLookupError):
+            pass
+        except PermissionError:
+            live.append(f'{p} pid {pid}')
+print('\n'.join(live))
+sys.exit(0 if live else 1)
+EOF
+}
+
+#------------------------------------------------------------------------------

@@ -1,0 +1,40 @@
+#!/bin/bash
+# ./Allrun          the whole case with GEMS3K mode frozen (3 s at 1 ms; a
+#                   few minutes) into work/case, then expect.json
+# ./Allrun local    mode local (per-cell warm GEMS3K calls; about 15 min)
+#                   into work/local, against frozen (work/case) if run
+#
+# Needs a rhoFixedFlowFoam built with the GEMS3K bridge (LESTO_SOLVER),
+# LESTO_M10_SYSTEM (the external PbBiIHe-dat.lst) and LESTO_M10_DATA (the
+# external pv_BiI3_phases.csv and log10Kf_PbBiI.csv); see readme.md.
+. "${0%/*}/../RunFunctions"
+lestoInit
+mode=${1:-frozen}
+case $mode in
+  frozen) c=work/case ;;
+  local) c=work/local ;;
+  *) lestoUsage "[frozen | local]" ;;
+esac
+lestoNeed LESTO_M10_DATA pv_BiI3_phases.csv log10Kf_PbBiI.csv
+lestoNeed LESTO_M10_SYSTEM
+lestoRequireOpenFOAM
+if ! ldd "$LESTO_SOLVER" | grep -q libgemsbridge.so
+then
+  lestoResult NOTRUN "$LESTO_SOLVER has no GEMS3K bridge: build one with" \
+    "LESTO_GEMSBRIDGE (readme.md) and set LESTO_SOLVER to it"
+  exit 0
+fi
+
+lestoWorkCase $c replace
+cp benchmark.json $c/
+[ "$mode" = frozen ] || sed -i 's/GEMS {mode frozen;/GEMS {mode local;/' \
+  $c/constant/thermochemistryProperties
+grep -q "GEMS {mode $mode;" $c/constant/thermochemistryProperties
+lestoChannelCarrier $c
+lestoSolve $c
+if [ "$mode" = frozen ]
+then
+  lestoCheck $c
+else
+  lestoCheck $c expect-local.json
+fi

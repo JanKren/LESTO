@@ -5,7 +5,7 @@ axisymmetric mesh/input staging directories for M10e. These are preliminary
 benchmarks: no completed experimental validation is claimed. M10a–d now supply
 the Bi-species kernel, GEMS options and reactive wall channels. The new
 `digitize.py`, `carriers.py`, `cases.py`, `run.py` and `report.py` prepare and
-exercise physical-carrier M10e cases; [run/034](../../../run/034-liu2025/readme.md)
+exercise physical-carrier M10e cases; [run/024](../../../run/024-liu2025/readme.md)
 records their qualification and remaining inputs.
 
 Source: Lu Liu et al., *Chemical speciation of iodine evaporated from liquid
@@ -187,6 +187,6 @@ raw iodine gamma scans, evaporated amounts/release histories, exact boat
 placement and geometry, and flow-controller reference conditions from Jörg
 Neuhausen and Lu Liu. For production Bi cases, use the external licensed data
 only after provenance confirmation; the repository's PbI2 phase-resolved table
-is already available. The proposed M10e case block (run/030–034) remains reserved
+is already available. The proposed M10e case block (run/018–034) remains reserved
 for qualified solver cases; this preliminary package does not allocate those
 case numbers.

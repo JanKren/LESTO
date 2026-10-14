@@ -1,0 +1,7 @@
+#!/bin/bash
+# ./Allclean        removes work/ (the tracked cases/, inputs/ and scripts
+#                   are never touched)
+. "${0%/*}/../RunFunctions"
+lestoInit
+lestoRemove work/*
+rmdir work 2> /dev/null || true

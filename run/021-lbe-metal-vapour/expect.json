@@ -1,0 +1,66 @@
+{
+ "description": "Case 021 at 1.2 s (source active): the hottest 1 mm bin above 0.1 % of each condensate's peak, metal phases split at the melting point, against fractional plug flow (verification.json, baseline); closures of the three ledgers",
+ "checks": [
+  {
+   "id": "onset Pb(l) (plug flow 921 K)",
+   "type": "onsetBin",
+   "file": "postProcessing/axialProfiles/1.2/condensate_Pb_s_native.dat",
+   "fraction": 0.001,
+   "Tmin": 600.61,
+   "value": 919.9274999999999,
+   "abs": 0.01
+  },
+  {
+   "id": "onset Bi(l) (plug flow 885 K)",
+   "type": "onsetBin",
+   "file": "postProcessing/axialProfiles/1.2/condensate_Bi_s_native.dat",
+   "fraction": 0.001,
+   "Tmin": 544.512416,
+   "value": 882.8924999999999,
+   "abs": 0.01
+  },
+  {
+   "id": "onset Bi(cr) (plug flow 544 K)",
+   "type": "onsetBin",
+   "file": "postProcessing/axialProfiles/1.2/condensate_Bi_s_native.dat",
+   "fraction": 0.001,
+   "Tmax": 544.512416,
+   "value": 541.3475000000002,
+   "abs": 0.01
+  },
+  {
+   "id": "onset PbI2(cr) (plug flow 537 K)",
+   "type": "onsetBin",
+   "file": "postProcessing/axialProfiles/1.2/PbI2_g_native.dat",
+   "fraction": 0.001,
+   "value": 533.1175000000002,
+   "abs": 0.01
+  },
+  {
+   "id": "onset BiI3(cr) (plug flow 451 K)",
+   "type": "onsetBin",
+   "file": "postProcessing/axialProfiles/1.2/BiI3_g_native.dat",
+   "fraction": 0.001,
+   "value": 450.8175000000001,
+   "abs": 0.01
+  },
+  {
+   "id": "element closure Pb, every step (round-off; the M10d record: at most 4.42e-16)",
+   "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/Pb.dat",
+   "max": 1e-14
+  },
+  {
+   "id": "element closure Bi, every step (round-off; the M10d record: at most 4.42e-16)",
+   "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/Bi.dat",
+   "max": 1e-14
+  },
+  {
+   "id": "element closure I, every step (round-off; the M10d record: at most 4.42e-16)",
+   "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/I.dat",
+   "max": 1e-14
+  }
+ ]
+}

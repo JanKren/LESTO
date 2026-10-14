@@ -1,0 +1,17 @@
+#!/bin/bash
+# ./Allrun          the whole case (3 s, 3000 steps; about 10 s) into
+#                   work/case, then its numbers against expect.json
+#
+# Needs LESTO_M10_DATA: the directory of the external pv_BiI3_phases.csv
+# (thermochemistry/systems/make_pv_tables.py; not redistributed).
+. "${0%/*}/../RunFunctions"
+lestoInit
+[ $# -eq 0 ] || [ "$1" = full ] || lestoUsage "[full]"
+lestoNeed LESTO_M10_DATA pv_BiI3_phases.csv
+lestoRequireOpenFOAM
+
+lestoWorkCase work/case replace
+cp benchmark.json work/case/
+lestoChannelCarrier work/case
+lestoSolve work/case
+lestoCheck work/case

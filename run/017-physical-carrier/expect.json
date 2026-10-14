@@ -1,0 +1,81 @@
+{
+ "description": "Case 017 (coarse, 212 x 48): Lobresco et al. (2026) T106_6 at 6 s; reproduces case 023's coarse T106_6 (bit for bit with the M10e solver, sha256 16fd804e...)",
+ "checks": [
+  {
+   "id": "carrier audit (inflow, global and cell balance, wall/axis leakage within 1e-12 of the inflow)",
+   "type": "json",
+   "file": "../carriers/He106/carrier-audit.json",
+   "key": "status",
+   "equals": "PASS"
+  },
+  {
+   "id": "T_dep, 1 % of the peak of wall + gas from the inlet, solver (gamma bins) [K]",
+   "type": "json",
+   "file": "comparison.json",
+   "key": "solver_onsets.Tdep_fromInlet.T",
+   "value": 839.0859031960488,
+   "abs": 0.01
+  },
+  {
+   "id": "T_dep minus the measurement (814 K, Table 2), wall T of the digitised curve [K]",
+   "type": "json",
+   "file": "comparison.json",
+   "key": "dT_dep_fromInlet_K",
+   "value": 25.73430085163227,
+   "abs": 0.01
+  },
+  {
+   "id": "computed peak minus measured peak [m]",
+   "type": "json",
+   "file": "comparison.json",
+   "key": "dx_peak_m",
+   "value": -0.03999999999999998,
+   "abs": 1e-09
+  },
+  {
+   "id": "wall inventory at 6 s, wedge [mol]",
+   "type": "json",
+   "file": "comparison.json",
+   "key": "solver_onsets.inventory.wall",
+   "value": 6.595089337815613e-08,
+   "rel": 1e-09
+  },
+  {
+   "id": "gas inventory at 6 s, wedge [mol]",
+   "type": "json",
+   "file": "comparison.json",
+   "key": "solver_onsets.inventory.gas",
+   "value": 1.2713288437745622e-09,
+   "rel": 1e-06
+  },
+  {
+   "id": "sample inventory at 6 s (boat removed) [mol]",
+   "type": "json",
+   "file": "comparison.json",
+   "key": "solver_onsets.inventory.sample",
+   "value": 0.0,
+   "abs": 0.0
+  },
+  {
+   "id": "pair closure, every step (023: 2.14e-16)",
+   "type": "closure",
+   "file": "postProcessing/phaseChangeBalance/0/PbI2_g.dat",
+   "max": 1e-14
+  },
+  {
+   "id": "final profiles = case 023's tracked coarse/T106_6/final_profiles",
+   "type": "sameFiles",
+   "rel": 1e-09,
+   "pairs": [
+    [
+     "postProcessing/axialProfiles/6/PbI2_g_gamma.dat",
+     "case:lobresco2026/cases/coarse/T106_6/final_profiles/PbI2_g_gamma.dat"
+    ],
+    [
+     "postProcessing/axialProfiles/6/PbI2_g_native.dat",
+     "case:lobresco2026/cases/coarse/T106_6/final_profiles/PbI2_g_native.dat"
+    ]
+   ]
+  }
+ ]
+}

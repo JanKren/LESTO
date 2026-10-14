@@ -63,8 +63,8 @@ bash manuscript/build.sh --figures
 ```
 
 Regeneration requires Python, NumPy and Matplotlib, plus the accompanying
-`run/034-liu2025/{full_analysis,followup_results,production_576x72_limitedLinear,scheme_mesh_study,iteration_check}`
-reports and profiles, `run/035-lobresco2026` (case set-ups, final profiles),
+`run/024-liu2025/{full_analysis,followup_results,production_576x72_limitedLinear,scheme_mesh_study,iteration_check}`
+reports and profiles, `run/023-lobresco2026` (case set-ups, final profiles),
 and the `thermochemistry/benchmarks/{liu2025,lobresco2026}` scripts and
 digitised CSV inputs. Compilation alone
 does not require those inputs or the external thermodynamic coefficients.

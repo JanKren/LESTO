@@ -1,0 +1,12 @@
+#!/bin/bash
+# ./Allrun          the whole case (3 s, 3000 steps; seconds) into work/case,
+#                   then its numbers against expect.json
+. "${0%/*}/../RunFunctions"
+lestoInit
+[ $# -eq 0 ] || [ "$1" = full ] || lestoUsage "[full]"
+lestoRequireOpenFOAM
+
+lestoWorkCase work/case replace
+lestoChannelCarrier work/case
+lestoSolve work/case
+lestoCheck work/case

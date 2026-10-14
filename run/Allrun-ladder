@@ -1,0 +1,41 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#
+# run/Allrun-ladder [<first>-<last>]
+#
+# Runs the default check (./Allrun without arguments) of every case of ours
+# from <first> to <last> (default 012-024), one after the other, and prints
+# one line per case: PASS, FAIL or NOTRUN (external data or a GEMS3K build
+# missing).  The output of case NNN goes to run/NNN-*/work/; the log of its
+# Allrun to run/NNN-*/work/log.Allrun.  About 30 min with every input
+# available, most of it cases 017, 023 and 024.
+#
+# Exit status 1 if any case failed.
+#
+#------------------------------------------------------------------------------
+cd "${0%/*}" || exit 2
+range=${1:-012-024}
+first=$((10#${range%-*}))
+last=$((10#${range#*-}))
+failed=0
+for dir in [0-9][0-9][0-9]-*/
+do
+  dir=${dir%/}
+  n=$((10#${dir%%-*}))
+  [ "$n" -ge "$first" ] && [ "$n" -le "$last" ] || continue
+  if [ ! -x "$dir/Allrun" ]
+  then
+    printf '%-6s %s: no Allrun (run it as its readme says)\n' - "$dir"
+    continue
+  fi
+  mkdir -p "$dir/work"
+  start=$(date +%s)
+  "$dir/Allrun" > "$dir/work/log.Allrun" 2>&1
+  status=$?
+  line=$(grep -E '^(PASS|FAIL|NOTRUN) ' "$dir/work/log.Allrun" | tail -1)
+  [ -n "$line" ] || line="FAIL   $dir: exit status $status, see $dir/work/log.Allrun"
+  [ $status -eq 0 ] || [[ "$line" == FAIL* ]] || line="FAIL   $dir: exit status $status ($line)"
+  [[ "$line" != FAIL* ]] || failed=1
+  echo "$line ($(( $(date +%s) - start )) s)"
+done
+exit $failed

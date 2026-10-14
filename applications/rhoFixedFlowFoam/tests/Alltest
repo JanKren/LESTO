@@ -79,7 +79,7 @@
 #          profile times of a restart with another deltaT, and the uneven
 #          3-rank split M3.2c of tests/profiles (unless M3 runs it); plan
 #          sections 20 to 24) and the gate
-#   M4     paper-mode carrier, layer distance, code-to-code case run/014
+#   M4     paper-mode carrier, layer distance, code-to-code case run/022
 #          (tests/paperMode: setFrozenCarrier on the pipe and on a wedge,
 #          serial and decomposed (also a single inlet face on a rank), on
 #          a wedge not extruded along the axis and refused on one whose
@@ -93,7 +93,7 @@
 #          parallel; faces with the elements of two other ranks summed in
 #          the same order in two runs; maps that run both ways between two
 #          ranks, on the channel, the pipe and the tetrahedral pipe), the
-#          pipe of run/014 on four 4-rank splits, binary restarts (mw_ = the
+#          pipe of run/022 on four 4-rank splits, binary restarts (mw_ = the
 #          deposits), refusals,
 #          profiles, model HKS in serial and on 4 ranks (the temperature
 #          of the nearest faces pulled across ranks), several interface
@@ -106,7 +106,7 @@
 #          transport identity of the cell defects at exact zero, a copy of
 #          the sources with the source form built as its negative control);
 #          the mole-fraction monitor from the carrier's p/(R T); the exactly
-#          rescaled inflow of a wedge with sectorAngle; run/014's
+#          rescaled inflow of a wedge with sectorAngle; run/022's
 #          out_excerpt; the provenance of its T-Flows inputs; the v2606
 #          compile of the solver and the utility; plan sections 25 to 27,
 #          29 and 33; about 25-35 min) and the gate
@@ -115,7 +115,7 @@
 #          rules with the gate restated by the researcher, max(2 K,
 #          dT_bin)), the closure of the runs made with the current
 #          sources without drift (M4.17; a revalidated run is not gated),
-#          the positions of Figs. 9-10 against run/014 and the T-Flows
+#          the positions of Figs. 9-10 against run/022 and the T-Flows
 #          parameter set (not a gate), and the key of a run, which follows
 #          the mesh and the set-up functions (M4.20); hours on 16 cores:
 #          M4LONG_JOBS runs of M4LONG_RANKS ranks, default 2 x 8;
@@ -167,7 +167,7 @@
 #          with none and with halfCell gated, the volumetric form reported),
 #          the axial x2 study (gated by the criterion the second M7 study
 #          proposed, M7LONG_AXIAL_GATE=no reports it), and acceptance 3 on
-#          run/014 (dt 4, 2 and 1 ms to 30 s; the intermediate-time error
+#          run/022 (dt 4, 2 and 1 ms to 30 s; the intermediate-time error
 #          reported); hours on 16 cores: M7LONG_JOBS runs of M7LONG_RANKS
 #          ranks, default 2 x 8 (on a machine with hyperthreading bind
 #          them to distinct physical cores, e.g. M7LONG_CPUS=0-15; readme);

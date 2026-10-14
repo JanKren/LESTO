@@ -725,7 +725,7 @@ done
 #------------------------------------------------------------------------------
 PIPE=$HK_DIR/pipe013
 C013=$HK_DIR/run013
-makeCase 013 "$PIPE" \
+makeCase hks-inventory "$PIPE" \
   && setControl "$PIPE" endTime 0.1 \
   && setControl "$PIPE" deltaT 0.004 \
   && setControl "$PIPE" writeInterval 25 \
@@ -733,9 +733,9 @@ makeCase 013 "$PIPE" \
        'uniform 0.1;' \
   || { echo "Setting up $PIPE failed"; exit 1; }
 C013L=$HK_DIR/run013Steps25
-makeCase 013 "$C013" && setControl "$C013" endTime 0.005 \
+makeCase hks-inventory "$C013" && setControl "$C013" endTime 0.005 \
   || { echo "Setting up $C013 failed"; exit 1; }
-makeCase 013 "$C013L" && setControl "$C013L" endTime 0.025 \
+makeCase hks-inventory "$C013L" && setControl "$C013L" endTime 0.025 \
   || { echo "Setting up $C013L failed"; exit 1; }
 
 # run/013 with a small reservoir, 1e-7 mol (Cs = 5.68 kg/m3), at its own
@@ -745,7 +745,7 @@ for n in 9 10
 do
   c=$HK_DIR/run013SmallReservoir-nCorr$n
   PIPESMALL+=("$c")
-  makeCase 013 "$c" \
+  makeCase hks-inventory "$c" \
     && edit "$c/constant/thermochemistryProperties" \
          's/^(    amount +)4.84e-6;/\11e-7;/' '^    amount +1e-7;' \
     && edit "$c/constant/thermochemistryProperties" \
@@ -1712,7 +1712,7 @@ fi
 
 if grep -q '^End' "$C013/log"
 then
-  out=$("$REGRESS" -excerpt "$(runCaseDir 013)/out_excerpt" "$C013/log")
+  out=$("$REGRESS" -excerpt "$(runCaseDir hks-inventory)/out_excerpt" "$C013/log")
   status=$?
   echo "$out" | head -20
   check M5.3b "run/013 out_excerpt: ${out%%$'\n'*}" [ $status -eq 0 ]
@@ -2101,7 +2101,7 @@ N012=$HK_DIR/run012Noise
 N012S=$HK_DIR/run012NoiseSignificance0
 for c in "$N012" "$N012S"
 do
-  makeCase 012 "$c" && setControl "$c" endTime 0.004 || exit 1
+  makeCase temperature-model "$c" && setControl "$c" endTime 0.004 || exit 1
 done
 printf '\nprofiles {\n%s\n}\n' '  bins { native { min 0; max 0.69; nBins 424; } }
   times (0.004);

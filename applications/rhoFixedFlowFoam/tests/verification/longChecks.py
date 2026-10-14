@@ -9,7 +9,7 @@ Numerical checks of the long runs of milestone M7
 families (the time-step study of acceptance 3 on the 007 carrier, run/012
 and run/013; on the paper-mode carrier the h vs h/2 first-layer study of
 acceptance 2, the axial x2 study and the time-step study of acceptance 3
-on run/014).  The profiles
+on run/022).  The profiles
 (postProcessing/axialProfiles) are read with utilities/axialProfiles.py,
 the balance files and the fields with tests/phaseChange/checks.py, the
 bin drop of the onset with tests/paperMode/checks.py, and the time-step
@@ -21,7 +21,7 @@ Measures of the wall-deposit line density n'_w(b) [mol/m] (the column
   T_dep, x_dep  the onset fromInlet at 1 % of the peak of the wall
                 column, interpolated between the bin centres (plan E10,
                 recomputed with axialProfiles.onset); the solver writes the
-                same for its observable (run/014: 'wall')
+                same for its observable (run/022: 'wall')
   dT_bin        the drop of the wall temperature across the native bin of
                 the onset (tests/paperMode/checks.py binDrop)
   peak mDep_    the largest deposit per wall area [kg/m2] on the WALL faces

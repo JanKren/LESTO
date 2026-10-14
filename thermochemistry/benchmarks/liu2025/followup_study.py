@@ -22,7 +22,7 @@ from carriers import REPO, prepare_carrier, call, field, header
 from cases import prepare_case
 from report import analyse
 
-FULL = REPO/'run/034-liu2025/work/prepared'
+FULL = REPO/'run/024-liu2025/work/prepared'
 BASES = ['PbI2_SS_Q1_baseline', 'LBE-I_SS_II_Q2_baseline_sat0.001',
          'LBE-I_SS_II_Q2_baseline_sat0.01', 'LBE-I_SS_II_Q2_shift29k_sat0.01']
 SENSITIVITY = BASES[:3]+['LBE-I_SiO2_I_Q2_baseline_sat0.001']
@@ -230,7 +230,7 @@ def prepare(args):
         add(base,'flow0C','flow_reference',{'flow_reference_temperature_K':273.15,'flow_reference_pressure_Pa':101325},
             carrier('flow0C',experiment,flow_T=273.15))
     # Species-derived alignment hypotheses bracket the internal Figure 7C conflict.
-    diagnostics=json.loads((REPO/'run/034-liu2025/full_analysis/analysis.json').read_text())['silica_figure_diagnostics']
+    diagnostics=json.loads((REPO/'run/024-liu2025/full_analysis/analysis.json').read_text())['silica_figure_diagnostics']
     for diagnostic in diagnostics:
         shift=diagnostic['diagnostic_offset_cm'][0]/100
         temperature_root=out/'temperature_hypotheses'/diagnostic['species'];temperature_root.mkdir(parents=True)

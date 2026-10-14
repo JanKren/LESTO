@@ -1,0 +1,45 @@
+#!/bin/bash
+# ./Allrun                  5 steps into work/excerpt, compared with
+#                           out_excerpt (about 15 s, plus the conversion of
+#                           the pipe mesh once, about 30 s)
+# ./Allrun steps <n>        the first <n> steps (1 ms each) into work/steps<n>
+# ./Allrun full [<ranks>]   the whole case, 16 s, into work/full (about 10 h
+#                           serial; meant for a parallel machine)
+. "${0%/*}/../RunFunctions"
+lestoInit
+mode=${1:-excerpt}
+case $mode in
+  excerpt) c=work/excerpt; end=0.005; np=1 ;;
+  steps) [ $# -eq 2 ] || lestoUsage "steps <n>"
+         c=work/steps$2; end=$(python3 -c "print($2*0.001)"); np=1 ;;
+  full) c=work/full; end=; np=${2:-1} ;;
+  *) lestoUsage "[excerpt | steps <n> | full [<ranks>]]" ;;
+esac
+lestoRequireOpenFOAM
+
+if [ "$mode" = full ]
+then
+  lestoWorkCase $c
+else
+  lestoWorkCase $c replace
+fi
+lestoPipeMesh $c
+[ -z "$end" ] || lestoSetControl $c endTime $end
+lestoSolve $c $np
+
+if [ "$mode" = excerpt ]
+then
+  # out_excerpt holds 'Cells adjacent to WALL: 15264', which the solver
+  # prints only for model mock since the final M2 pass (tests: M2.8)
+  grep -v '^Cells adjacent to WALL: ' out_excerpt > $c/out_excerpt.compared
+  if out=$(lestoExcerpt $c/out_excerpt.compared $c/log.solver)
+  then
+    lestoResult PASS "out_excerpt: ${out%%$'\n'*}"
+  else
+    echo "$out" | head -40
+    lestoResult FAIL "out_excerpt: ${out%%$'\n'*}"
+  fi
+else
+  grep '^Balance' $c/log.solver | tail -1
+  lestoResult PASS "ran to t = $(grep '^Time = ' $c/log.solver | tail -1 | cut -d' ' -f3) s; log $c/log.solver"
+fi

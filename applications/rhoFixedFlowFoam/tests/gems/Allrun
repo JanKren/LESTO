@@ -955,8 +955,8 @@ edit "$PAPERA/constant/thermochemistryProperties" \
 blockCase channel "$PAPERF" && gemsDict "$PAPERF" frozen \
   && setControl "$PAPERF" endTime 0.002 && paperCarrier "$PAPERF" || exit 1
 
-makeCase 015 "$PIPE" && setControl "$PIPE" endTime 0.025 || exit 1
-makeCase 015 "$PIPE_OTHER" && setControl "$PIPE_OTHER" endTime 0.005 || exit 1
+makeCase hks-gems-local "$PIPE" && setControl "$PIPE" endTime 0.025 || exit 1
+makeCase hks-gems-local "$PIPE_OTHER" && setControl "$PIPE_OTHER" endTime 0.005 || exit 1
 
 # wallResistance halfCell (M9.10)
 halfCell() {
@@ -1472,7 +1472,7 @@ excerptVerdict() {
 
 if grep -q '^End' "$PIPE/log"
 then
-  EXCERPT=$(runCaseDir 015)/out_excerpt
+  EXCERPT=$(runCaseDir hks-gems-local)/out_excerpt
   bridgeMd5=$(md5sum < "$BRIDGE/libgemsbridge.so" | cut -d' ' -f1)
   verdict=$(excerptVerdict "$EXCERPT" "$PIPE/log" "$bridgeMd5" \
               "$GE_DIR/excerptVerdict")
@@ -1501,7 +1501,7 @@ otherBridge() {
   local d=$GE_DIR/excerptOther excerpt full nDiff v1 v2 md5
   rm -rf "$d"
   mkdir -p "$d"
-  excerpt=$(runCaseDir 015)/out_excerpt
+  excerpt=$(runCaseDir hks-gems-local)/out_excerpt
   md5=$(md5sum < "$FAULT_DIR/libgemsbridge.so" | cut -d' ' -f1)
   full=$("$REGRESS" -excerpt "$excerpt" "$PIPE_OTHER/log")
   nDiff=$(echo "$full" | grep -c '^<')

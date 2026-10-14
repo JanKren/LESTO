@@ -174,5 +174,5 @@ libraries. The original ABI is qualified on 800 cold/warm calls, comparing
 statuses, iterations, amounts, pressures and activities bit for bit.
 `tests/Alltest M10c` exercises both GEMS gas modes, guarded/faulted calls,
 restart and MPI behavior. The default OpenFOAM build remains bridge-free.
-See the solver documentation and run/032 for configuration and external-data
+See the solver documentation and run/020 for configuration and external-data
 requirements. No licensed Bi-I records are included in the repository.

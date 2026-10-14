@@ -19,7 +19,7 @@ def main():
     parser.add_argument('--solver', type=Path)
     args = parser.parse_args()
     repo = args.repo.resolve()
-    prepared = (args.prepared or repo/'run/034-liu2025/work/prepared').resolve()
+    prepared = (args.prepared or repo/'run/024-liu2025/work/prepared').resolve()
     solver = (args.solver or prepared/'bin/rhoFixedFlowFoam').resolve()
     checks = []
     def record(name, ok, detail):

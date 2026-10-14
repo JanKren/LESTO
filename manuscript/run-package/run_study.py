@@ -66,7 +66,7 @@ def control(text, correctors=3, end=60., smoke=False):
 
 
 def locations(args):
-    prepared=(args.prepared or args.repo/'run/034-liu2025/work/prepared').resolve()
+    prepared=(args.prepared or args.repo/'run/024-liu2025/work/prepared').resolve()
     solver=(args.solver or prepared/'bin/rhoFixedFlowFoam').resolve()
     tool=args.carrier_tool
     if tool is None:

@@ -48,7 +48,7 @@ does not qualify either thermodynamic dataset.
 ## Execution dependency found here on 12 October
 
 The accessible workspace has the saved results and source code, but no
-`run/034-liu2025/work/prepared` directory. The accessible Ubuntu environment
+`run/024-liu2025/work/prepared` directory. The accessible Ubuntu environment
 has no discovered OpenFOAM installation or `rhoFixedFlowFoam` executable.
 The original run manifests name a private binary with SHA-256
 `16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58`.

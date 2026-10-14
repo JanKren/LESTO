@@ -20,20 +20,20 @@ sys.path.insert(0, str(BENCH))
 from analyse_matrix import experimental_shape
 from report import rows
 
-FULL = REPO / 'run/034-liu2025/full_analysis'
-FOLLOW = REPO / 'run/034-liu2025/followup_results'
+FULL = REPO / 'run/024-liu2025/full_analysis'
+FOLLOW = REPO / 'run/024-liu2025/followup_results'
 # Production baselines: 576 x 72 (41,472 cells), Gauss limitedLinear 1 for the species advection, otherwise the
 # inputs of the 18,432-cell cases.  The directory holds analysis.json (q1_peaks, case_metrics, ...) and
 # profiles/<case>/ for the 15 baseline and the 4 silica alignment cases; FULL keeps the 18,432-cell upwind
 # originals, which remain the reference of the 64 follow-up sensitivities.
-PROD = REPO / 'run/034-liu2025/production_576x72_limitedLinear'
+PROD = REPO / 'run/024-liu2025/production_576x72_limitedLinear'
 # Scheme and mesh study (plan sections 38-39): two cases, three schemes, up to four levels.
-STUDY = REPO / 'run/034-liu2025/scheme_mesh_study'
+STUDY = REPO / 'run/024-liu2025/scheme_mesh_study'
 # Full-run corrector check: eight versus three species correctors over 60 s.
-ITER = REPO / 'run/034-liu2025/iteration_check'
+ITER = REPO / 'run/024-liu2025/iteration_check'
 # Head-to-head on Lobresco et al. (2026): digitised published data and our ten runs.
 LOB_BENCH = REPO / 'thermochemistry/benchmarks/lobresco2026'
-LOB_RUN = REPO / 'run/035-lobresco2026'
+LOB_RUN = REPO / 'run/023-lobresco2026'
 LOB_CASES = ['T106_6', 'T106_60', 'T106_300', 'T5_60', 'T540_60']
 BASES = ['PbI2_SS_Q1_baseline', 'LBE-I_SS_II_Q2_baseline_sat0.001',
          'LBE-I_SS_II_Q2_baseline_sat0.01', 'LBE-I_SS_II_Q2_shift29k_sat0.01']

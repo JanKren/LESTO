@@ -49,7 +49,7 @@ published per-flow-rate curves.  It is one profile for all cases, peaking at
 average -23 K at 106 mL/min (largest difference 68-71 K), +2 K at 5 mL/min
 (68 K) and +22 K at 540 mL/min (92 K); no single axial shift reconciles them
 (best-shift RMS 53-62 K).  The table is not copied here; the comparison runs
-use the published curves (`run/035-lobresco2026`).
+use the published curves (`run/023-lobresco2026`).
 
 ## Rerun
 

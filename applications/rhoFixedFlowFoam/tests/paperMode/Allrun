@@ -7,7 +7,7 @@
 #
 # Acceptance tests of milestone M4 of doc/phase-change-plan.md: the
 # paper-mode carrier (utilities/setFrozenCarrier), the interaction layer
-# 'distance' of interfaceExchange, and the code-to-code case run/014 of the
+# 'distance' of interfaceExchange, and the code-to-code case run/022 of the
 # temperature-based model of Lobresco et al. (2026) (plan section 6 M4,
 # acceptance 1 to 6, the binding amendments listed in its focus, and the
 # decisions of plan section 25).  Every numerical claim is checked on the
@@ -36,7 +36,7 @@ CHECKS="python3 $PM_SRC/checks.py"
 PCCHECKS="python3 $TESTS_DIR/phaseChange/checks.py"
 CARRIER_EXE=$FOAM_USER_APPBIN/setFrozenCarrier
 BALANCE=postProcessing/phaseChangeBalance/0/PbI2_g.dat
-CASE014=$(runCaseDir 014) || exit 1
+CASE014=$(runCaseDir paper-temperature-model) || exit 1
 
 mkdir -p "$PM_DIR"
 
@@ -70,11 +70,11 @@ EOF
   (cd "$c" && decomposePar -force "$@" > log.decomposePar 2>&1)
 }
 
-# case014 <destination> [<own dynamicCode: yes>]: a copy of run/014 (makeCase)
+# case014 <destination> [<own dynamicCode: yes>]: a copy of run/022 (makeCase)
 # with its carrier written by setFrozenCarrier into 0
 case014() {
   local dst=$1 own=${2:-no}
-  makeCase 014 "$dst" || return 1
+  makeCase paper-temperature-model "$dst" || return 1
   if [ "$own" = yes ]
   then
     rm -f "$dst/dynamicCode"
@@ -106,7 +106,7 @@ echo "== M4 paper-mode carrier and layer distance (work directory $PM_DIR)"
 #------------------------------------------------------------------------------
 # Criteria of the short part
 #
-#   M4.1a  the paper-mode carrier of run/014 on the pipe of run/001 (serial):
+#   M4.1a  the paper-mode carrier of run/022 on the pipe of run/001 (serial):
 #          max |sum_f phi| per cell <= 1e-15 of the inflow; U_b = Q/(pi R^2)
 #          (Q = 1.67e-6 m3/s, R = 2.4 mm) to 1e-9; the discrete inflow, the
 #          facet-area ratio and the discrete bulk velocity printed; the
@@ -137,7 +137,7 @@ echo "== M4 paper-mode carrier and layer distance (work directory $PM_DIR)"
 #          rewritten as decomposePar writes a 'uniform' patch (6 digits) is
 #          reported above 1e-15 of the inflow
 #   M4.1f  the wall table of T-Flows: its count line says 66 rows, the file
-#          has 70; 'rows all' (run/014) reads 70 and names the mismatch;
+#          has 70; 'rows all' (run/022) reads 70 and names the mismatch;
 #          'rows count' (as T-Flows) reads 66 rows (x <= 0.65 m) and stops
 #          with outOfRange fatal at the faces beyond, and holds T(0.65 m)
 #          there with outOfRange hold
@@ -168,7 +168,7 @@ echo "== M4 paper-mode carrier and layer distance (work directory $PM_DIR)"
 #          findInstance, <= 1e-15; setFrozenCarrier on that case writes the
 #          carrier into 0, identical to the original, and nothing into the
 #          latest time (review of M4, round 1)
-#   M4.2   run/014 on the pipe (acceptance 2): layer distance 30528 cells
+#   M4.2   run/022 on the pipe (acceptance 2): layer distance 30528 cells
 #          with A_I/V_I = 8533.7 (to 1e-5), the centre-distance rule of
 #          T-Flows selects the same cells; layer faceCells 15264 cells with
 #          A_I/V_I = 17681.9
@@ -192,7 +192,7 @@ echo "== M4 paper-mode carrier and layer distance (work directory $PM_DIR)"
 #          solver, as M2.4a-c), mDep_ on every wall face equal to serial to
 #          1e-9 of its largest value, areaIntegrate of mDep_ = the wall
 #          inventory to 1e-12 in every step
-#   M4.7c  the pipe of run/014 (SuperBee, background Y = 0.1, 10 steps of 4
+#   M4.7c  the pipe of run/022 (SuperBee, background Y = 0.1, 10 steps of 4
 #          ms, every corrector solved to 1e-15 with 3 correctors per step) in
 #          serial and on 4 ranks: simple (4 1 1), hierarchical (2 2 1), and
 #          an uneven manual split whose rank 0 holds the first cell layer (so
@@ -256,9 +256,9 @@ echo "== M4 paper-mode carrier and layer distance (work directory $PM_DIR)"
 #          closure <= 1e-13, the inventories (gas, wall, sample) equal to
 #          serial to 1e-9 in every step, areaIntegrate of mDep_ = the wall
 #          inventory to 1e-12, the same counts and the removal once
-#   M4.11  run/014: its out_excerpt reproduced (5 steps)
+#   M4.11  run/022: its out_excerpt reproduced (5 steps)
 #   M4.12  provenance (NOTRUN without /home/jan/src/T-Flows or the pinned
-#          revision): constant/wall_x_profile_complete.dat of run/014 is the
+#          revision): constant/wall_x_profile_complete.dat of run/022 is the
 #          T-Flows file at 35c1f6406e8e byte for byte, and the conductivity
 #          table of its setFrozenCarrierDict is k_he of User_Mod/Types.f90
 #   M4.13  layer distance with several interface patches (tests/paperMode/
@@ -287,7 +287,7 @@ echo "== M4 paper-mode carrier and layer distance (work directory $PM_DIR)"
 #          M4.7h; the build before the review of M4, round 3: +0.92 %, 14
 #          faces; gated since the M7 integration, plan section 33)
 #   M4.15  the closure does not drift (review of M4, round 2; plan section
-#          27, item 1): the pipe of run/014 with its own solver settings, a
+#          27, item 1): the pipe of run/022 with its own solver settings, a
 #          background Y = 0.1 and 20 steps of 0.1 s on 4 ranks (simple (4 1
 #          1)): closure <= 2e-15 of the reference in every step (the binary
 #          before the fix, with the row-form transport defect and the
@@ -563,7 +563,7 @@ Ub=$(python3 -c "import math; print(repr(1.67e-6/(math.pi*2.4e-3**2)))")
 out2=$($CHECKS carrier "$CAR/log.setFrozenCarrier" "Ub=$Ub"); s2=$?
 picard=$(grep -o 'Temperature solved .*' "$CAR/log.setFrozenCarrier" | head -1)
 wallT=$(grep -o 'the wall faces hold the table .*' "$CAR/log.setFrozenCarrier")
-check M4.1a "pipe carrier of run/014 (serial): $out1; $out2; $(grep -o \
+check M4.1a "pipe carrier of run/022 (serial): $out1; $out2; $(grep -o \
 'discrete inflow through .*' "$CAR/log.setFrozenCarrier"); $picard; $wallT" \
   eval '[ $s0 -eq 0 ] && [ $s1 -eq 0 ] && [ $s2 -eq 0 ] \
     && [[ "$picard" != *"NOT converged"* ]] && [[ "$wallT" == *"(max deviation 0 K)"* ]]'
@@ -840,7 +840,7 @@ else
   tableText+="rows count, outOfRange hold failed ($c)"
 fi
 check M4.1f "wall table of T-Flows (count line 66, 70 rows): rows all reads\
- 70 and names the mismatch (run/014); $tableText" $tableOk
+ 70 and names the mismatch (run/022); $tableText" $tableOk
 
 #------------------------------------------------------------------------------
 # M4.1g: the solver on the wedge carrier
@@ -879,31 +879,31 @@ check M4.1j "the utility on the wedge after its run (startFrom latestTime,\
     && [[ "$into" == *"into 0 (the instance of rho found from the start time 0.02)"* ]]'
 
 #------------------------------------------------------------------------------
-# M4.2 and M4.11: run/014 (layer distance, 5 steps: the excerpt), and with
+# M4.2 and M4.11: run/022 (layer distance, 5 steps: the excerpt), and with
 # layer faceCells (1 step)
 #------------------------------------------------------------------------------
 C014=$PM_DIR/run014
 copyCase "$CAR" "$C014" && rm -f "$C014/dynamicCode" \
   && ln -s "$DYNAMIC_CODE_DIR" "$C014/dynamicCode" \
   && setControl "$C014" endTime 0.005
-runSerial "$C014" "$SOLVER_EXE" || echo "run/014 failed ($C014/log)"
+runSerial "$C014" "$SOLVER_EXE" || echo "run/022 failed ($C014/log)"
 C014F=$PM_DIR/run014-faceCells
 copyCase "$CAR" "$C014F" && rm -f "$C014F/dynamicCode" \
   && ln -s "$DYNAMIC_CODE_DIR" "$C014F/dynamicCode" \
   && setControl "$C014F" endTime 0.001 \
   && edit "$C014F/constant/thermochemistryProperties" \
        "s/^(  layer +)distance;/\1faceCells;/" "^  layer +faceCells;" \
-  && runSerial "$C014F" "$SOLVER_EXE" || echo "run/014 faceCells failed ($C014F/log)"
+  && runSerial "$C014F" "$SOLVER_EXE" || echo "run/022 faceCells failed ($C014F/log)"
 out1=$($CHECKS layerCounts "$C014/log" distance 30528 8533.7 1e-5); s1=$?
 out2=$($CHECKS layerCounts "$C014F/log" faceCells 15264 17681.9 1e-5); s2=$?
 centre=$(grep -o 'centre-distance rule .*' "$C014/log")
 same=": 30528 cells (largest R - r selected 9.77116e-05 m, smallest outside"
 same+=" 0.000163789 m); 0 cells only in this rule, 0 only in the layer"
-check M4.2 "acceptance 2 on the pipe of run/014: $out1; $centre; $out2" \
+check M4.2 "acceptance 2 on the pipe of run/022: $out1; $centre; $out2" \
   eval '[ $s1 -eq 0 ] && [ $s2 -eq 0 ] && [[ "$centre" == *"$same"* ]]'
 
 out=$("$REGRESS" -excerpt "$CASE014/out_excerpt" "$C014/log" 2>&1); s=$?
-check M4.11 "run/014 out_excerpt: ${out%%$'\n'*}" [ $s -eq 0 ]
+check M4.11 "run/022 out_excerpt: ${out%%$'\n'*}" [ $s -eq 0 ]
 
 #------------------------------------------------------------------------------
 # M4.7a/b/d and M4.9: the channel with layer distance (serial, 4 ranks
@@ -1033,12 +1033,12 @@ check M4.7g "channel, layer distance 5.5e-4 m, the three rows of the lower\
     && [ $s4 -eq 0 ] && [ $s5 -eq 0 ]'
 
 #------------------------------------------------------------------------------
-# M4.7c: the pipe of run/014 (SuperBee) in serial and on three 4-rank splits:
+# M4.7c: the pipe of run/022 (SuperBee) in serial and on three 4-rank splits:
 # simple (4 1 1), hierarchical (2 2 1) and the uneven manual split whose rank
 # 0 holds the first cell layer.  Serial/parallel agreement to 1e-9 needs a
 # converged outer loop (plan section 16, item 7), and SuperBee's lagged
 # limiter keeps the loop from converging below about 2e-6 on this mesh
-# (section 25: run/014's own loop agrees to 1.2e-11 on simple (4 1 1) but to
+# (section 25: run/022's own loop agrees to 1.2e-11 on simple (4 1 1) but to
 # 9.8e-9 on hierarchical (2 2 1)).  The runs therefore solve every corrector
 # to the round-off floor (PBiCGStab 1e-15, relTol 0) with a fixed 3
 # correctors per step (nCorr 2, an outer tolerance never reached): the
@@ -1099,7 +1099,7 @@ remote=$(grep -o '[0-9]* elements with their nearest wall face on another rank' 
            "$PIPEM/log")
 [ "$remote" = "15264 elements with their nearest wall face on another rank" ] \
   || ok=false
-check M4.7c "pipe of run/014 (SuperBee, layer distance), background Y = 0.1,\
+check M4.7c "pipe of run/022 (SuperBee, layer distance), background Y = 0.1,\
  10 steps of 4 ms, every corrector solved to 1e-15; the uneven split\
  $(cat "$PIPEM/log.split" 2>/dev/null) ($remote): $text" $ok
 
@@ -1204,7 +1204,7 @@ check M4.7f "the serial pipe of M4.7c restarted from 0.02 (deposits of\
 
 #------------------------------------------------------------------------------
 # M4.15: the closure does not drift (review of M4, round 2; plan section 27,
-# item 1).  The pipe of run/014 with its own solver settings, a background
+# item 1).  The pipe of run/022 with its own solver settings, a background
 # Y = 0.1 and steps of 0.1 s (20 steps on 4 ranks): the double-precision
 # imbalance of the assembled transport matrix grows with D dt/h^2 of the
 # wall cells (h = 57 um, D about 1e-4 m2/s: about 3000 here, 300 in the
@@ -1217,7 +1217,7 @@ check M4.7f "the serial pipe of M4.7c restarted from 0.02 (deposits of\
 # for M4.18.
 #------------------------------------------------------------------------------
 
-# driftPipe <case> <layer> [<executable>]: the pipe of run/014 with a
+# driftPipe <case> <layer> [<executable>]: the pipe of run/022 with a
 # background Y = 0.1, 20 steps of 0.1 s on 4 ranks (simple (4 1 1)), the
 # debug report on; run with the solver under test unless another
 # executable is given (the negative control of M4.18)
@@ -1243,7 +1243,7 @@ driftPipe "$DRIFT" distance || echo "the drift pipe failed ($DRIFT/log)"
 steps=$(count "$DRIFT/log" '^Time = ')
 out1=$($PCCHECKS closure "$DRIFT/$BALANCE" 2e-15); s1=$?
 wallKg=$(awk '!/^#/{w=$3} END{print w}' "$DRIFT/$BALANCE" 2>/dev/null)
-check M4.15 "the closure does not drift: the pipe of run/014, background Y =\
+check M4.15 "the closure does not drift: the pipe of run/022, background Y =\
  0.1, $steps steps of 0.1 s on 4 ranks (wall inventory at the end $wallKg\
  kg): ${out1#*: } (the binary before the fix: 1.16e-14 after 20 steps,\
  growing linearly)" eval '[ $s1 -eq 0 ] && [ "$steps" = 20 ]'
@@ -1695,7 +1695,7 @@ else
 fi
 
 #------------------------------------------------------------------------------
-# M4.12: provenance of the T-Flows inputs of run/014
+# M4.12: provenance of the T-Flows inputs of run/022
 #------------------------------------------------------------------------------
 if git -C "$TFLOWS_REPO" cat-file -e \
      "$TFLOWS_REV:$TFLOWS_CASE/wall_x_profile_complete.dat" 2>/dev/null
@@ -1706,7 +1706,7 @@ then
   kTable=$(git -C "$TFLOWS_REPO" show "$TFLOWS_REV:$TFLOWS_CASE/User_Mod/Types.f90" \
              | $CHECKS conductivityTable "$CASE014/system/setFrozenCarrierDict")
   s=$?
-  check M4.12 "provenance: run/014 constant/wall_x_profile_complete.dat is\
+  check M4.12 "provenance: run/022 constant/wall_x_profile_complete.dat is\
  $TFLOWS_CASE/wall_x_profile_complete.dat at ${TFLOWS_REV:0:12} byte for byte\
  ($same); $kTable" eval '$same && [ $s -eq 0 ]'
 else

@@ -1,0 +1,13 @@
+{
+ "description": "Case 020, mode local, at 3 s: element closure, and the deposits equal to mode frozen (verification.json: local against frozen 0)",
+ "checks": [
+  {"id": "element closure I, every step", "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/I.dat", "max": 1e-14},
+  {"id": "PbI2 deposit L1, local against frozen (recorded 0; if frozen was run)", "type": "l1", "optional": true,
+   "file": "postProcessing/axialProfiles/3/PbI2_g_cm.dat",
+   "reference": "../case/postProcessing/axialProfiles/3/PbI2_g_cm.dat", "max": 1e-12},
+  {"id": "BiI3 deposit L1, local against frozen (recorded 0; if frozen was run)", "type": "l1", "optional": true,
+   "file": "postProcessing/axialProfiles/3/BiI3_g_cm.dat",
+   "reference": "../case/postProcessing/axialProfiles/3/BiI3_g_cm.dat", "max": 1e-12}
+ ]
+}

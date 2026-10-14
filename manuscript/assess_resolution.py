@@ -7,8 +7,8 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
-FULL = REPO / 'run/034-liu2025/full_analysis/profiles'
-FOLLOW = REPO / 'run/034-liu2025/followup_results/profiles'
+FULL = REPO / 'run/024-liu2025/full_analysis/profiles'
+FOLLOW = REPO / 'run/024-liu2025/followup_results/profiles'
 BASES = ['PbI2_SS_Q1_baseline', 'LBE-I_SS_II_Q2_baseline_sat0.001',
          'LBE-I_SS_II_Q2_baseline_sat0.01', 'LBE-I_SS_II_Q2_shift29k_sat0.01']
 LABELS = ['Pure PbI2', 'Steel Q2, 0.1\\%', 'Steel Q2, 1\\%', 'Steel Q2, shifted BiI']

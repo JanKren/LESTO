@@ -80,9 +80,9 @@ Later stages will also include:
 The phase-change solver's M10a stage now supports independent PbI2/BiI3
 pairs, shared multi-species sources and element conservation outputs.
 See [the solver documentation](applications/rhoFixedFlowFoam/readme.md)
-and [the preliminary channel](run/030-pbi2-bii3-channel/readme.md).
+and [the preliminary channel](run/018-pbi2-bii3-channel/readme.md).
 M10b adds bridge-free homogeneous gas re-speciation and reaction/element
-accounts; see [run/031](run/031-pbbi-gas-speciation/readme.md).
+accounts; see [run/019](run/019-pbbi-gas-speciation/readme.md).
 M10c adds optional frozen/local GEMS gas engines; see
-[run/032](run/032-pbbi-gems-speciation/readme.md). Reactive/shared-condensate
+[run/020](run/020-pbbi-gems-speciation/readme.md). Reactive/shared-condensate
 coupling remains for M10d before experimental validation.

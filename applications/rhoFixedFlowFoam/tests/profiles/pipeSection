@@ -47,7 +47,7 @@ PYEOF
 }
 
 preparePipe() {
-  makeCase 012 "$1" \
+  makeCase temperature-model "$1" \
     && setControl "$1" endTime 0.02 \
     && setControl "$1" deltaT 0.004 \
     && setControl "$1" writeInterval 5 \
@@ -79,7 +79,7 @@ fi
 # the uneven split: the cell centres (writeCellCentres, ascii, in a copy of
 # the case), 3 slabs along x
 CENTRES=$PR_DIR/pipeCellCentres
-makeCase 012 "$CENTRES" && setControl "$CENTRES" writeFormat ascii \
+makeCase temperature-model "$CENTRES" && setControl "$CENTRES" writeFormat ascii \
   && (cd "$CENTRES" && postProcess -func writeCellCentres -time 0 \
         > log.writeCellCentres 2>&1) \
   && python3 - "$CENTRES/0/Cx" "$PIPEU3/constant/cellDecomposition" <<'EOF' \
@@ -103,7 +103,7 @@ decomposeWith "$PIPEU3" 3 \
 if $all
 then
   C012=$PR_DIR/run012
-  makeCase 012 "$C012" && setControl "$C012" endTime 0.005 || exit 1
+  makeCase temperature-model "$C012" && setControl "$C012" endTime 0.005 || exit 1
   addProfiles "$C012" '  bins {
     native { min 0; max 0.69; nBins 424; }
     gamma  { min 0; max 0.69; width 0.01; }

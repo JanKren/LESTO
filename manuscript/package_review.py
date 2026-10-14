@@ -22,17 +22,17 @@ def main():
         files.update(p for p in (HERE / folder).iterdir() if p.is_file())
     for result in ['full_analysis', 'followup_results', 'production_576x72_limitedLinear',
                    'scheme_mesh_study', 'iteration_check']:
-        root = REPO / 'run/034-liu2025' / result
+        root = REPO / 'run/024-liu2025' / result
         files.update(p for p in root.glob('*') if p.is_file() and not p.name.startswith('.'))
         files.update(p for p in (root / 'profiles').rglob('*') if p.is_file())
-    files.update(REPO / 'run/034-liu2025' / name for name in [
+    files.update(REPO / 'run/024-liu2025' / name for name in [
         'full_size_launch.json', 'full_size_completion.json', 'followup_launch.json'])
     bench = REPO / 'thermochemistry/benchmarks/liu2025'
     files.update(bench / name for name in [
         'analyse_matrix.py', 'report.py', 'prepare.py', 'carriers.py', 'README.md',
         'experiments.csv', 'targets.csv', 'sublimation.csv'])
     files.update(p for p in (bench / 'digitized').iterdir() if p.suffix in {'.csv', '.json'})
-    lob_run = REPO / 'run/035-lobresco2026'
+    lob_run = REPO / 'run/023-lobresco2026'
     files.update(p for p in lob_run.rglob('*') if p.is_file()
                  and '__pycache__' not in p.parts and p.suffix != '.pyc')
     lob_bench = REPO / 'thermochemistry/benchmarks/lobresco2026'

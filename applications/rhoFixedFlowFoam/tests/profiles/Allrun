@@ -795,7 +795,7 @@ source "$PR_SRC/pipeSection"
 if grep -q '^End' "$C012/log"
 then
   grep -v -E '^(Profiles|  T_dep of )' "$C012/log" > "$C012/log.withoutProfiles"
-  excerpt=$("$REGRESS" -excerpt "$(runCaseDir 012)/out_excerpt" \
+  excerpt=$("$REGRESS" -excerpt "$(runCaseDir temperature-model)/out_excerpt" \
     "$C012/log.withoutProfiles")
   s1=$?
   out=$($CHECKS integrals "$C012" 1e-12)

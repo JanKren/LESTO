@@ -1,0 +1,73 @@
+#!/bin/bash
+# ./Allrun                  5 steps into work/excerpt, compared with
+#                           out_excerpt (about 15 s, plus the conversion of
+#                           the pipe mesh once)
+# ./Allrun steps <n>        the first <n> steps (1 ms each) into work/steps<n>
+# ./Allrun full [<ranks>]   the whole case, 16 s, into work/full (about 2.3 s
+#                           per step serial)
+#
+# Needs a rhoFixedFlowFoam built with the GEMS3K bridge (LESTO_GEMSBRIDGE,
+# readme.md); point LESTO_SOLVER to it.  The whole excerpt is compared only
+# with the bridge that wrote it (md5 below, as criterion M9.8); with another
+# bridge the start-up and step 1 are compared, which no GEMS3K call reaches.
+EXCERPT_BRIDGE_MD5=fb67103e8754cb33faf1ae7a8eb2df12
+. "${0%/*}/../RunFunctions"
+lestoInit
+mode=${1:-excerpt}
+case $mode in
+  excerpt) c=work/excerpt; end=0.005; np=1 ;;
+  steps) [ $# -eq 2 ] || lestoUsage "steps <n>"
+         c=work/steps$2; end=$(python3 -c "print($2*0.001)"); np=1 ;;
+  full) c=work/full; end=; np=${2:-1} ;;
+  *) lestoUsage "[excerpt | steps <n> | full [<ranks>]]" ;;
+esac
+lestoRequireOpenFOAM
+bridge=$(ldd "$LESTO_SOLVER" | sed -n 's|.*libgemsbridge.so => \([^ ]*\) .*|\1|p')
+if [ -z "$bridge" ]
+then
+  lestoResult NOTRUN "$LESTO_SOLVER has no GEMS3K bridge: build one with" \
+    "LESTO_GEMSBRIDGE (readme.md) and set LESTO_SOLVER to it"
+  exit 0
+fi
+md5=$(md5sum < "$bridge" | cut -d' ' -f1)
+echo "   bridge $bridge (md5 $md5)"
+
+if [ "$mode" = full ]
+then
+  lestoWorkCase $c
+else
+  lestoWorkCase $c replace
+fi
+lestoPipeMesh $c
+[ -z "$end" ] || lestoSetControl $c endTime $end
+lestoSolve $c $np
+
+if [ "$mode" = excerpt ]
+then
+  if [ "$md5" = "$EXCERPT_BRIDGE_MD5" ]
+  then
+    cp out_excerpt $c/out_excerpt.compared
+    what="the whole excerpt (the bridge that wrote it)"
+  else
+    awk '/^Time = / { n++ } n == 2 { exit } { print }' out_excerpt \
+      > $c/out_excerpt.compared
+    echo '...' >> $c/out_excerpt.compared
+    what="start-up and step 1 only (another bridge than md5 ${EXCERPT_BRIDGE_MD5:0:8}...)"
+  fi
+  if out=$(lestoExcerpt $c/out_excerpt.compared $c/log.solver)
+  then
+    if [ "$md5" = "$EXCERPT_BRIDGE_MD5" ]
+    then
+      lestoResult PASS "out_excerpt, $what: ${out%%$'\n'*}"
+    else
+      lestoResult NOTRUN "out_excerpt, $what: ${out%%$'\n'*}; steps 2-5" \
+        "move with the last bits of GEMS3K's p_eq"
+    fi
+  else
+    echo "$out" | head -40
+    lestoResult FAIL "out_excerpt, $what: ${out%%$'\n'*}"
+  fi
+else
+  grep '^Balance' $c/log.solver | tail -1
+  lestoResult PASS "ran to t = $(grep '^Time = ' $c/log.solver | tail -1 | cut -d' ' -f3) s; log $c/log.solver"
+fi

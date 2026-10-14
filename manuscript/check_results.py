@@ -33,7 +33,7 @@ def l1(a, b):
 
 def check_production(full, follow):
     """19 production cases: gates, stoichiometry of the saved profiles."""
-    prod = REPO / 'run/034-liu2025/production_576x72_limitedLinear'
+    prod = REPO / 'run/024-liu2025/production_576x72_limitedLinear'
     analysis = json.loads((prod / 'analysis.json').read_text())
     ledger = json.loads((prod / 'ledger.json').read_text())
     assert (analysis['PASS'], analysis['FAIL'], analysis['NOTRUN']) == (15, 0, 0)
@@ -51,7 +51,7 @@ def check_production(full, follow):
 
 def check_scheme_study(full, follow):
     """Recompute every successive and cross-scheme profile difference of the study from its profiles."""
-    study = REPO / 'run/034-liu2025/scheme_mesh_study'
+    study = REPO / 'run/024-liu2025/scheme_mesh_study'
     result = json.loads((study / 'results.json').read_text())
     bases = {'pure': 'PbI2_SS_Q1_baseline', 'steel': 'LBE-I_SS_II_Q2_shift29k_sat0.01'}
     def folder(key, level, scheme):
@@ -80,7 +80,7 @@ def check_scheme_study(full, follow):
     for key, base in bases.items():   # the L3 limitedLinear runs are the production runs
         for f in ['element_I', 'PbI2_g', 'BiI3_g']:
             assert (folder(key, 3, 'll') / (f + '_native.dat')).read_bytes() == (
-                REPO / 'run/034-liu2025/production_576x72_limitedLinear/profiles' / base / (f + '_native.dat')).read_bytes()
+                REPO / 'run/024-liu2025/production_576x72_limitedLinear/profiles' / base / (f + '_native.dat')).read_bytes()
     table = (HERE / 'generated/numerical-table.tex').read_text()
     for family in ['pure.ll', 'steel.ll', 'steel.up', 'steel.vl', 'pure.vl']:
         for step in result[family]['successive'].values():
@@ -90,7 +90,7 @@ def check_scheme_study(full, follow):
 
 def check_iteration(full):
     """Eight versus three correctors over 60 s: recompute the profile differences."""
-    root = REPO / 'run/034-liu2025/iteration_check'
+    root = REPO / 'run/024-liu2025/iteration_check'
     summary = json.loads((root / 'summary.json').read_text())
     assert len(summary['cases']) == 3
     for case in summary['cases']:
@@ -110,7 +110,7 @@ def check_iteration(full):
 def check_lobresco(generated):
     """Independent recomputation of the deposition-onset table from the repository copies."""
     bench = REPO / 'thermochemistry/benchmarks/lobresco2026'
-    run = REPO / 'run/035-lobresco2026'
+    run = REPO / 'run/023-lobresco2026'
     provenance = json.loads((bench / 'digitized/provenance.json').read_text())
     rows_out = {r['case']: r for r in generated['lobresco2026']['rows']}
     def first_crossing(x, y, wall_x, wall_t):
@@ -154,8 +154,8 @@ def check_lobresco(generated):
 
 
 def main():
-    full = REPO / 'run/034-liu2025/full_analysis'
-    follow = REPO / 'run/034-liu2025/followup_results'
+    full = REPO / 'run/024-liu2025/full_analysis'
+    follow = REPO / 'run/024-liu2025/followup_results'
     original = json.loads((full / 'analysis.json').read_text())
     result = json.loads((follow / 'analysis.json').read_text())
     assert (original['PASS'], original['FAIL'], original['NOTRUN']) == (15, 0, 1)

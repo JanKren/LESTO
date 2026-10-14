@@ -1,0 +1,57 @@
+#!/bin/bash
+# ./Allrun                  5 steps into work/excerpt with the carrier of
+#                           setFrozenCarrier, compared with out_excerpt
+#                           (about 1 min, plus the pipe mesh once)
+# ./Allrun full [<ranks>]   the whole case, 30 s, into work/full; the carrier
+#                           is written on the decomposed case (exact; readme)
+#                           (2-3 h on 16 ranks)
+# ./Allrun long             the runs of acceptance 3-5: tests/Alltest M4long
+#                           (hours on 16 cores; tests/paperMode/longRuns)
+. "${0%/*}/../RunFunctions"
+lestoInit
+mode=${1:-excerpt}
+case $mode in
+  excerpt) c=work/excerpt; np=1 ;;
+  full) c=work/full; np=${2:-16} ;;
+  long) exec "$LESTO_REPO/applications/rhoFixedFlowFoam/tests/Alltest" M4long ;;
+  *) lestoUsage "[excerpt | full [<ranks>] | long]" ;;
+esac
+lestoRequireOpenFOAM
+carrier=${LESTO_CARRIER:-$(dirname "$LESTO_SOLVER")/setFrozenCarrier}
+[ -x "$carrier" ] || {
+  echo "No $carrier: build applications/rhoFixedFlowFoam (./Allwmake) or set LESTO_CARRIER" >&2
+  exit 2
+}
+
+if [ "$mode" = excerpt ]
+then
+  lestoWorkCase $c replace
+  lestoPipeMesh $c
+  lestoRun $c log.setFrozenCarrier "$carrier"
+  lestoSetControl $c endTime 0.005
+  lestoSolve $c
+  if out=$(lestoExcerpt out_excerpt $c/log.solver)
+  then
+    lestoResult PASS "out_excerpt: ${out%%$'\n'*}"
+  else
+    echo "$out" | head -40
+    lestoResult FAIL "out_excerpt: ${out%%$'\n'*}"
+  fi
+else
+  lestoWorkCase $c
+  lestoPipeMesh $c
+  if [ "$np" -le 1 ]
+  then
+    lestoRun $c log.setFrozenCarrier "$carrier"
+  else
+    # the carrier written on the decomposed case: decomposePar would round
+    # patch values that are all equal to a 10-digit 'uniform' (readme)
+    lestoDecompose $c "$np"
+    lestoRun $c log.setFrozenCarrier $(lestoMpirun "$np") "$carrier" -parallel
+    lestoRun $c log.setFrozenCarrier-check $(lestoMpirun "$np") "$carrier" -check -parallel
+  fi
+  lestoSolve $c "$np"
+  grep '^Balance' $c/log.solver | tail -1
+  lestoResult PASS "ran to t = $(grep '^Time = ' $c/log.solver | tail -1 | cut -d' ' -f3) s;" \
+    "T_dep: utilities/axialProfiles.py $c --set gamma"
+fi

@@ -21,9 +21,9 @@ from matplotlib.patches import FancyArrowPatch, Rectangle
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
-ANALYSIS = REPO / "run/034-liu2025/full_analysis"
+ANALYSIS = REPO / "run/024-liu2025/full_analysis"
 DIGITISED = REPO / "thermochemistry/benchmarks/liu2025/digitized"
-WORK = REPO / "run/034-liu2025/work/followup-20261007"
+WORK = REPO / "run/024-liu2025/work/followup-20261007"
 FIGURES = HERE / "figures"
 BLUE, RED, GREEN, GRAY = "#0014E6", "#DC005A", "#008F68", "#4B4B4B"
 INPUTS = set()
@@ -182,7 +182,7 @@ def main():
     if state_path.exists():
         state=read_json(state_path)
     else:
-        state=read_json(REPO/"run/034-liu2025/followup_launch.json")
+        state=read_json(REPO/"run/024-liu2025/followup_launch.json")
     counts=collections.Counter(r["status"] for r in state.get("cases",{}).values()) if isinstance(state.get("cases"),dict) else state["case_status_counts"]
     stamp=state.get("updated_utc",state.get("captured_utc"))
     local=dt.datetime.fromisoformat(stamp).astimezone(ZoneInfo("Europe/Zurich"))

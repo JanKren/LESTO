@@ -39,7 +39,7 @@ stated explicitly; that case was not run.
 All new evidence is in the repository; plan section 39 summarises it and
 awaits sign-off.
 
-- **Production runs** (`run/034-liu2025/production_576x72_limitedLinear`):
+- **Production runs** (`run/024-liu2025/production_576x72_limitedLinear`):
   the 15 baselines and the 4 silica temperature-coordinate cases re-run on
   41,472 cells with `Gauss limitedLinear 1`; all 19 PASS. The baseline
   tables, Figs. 4 and 7 and the abstract numbers now come from them. The 64
@@ -54,7 +54,7 @@ awaits sign-off.
   opposite order), so neither shift is preferred. The BiI3 share, totals and
   ledger are unchanged within the stated tolerances (largest raw residue
   1.41e-12).
-- **Scheme and mesh study** (`run/034-liu2025/scheme_mesh_study`):
+- **Scheme and mesh study** (`run/024-liu2025/scheme_mesh_study`):
   Table III and Fig. 3 replaced. Steel shifted-BiI iodine profile, successive
   levels 8,192 / 18,432 / 41,472 / 93,312 cells: limitedLinear 15.35 / 8.95 /
   1.98 %, upwind 10.47 / 10.58 / 2.13 %. Apparent orders 1.3 and 3.7 are
@@ -62,12 +62,12 @@ awaits sign-off.
   indicative 2.5 % (apparent order) and 3.6 % (second order) estimates of the
   41,472-cell error. Upwind vs limitedLinear at equal mesh 20.8 / 14.1 / 11.3 /
   7.7 %; van Leer vs limitedLinear at most 2.8 % (steel) and 1.8 % (pure).
-- **Iteration check** (`run/034-liu2025/iteration_check`): eight vs three
+- **Iteration check** (`run/024-liu2025/iteration_check`): eight vs three
   correctors over the full 60 s, three cases. Iodine profile change 1.1e-13 %
   and 4.9e-13 % (pure PbI2, steel 0.1 %) and 0.021 % (steel 1 %). The
   "full-run iteration sensitivity unqualified" caveat is replaced.
   The fourth case (shifted BiI) was still queued and is not used.
-- **Lobresco et al. (2026)** (`run/035-lobresco2026`,
+- **Lobresco et al. (2026)** (`run/023-lobresco2026`,
   `thermochemistry/benchmarks/lobresco2026`): new Sec. 6.3, Table V,
   Fig. 5, one sentence each in abstract and conclusions. Onset temperature
   minus measurement +26 / +19 / +16 / -11 / -14 K, RMS 18 K, against 35 K for

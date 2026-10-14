@@ -1,0 +1,37 @@
+#!/bin/bash
+# ./Allclean        removes work/smoke and work/coarse only
+# ./Allclean --all  also every other entry of work/: work/prepared (the 15
+#                   full-size runs, the only raw CFD output of M10e, 33 GB),
+#                   work/followup-*, work/attempt-* and the probes.  Refused
+#                   while any run_state.json below work/ reports RUNNING
+#                   with a live process; asks for the case name to confirm
+#                   (or give --yes as well).
+. "${0%/*}/../RunFunctions"
+lestoInit
+all=no; yes=no
+for arg in "$@"
+do
+  case $arg in
+    --all) all=yes ;;
+    --yes) yes=yes ;;
+    *) lestoUsage "[--all [--yes]]" ;;
+  esac
+done
+lestoRemove work/smoke work/coarse
+[ "$all" = yes ] || exit 0
+[ -d work ] || exit 0
+if live=$(lestoLiveRuns work)
+then
+  echo "Refusing: running studies below work/:" >&2
+  echo "$live" >&2
+  exit 2
+fi
+if [ "$yes" != yes ]
+then
+  du -sh work
+  read -r -p "This deletes the raw CFD output above. Type $LESTO_NAME to confirm: " answer \
+    || answer=
+  [ "$answer" = "$LESTO_NAME" ] || { echo "Not confirmed; nothing removed." >&2; exit 2; }
+fi
+lestoRemove work/*
+rmdir work 2> /dev/null || true

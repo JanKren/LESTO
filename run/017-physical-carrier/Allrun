@@ -1,0 +1,41 @@
+#!/bin/bash
+# ./Allrun          the coarse wedge (212 x 48): carrier (rhoSimpleFoam,
+#                   flux projection, audit; about 5 min), the 6 s of T106_6
+#                   (3000 steps, about 3 min serial), the comparison with the
+#                   measurement (analyse.py), and its numbers against
+#                   expect.json and case 023's tracked coarse T106_6
+# ./Allrun prod     the same on the production wedge (318 x 72), against
+#                   expect-prod.json and case 023's prod T106_6
+#
+# The carrier, case and comparison are made by the tooling of case 023
+# (make_cases.py, analyse.py) unchanged, with its work directory redirected
+# into work/<level> (physicalCarrier.py); case 023 is not written.
+. "${0%/*}/../RunFunctions"
+lestoInit
+level=${1:-coarse}
+case $level in
+  coarse) expect=expect.json ;;
+  prod) expect=expect-prod.json ;;
+  *) lestoUsage "[coarse | prod]" ;;
+esac
+lestoRequireOpenFOAM
+lobresco=$(lestoCaseDir lobresco2026)
+w=work/$level
+
+lestoBuild "$LESTO_REPO/thermochemistry/benchmarks/liu2025/carrierTool" liuCarrierTool
+lestoRemove $w
+mkdir -p $w/bin
+cp work/bin/liuCarrierTool $w/bin/
+ln -s "$LESTO_SOLVER" $w/bin/rhoFixedFlowFoam
+echo "   carrier and case (make_cases.py of $(basename "$lobresco")) in $w"
+python3 physicalCarrier.py prepare "$lobresco" $w $level > $w/log.prepare 2>&1 || {
+  tail -20 $w/log.prepare
+  lestoResult FAIL "preparation failed: $w/log.prepare"
+}
+cat $w/log.prepare
+lestoSolve $w/case
+python3 physicalCarrier.py analyse "$lobresco" $w/case > $w/log.analyse 2>&1 || {
+  tail -20 $w/log.analyse
+  lestoResult FAIL "analyse.py failed: $w/log.analyse"
+}
+lestoCheck $w/case $expect

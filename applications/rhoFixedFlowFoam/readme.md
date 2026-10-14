@@ -177,7 +177,7 @@ is no `rho` yet):
   1e-5; M4.1h), also on a decomposed case (the two sides of a processor
   face are exactly opposite);
 - `T`: `uniform`, `profile` (the wall table T(x) on the whole
-  cross-section) or `solved` (the default of run/014): the steady
+  cross-section) or `solved` (the default of run/022): the steady
   temperature of the frozen flow, `div(rho cp phi_v T) = laplacian(k(T),
   T)`, with the wall table on the wall patches (Dirichlet at the face
   centres), `inletTemperature` at the inlet and zero gradient elsewhere,
@@ -202,12 +202,12 @@ from `sectorAngle`, exact, and the inlet carries the fraction theta/(2 pi)
 of Q.  The faceted cross-section is smaller than the circle (0.5 % for the
 36 sides of run/001): `rescaleToFacets yes` scales the amplitude so that
 the discrete inflow is Q (exactly, to round-off, with `sectorAngle`); `no`
-(T-Flows, run/014) keeps U_b = Q/(pi R^2).  The discrete flows of the two
+(T-Flows, run/022) keeps U_b = Q/(pi R^2).  The discrete flows of the two
 codes still differ: T-Flows takes its face fluxes from the parabola at the
 vertex-mean centres of its cells and faces, which on the mesh of run/001
 carries 1.0038 Q (a discrete bulk velocity of 0.09311 m/s against the
 0.09276 m/s of the exact integral here), so at the same `FLOW_RATE`
-run/014's carrier is 0.39 % slower than T-Flows' (plan section 27, item
+run/022's carrier is 0.39 % slower than T-Flows' (plan section 27, item
 9).  A carrier with T-Flows' total flow on this mesh is `flowRate
 1.67641e-6` with `rescaleToFacets yes`.
 
@@ -259,7 +259,7 @@ decomposition (e.g. scotch on Merlin7), or write the carrier on the
 decomposed case: `-parallel` without `-check` writes it on the decomposed
 mesh, exactly (M4.1b, M4.1d).  The dictionary
 (`system/setFrozenCarrierDict`) is documented in the header of
-`setFrozenCarrier.C`; run/014 holds the T-Flows parity version.  `Allwmake`
+`setFrozenCarrier.C`; run/022 holds the T-Flows parity version.  `Allwmake`
 builds the utility with the solver.
 
 ## Numerical controls
@@ -358,7 +358,7 @@ Milestones M2 to M5 of `doc/phase-change-plan.md`: the exchange core,
 the temperature model, release samples and the mass ledger (M2); the
 axial profiles, T_dep, `mDep_` and `exch_` (M3); the paper-mode carrier
 (`utilities/setFrozenCarrier`, above), the `distance` interaction layer
-and the code-to-code case run/014 of the temperature model (M4); the
+and the code-to-code case run/022 of the temperature model (M4); the
 Hertz-Knudsen-Schrage model with vapour-pressure tables, inventory samples
 and their removal (M5); the GEMS3K backend of its vapour pressure,
 `equilibrium GEMS` in mode frozen or local, with the optional speciation
@@ -556,7 +556,7 @@ and at most 6e-5 at the resolution of the production first layer, against
 28 and 33).  It is
 therefore the wall law of the physical runs (M8: their cases set
 `wallResistance halfCell`), while the code default stays `none`, the law
-of the paper and of T-Flows, which the code-to-code cases (run/014, M4long,
+of the paper and of T-Flows, which the code-to-code cases (run/022, M4long,
 M6) reproduce; every case of `run/` up to 015 keeps `none`.
 
 `areaMultiplier` scales `A_e`, and hence the rate, of every model (plan E2):
@@ -620,7 +620,7 @@ The start-up lines give both counts of plan section 12, item 10: the
 layer of the exact distance with the distances of its cells and of the
 nearest cell outside within twice the distance (the margin of the rule),
 and with `centreDistance` the T-Flows test `R - r <= distance` about the
-given axis (a comparison only).  On the pipe of run/001 (run/014):
+given axis (a comparison only).  On the pipe of run/001 (run/022):
 
     Interface (layer distance): patches (WALL), distance 0.0001 m: 30528
       elements in 30528 cells; A_I = 0.0103918 m2, V_I = 1.21773e-06 m3,
@@ -637,7 +637,7 @@ given axis (a comparison only).  On the pipe of run/001 (run/014):
 two cell layers, against one (15264 cells, `A_I/V_I = 17681.9 1/m`) for
 `layer faceCells`.  The paper's text ("all control volumes lying entirely
 within" 0.1 mm) describes the one layer, T-Flows' `R - r <= DELTA` the two
-(`manuscript/notes-for-authors.md`, item C); run/014 switches between them.
+(`manuscript/notes-for-authors.md`, item C); run/022 switches between them.
 
 **Why not patchDataWave.**  OpenFOAM's wall distance with the nearest face
 (`patchDataWave<wallPointData<label>>`) is wrong for this purpose in three
@@ -1305,7 +1305,7 @@ correction, which telescopes only to round-off) are booked in
 `solverDefect` with the stiff exchange's, not in the closure.  Until the M4
 review, round 3, the source `b - s` stayed in the defect, so the closure
 changed by `dt sum_c (b - s)_c`, up to 1.7e-24 kg per step on the
-non-orthogonal pipe of run/014, booked nowhere (plan section 29, item 2;
+non-orthogonal pipe of run/022, booked nowhere (plan section 29, item 2;
 M4.18).  An interpolation scheme with an explicit correction (linearUpwind,
 LUST) adds it to the source only, without face values in the matrix: it
 stays in `E`, and its rounding reaches the closure (a few eps of the
@@ -1378,7 +1378,7 @@ moleFractionWarning`.  For a perfect-gas carrier this is `(Y/M)/(Y/M +
 (rho = 1, not the density of helium) that form measured the species
 against an imaginary carrier of 250 mol/m3 and was 6 to 25 times too
 small (plan section 29, item 4; M4.19).  Measured with the carrier's own
-concentration, the gas of run/014 is not dilute: at the end of the
+concentration, the gas of run/022 is not dilute: at the end of the
 release of Figs. 8-10 (15 s) x exceeds 0.05 in 148530 of the 228960 cells
 and 0.1 in 54783, at most 0.12 (the plateau of Fig. 9, 1.25 mol/m3,
 against 10 to 16 mol/m3 of helium at 1 bar), so the passive-carrier
@@ -2200,8 +2200,8 @@ written below `run/`:
 | `tests/hks/Allrun` | M5: HKS boxes at 700 K (bare wall, CAPPED, ample condensate, below Y_eq, halfCell), the channel with an inventory sample and its removal (nCorr 3 and 0, binary restarts across the removal, re-decomposed, 4 ranks simple and uneven, the exact clock), run/013 (25 steps and its `out_excerpt`), the tables, refusals, and the carry-overs of the M3 sign-off |
 | `tests/hks/checks.py` | the numerical checks of M5 (independent model values: the table, G, lambda, Y_eq) |
 | `tests/testVapourPressureTable.C` | standalone g++ test of `vapourPressureTable.H` with synthetic tables and the generated Gurvich and T-Flows tables (M5.4a; with the NASA-9 reference M5.4b) |
-| `tests/paperMode/Allrun` | M4: `setFrozenCarrier` on the pipe and a wedge (serial, decomposed, written in parallel; the ascii negative evidence; the T-Flows table; inputs that do not fit the mesh), the layer counts of run/014, layer distance on the channel (serial, 4 ranks split by rows and with three ranks per face, restarts, profiles, HKS in serial and on 4 ranks, refusals) and on the pipe of run/014 (three 4-rank splits; the closure without drift at large steps), run/014's `out_excerpt`, provenance, the v2606 compile |
-| `tests/paperMode/longRuns` | M4long: the runs of acceptance 3-5 and the T-Flows parameter set as edits of run/014 (reused when their key is unchanged: the sources, the inputs of run/014, the mesh checksum, the set-up functions, the run's spec and the OpenFOAM installation; run again when it changed, or, only with `M4LONG_REVALIDATE=yes`, revalidated against the binaries they were made with by a 5-step probe from their last write (fields, profiles and the balance file but its booking columns and the diagnostic `evaporatedAboveWarning` identical) and then named so in every criterion line; resumed when stopped; built from the current sources before their binaries are kept; `M4LONG_RUNS`, `M4LONG_JOBS`, `M4LONG_RANKS`), criteria M4.3-M4.5b, M4.16, M4.17 and M4.20, NOTRUN with the cost for runs that did not end; a recorded run of another key that is not selected is kept (NOTRUN, naming the way to revalidate it or to run it again; before the M7 integration an evaluation discarded it) |
+| `tests/paperMode/Allrun` | M4: `setFrozenCarrier` on the pipe and a wedge (serial, decomposed, written in parallel; the ascii negative evidence; the T-Flows table; inputs that do not fit the mesh), the layer counts of run/022, layer distance on the channel (serial, 4 ranks split by rows and with three ranks per face, restarts, profiles, HKS in serial and on 4 ranks, refusals) and on the pipe of run/022 (three 4-rank splits; the closure without drift at large steps), run/022's `out_excerpt`, provenance, the v2606 compile |
+| `tests/paperMode/longRuns` | M4long: the runs of acceptance 3-5 and the T-Flows parameter set as edits of run/022 (reused when their key is unchanged: the sources, the inputs of run/022, the mesh checksum, the set-up functions, the run's spec and the OpenFOAM installation; run again when it changed, or, only with `M4LONG_REVALIDATE=yes`, revalidated against the binaries they were made with by a 5-step probe from their last write (fields, profiles and the balance file but its booking columns and the diagnostic `evaporatedAboveWarning` identical) and then named so in every criterion line; resumed when stopped; built from the current sources before their binaries are kept; `M4LONG_RUNS`, `M4LONG_JOBS`, `M4LONG_RANKS`), criteria M4.3-M4.5b, M4.16, M4.17 and M4.20, NOTRUN with the cost for runs that did not end; a recorded run of another key that is not selected is kept (NOTRUN, naming the way to revalidate it or to run it again; before the M7 integration an evaluation discarded it) |
 | `tests/paperMode/checks.py` | the numerical checks of M4 (continuity lines, carrier values, layer counts, mDep_, inventories, faces, plateau, solid profiles, T_dep with its bound, provenance, the closure of segmented runs, balance files without their booking columns, the explicit remainder and the transport identity of the debug report; `sourceFormMutant` edits a copy of `matrixDefect.H` into the negative control of M4.18) |
 | `tests/paperMode/wedge/` | blockMesh template of the 5-degree wedge (40 x 10 cells) and its `setFrozenCarrierDict` (M4.1c, M4.1g, M4.1h, M4.1i) |
 | `tests/paperMode/corners/` | an L-shaped channel of 75 cells with three interface patches meeting at a concave and a re-entrant corner, a carrier at rest (makeCarrier) (M4.13, M4.14; the tetrahedral pipe of M4.14 uses its dictionaries) |
@@ -2219,7 +2219,7 @@ written below `run/`:
 | `tests/verification/pipeMeshes` | M7long (M7.2a-b): the h/2 first-layer mesh (`refineWallLayer`) and the axial x2 mesh (`refineMesh` along the axis) of the test mesh, with checkMesh and their facts |
 | `tests/verification/meshChecks.py` | its checks and the table of the mesh facts |
 | `tests/verification/pipeMeshFacts/` | test helper (built into the work area): the interaction layers (faceCells; the cells within 1e-4 m of the wall), the first-layer thickness, the half-cell distance, the axial cells |
-| `tests/verification/longStudies` | M7long: the long runs of M7, managed as those of M4long (keys, kept binaries, reuse, resume, `M7LONG_REVALIDATE=yes`, `M7LONG_RUNS`, `M7LONG_JOBS`, `M7LONG_RANKS`; `longStudies keys` prints the keys): run/012 and run/013 on the 007 carrier at dt 4, 2 and 1 ms to 16 s, and 11 edits of run/014 to 30 s (h vs h/2, axial x2, dt 4, 2 and 1 ms); criteria M7.3a-d, M7.2c-f, M7.5a-c, M7.3pa-pc, and its own mechanics M7.6a-b (the verdicts of the criteria, a resume) |
+| `tests/verification/longStudies` | M7long: the long runs of M7, managed as those of M4long (keys, kept binaries, reuse, resume, `M7LONG_REVALIDATE=yes`, `M7LONG_RUNS`, `M7LONG_JOBS`, `M7LONG_RANKS`; `longStudies keys` prints the keys): run/012 and run/013 on the 007 carrier at dt 4, 2 and 1 ms to 16 s, and 11 edits of run/022 to 30 s (h vs h/2, axial x2, dt 4, 2 and 1 ms); criteria M7.3a-d, M7.2c-f, M7.5a-c, M7.3pa-pc, and its own mechanics M7.6a-b (the verdicts of the criteria, a resume) |
 | `tests/verification/longChecks.py` | its checks: the runs (ended, closure in every step, solverDefect), the v_d of the flux form against the solver's print-out, the h vs h/2 measures (onset shift in native bins, peak `mDep_`, profile L1), the axial x2 measures, the intermediate-time error of a time-step study, a byte-for-byte comparison of profiles; a crash reported as `CRASHED` with exit status 3 |
 | `tests/verification/dtChecks.py` | the measures of the time-step studies (L1 of the wall deposit between two dt relative to the deposit, peak, centroid, T_dep of both search modes, observed order and Richardson estimate; history over the profile times; a plot) |
 
@@ -2342,7 +2342,7 @@ Criteria:
 | M3.6 | box, `writeExchangeField yes`: `exch_PbI2_g` = rho (Y^n - Y^n-1)/dt to 1e-12 and sum exch V dt = -(change of the wall inventory) to 1e-12; no `exch_` without the switch |
 | M3.7 | run/012 with profiles at 0.002 and 0.004: the log without the profile lines reproduces its `out_excerpt` as is; integrals to 1e-12; no time directory; `utilities/axialProfiles.py` prints T_dep |
 | M3.8 | restart of a box whose single-face INLET (`fixedGradient`) and OUTLET (`mixed`) values are rounded `uniform` values recomputed when read: not recorded as rounded, `exact` with and without the writer's record, the verdict's coverage stated, continuation cmp-identical |
-| M4.1a | the paper-mode carrier of run/014 on the pipe (serial): `max |sum_f phi|` per cell <= 1e-15 of the inflow (2.2e-18); U_b = Q/(pi R^2) to 1e-9; the discrete inflow, the facet-area ratio and the discrete bulk velocity printed; T solved (Picard converged), the wall faces holding the table at their centres exactly |
+| M4.1a | the paper-mode carrier of run/022 on the pipe (serial): `max |sum_f phi|` per cell <= 1e-15 of the inflow (2.2e-18); U_b = Q/(pi R^2) to 1e-9; the discrete inflow, the facet-area ratio and the discrete bulk velocity printed; T solved (Picard converged), the wall faces holding the table at their centres exactly |
 | M4.1b | the same carrier decomposed by `decomposePar`, simple (4 1 1) and hierarchical (2 2 1): `setFrozenCarrier -check -parallel` <= 1e-15 (plan section 15, item 7); written by `setFrozenCarrier -parallel` on the decomposed mesh: <= 1e-15, its `phi` equal bit for bit to the decomposed serial one on every rank |
 | M4.1c | a wedge (blockMesh, 5 degrees, 40 x 10 cells, the meshes of M7): <= 1e-15; the sector from the wedge patches; `rescaleToFacets yes`: the discrete inflow Q 5/360, summed exactly from the written `phi` to 2.5e-13 with the sector from the wedge-plane normals and to 5e-17 (limit 1e-15) with `sectorAngle 5` (review of M4, round 3); the facet-area ratio sin(theta)/theta; a `columns` table on the whole cross-section (`mode profile`) |
 | M4.1d | the wedge decomposed (simple (4 1 1)): `-check -parallel` <= 1e-15; decomposed with a single INLET face on rank 1: the `uniform` value decomposePar writes for that patch is reported above 1e-15, and the carrier written with `-parallel` on that decomposition is exact |
@@ -2353,7 +2353,7 @@ Criteria:
 | M4.1i | a wedge whose wall faces are tilted (`perturbWedge wall`): the utility stops and writes nothing; with `permeableWalls yes` it writes with a warning, continuity <= 1e-15, the wall flux reported above 1e-12 |
 | M4.1j | the wedge after its run (startFrom latestTime, 0.02): `-check` reads the `phi` of 0 found by findInstance (<= 1e-15); the utility writes the carrier into 0, unchanged, and nothing into 0.02 |
 | M4.1k | inputs that do not fit the mesh (the wedge, `rescaleToFacets yes`): an axis pointing out of the inlet, `inlet` naming the outlet, and a radius below the wall each stop the utility with its message and without writing a field; with `allowBackflow yes` the last writes |
-| M4.2 | run/014 on the pipe (acceptance 2): layer distance 30528 cells, `A_I/V_I = 8533.7` (to 1e-5), the T-Flows centre-distance rule the same cells; layer faceCells 15264 cells, 17681.9 |
+| M4.2 | run/022 on the pipe (acceptance 2): layer distance 30528 cells, `A_I/V_I = 8533.7` (to 1e-5), the T-Flows centre-distance rule the same cells; layer faceCells 15264 cells, 17681.9 |
 | M4.3 | `M4long`: Fig. 9 identity n' t_ev = n0/U_b,d (U_b,d the discrete bulk velocity) on every native bin of the plateau 0.25-0.45 m at t_ev + 1 to 1 %, t_ev 6 and 15 s (one line each), printed against the paper's 3.38e-4 mol s/m |
 | M4.4 | `M4long`: the solid profiles at 2 t_ev of t_ev 6 and 15 s agree (a property of the model; Fig. 9 has no 6 s curve): L1 difference of the native wall columns <= 1 % of the deposit |
 | M4.5 | `M4long`: Table 2, temperature-based column, with the gate restated by the researcher (2026-10-02): \|T_dep - T_paper\| <= max(2 K, dT_bin), dT_bin the drop of the wall temperature across the native bin of the onset; T_dep fromInlet at 1 % of the peak of the wall column, for every case and both layer rules (10 lines), at the end of the experiment or bounded there through the irreversible deposit (a run that has not ended is decided from that bound at its latest profiles, else NOTRUN); the raw difference, dT_bin and the plain +-2 K comparison are printed.  All 10 lines meet the gate; T5_60 (+2.25 / +2.22 K, dT_bin 2.77 K) is outside the plain +-2 K (plan section 26, item 5) |
@@ -2361,7 +2361,7 @@ Criteria:
 | M4.6 | the sources (solver and `setFrozenCarrier`) compile and link with 0 warnings against OpenFOAM v2606 (a copy without the build directories of any platform, wcleaned and built in the work area, every source of both Make/files compiled; `LESTO_OPENFOAM_V2606`; NOTRUN without it) |
 | M4.7a | channel, layer distance 3.5e-4 m (400 cells, `A_I/V_I = 2500 1/m`), tight solves, 200 steps: closure <= 1e-13 every step; `areaIntegrate` of `mDep_PbI2_s` on WALL = the wall inventory to 1e-12 every step; both walls of the symmetric channel deposit the same to 1e-12 |
 | M4.7b | the channel on 4 ranks split by rows (the first row of each wall on its own rank: 200 elements with their nearest face on another rank): closure <= 1e-13, inventories = serial to 1e-9 every step, `mDep_` of every wall face = serial to 1e-9 of its largest value, `areaIntegrate` = the wall inventory to 1e-12 |
-| M4.7c | the pipe of run/014 (SuperBee, background Y = 0.1, 10 steps of 4 ms, every corrector solved to 1e-15, 3 correctors per step) in serial and on 4 ranks: simple (4 1 1), hierarchical (2 2 1), and an uneven manual split with the first cell layer on rank 0 (15264 elements with their nearest face on another rank): closure <= 1e-13, inventories = serial to 1e-9 every step, `areaIntegrate` of `mDep_` = the wall inventory to 1e-12 every step |
+| M4.7c | the pipe of run/022 (SuperBee, background Y = 0.1, 10 steps of 4 ms, every corrector solved to 1e-15, 3 correctors per step) in serial and on 4 ranks: simple (4 1 1), hierarchical (2 2 1), and an uneven manual split with the first cell layer on rank 0 (15264 elements with their nearest face on another rank): closure <= 1e-13, inventories = serial to 1e-9 every step, `areaIntegrate` of `mDep_` = the wall inventory to 1e-12 every step |
 | M4.7d | binary restarts in distance mode from 0.1 (channel, serial and 4 ranks): every file at 0.2 cmp-identical to the continuous run, no warning that `mw_` differs from the deposits |
 | M4.7e | restarts of the pipe of M4.7c at 0.04 onto another decomposition (the serial state on 4 ranks, hierarchical (2 2 1); the uneven split reconstructed and continued in serial): the deposits re-read from `mw_` give the ledger's inventory to 1e-15, `exact` (A_I and V_I are compensated sums; with plain sums 7.3e-15 and 2.8e-15, and 2.0e-14 from 16 ranks to serial, a FatalError) |
 | M4.7f | the serial pipe of M4.7c restarted from 0.02 (deposits that do not all survive (m''_e A_e)/A_e): every file at 0.04 cmp-identical, exact (relative 0), no `mw_` warning |
@@ -2370,14 +2370,14 @@ Criteria:
 | M4.8 | refusals (7): `halfCell` and `areaPerVolume cell` with layer distance; layer distance without `distance`; a distance that selects no cell; restarts with another distance and with the other rule (both ways) |
 | M4.9 | profiles in distance mode (channel): bins + outside = inventory to 1e-12, every file and set; T_dep found; the `Twall` and `wallArea` columns equal to those of layer faceCells bit for bit |
 | M4.10 | model HKS with layer distance (the inventory channel of M5, `interfaceTemperature wall` from the nearest faces), 2 lines: serial: closure <= 1e-13, 0 significant projections and complementarity violations, the wall deposits, one removal; on 4 ranks split by rows (200 elements pull the temperature of their nearest face from another rank): closure <= 1e-13, gas, wall and sample = serial to 1e-9 every step, `areaIntegrate` of `mDep_` = the wall inventory to 1e-12, the same counts, one removal |
-| M4.11 | run/014 reproduces its `out_excerpt` (5 steps) |
-| M4.12 | provenance (NOTRUN without the T-Flows repository at 35c1f6406e): the wall table of run/014 is the T-Flows file byte for byte, and the conductivity table of its `setFrozenCarrierDict` is `k_he` of `User_Mod/Types.f90` |
+| M4.11 | run/022 reproduces its `out_excerpt` (5 steps) |
+| M4.12 | provenance (NOTRUN without the T-Flows repository at 35c1f6406e): the wall table of run/022 is the T-Flows file byte for byte, and the conductivity table of its `setFrozenCarrierDict` is `k_he` of `User_Mod/Types.f90` |
 | M4.13 | layer distance with several interface patches (`tests/paperMode/corners`, an L-shaped channel; the patches in both orders of the boundary file), 2 lines: distance 7.5e-5 m, 5 cells (the corner cell of WALLB and WALLC included), `A_I/V_I = 20000 1/m`, `mDep_` 0 on WALLA and WALLC and > 0 on WALLB, the same in both orders; 1.25e-4 m, 15 cells (the cell at the re-entrant corner included), 6666.67 1/m, `mDep_` the same in both orders, 0 on the corner face of WALLC |
 | M4.14 | the layer independent of the decomposition, 2 lines: the corners on 3 ranks, one block each (the rank of the cell at the re-entrant corner has no interface face): 15 cells, inventories and `mDep_` = serial to 1e-12, restarts serial -> 3 ranks and 3 ranks -> serial exact; a tetrahedral pipe (gmsh; NOTRUN without it): the same layer in serial, on 4 ranks and recomputed from the mesh (`checks.py exactLayer`), the serial state restarted on 4 ranks exact, `areaIntegrate` of `mDep_` = the wall inventory to 1e-12 in serial and on the 4 ranks (maps both ways; the start-up count exactly 21 elements with their nearest face on another rank and 0 faces with elements of two or more other ranks, gated since the M7 integration; round 2: +0.92 %, 14 faces) |
-| M4.15 | the closure does not drift: the pipe of run/014 with its own solver settings, background Y = 0.1, 20 steps of 0.1 s on 4 ranks: closure <= 2e-15 of the reference in every step (4.2e-16; the binary before the M4 review, round 2: 1.16e-14, growing linearly) |
+| M4.15 | the closure does not drift: the pipe of run/022 with its own solver settings, background Y = 0.1, 20 steps of 0.1 s on 4 ranks: closure <= 2e-15 of the reference in every step (4.2e-16; the binary before the M4 review, round 2: 1.16e-14, growing linearly) |
 | M4.18 | the face-flux correction of the transport matrix in flux form (review of M4, round 3): the drift pipe of M4.15 with layer distance and with layer faceCells (4 ranks, `reportMatrixResidual yes`) prints an explicit remainder of 0 kg/s in 0 cells in every step, of an explicit source sum \|b - s\| of 1.4e-6 to 1.8e-6 kg/s (the non-orthogonal correction), and the transport identity of the cell defects, D = sum_c r_c + dM/dt + sum_p F_p - sum_c E_c summed exactly, at most 1e-30 of its terms in every step (measured at most 1.1e-36; plan section 33); faceCells closure <= 2e-15; positive control: the channel with `Gauss linearUpwind` leaves a remainder (its correction is in the source only) and D stays 0; negative control: a copy of the sources whose cell defect keeps the correction in source form while the report of E is unchanged (`checks.py sourceFormMutant`, built into the work area) passes the check of E but violates the identity in every step (1e-21 to 8e-20 of its terms) |
 | M4.19 | the mole-fraction monitor in paper mode (review of M4, round 3): the max mole fraction printed for the last step of the serial pipe of M4.7c = max c/(c + p/(R T)), c = rho Y/M, recomputed from its fields, to 1e-5 (0.0675; the old form (Y/M)/(Y/M + 1/M_He) printed 0.00287) |
-| M4.16 | `M4long`, not a gate: the positions of Figs. 9-10 (the gas front at 16 s, the solid onset and peak at 30 s) against run/014 (fig9-tev15) and against the T-Flows parameter set (fig9-tev15-TFlows: Tdep 638.15 K, A 150, k 0.02, distance 2.4e-4), printed in mm |
+| M4.16 | `M4long`, not a gate: the positions of Figs. 9-10 (the gas front at 16 s, the solid onset and peak at 30 s) against run/022 (fig9-tev15) and against the T-Flows parameter set (fig9-tev15-TFlows: Tdep 638.15 K, A 150, k 0.02, distance 2.4e-4), printed in mm |
 | M4.17 | `M4long`: the closure of every long run made with the current sources, at most 1e-14 of the reference in every step of every balance file (a run restarted in segments has several); a run revalidated from older binaries is listed with the closure of their booking, not gated; NOTRUN when no run was made with the current sources |
 | M4.20 | `M4long`: the key of a long run follows the mesh (the checksum of `tests/work/mesh`) and the shell functions that set a run up, as the cache keys of the gate do: a stand-in mesh checksum and a redefined `setupLong` each give another key (review of M4, round 3: neither was in the key) |
 | M5.0 | `testPhaseChange.C` with the HKS checks: G R T/M = 89.65 m/s at 700 K, kineticScale 1e-5/sqrt(1000) = the T-Flows expression, the HKS half cell = the Robin flux, the predictor of HKS wall and sample elements, the admissible flow, the predictor with the previous regimes (no jump between CAPPED and NONE), a row of 10 stiff sample cells run as the corrector loop: alternating without the previous regimes, settled and complementary with them; the guard's switch back, largest misses first until the rest is within the tolerance |
@@ -2443,7 +2443,7 @@ Criteria:
 | M7.5a | M7long: the two runs on the axial x2 mesh end, closure and solverDefect as M7.3a, the flux form's v_d |
 | M7.5b | M7long, the axial x2 study, flux form, none, against the base mesh at 30 s: T_dep shifts by at most 1 native bin, the 1 cm peak height by at most 5 %, the L1 change of the 1 cm wall profiles is at most 1 % (the criterion proposed by the second M7 study, a gate pending sign-off; `M7LONG_AXIAL_GATE=no` reports it) |
 | M7.5c | the same with wallResistance halfCell |
-| M7.3pa | M7long: the three runs of the time-step study on the paper-mode carrier (run/014 as distributed at dt 4, 2 and 1 ms to 30 s) end, closure and solverDefect as M7.3a |
+| M7.3pa | M7long: the three runs of the time-step study on the paper-mode carrier (run/022 as distributed at dt 4, 2 and 1 ms to 30 s) end, closure and solverDefect as M7.3a |
 | M7.3pb | M7long, acceptance 3 on the paper-mode carrier: L1(2 ms, 1 ms) of the wall deposit at 30 s below 1 %, native and 1 cm bins |
 | M7.3pc | M7long, reported: the observed order and the Richardson estimate at 30 s, and the intermediate-time error while gas is present (the largest L1(2 ms, 1 ms) over the profile times with a deposit above 1 % of the release, the values at t_ev and t_ev + 1, the gas at t_ev + 1) |
 | M7.6a | M7long: the verdicts of the criteria with a stand-in checker (met, not met, cannot be computed, a crash with python's exit 1, a crash reported with exit 3) in every mode (gate, expectFail, report, axial gated and reported): a crash or 'cannot be computed' is a FAIL; `longChecks.py` reports a crash as `CRASHED` with exit 3 (plan section 35, item N; no run) |
@@ -2582,9 +2582,9 @@ not selected is kept; `M7LONG_JOBS` x `M7LONG_RANKS`, default 2 x 8;
 | study | runs | changed from the case |
 |---|---|---|
 | dt, 007 carrier (acceptance 3) | temperature-dt1ms/2ms/4ms, HKS-dt1ms/2ms/4ms | run/012 and run/013 (final tolerance 1e-14) at dt 1, 2 and 4 ms to 16 s, writes every second, a profiles dictionary (native and 1 cm bins, times every 0.5 s) |
-| h vs h/2 (acceptance 2) | h-flux-none, h2-flux-none, h-A-none, h2-A-none, h-flux-halfCell, h2-flux-halfCell | run/014 at 106 mL/min, layer faceCells; the flux form (`depositionVelocity 0.0124421` m/s, the v_d that A gives on the base mesh) or the volumetric form (A 220 1/s); none or halfCell; the base or the h/2 mesh; to 30 s |
+| h vs h/2 (acceptance 2) | h-flux-none, h2-flux-none, h-A-none, h2-A-none, h-flux-halfCell, h2-flux-halfCell | run/022 at 106 mL/min, layer faceCells; the flux form (`depositionVelocity 0.0124421` m/s, the v_d that A gives on the base mesh) or the volumetric form (A 220 1/s); none or halfCell; the base or the h/2 mesh; to 30 s |
 | axial x2 | x2-flux-none, x2-flux-halfCell | as the flux-form runs, on the axial x2 mesh (a bin set `cells` of its 848 axial cells besides the 424 native ones) |
-| dt, paper-mode carrier (acceptance 3) | dt4ms, dt2ms, dt1ms | run/014 as distributed (100.2 mL/min, layer distance, A) at dt 4, 2 and 1 ms to 30 s |
+| dt, paper-mode carrier (acceptance 3) | dt4ms, dt2ms, dt1ms | run/022 as distributed (100.2 mL/min, layer distance, A) at dt 4, 2 and 1 ms to 30 s |
 
 Measured on v2412 (plan section 33; the runs on the paper-mode carrier are
 the second M7 study's, revalidated by their probes):
@@ -2631,7 +2631,7 @@ the second M7 study's, revalidated by their probes):
   bins), 1 cm peak +0.0007 %, L1 9.8e-4, alike for none and halfCell.  The
   onset moves because axial2 resolves where the cell temperature crosses
   Tdep inside a base cell; the profiles and the peak do not move.
-- **Acceptance 3 on the paper-mode carrier** (M7.3pa-pc), run/014 as
+- **Acceptance 3 on the paper-mode carrier** (M7.3pa-pc), run/022 as
   distributed, at 30 s: L1(2 ms, 1 ms) 1.29e-7 (native bins) and 7.14e-8
   (1 cm), observed order 0.94 and 1.08.  Once the gas has gone, the final
   deposit of the temperature model still depends on dt at first order,
@@ -2710,7 +2710,7 @@ M10a adds simultaneous PbI2/BiI3 transport with different formulas and
 kinetics, prescribed multi-species release, and separate inventory
 reservoirs in a shared boat region. Each pair remains independent; gas
 re-speciation, reactive deposition and shared condensates belong to later
-M10 milestones. `run/030-pbi2-bii3-channel` is the first qualification case.
+M10 milestones. `run/018-pbi2-bii3-channel` is the first qualification case.
 
 Add formulas in `constant/speciesTransportProperties`:
 
@@ -2919,7 +2919,7 @@ the original 1e-13 oracle stopping tolerance was insufficient for some
 minor iodine species. No external thermodynamic records are bundled.
 
 The reproducible preliminary case is
-[`run/031-pbbi-gas-speciation`](../../run/031-pbbi-gas-speciation/readme.md).
+[`run/019-pbbi-gas-speciation`](../../run/019-pbbi-gas-speciation/readme.md).
 Its common diffusivity and carrier ramp are provisional. In the 1173 K
 prescribed-source study, the 1 ms BiI3 deposit differs from M10a by 0.1332%
 in 1 cm bins, and the 2 ms to 1 ms change is 0.0575%; both are below the
@@ -3008,7 +3008,7 @@ that independent reference, with a 1e-9 relative tolerance for species
 above 1e-10 of the largest element amount.
 
 The reproducible case is
-[`run/032-pbbi-gems-speciation`](../../run/032-pbbi-gems-speciation/readme.md).
+[`run/020-pbbi-gems-speciation`](../../run/020-pbbi-gems-speciation/readme.md).
 Its thermal ramp, diffusivity and prescribed source remain provisional.
 External inputs are selected using the M10 environment variables and
 `LESTO_M10_SYSTEM`. `LESTO_M10C_SCIENCE_RECHECK` explicitly rechecks an
@@ -3044,7 +3044,7 @@ gasSources
 }
 ```
 
-The source example is synthetic; run/033 provides the provisional LBE Q2
+The source example is synthetic; run/021 provides the provisional LBE Q2
 source. Source amounts are distributed uniformly over the selected volume,
 with exact overlap of the release window and each time step. Paired gases
 use the existing sample release mechanism instead.
@@ -3089,7 +3089,7 @@ After re-decomposition, `mw_` reconstructs the stores and any inventory
 rounding adjustment is booked. Fingerprints refuse changes to channel
 definitions, source schedules or table contents across restart.
 
-[`run/033-lbe-metal-vapour`](../../run/033-lbe-metal-vapour/readme.md)
+[`run/021-lbe-metal-vapour`](../../run/021-lbe-metal-vapour/readme.md)
 contains the reproducible channel. `tests/Alltest M10d` includes analytical
 boxes, optional BiI(cr), half-cell resistance, source/ledger/profile checks,
 serial/four-rank and changed-decomposition restarts, and input refusals.
@@ -3097,7 +3097,7 @@ With `LESTO_M10D_NASA`, `LESTO_M10D_THERMOFUN` and `LESTO_M10D_REFERENCE`,
 it also compares both BiI variants and two time steps with fractional plug
 flow. External thermodynamic records remain outside the repository.
 
-[`run/034-liu2025`](../../run/034-liu2025/readme.md) prepares M10e's physical
+[`run/024-liu2025`](../../run/024-liu2025/readme.md) prepares M10e's physical
 helium wedge carriers and Q1/Q2 column matrix from digitised paper curves.
 Fifteen 60 s coarse cases and five full-size smoke cases pass numerical
 conservation checks. Saved peak/profile comparisons and selected time-step

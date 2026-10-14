@@ -1,0 +1,25 @@
+{
+ "description": "Case 018 at 3 s: the two onsets against the plug-flow saturation crossings, element closures (verification.json); the PbI2 pair equals case 014 byte for byte",
+ "checks": [
+  {"id": "1 % onset PbI2 (plug-flow crossing 567.057 K)", "type": "header",
+   "file": "postProcessing/axialProfiles/3/PbI2_g_native.dat",
+   "pattern": "^# Tdep fromInlet status found T (\\S+)", "value": 561.164455240661, "abs": 0.01},
+  {"id": "1 % onset BiI3 (plug-flow crossing 450.383 K)", "type": "header",
+   "file": "postProcessing/axialProfiles/3/BiI3_g_native.dat",
+   "pattern": "^# Tdep fromInlet status found T (\\S+)", "value": 449.9788393634718, "abs": 0.01},
+  {"id": "released PbI2 [mol]", "type": "log", "file": "log.solver",
+   "pattern": "^Balance PbI2_g \\[mol\\]: .* released (\\S+)", "value": 2.7992536908413373e-11, "rel": 1e-14},
+  {"id": "released BiI3 [mol]", "type": "log", "file": "log.solver",
+   "pattern": "^Balance BiI3_g \\[mol\\]: .* released (\\S+)", "value": 3.5684583649025576e-11, "rel": 1e-14},
+  {"id": "element closure Pb, every step (recorded 4.05e-16)", "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/Pb.dat", "max": 1e-14},
+  {"id": "element closure Bi, every step (recorded 4.56e-16)", "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/Bi.dat", "max": 1e-14},
+  {"id": "element closure I, every step (recorded 4.37e-16)", "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/I.dat", "max": 1e-14},
+  {"id": "PbI2 pair equal to case 014 (if run)", "type": "sameFiles", "optional": true,
+   "pairs": [["postProcessing/phaseChangeBalance/0/PbI2_g.dat", "case:hks-channel/work/case/postProcessing/phaseChangeBalance/0/PbI2_g.dat"],
+             ["postProcessing/axialProfiles/3/PbI2_g_native.dat", "case:hks-channel/work/case/postProcessing/axialProfiles/3/PbI2_g_native.dat"],
+             ["postProcessing/phaseChangeElements/0/Pb.dat", "case:hks-channel/work/case/postProcessing/phaseChangeElements/0/Pb.dat"]]}
+ ]
+}

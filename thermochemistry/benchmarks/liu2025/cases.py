@@ -75,7 +75,7 @@ def prepare_case(case, carrier, tables, mode, saturation, dt, end_time, diffusiv
     for name in GASES+['PbI2_s','BiI3_s','Pb_s','Bi_s']:
         field(case, 'Y_'+name, '0 0 0 0 0 0 0', '0',
               'type fixedValue; value uniform 0;', 'type zeroGradient;', 'type zeroGradient;')
-    template = REPO/'run/033-lbe-metal-vapour'
+    template = REPO/'run/021-lbe-metal-vapour'
     props = (template/'constant/speciesTransportProperties').read_text()
     props = props.replace('D 0;', f'D {diffusivity:.17g};')
     (case/'constant/speciesTransportProperties').write_text(props)

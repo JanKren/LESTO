@@ -1,0 +1,50 @@
+#!/bin/bash
+# ./Allrun          the whole case (3 s at 1 ms; about 3 min) into work/case,
+#                   then its numbers against expect.json
+# ./Allrun dt       the time-step study: the case at 2 ms (work/dt2ms) and
+#                   4 ms (work/dt4ms), and the 1 cm deposit L1 against 1 ms
+#
+# Needs LESTO_M10_DATA: the directory of the external pv_BiI3_phases.csv
+# and log10Kf_PbBiI.csv (thermochemistry/systems/make_pv_tables.py and
+# make_kf_tables.py; not redistributed).
+. "${0%/*}/../RunFunctions"
+lestoInit
+mode=${1:-full}
+case $mode in full|dt) ;; *) lestoUsage "[full | dt]" ;; esac
+lestoNeed LESTO_M10_DATA pv_BiI3_phases.csv log10Kf_PbBiI.csv
+lestoRequireOpenFOAM
+
+run() {
+  lestoWorkCase $1 replace
+  cp benchmark.json $1/
+  if [ -n "${2:-}" ]
+  then
+    # the profiles are written at the write times: one write at the end, 3 s
+    lestoSetControl $1 deltaT $2
+    lestoSetControl $1 writeInterval $(python3 -c "print(round(3/$2))")
+  fi
+  lestoChannelCarrier $1
+  lestoSolve $1
+}
+
+if [ "$mode" = full ]
+then
+  run work/case
+  lestoCheck work/case
+else
+  [ -f work/case/postProcessing/axialProfiles/3/PbI2_g_cm.dat ] || run work/case
+  run work/dt2ms 0.002
+  run work/dt4ms 0.004
+  python3 - <<'PY'
+from pathlib import Path
+import sys
+sys.path.insert(0, '..')
+from lestoCheck import l1
+for name in ['PbI2_g', 'BiI3_g']:
+    ref = Path(f'work/case/postProcessing/axialProfiles/3/{name}_cm.dat')
+    for dt in ['dt2ms', 'dt4ms']:
+        p = Path(f'work/{dt}/postProcessing/axialProfiles/3/{name}_cm.dat')
+        print(f'   {name} {dt} against 1 ms: deposit L1 {100 * l1(p, ref, "wall"):.4g} %')
+PY
+  lestoResult PASS "time-step study (recorded: 2 ms against 1 ms 0.0331 % PbI2, 0.0575 % BiI3)"
+fi

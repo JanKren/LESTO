@@ -1,0 +1,29 @@
+{
+ "description": "Case 014 at 3 s: PbI2 onset and inventories (equal, byte for byte, to the PbI2 pair of case 018 run with the same solver), closures at round-off",
+ "checks": [
+  {"id": "1 % onset of the PbI2 deposit (plug-flow saturation crossing 567.057 K)", "type": "header",
+   "file": "postProcessing/axialProfiles/3/PbI2_g_native.dat",
+   "pattern": "^# Tdep fromInlet status found T (\\S+)", "value": 561.16445524066103, "abs": 0.01},
+  {"id": "peak bin temperature", "type": "header",
+   "file": "postProcessing/axialProfiles/3/PbI2_g_native.dat",
+   "pattern": "^# Tpeak (\\S+) K", "value": 548.25, "abs": 1e-6},
+  {"id": "wall inventory [mol]", "type": "header",
+   "file": "postProcessing/axialProfiles/3/PbI2_g_native.dat",
+   "pattern": "^# inventory gas \\S+ wall (\\S+)", "value": 2.7863234206888819e-11, "rel": 1e-9},
+  {"id": "gas inventory [mol]", "type": "header",
+   "file": "postProcessing/axialProfiles/3/PbI2_g_native.dat",
+   "pattern": "^# inventory gas (\\S+)", "value": 1.0644342596433258e-13, "rel": 1e-6},
+  {"id": "released [mol] = n0", "type": "log", "file": "log.solver",
+   "pattern": "^Balance PbI2_g \\[mol\\]: .* released (\\S+)", "value": 2.7992536908413373e-11, "rel": 1e-14},
+  {"id": "pair closure, every step", "type": "closure",
+   "file": "postProcessing/phaseChangeBalance/0/PbI2_g.dat", "max": 1e-14},
+  {"id": "element closure Pb, every step", "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/Pb.dat", "max": 1e-14},
+  {"id": "element closure I, every step", "type": "elementClosure",
+   "file": "postProcessing/phaseChangeElements/0/I.dat", "max": 1e-14},
+  {"id": "equal to the PbI2 pair of case 018 (if run)", "type": "sameFiles", "optional": true,
+   "pairs": [["postProcessing/phaseChangeBalance/0/PbI2_g.dat", "case:pbi2-bii3-channel/work/case/postProcessing/phaseChangeBalance/0/PbI2_g.dat"],
+             ["postProcessing/axialProfiles/3/PbI2_g_native.dat", "case:pbi2-bii3-channel/work/case/postProcessing/axialProfiles/3/PbI2_g_native.dat"],
+             ["postProcessing/phaseChangeElements/0/Pb.dat", "case:pbi2-bii3-channel/work/case/postProcessing/phaseChangeElements/0/Pb.dat"]]}
+ ]
+}
