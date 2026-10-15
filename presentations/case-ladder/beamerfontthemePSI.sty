@@ -1,0 +1,69 @@
+% ======================================================================
+%  beamerfontthemePSI.sty
+%  PSI beamer font theme.
+%
+%  The PSI template uses "Aptos" (an Office/Microsoft font). Aptos is not
+%  freely redistributable for LaTeX, so by default this theme uses
+%  Fira Sans -- a free, humanist grotesque that closely matches Aptos and
+%  compiles under plain pdfLaTeX. If Fira Sans is unavailable it falls back
+%  to Helvetica (Nimbus Sans), which is present in every TeX installation
+%  and is the template's own listed fallback (Arial-class).
+%
+%  To use the *real* Aptos instead, compile with XeLaTeX/LuaLaTeX and put
+%  the following in your preamble (Aptos must be installed on the system):
+%     \usepackage{fontspec}
+%     \setsansfont{Aptos}
+%     \renewcommand{\familydefault}{\sfdefault}
+% ======================================================================
+\ProvidesPackage{beamerfontthemePSI}[2026/07/21 PSI beamer font theme]
+
+% Vector Latin Modern for maths / mono (avoids Type3 bitmaps) -- optional.
+\IfFileExists{lmodern.sty}{\RequirePackage{lmodern}}{}
+\RequirePackage{iftex}
+\newif\ifPSI@unicode
+\ifXeTeX\PSI@unicodetrue\fi
+\ifLuaTeX\PSI@unicodetrue\fi
+
+\ifPSI@unicode
+  % ---- XeLaTeX / LuaLaTeX : use the real Aptos if present, else Fira Sans ----
+  \RequirePackage{fontspec}
+  \IfFontExistsTF{Aptos}{%
+     \setsansfont{Aptos}[BoldFont={Aptos Bold}]%
+  }{\IfFontExistsTF{Fira Sans}{%
+     \setsansfont{Fira Sans}[BoldFont={Fira Sans SemiBold}]%
+  }{}}%
+  \renewcommand{\familydefault}{\sfdefault}
+\else
+  % ---- pdfLaTeX : Fira Sans lookalike, Helvetica fallback ----
+  \IfFileExists{FiraSans.sty}{%
+     \RequirePackage[sfdefault,scaled=1.0]{FiraSans}%
+  }{%
+     \RequirePackage{helvet}%
+     \renewcommand{\familydefault}{\sfdefault}%
+  }
+\fi
+
+% Everything in the slides is sans-serif.
+\renewcommand{\familydefault}{\sfdefault}
+
+% ---- Sizes / weights (matching the template's Aptos Bold headings) -------
+\setbeamerfont{title}{size=\fontsize{30}{34}\selectfont,series=\bfseries}
+\setbeamerfont{subtitle}{size=\Large,series=\bfseries}
+\setbeamerfont{author}{size=\small,series=\mdseries}
+\setbeamerfont{date}{size=\small,series=\mdseries}
+\setbeamerfont{institute}{size=\small,series=\mdseries}
+
+\setbeamerfont{frametitle}{size=\Large,series=\bfseries}
+\setbeamerfont{framesubtitle}{size=\normalsize,series=\mdseries}
+
+\setbeamerfont{section page}{size=\huge,series=\bfseries}
+\setbeamerfont{section in toc}{size=\large,series=\bfseries}
+\setbeamerfont{subsection in toc}{size=\normalsize,series=\mdseries}
+
+\setbeamerfont{block title}{series=\bfseries}
+\setbeamerfont{PSI footer}{size=\fontsize{6.5}{8}\selectfont}
+\setbeamerfont{PSI page number}{size=\fontsize{6.5}{8}\selectfont}
+\setbeamerfont{caption}{size=\footnotesize}
+\setbeamerfont{caption name}{size=\footnotesize,series=\bfseries}
+
+\mode<all>

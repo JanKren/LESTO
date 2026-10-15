@@ -1,0 +1,18 @@
+Build  : _8dbc61e11c-20241220 OPENFOAM=2412 version=v2412
+Exec   : rhoFixedFlowFoam -parallel
+Date   : Oct 15 2026
+D_PbI2_g internal min/max [m2/s]: 3.089e-05 0.000253574
+Integrated source PbI2_g = 0 kg/s
+Integrated source tracer = 0 kg/s
+Net thermochemistry source = 0 kg/s
+ExecutionTime = 13.51 s  ClockTime = 15 s
+Integrated source PbI2_g = 0 kg/s
+Integrated source tracer = 0 kg/s
+Net thermochemistry source = 0 kg/s
+ExecutionTime = 24.93 s  ClockTime = 28 s
+Net thermochemistry source = 0 kg/s
+ExecutionTime = 535.33 s  ClockTime = 555 s
+Integrated source PbI2_g = 0 kg/s
+Integrated source tracer = 0 kg/s
+Net thermochemistry source = 0 kg/s
+ExecutionTime = 536.81 s  ClockTime = 557 s

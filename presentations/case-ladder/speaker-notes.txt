@@ -1,0 +1,115 @@
+The LESTO case ladder — presenter notes
+Jan Kren, 15 October 2026
+(pages 4, 12, 17 and 28 are the section dividers)
+
+Page 01. The LESTO case ladder (title)
+
+The case ladder in run/ of the LESTO repository: 24 cases, each adding one thing to the case it is based on. Cases 001 to 011 are Bojan Ničeno's: the pipe, the helium carrier and the species transport. Cases 012 to 024 are mine: the gas and condensate exchange, step by step, and the three benchmark studies. Every number on the slides comes from a file of the repository or from a run made for this deck on 15 October 2026.
+
+Page 02. The ladder: 24 cases, one change each
+
+The arrows are the based-on links of the readmes. The trunk runs from the laminar pipe of 001 to the coupled species sources of 011, then turns to the wall laws: the temperature model in 012, the Hertz-Knudsen-Schrage law in 013, the synthetic channel in 014. Side branches end in cases no later case builds on: 015 and 020 need the optional GEMS3K build, 022 is the paper-mode benchmark of the temperature model. 023 and 024 are the two experimental benchmark studies; 024 is based on 021 and uses the physical-carrier technique of 017. New cases go on top, from 025.
+
+Page 03. Every case: the same four parts
+
+The run/readme.md is the index. No Allrun writes a tracked file; everything goes into the git-ignored work directory of the case. Without an external input, such as the restricted bismuth thermodynamic tables, a case prints NOTRUN and the sweep continues. For this deck the cases were copied into a scratch directory and run there, with OpenFOAM v2412 and the M10e solver binary, sha256 16fd804e, pinned to cores 4, 5 and 11.
+
+Page 05. 001 first-pipe-flow-simpleFoam
+
+The geometry is that of Francesco's T-Flows LESTO cases, vapour-pressure model, with the internal wall renamed WALL. Helium at rho 0.166 kg per cubic metre and mu 2.70e-5 Pa s; outlet pressure zero, no-slip wall. The cross-section is the INLET patch of the converted mesh, 540 faces: an O-grid core with a refined wall layer. The SIMPLE iterations are pseudo-time, not a transient.
+
+Page 06. 002 parabolic-inlet
+
+Only 0/U changed. OpenFOAM compiles the coded boundary condition at run time into dynamicCode/parabolicInlet. The parabolic inlet meets a uniform initial field, which costs iterations: 388 instead of 235. Case 003 removes that mismatch.
+
+Page 07. 003 parabolic-initialization
+
+system/setExprFieldsDict writes the same parabola into the internal field, so the initial condition is consistent with the inlet. The first Ux residual of 003 is already below 1e-2, and the iteration count drops from 388 to 222.
+
+Page 08. 004 energy-with-rhoSimpleFoam
+
+The physics stays that of 003: constant density 0.166, inlet and wall at 300 K. The readme lists the pressure criterion as 1e-4; the tracked system/fvSolution has p 1e-3, which is what the figure draws. The energy residual is the last to fall below its criterion, at iteration 154.
+
+Page 09. 005 varying-wall-temperature
+
+Modified files: 0.orig/T and system/setExprFieldsDict. Because the initial temperature already matches the wall ramp, the energy equation starts close to its solution: its first residual is about 1e-5 against 1 in case 004. The iteration count, 154, is set by the other equations.
+
+Page 10. 006 variable-density
+
+Only constant/thermophysicalProperties changed. With density coupled to temperature the pressure residual oscillates in the first 30 iterations and the run needs 230 iterations instead of 154.
+
+Page 11. 007 variable-properties-high-temperature
+
+The saved carrier at time 261 is what 008 to 013 read through links: U, p, T, rho and phi. Its temperature equals the wall ramp at every radius, and the velocity has no radial component: its T and U were overwritten in commit 3ce3791, which is why the notes of 012 and 013 call it a development carrier, plan section 8, risk 10. Its consistency is max of T minus p W over R rho, relative, 0.0030. The physical carriers come in 017.
+
+Page 13. 008 one-species-transport-rhoFixedFlowFoam
+
+The species equation is ddt of rho Y plus div of phi Y minus laplacian of rho D Y equals zero, for every species in the run-time list. Inlet mass fraction 1e-6, time step 4 ms. The two species must stay identical; this checks the multi-species loop before species-specific diffusivities. The deck run stopped at 1 s instead of the case's 16 s, to keep it below a few minutes.
+
+Page 14. 009 variable-diffusivity
+
+The diffusivity range is the start-up line of the tracked out_excerpt. The correlation pressure is in atmospheres; the carrier is at 1 atm. On the hot side the PbI2 diffusivity is up to 25 times the tracer's, so the PbI2 front is more smeared than the tracer front. The PbI2 residual history is expected to reproduce that of the single-species case.
+
+Page 15. 010 handles-solid-species
+
+evaluateThermochemistry receives T, p, the species list and the local values, and returns one source per species: the interface a GEMS call will use later. S0 is in kg per cubic metre and second. The solid grows linearly in time, independently of the gas, which is the point of the mock: the gas equations are unchanged from 009. The figure is the tracked excerpt of the original 16 s run with OpenFOAM v2606: the maximum mass fraction of PbI2_s grows by 2.93e-8 per 4 ms step to 1.17e-4. Today's solver carries the coupled mock source of 011 in the same routine, so case 010 cannot be rerun as it was; the deck run of 010 behaved like 011 and is not shown.
+
+Page 16. 011 coupled-species-sources
+
+The tracer is dropped. Every step prints the integrated source of PbI2_g and PbI2_s and their sum; in the tracked excerpt the sum is exactly 0 kg per second while the individual rates grow from 4.4e-18 kg per second. The solid sits where gas has arrived and the wall is cooler than 1000 K.
+
+Page 18. 012 temperature-model
+
+The wall flux is minus rho v_d times the positive part of one minus exp of minus k times Tdep minus T, times Y; irreversible. Every kilogram is booked: gas, wall, released, transport, clamped and solver defect, and the closure is their difference. The default Allrun reproduced the 123 lines of out_excerpt exactly in the deck run. Over the whole 6 s release the closure stays at 1.8e-14 and the released amount equals n0 M to 2e-16, criterion M2.2g.
+
+Page 19. 013 hks-inventory
+
+The boat holds 4.84e-6 mol, 2.23 mg, the inventory of experiment T106_6, and is removed at 6 s. The vapour-pressure table is from the NASA-9 records of Gurvich 1991. The final tolerance of the PbI2 solve went from 1e-12 to 1e-14: with 1e-12 the solver defect grew to 2e-8 of the inventory over 16 s. The wall stays empty near the boat because the walls there are far above the saturation temperature. Over 100 steps the boat lost 0.50 micromol to the gas.
+
+Page 20. 014 hks-channel
+
+The channel is made by blockMesh and filled by the test helper makeCarrier with plug flow and a linear temperature; every later development case uses it. The release is 2.80e-11 mol PbI2 over 2 s into a box of 40 cells. The 1 percent onset is the paper's definition of T_dep, on the condensate. Its PbI2 ledger and profiles are byte-identical to the PbI2 pair of case 018, checked in the deck run as well.
+
+Page 21. 015 hks-gems-local
+
+The table stays as a guard: below 500 K, below a mole fraction of 1e-6, outside the system's grid, for a failed call or a result more than 0.01 decades off the table, the element takes the table. Step 1 makes no call: 4356 wall faces are below 500 K and no other element has gas. For this ideal PbI2-He gas the case shows the coupling, not a new physical result. The whole excerpt is compared only with the bridge that wrote it, md5 fb67103e; this workstation's solver has no bridge, so the case would print NOTRUN.
+
+Page 22. 016 hks-channel-halfcell
+
+On this mesh the half-cell conductance D over dy/2 is 1 m per second, 64 to 107 times smaller than the kinetic conductance, so it controls the uptake. Where the deposit starts, the gas reaches the wall by diffusion either way, so the onset moves by only 5 mK, far inside one 1 mm bin of 6.5 K. halfCell is the wall law of every physical run: 017, 023 and 024.
+
+Page 23. 017 physical-carrier
+
+The carrier is computed with rhoSimpleFoam, expanding and laminar, projected to an exactly divergence-free flux, audited, and frozen. The boat of 013 returns at the digitised arrow, x = 0.13 m, with the wedge share of the inventory, 6.72e-8 mol. The inlet is zero-total-flux for the gas. Not represented: the boat obstruction, the end of the experiment and the non-dilute gas next to the boat. The figure is the tracked final profile of case 023's coarse T106_6, which 017's Allrun reproduces byte for byte with the M10e solver; the case was not rerun for the deck.
+
+Page 24. 018 pbi2-bii3-channel
+
+The source ratio follows the inferred PbI2 and BiI3 deposits of Liu et al. 2025, LBE-I_SS_II. The two pairs do not interact, so the PbI2 results are those of 014 byte for byte, criterion M10a.1; the deck run confirmed that. The BiI3 table is made from restricted Bi thermodynamic records and is not redistributed; without it the case prints NOTRUN. A qualification case, not the paper's geometry.
+
+Page 25. 019 pbbi-gas-speciation
+
+The exact kernel uses tabulated formation constants. The inlet is raised to 1173 K, the LBE furnace, so that there is something to re-speciate. The percentages are the 1 cm deposit L1 differences from the independent pairs of 018 run at the same inlet; 2 ms against 1 ms gives 0.0331 and 0.0575 percent. Numerical results under provisional inputs: synthetic ramp, common diffusivity, prescribed release.
+
+Page 26. 020 pbbi-gems-speciation
+
+Mode frozen caches the formation constants at the frozen cell temperatures and pressures, then uses the exact kernel. Mode local calls GEMS3K per cell and step, warm started, with guards and the kernel as refinement and fallback. For an ideal gas both must reproduce 019, and they do. The figure shows why the refinement is needed: the raw interior-point result is off by up to about half a decade at mole fractions near 1e-10; decades above 1e-3 are guarded and never called.
+
+Page 27. 021 lbe-metal-vapour
+
+The Q2 source releases monatomic Pb, Bi and I; the metal vapour is 1 percent of the ideal-LBE saturation pressure at 1173 K. Pb_g condenses on Pb_s; Bi_g and Bi2_g on one shared Bi_s; BiI_g reacts irreversibly at the wall to 2 Bi_s and BiI3_g. Onsets, solver against fractional plug flow: Pb(l) 919.93 against 921, Bi(l) 882.89 against 885, PbI2(cr) 533.12 against 537, Bi(cr) 541.35 against 544, BiI3(cr) 450.82 against 451 K. The carrier is the plug-flow limit, 200 by 2 cells with D = 0, read at 1.2 s while the source is active.
+
+Page 29. 022 paper-temperature-model
+
+The layer is the T-Flows layer of cell centres within 0.1 mm of the wall, 30528 cells, A_I over V_I 8533.7 per metre. The plateau, n0 over the bulk velocity, agrees. The deposit starts where the wall table crosses the input Tdep of 680 K, at 0.476 m, 2.6 cm upstream of the published onset at 0.502 m; the T-Flows parameter set, Tdep 638.15 K, A 150, k 0.02, distance 2.4e-4, puts it at 0.5011 m. Which set produced the paper's figures is a question for the authors. The full 30 s case takes 2 to 3 hours on 16 ranks and was not rerun.
+
+Page 30. 023 lobresco2026
+
+No parameter is adjusted to these data. The rule is the paper's: 1 percent of the peak of the deposit, from the inlet, on the measured wall curve, minus the measurement of Table 2. At 5 mL per minute vapour diffuses upstream and deposits near the cold inlet; the table uses the main deposit downstream of the boat. Computed peaks lie 1 to 4 cm upstream of the measured ones. This is Sec. 6.3, Table V and Fig. 5 of the manuscript.
+
+Page 31. 024 liu2025
+
+Three configurations on 1.25 m columns of steel and silica, 5-degree wedges, measured wall temperatures, Q1 the deposited amount over three hours, Q2 LBE metal vapour with two BiI datasets, 2 ms steps, 60 s. Provisional numerical work: the release history, the flow reference conditions and several coordinates are assumptions. The mesh number is the iodine profile change between 41,472 and 93,312 cells; no formal GCI, the apparent orders are inconsistent. manuscript/check_results.py recomputes these numbers from the saved profiles.
+
+Page 32. What the ladder demonstrates
+
+The ladder makes every capability of rhoFixedFlowFoam reproducible from a short readme: what changed, what to check, how to run. Cases 001 to 011 are Bojan Ničeno's groundwork; 012 to 024 add the exchange laws, the chemistry and the benchmark studies. The manuscript's prepare_results.py reads 023 and 024 directly. In this deck every default check that could run on this workstation passed; 015 and 020 need the GEMS3K bridge, 017, 023 and 024 take minutes to hours and are shown from their tracked records.

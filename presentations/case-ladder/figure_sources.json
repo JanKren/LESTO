@@ -1,0 +1,198 @@
+{
+ "generated_by": "make_figures.py",
+ "runs": "runs/runs.json",
+ "derived_values": {
+  "fig008": 0.0,
+  "fig012": 1.703433451620514e-16,
+  "fig013": "['T_K', 'PbI2(cr)', 'PbI2(l)']",
+  "fig016": 0.06622077461223408,
+  "fig017": 72.0
+ },
+ "figures": {
+  "c001": {
+   "inputs": {
+    "presentations/case-ladder/runs/001/inlet_edges.npz": "760051121892d72cef2aa51a744ce85d4746333d6893f5032ce9ea1dc490dd02",
+    "run/001-first-pipe-flow-simpleFoam/out": "9b1e6a0d42e73c1c12a7defc2daf323c4153df7f063fcbb0eb6c7fedd8e6bb61"
+   },
+   "note": "Cross-section: INLET patch of the gmshToFoam conversion of run/001/pipe.msh (foamToVTK); residuals: run/001/out."
+  },
+  "c002": {
+   "inputs": {
+    "run/001-first-pipe-flow-simpleFoam/out": "9b1e6a0d42e73c1c12a7defc2daf323c4153df7f063fcbb0eb6c7fedd8e6bb61",
+    "run/002-parabolic-inlet/out": "2e5f0c066a0326eab943ba2f90b935c00f4f4a9e2f9c50d5f1ade4e15eaf6262",
+    "run/002-parabolic-inlet/0/U": "81c5d14b6f1cb3299d2cccd7a4d4e455cb965a260d6bf4d861361c9882140833"
+   },
+   "note": "Inlet profiles from 0/U (uniform 0.095 m/s; 0.19(1-r^2/R^2)); residuals from the out logs."
+  },
+  "c003": {
+   "inputs": {
+    "run/002-parabolic-inlet/out": "2e5f0c066a0326eab943ba2f90b935c00f4f4a9e2f9c50d5f1ade4e15eaf6262",
+    "run/003-parabolic-initialization/out": "9b8dbfb35ec07f4f1cf623e66285548d688fb96c6e73c8f6fc3dbafff40f8a53"
+   },
+   "note": "Ux residual histories of run/002/out and run/003/out."
+  },
+  "c004": {
+   "inputs": {
+    "run/004-energy-with-rhoSimpleFoam/out": "d2f2f603e8cf58d7e3ba69c7daa4ef389887008d6c2736269d0eb53c34047045",
+    "run/004-energy-with-rhoSimpleFoam/system/fvSolution": "a3232a57cee38cfb13ed3dab090638e85675aaf36042f2a87cff6a39ed0a2bf7"
+   },
+   "note": "Residuals of run/004/out; criteria from system/fvSolution (residualControl)."
+  },
+  "c005": {
+   "inputs": {
+    "run/004-energy-with-rhoSimpleFoam/out": "d2f2f603e8cf58d7e3ba69c7daa4ef389887008d6c2736269d0eb53c34047045",
+    "run/005-varying-wall-temperature/out": "280e62ff0cfe14fcc7da1d28e624a12540d970f4836d936a45fb3c51780d1acb",
+    "run/005-varying-wall-temperature/0.orig/T": "fc8e39441e68f5a53052ead473de38cdd8f3e7b5432dc8f784c8aa1c543065c3"
+   },
+   "note": "Wall ramp 400-100x/0.69 K from 0.orig/T (codedFixedValue); e residuals of the out logs."
+  },
+  "c006": {
+   "inputs": {
+    "run/005-varying-wall-temperature/out": "280e62ff0cfe14fcc7da1d28e624a12540d970f4836d936a45fb3c51780d1acb",
+    "run/006-variable-density/out": "fcc701e8a63c720e41ae28ba783cf0dd756dce1c71c672cdb68bdb4344d268c1"
+   },
+   "note": "Residual histories of run/005/out and run/006/out."
+  },
+  "c007": {
+   "inputs": {
+    "presentations/case-ladder/runs/007/carrier261_centre_slice.csv": "83a515b3c48a43ffc3d49c63edf025e92801f5b6ef9c57361fc421bb46e9d60d",
+    "presentations/case-ladder/runs/007/carrier261_axis.csv": "47afa098d575cfd066384be8e6c39b899abffc1177bcf4e30793bdeed6f752e7",
+    "run/007-variable-properties-high-temperature/261/T": "327caae27dfb1799d59914e78f9febf016fa3269c8ca23258ae710303ac52682",
+    "run/007-variable-properties-high-temperature/0.orig/T": "4ffa574d63857603942c2238a678b8fe20a6c18600639ee0fdbc1c4778c488f7"
+   },
+   "note": "foamToVTK of run/007/261 on the converted pipe mesh; wedge |z|<0.27|y|+0.12 mm at signed radius, binned 2.5 mm x 0.12 mm; axis cells r<0.3 mm per axial cell layer."
+  },
+  "c008": {
+   "inputs": {
+    "presentations/case-ladder/runs/008/profiles_t1s.csv": "f0e799cd7dabe1dac46acb842388ef95479ad0be80c1c722e4468d33faef5476"
+   },
+   "note": "Run made for the deck: run/008 to t = 1 s on 3 ranks; cross-section integrals per axial cell layer."
+  },
+  "c009": {
+   "inputs": {
+    "presentations/case-ladder/runs/009/profiles_t1s.csv": "cd6aedecfe2609fe13c28a126f851fcb123770d30e65d08c338edadba8f354be"
+   },
+   "note": "Run made for the deck: run/009 to t = 1 s on 3 ranks; D_PbI2_g on the axis cells."
+  },
+  "c010": {
+   "inputs": {
+    "run/010-handles-solid-species/out_excerpt": "60fb6a92f153ee7364f14a548b88c27675fe8b930d467b49afb8296bf28aa296",
+    "run/007-variable-properties-high-temperature/0.orig/T": "4ffa574d63857603942c2238a678b8fe20a6c18600639ee0fdbc1c4778c488f7"
+   },
+   "note": "Tracked out_excerpt of run/010 (first 10 and last steps of the 16 s run, v2606); S/S0 = (Thot - T)/(Thot - Tcold) of the readme on the wall ramp of 007. Not a deck run: the current solver implements the coupled mock of 011."
+  },
+  "c011": {
+   "inputs": {
+    "presentations/case-ladder/runs/011/profiles_t1s.csv": "4c1428c0303268419e5c686a945a09cacd3d8f993bd9e8c68b1b88fb90478278"
+   },
+   "note": "Run made for the deck: run/011 to t = 1 s on 3 ranks."
+  },
+  "c012": {
+   "inputs": {
+    "presentations/case-ladder/runs/012/steps100/PbI2_g_balance.dat": "05ce39f8546670332e721b5e3e9aaad0fc16dd9f71668caeaa691d753a39805e"
+   },
+   "note": "Run made for the deck: ./Allrun steps 100 of run/012 (serial). Zero closures drawn at 1e-20."
+  },
+  "c013": {
+   "inputs": {
+    "thermochemistry/systems/data/pv_PbI2_phases.csv": "0bf13eb9319d89099f0cbffca83d96b4d09225c1361329f38cc4f851cfa99d37",
+    "presentations/case-ladder/runs/013/steps100/PbI2_g_balance.dat": "53688c957d1a40c797aae1729de641fb2fae8494063d55bbd3b4f41f29337925"
+   },
+   "note": "p_eq table of the case (link constant/pv_PbI2_phases.csv); run made for the deck: ./Allrun steps 100 of run/013."
+  },
+  "c014": {
+   "inputs": {
+    "presentations/case-ladder/runs/014/axialProfiles/3/PbI2_g_native.dat": "3999078f697511483b6d34b1d7a4e4a604fa48a3cd32d96509bb0f27bd35a887"
+   },
+   "note": "Run made for the deck: ./Allrun of run/014 (PASS 9/9); plug-flow crossing 567.057 K from the readme."
+  },
+  "c015": {
+   "inputs": {
+    "run/015-hks-gems-local/out_excerpt": "a63001150c8088a1e9d80365882813aeab253d042a6f6b8f36872aa2ab5a5550"
+   },
+   "note": "Per-step GEMS lines of the tracked out_excerpt (5 steps; written with the bridge md5 fb67103e...). Dashed: the guard maxLog10Deviation 0.01."
+  },
+  "c016": {
+   "inputs": {
+    "presentations/case-ladder/runs/014/axialProfiles/3/PbI2_g_native.dat": "3999078f697511483b6d34b1d7a4e4a604fa48a3cd32d96509bb0f27bd35a887",
+    "presentations/case-ladder/runs/016/axialProfiles/3/PbI2_g_native.dat": "9ff5454144b4bd0abf2ddd8c8dd3a4f9ec416f62cfb28c08911eee5659bcc093"
+   },
+   "note": "Runs made for the deck: ./Allrun of run/014 and run/016 (both PASS)."
+  },
+  "c017": {
+   "inputs": {
+    "run/023-lobresco2026/cases/coarse/T106_6/final_profiles/PbI2_g_gamma.dat": "18da798b8a7fc4e3e32c3d9be25652557fe34f1c72b32174dd35b31cfd51797d",
+    "run/023-lobresco2026/cases/coarse/T106_6/comparison.json": "3d8e0ee16a3ef9f94226474b588482b72cce7296fb45e28ae3574a443ec765bf",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_6_experiment.csv": "8be6090b2659c070330f77a1eb46f3a6963c8887001324f66250dcb52154f20d",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_6_model_temperature_based.csv": "6b761e5e87183b0a3f5f754d5dfa9ab22db0dd7e7570727832b12e47f4b27424",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_6_model_vapour_pressure_based.csv": "ccac05c4c0d17f474019b9cc21d082bfea3c3f5c2768aebe550b2966b090d792"
+   },
+   "note": "Tracked record of case 023 coarse T106_6 (identical to the output of case 017's ./Allrun); wedge scaled to the full column by the factor of comparison.json."
+  },
+  "c018": {
+   "inputs": {
+    "presentations/case-ladder/runs/018/axialProfiles/3/PbI2_g_native.dat": "3999078f697511483b6d34b1d7a4e4a604fa48a3cd32d96509bb0f27bd35a887",
+    "presentations/case-ladder/runs/018/axialProfiles/3/BiI3_g_native.dat": "c52c17d86157845206308ee695e6c2f9ddd9e8f5b47978ede4507f25796840f9"
+   },
+   "note": "Run made for the deck: ./Allrun of run/018 with the m10 tables (pv_BiI3_phases.csv md5 0429d3fc...), PASS 8/8; dashed: plug-flow crossings of the readme."
+  },
+  "c019": {
+   "inputs": {
+    "presentations/case-ladder/runs/019/axialProfiles/3/PbI2_g_native.dat": "321616f842801ddb9ecd7030d0797c19f510aa4da7619e8ad0a0fb28f4267d7f",
+    "presentations/case-ladder/runs/019/axialProfiles/3/BiI3_g_native.dat": "d3f114994bf848b7acae47b6c695db7debfba96a6eb9a1f6b5ddfbdba34e5611"
+   },
+   "note": "Run made for the deck: ./Allrun of run/019 with the m10 tables (kernel, 1 ms)."
+  },
+  "c020": {
+   "inputs": {
+    "run/020-pbbi-gems-speciation/qualification.json": "9c96ee35ed8165e3738b3cb09d2848f229bd71726c37fdf07f37321d94ecdc1d"
+   },
+   "note": "qualification.json of run/020: largest primal error of the raw GEMS3K result by mole-fraction decade (zero drawn at 1e-6); the exact kernel refines every local result."
+  },
+  "c021": {
+   "inputs": {
+    "presentations/case-ladder/runs/021/axialProfiles/1.2/condensate_Pb_s_native.dat": "8c165485b3633457f72c75e8ea89919a81e674ec027b9854c8df0a987597dc42",
+    "presentations/case-ladder/runs/021/axialProfiles/1.2/condensate_Bi_s_native.dat": "0d7d984bd3bd7085170350c271083e2b686e7f5f0204a8145d123f3e79895c0e",
+    "presentations/case-ladder/runs/021/axialProfiles/1.2/PbI2_g_native.dat": "11ffb76e3e0e55bb99c66e6e998eefa3e1faf015c63cfb75de9369b61a11b02a",
+    "presentations/case-ladder/runs/021/axialProfiles/1.2/BiI3_g_native.dat": "368bbd252620e8a7d744e447baebbe75f7f80e1fd4517c28baf51fd56b0d139a",
+    "run/021-lbe-metal-vapour/verification.json": "370d36ca12beaaa3597ad637be17d47fb8ec42a4aaedca7a5aa3de634eec8ccc"
+   },
+   "note": "Run made for the deck: ./Allrun of run/021 with the m10d baseline tables, PASS 8/8; onsets (dots) from verification.json."
+  },
+  "c022": {
+   "inputs": {
+    "run/022-paper-temperature-model/constant/wall_x_profile_complete.dat": "9febcfe586ca626c84e8137def1ff666c1ed9c5e0c39801227688cfeef16301d",
+    "run/022-paper-temperature-model/readme.md": "83a6648bfcd55aad4d1c9df76dffc648fdb0b6d7345ed12d4f89b31a1bc6dec9",
+    "run/022-paper-temperature-model/notes.md": "86efb9b4024a29bf8ef156f6b341dffbe530c0adc1907fc90d3224bae2003391"
+   },
+   "note": "Wall table constant/wall_x_profile_complete.dat (x in cm); onsets from the readme and notes (M4long runs fig9-tev15 and fig9-tev15-TFlows)."
+  },
+  "c023": {
+   "inputs": {
+    "run/023-lobresco2026/cases/prod/T106_6/final_profiles/PbI2_g_gamma.dat": "5e396fa7035c2fd19836e10932e475a07ff6a4407a6ddff2f827cf607fc3c26d",
+    "run/023-lobresco2026/cases/prod/T106_6/comparison.json": "5710fb8ec4ef8d5af4532e0ccb1e214c5bac0e9e5c761734fe50624d1199dff4",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_6_experiment.csv": "8be6090b2659c070330f77a1eb46f3a6963c8887001324f66250dcb52154f20d",
+    "run/023-lobresco2026/cases/prod/T106_60/final_profiles/PbI2_g_gamma.dat": "f07c87626415828db2bec78dc0f1a9c46ac77f59995a268b4941723bfc210797",
+    "run/023-lobresco2026/cases/prod/T106_60/comparison.json": "cb7d6080580f8495c08346bc504bd36f1043b80890efc6d30dc34836c89eaaec",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_60_experiment.csv": "3974fd7a7808e2f1900021b11c78b97bae3edfa76ceec215a3ebfe0988ac36a2",
+    "run/023-lobresco2026/cases/prod/T106_300/final_profiles/PbI2_g_gamma.dat": "5bf1ee706106b0562e1d335e4f11076f743d6f5e42ee1db4f93aa5cf8ee11d3d",
+    "run/023-lobresco2026/cases/prod/T106_300/comparison.json": "02a6528fa96105d984659eb38fbd5bb52c1e853482e47cd0b70ca0fe2e6e7457",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T106_300_experiment.csv": "ab92d0beb8fff84ca2eb82b23b2e7afc4994088655062334760c3db7317f78bb",
+    "run/023-lobresco2026/cases/prod/T5_60/final_profiles/PbI2_g_gamma.dat": "fcb5db3b7ef3e3cd1c6eae42500c32bf1b7cc69ec4e8d86a157775891d393576",
+    "run/023-lobresco2026/cases/prod/T5_60/comparison.json": "23a3b2e7c3dd25c17737848fe96bea84528c53a773dce11008326f8fa3a2e120",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T5_60_experiment.csv": "3e51e3a70578cd39d2481322cbe465086f420e33e98ca9d0dc961822428469c0",
+    "run/023-lobresco2026/cases/prod/T540_60/final_profiles/PbI2_g_gamma.dat": "7f85b89eb7bb1c33f17200625c98c054c829468a63da123f0ef4562cc7d419db",
+    "run/023-lobresco2026/cases/prod/T540_60/comparison.json": "88a404ab3e75f3ca8998f456f8498fb0f24016440c68fdfcb8dce7e1fef27249",
+    "thermochemistry/benchmarks/lobresco2026/digitized/T540_60_experiment.csv": "c9c79a10a79572bc130bc3ea31b6b1aed6c0af954b59aa07701bc261b652dcc1"
+   },
+   "note": "Tracked records cases/prod/<case> of run/023 (production wedge, 318 x 72) against the digitised measurements and both published models; each panel on its own scale."
+  },
+  "c024": {
+   "inputs": {
+    "run/024-liu2025/production_576x72_limitedLinear/profiles/PbI2_SS_Q1_baseline/iodine-comparison.csv": "ae7f603df4ba6485d8d40b0666902c64fab56e87edc205cd81cf0f531f644dce",
+    "run/024-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q1_baseline/iodine-comparison.csv": "bf8c08d4e29701c5ad6225f4bea0ba4efacd9479e5c752daa27deaa48d3e029f"
+   },
+   "note": "Production runs (576 x 72, limitedLinear) of run/024: iodine wall profile against the digitised scan, as written by the analysis (iodine-comparison.csv)."
+  }
+ }
+}

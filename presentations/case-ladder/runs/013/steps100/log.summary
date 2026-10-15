@@ -1,0 +1,209 @@
+Build  : _8dbc61e11c-20241220 OPENFOAM=2412 version=v2412
+Exec   : /home/jan/OpenFOAM/jan-v2412/platforms/linux64GccDPInt32Opt/bin/rhoFixedFlowFoam
+Date   : Oct 15 2026
+Interface (layer faceCells): patches (WALL), 15264 elements in 15264 cells; A_I = 0.0103918 m2, V_I = 5.87706e-07 m3, A_I/V_I = 17681.9 1/m
+Pair PbI2_g: p_eq from "<constant>/pv_PbI2_phases.csv", phases 2(PbI2(cr) PbI2(l)) (the minimum), 198 nodes 270-1250 K; units log10Pa, interpolation logInverseT, outOfRange extrapolate; stable phase PbI2(cr) -> PbI2(l) at 683 K
+Sample boat (pair PbI2_g): 144 cells, V_Z = 8.11776e-09 m3; inventory of 4.84e-06 mol (Cs = n0 M/V_Z = 274.864 kg/m3 on a fresh start), areaPerVolume 4000 1/m, kineticScale 1, Ce 1, removed at the step starting at t >= removeTime - deltaT/2, removeTime 6 s
+Pair PbI2_g -> PbI2_s: M = 0.461009 kg/mol; at most 11 outer correctors to the initial residual 1e-05; final solve with Y_PbI2_gFinal
+Pair PbI2_g, HKS on the interface: T_e 300.825-999.175 K, p_eq 3.20486e-15-23177.6 Pa, Y_eq = p_eq/beta_c 3.64327e-18-26.3458; G_e beta_c/rho_c 58.7706-107.108 m/s; lambda = sum_e g_e/(rho_c V_c) 1.03917e+06-1.89388e+06 1/s, layer mean 1.42348e+06 1/s; 0 elements outside the table (none); 0 elements with p_eq > p (the condensate would boil; not capped)
+Sample boat, HKS: lambda_s = sum g_e/(rho V) 418584 1/s (mean over its cells), Y_eq 12.5209-14.2658
+Balance PbI2_g [mol]: gas 3.90719e-08 wall 0 sample 4.80093e-06 released 0 transport -3.45834e-21 removed 0 clamped -2.9844e-23 restart 0 solverDefect 5.87254e-22 (relative 1.21333e-16) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 3.56 s  ClockTime = 33 s
+Balance PbI2_g [mol]: gas 5.86574e-08 wall 0 sample 4.78134e-06 released 0 transport -7.23037e-21 removed 0 clamped -2.86871e-23 restart 0 solverDefect 8.52667e-22 (relative 1.76171e-16) closure 0 (relative 0)
+ExecutionTime = 5.92 s  ClockTime = 36 s
+Balance PbI2_g [mol]: gas 7.54586e-08 wall 0 sample 4.76454e-06 released 0 transport -1.11455e-20 removed 0 clamped 1.2851e-23 restart 0 solverDefect 1.04361e-21 (relative 2.15622e-16) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 8.37 s  ClockTime = 38 s
+Balance PbI2_g [mol]: gas 9.06822e-08 wall 0 sample 4.74932e-06 released 0 transport -1.34864e-20 removed 0 clamped -1.71371e-24 restart 0 solverDefect 1.22719e-21 (relative 2.53551e-16) closure 0 (relative 0)
+ExecutionTime = 10.83 s  ClockTime = 41 s
+Balance PbI2_g [mol]: gas 1.04761e-07 wall 0 sample 4.73524e-06 released 0 transport -1.46409e-20 removed 0 clamped -7.27661e-24 restart 0 solverDefect 1.25208e-21 (relative 2.58695e-16) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 12.98 s  ClockTime = 43 s
+Balance PbI2_g [mol]: gas 1.17904e-07 wall 0 sample 4.7221e-06 released 0 transport -1.45115e-20 removed 0 clamped 1.04327e-23 restart 0 solverDefect 1.41494e-21 (relative 2.92344e-16) closure 0 (relative 0)
+ExecutionTime = 15.66 s  ClockTime = 46 s
+Balance PbI2_g [mol]: gas 1.30235e-07 wall 0 sample 4.70977e-06 released 0 transport -1.33134e-20 removed 0 clamped 3.47283e-23 restart 0 solverDefect 1.48836e-21 (relative 3.07512e-16) closure 0 (relative 0)
+ExecutionTime = 18.12 s  ClockTime = 49 s
+Balance PbI2_g [mol]: gas 1.41838e-07 wall 0 sample 4.69816e-06 released 0 transport -1.1271e-20 removed 0 clamped 1.94243e-23 restart 0 solverDefect 1.57744e-21 (relative 3.25916e-16) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 20.52 s  ClockTime = 52 s
+Balance PbI2_g [mol]: gas 1.52781e-07 wall 0 sample 4.68722e-06 released 0 transport -8.58671e-21 removed 0 clamped -1.75648e-23 restart 0 solverDefect 1.50939e-21 (relative 3.11858e-16) closure 0 (relative 0)
+ExecutionTime = 22.62 s  ClockTime = 54 s
+Balance PbI2_g [mol]: gas 1.63119e-07 wall 0 sample 4.67688e-06 released 0 transport -5.43342e-21 removed 0 clamped -5.52623e-23 restart 0 solverDefect 1.44301e-21 (relative 2.98142e-16) closure 0 (relative 0)
+ExecutionTime = 24.86 s  ClockTime = 57 s
+Balance PbI2_g [mol]: gas 1.72901e-07 wall 0 sample 4.6671e-06 released 0 transport -1.94278e-21 removed 0 clamped -5.31658e-23 restart 0 solverDefect 1.50788e-21 (relative 3.11545e-16) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 27.11 s  ClockTime = 59 s
+Balance PbI2_g [mol]: gas 1.82173e-07 wall 0 sample 4.65783e-06 released 0 transport 1.734e-21 removed 0 clamped -2.13054e-23 restart 0 solverDefect 1.50651e-21 (relative 3.11263e-16) closure 0 (relative 0)
+ExecutionTime = 29.57 s  ClockTime = 62 s
+Balance PbI2_g [mol]: gas 1.90972e-07 wall 0 sample 4.64903e-06 released 0 transport 5.53165e-21 removed 0 clamped 2.77156e-24 restart 0 solverDefect 1.50996e-21 (relative 3.11976e-16) closure 0 (relative 0)
+ExecutionTime = 31.72 s  ClockTime = 64 s
+Balance PbI2_g [mol]: gas 1.99337e-07 wall 0 sample 4.64066e-06 released 0 transport 9.3997e-21 removed 0 clamped 3.28238e-23 restart 0 solverDefect 1.41966e-21 (relative 2.93319e-16) closure 0 (relative 0)
+ExecutionTime = 33.86 s  ClockTime = 66 s
+Balance PbI2_g [mol]: gas 2.073e-07 wall 0 sample 4.6327e-06 released 0 transport 1.33035e-20 removed 0 clamped -1.96982e-23 restart 0 solverDefect 1.36135e-21 (relative 2.81271e-16) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 36.31 s  ClockTime = 69 s
+Balance PbI2_g [mol]: gas 2.14892e-07 wall 0 sample 4.62511e-06 released 0 transport 1.72224e-20 removed 0 clamped -4.20748e-23 restart 0 solverDefect 1.14828e-21 (relative 2.37249e-16) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 38.31 s  ClockTime = 71 s
+Balance PbI2_g [mol]: gas 2.22141e-07 wall 0 sample 4.61786e-06 released 0 transport 2.10801e-20 removed 0 clamped -9.33074e-23 restart 0 solverDefect 9.28422e-22 (relative 1.91823e-16) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 40.72 s  ClockTime = 74 s
+Balance PbI2_g [mol]: gas 2.29073e-07 wall 0 sample 4.61093e-06 released 0 transport 2.48677e-20 removed 0 clamped -2.93908e-23 restart 0 solverDefect 6.79987e-22 (relative 1.40493e-16) closure 0 (relative 0)
+ExecutionTime = 43.07 s  ClockTime = 76 s
+Balance PbI2_g [mol]: gas 2.35711e-07 wall 0 sample 4.60429e-06 released 0 transport 2.85862e-20 removed 0 clamped -7.47723e-23 restart 0 solverDefect 6.03037e-22 (relative 1.24594e-16) closure 0 (relative 0)
+ExecutionTime = 45.61 s  ClockTime = 79 s
+Balance PbI2_g [mol]: gas 2.42077e-07 wall 0 sample 4.59792e-06 released 0 transport 3.22349e-20 removed 0 clamped 1.46784e-23 restart 0 solverDefect 4.3788e-22 (relative 9.04712e-17) closure 0 (relative 0)
+ExecutionTime = 48.19 s  ClockTime = 81 s
+Balance PbI2_g [mol]: gas 2.48191e-07 wall 0 sample 4.59181e-06 released 0 transport 3.581e-20 removed 0 clamped -1.83276e-23 restart 0 solverDefect 3.81972e-23 (relative 7.89199e-18) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 50.33 s  ClockTime = 84 s
+Balance PbI2_g [mol]: gas 2.54072e-07 wall 0 sample 4.58593e-06 released 0 transport 4.05624e-20 removed 0 clamped -4.52531e-23 restart 0 solverDefect -1.59991e-22 (relative -3.3056e-17) closure 0 (relative 0)
+ExecutionTime = 52.73 s  ClockTime = 86 s
+Balance PbI2_g [mol]: gas 2.59736e-07 wall 0 sample 4.58026e-06 released 0 transport 4.67013e-20 removed 0 clamped 1.86822e-23 restart 0 solverDefect -4.53273e-22 (relative -9.36515e-17) closure 0 (relative 0)
+ExecutionTime = 54.86 s  ClockTime = 88 s
+Balance PbI2_g [mol]: gas 2.652e-07 wall 0 sample 4.5748e-06 released 0 transport 5.39288e-20 removed 0 clamped -4.07837e-23 restart 0 solverDefect -6.51936e-22 (relative -1.34697e-16) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 57.18 s  ClockTime = 91 s
+Balance PbI2_g [mol]: gas 2.70477e-07 wall 0 sample 4.56952e-06 released 0 transport 6.19494e-20 removed 0 clamped 3.70706e-23 restart 0 solverDefect -8.37283e-22 (relative -1.72992e-16) closure 0 (relative 0)
+ExecutionTime = 59.26 s  ClockTime = 93 s
+Balance PbI2_g [mol]: gas 2.75581e-07 wall 0 sample 4.56442e-06 released 0 transport 7.05322e-20 removed 0 clamped -6.58152e-24 restart 0 solverDefect -1.09551e-21 (relative -2.26345e-16) closure 0 (relative 0)
+ExecutionTime = 61.79 s  ClockTime = 96 s
+Balance PbI2_g [mol]: gas 2.80525e-07 wall 0 sample 4.55948e-06 released 0 transport 7.94649e-20 removed 0 clamped 3.73375e-24 restart 0 solverDefect -1.39165e-21 (relative -2.87531e-16) closure 0 (relative 0)
+ExecutionTime = 63.97 s  ClockTime = 98 s
+Balance PbI2_g [mol]: gas 2.85318e-07 wall 0 sample 4.55468e-06 released 0 transport 8.85811e-20 removed 0 clamped -5.56206e-23 restart 0 solverDefect -1.62345e-21 (relative -3.35423e-16) closure 0 (relative 0)
+ExecutionTime = 66.42 s  ClockTime = 101 s
+Balance PbI2_g [mol]: gas 2.89973e-07 wall 0 sample 4.55003e-06 released 0 transport 9.77496e-20 removed 0 clamped -2.42176e-23 restart 0 solverDefect -1.82598e-21 (relative -3.77268e-16) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 68.91 s  ClockTime = 104 s
+Balance PbI2_g [mol]: gas 2.94498e-07 wall 0 sample 4.5455e-06 released 0 transport 1.06884e-19 removed 0 clamped 6.58802e-24 restart 0 solverDefect -2.03453e-21 (relative -4.20357e-16) closure 0 (relative 0)
+ExecutionTime = 70.94 s  ClockTime = 106 s
+Balance PbI2_g [mol]: gas 2.98902e-07 wall 0 sample 4.5411e-06 released 0 transport 1.15916e-19 removed 0 clamped -7.1119e-24 restart 0 solverDefect -2.30784e-21 (relative -4.76826e-16) closure 0 (relative 0)
+ExecutionTime = 73.38 s  ClockTime = 109 s
+Balance PbI2_g [mol]: gas 3.03194e-07 wall 0 sample 4.53681e-06 released 0 transport 1.24797e-19 removed 0 clamped -3.84744e-23 restart 0 solverDefect -2.63894e-21 (relative -5.45235e-16) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 75.77 s  ClockTime = 112 s
+Balance PbI2_g [mol]: gas 3.07381e-07 wall 0 sample 4.53262e-06 released 0 transport 1.33492e-19 removed 0 clamped -7.96797e-24 restart 0 solverDefect -3.27037e-21 (relative -6.75696e-16) closure 0 (relative 0)
+ExecutionTime = 78.34 s  ClockTime = 114 s
+Balance PbI2_g [mol]: gas 3.11471e-07 wall 0 sample 4.52853e-06 released 0 transport 1.41977e-19 removed 0 clamped -3.96537e-23 restart 0 solverDefect -3.59102e-21 (relative -7.41947e-16) closure 0 (relative 0)
+ExecutionTime = 80.23 s  ClockTime = 116 s
+Balance PbI2_g [mol]: gas 3.15469e-07 wall 0 sample 4.52453e-06 released 0 transport 1.50234e-19 removed 0 clamped -4.39269e-23 restart 0 solverDefect -3.87821e-21 (relative -8.01283e-16) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 82.71 s  ClockTime = 119 s
+Balance PbI2_g [mol]: gas 3.19381e-07 wall 0 sample 4.52062e-06 released 0 transport 1.58265e-19 removed 0 clamped -7.19036e-23 restart 0 solverDefect -4.14301e-21 (relative -8.55994e-16) closure 0 (relative 0)
+ExecutionTime = 84.96 s  ClockTime = 122 s
+Balance PbI2_g [mol]: gas 3.23214e-07 wall 0 sample 4.51679e-06 released 0 transport 1.66042e-19 removed 0 clamped -4.52572e-23 restart 0 solverDefect -4.4626e-21 (relative -9.22025e-16) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 87.17 s  ClockTime = 124 s
+Balance PbI2_g [mol]: gas 3.26972e-07 wall 0 sample 4.51303e-06 released 0 transport 1.73569e-19 removed 0 clamped -1.09844e-22 restart 0 solverDefect -4.70588e-21 (relative -9.72288e-16) closure 0 (relative 0)
+ExecutionTime = 89.44 s  ClockTime = 127 s
+Balance PbI2_g [mol]: gas 3.3066e-07 wall 0 sample 4.50934e-06 released 0 transport 1.80849e-19 removed 0 clamped -1.13397e-22 restart 0 solverDefect -4.96938e-21 (relative -1.02673e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 91.97 s  ClockTime = 131 s
+Balance PbI2_g [mol]: gas 3.34283e-07 wall 0 sample 4.50572e-06 released 0 transport 1.87887e-19 removed 0 clamped -8.41644e-23 restart 0 solverDefect -5.20554e-21 (relative -1.07553e-15) closure 0 (relative 0)
+ExecutionTime = 94.09 s  ClockTime = 133 s
+Balance PbI2_g [mol]: gas 3.37844e-07 wall 0 sample 4.50216e-06 released 0 transport 1.94669e-19 removed 0 clamped -9.03764e-23 restart 0 solverDefect -5.5409e-21 (relative -1.14481e-15) closure 0 (relative 0)
+ExecutionTime = 96.31 s  ClockTime = 136 s
+Balance PbI2_g [mol]: gas 3.41347e-07 wall 0 sample 4.49865e-06 released 0 transport 2.01175e-19 removed 0 clamped -5.50288e-23 restart 0 solverDefect -5.69054e-21 (relative -1.17573e-15) closure 0 (relative 0)
+ExecutionTime = 98.78 s  ClockTime = 138 s
+Balance PbI2_g [mol]: gas 3.44797e-07 wall 0 sample 4.4952e-06 released 0 transport 2.07445e-19 removed 0 clamped -8.66582e-23 restart 0 solverDefect -5.90765e-21 (relative -1.22059e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 100.67 s  ClockTime = 140 s
+Balance PbI2_g [mol]: gas 3.48195e-07 wall 0 sample 4.4918e-06 released 0 transport 2.13504e-19 removed 0 clamped -5.76953e-23 restart 0 solverDefect -6.22364e-21 (relative -1.28588e-15) closure 0 (relative 0)
+ExecutionTime = 103.13 s  ClockTime = 143 s
+Balance PbI2_g [mol]: gas 3.51546e-07 wall 0 sample 4.48845e-06 released 0 transport 2.19369e-19 removed 0 clamped -4.99644e-23 restart 0 solverDefect -6.40949e-21 (relative -1.32427e-15) closure 0 (relative 0)
+ExecutionTime = 105.39 s  ClockTime = 146 s
+Balance PbI2_g [mol]: gas 3.54852e-07 wall 0 sample 4.48515e-06 released 0 transport 2.24369e-19 removed 0 clamped -3.44963e-23 restart 0 solverDefect -6.88548e-21 (relative -1.42262e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 107.62 s  ClockTime = 148 s
+Balance PbI2_g [mol]: gas 3.58116e-07 wall 0 sample 4.48188e-06 released 0 transport 2.29145e-19 removed 0 clamped -3.93984e-23 restart 0 solverDefect -7.22509e-21 (relative -1.49279e-15) closure 0 (relative 0)
+ExecutionTime = 109.95 s  ClockTime = 151 s
+Balance PbI2_g [mol]: gas 3.61339e-07 wall 0 sample 4.47866e-06 released 0 transport 2.33874e-19 removed 0 clamped -4.34666e-23 restart 0 solverDefect -7.48257e-21 (relative -1.54599e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 112.48 s  ClockTime = 154 s
+Balance PbI2_g [mol]: gas 3.64525e-07 wall 0 sample 4.47547e-06 released 0 transport 2.38589e-19 removed 0 clamped -6.00734e-23 restart 0 solverDefect -7.714e-21 (relative -1.5938e-15) closure 0 (relative 0)
+ExecutionTime = 114.57 s  ClockTime = 156 s
+Balance PbI2_g [mol]: gas 3.67675e-07 wall 0 sample 4.47232e-06 released 0 transport 2.43301e-19 removed 0 clamped -2.65734e-23 restart 0 solverDefect -7.8623e-21 (relative -1.62444e-15) closure 0 (relative 0)
+ExecutionTime = 117.06 s  ClockTime = 159 s
+Balance PbI2_g [mol]: gas 3.70792e-07 wall 0 sample 4.46921e-06 released 0 transport 2.48005e-19 removed 0 clamped -1.68045e-23 restart 0 solverDefect -8.17092e-21 (relative -1.68821e-15) closure 0 (relative 0)
+ExecutionTime = 119.19 s  ClockTime = 161 s
+Balance PbI2_g [mol]: gas 3.73877e-07 wall 0 sample 4.46612e-06 released 0 transport 2.52635e-19 removed 0 clamped 1.30037e-23 restart 0 solverDefect -8.51236e-21 (relative -1.75875e-15) closure 0 (relative 0)
+ExecutionTime = 121 s  ClockTime = 163 s
+Balance PbI2_g [mol]: gas 3.76933e-07 wall 0 sample 4.46307e-06 released 0 transport 2.57204e-19 removed 0 clamped -2.72452e-23 restart 0 solverDefect -8.654e-21 (relative -1.78802e-15) closure 0 (relative 0)
+ExecutionTime = 123.24 s  ClockTime = 166 s
+Balance PbI2_g [mol]: gas 3.79959e-07 wall 0 sample 4.46004e-06 released 0 transport 2.61724e-19 removed 0 clamped 1.77581e-23 restart 0 solverDefect -8.85106e-21 (relative -1.82873e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 125.24 s  ClockTime = 168 s
+Balance PbI2_g [mol]: gas 3.82959e-07 wall 0 sample 4.45704e-06 released 0 transport 2.66226e-19 removed 0 clamped 2.51455e-23 restart 0 solverDefect -9.15564e-21 (relative -1.89166e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 127.42 s  ClockTime = 171 s
+Balance PbI2_g [mol]: gas 3.85934e-07 wall 0 sample 4.45407e-06 released 0 transport 2.70726e-19 removed 0 clamped -1.33167e-23 restart 0 solverDefect -9.42791e-21 (relative -1.94792e-15) closure 0 (relative 0)
+ExecutionTime = 129.36 s  ClockTime = 173 s
+Balance PbI2_g [mol]: gas 3.88884e-07 wall 0 sample 4.45112e-06 released 0 transport 2.75245e-19 removed 0 clamped -3.13492e-24 restart 0 solverDefect -9.79256e-21 (relative -2.02326e-15) closure 0 (relative 0)
+ExecutionTime = 131.24 s  ClockTime = 175 s
+Balance PbI2_g [mol]: gas 3.91811e-07 wall 0 sample 4.44819e-06 released 0 transport 2.79867e-19 removed 0 clamped 2.93248e-23 restart 0 solverDefect -1.00706e-20 (relative -2.08071e-15) closure 0 (relative 0)
+ExecutionTime = 133.39 s  ClockTime = 178 s
+Balance PbI2_g [mol]: gas 3.94716e-07 wall 0 sample 4.44528e-06 released 0 transport 2.84615e-19 removed 0 clamped 2.31489e-23 restart 0 solverDefect -1.04156e-20 (relative -2.15198e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 135.25 s  ClockTime = 179 s
+Balance PbI2_g [mol]: gas 3.97601e-07 wall 0 sample 4.4424e-06 released 0 transport 2.89526e-19 removed 0 clamped 5.75258e-25 restart 0 solverDefect -1.05468e-20 (relative -2.1791e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 137.41 s  ClockTime = 182 s
+Balance PbI2_g [mol]: gas 4.00466e-07 wall 0 sample 4.43953e-06 released 0 transport 2.94619e-19 removed 0 clamped 4.45946e-24 restart 0 solverDefect -1.07358e-20 (relative -2.21815e-15) closure 0 (relative 0)
+ExecutionTime = 139.41 s  ClockTime = 184 s
+Balance PbI2_g [mol]: gas 4.03312e-07 wall 0 sample 4.43669e-06 released 0 transport 2.99927e-19 removed 0 clamped -2.70005e-23 restart 0 solverDefect -1.08926e-20 (relative -2.25054e-15) closure 0 (relative 0)
+ExecutionTime = 141.56 s  ClockTime = 186 s
+Balance PbI2_g [mol]: gas 4.0614e-07 wall 0 sample 4.43386e-06 released 0 transport 3.05498e-19 removed 0 clamped -4.99022e-23 restart 0 solverDefect -1.11136e-20 (relative -2.2962e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 143.51 s  ClockTime = 188 s
+Balance PbI2_g [mol]: gas 4.08951e-07 wall 0 sample 4.43105e-06 released 0 transport 3.11388e-19 removed 0 clamped -4.73052e-23 restart 0 solverDefect -1.12751e-20 (relative -2.32957e-15) closure 0 (relative 0)
+ExecutionTime = 145.48 s  ClockTime = 190 s
+Balance PbI2_g [mol]: gas 4.11746e-07 wall 0 sample 4.42825e-06 released 0 transport 3.17654e-19 removed 0 clamped -5.40944e-23 restart 0 solverDefect -1.12752e-20 (relative -2.32959e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 147.73 s  ClockTime = 192 s
+Balance PbI2_g [mol]: gas 4.14525e-07 wall 0 sample 4.42547e-06 released 0 transport 3.24347e-19 removed 0 clamped -3.47185e-23 restart 0 solverDefect -1.15163e-20 (relative -2.3794e-15) closure 0 (relative 0)
+ExecutionTime = 149.71 s  ClockTime = 194 s
+Balance PbI2_g [mol]: gas 4.17289e-07 wall 0 sample 4.42271e-06 released 0 transport 3.31545e-19 removed 0 clamped -4.42192e-23 restart 0 solverDefect -1.17037e-20 (relative -2.41812e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 151.63 s  ClockTime = 196 s
+Balance PbI2_g [mol]: gas 4.2004e-07 wall 0 sample 4.41996e-06 released 0 transport 3.3933e-19 removed 0 clamped -3.89487e-24 restart 0 solverDefect -1.1914e-20 (relative -2.46156e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 153.8 s  ClockTime = 199 s
+Balance PbI2_g [mol]: gas 4.22776e-07 wall 0 sample 4.41722e-06 released 0 transport 3.47654e-19 removed 0 clamped 8.42394e-24 restart 0 solverDefect -1.19983e-20 (relative -2.47899e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 155.74 s  ClockTime = 201 s
+Balance PbI2_g [mol]: gas 4.255e-07 wall 0 sample 4.4145e-06 released 0 transport 3.56856e-19 removed 0 clamped -4.59482e-24 restart 0 solverDefect -1.21935e-20 (relative -2.51932e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 157.57 s  ClockTime = 202 s
+Balance PbI2_g [mol]: gas 4.28211e-07 wall 0 sample 4.41179e-06 released 0 transport 3.67611e-19 removed 0 clamped -1.22574e-23 restart 0 solverDefect -1.23665e-20 (relative -2.55505e-15) closure 0 (relative 0)
+ExecutionTime = 160.22 s  ClockTime = 206 s
+Balance PbI2_g [mol]: gas 4.3091e-07 wall 0 sample 4.40909e-06 released 0 transport 3.79667e-19 removed 0 clamped -3.22259e-23 restart 0 solverDefect -1.24499e-20 (relative -2.57228e-15) closure 0 (relative 0)
+ExecutionTime = 162.12 s  ClockTime = 208 s
+Balance PbI2_g [mol]: gas 4.33598e-07 wall 0 sample 4.4064e-06 released 0 transport 3.93408e-19 removed 0 clamped -1.97772e-23 restart 0 solverDefect -1.26093e-20 (relative -2.60523e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 163.84 s  ClockTime = 209 s
+Balance PbI2_g [mol]: gas 4.36275e-07 wall 0 sample 4.40373e-06 released 0 transport 4.09305e-19 removed 0 clamped -3.55509e-23 restart 0 solverDefect -1.26097e-20 (relative -2.60532e-15) closure 0 (relative 0)
+ExecutionTime = 165.56 s  ClockTime = 211 s
+Balance PbI2_g [mol]: gas 4.38941e-07 wall 0 sample 4.40106e-06 released 0 transport 4.27194e-19 removed 0 clamped -1.73729e-23 restart 0 solverDefect -1.28026e-20 (relative -2.64516e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 167.47 s  ClockTime = 213 s
+Balance PbI2_g [mol]: gas 4.41597e-07 wall 0 sample 4.3984e-06 released 0 transport 4.45779e-19 removed 0 clamped -3.29244e-23 restart 0 solverDefect -1.29124e-20 (relative -2.66784e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 169.21 s  ClockTime = 215 s
+Balance PbI2_g [mol]: gas 4.44243e-07 wall 0 sample 4.39576e-06 released 0 transport 4.65122e-19 removed 0 clamped -5.05153e-23 restart 0 solverDefect -1.30206e-20 (relative -2.69021e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 170.99 s  ClockTime = 216 s
+Balance PbI2_g [mol]: gas 4.4688e-07 wall 0 sample 4.39312e-06 released 0 transport 4.85413e-19 removed 0 clamped -3.70399e-23 restart 0 solverDefect -1.31461e-20 (relative -2.71613e-15) closure 0 (relative 0)
+ExecutionTime = 172.77 s  ClockTime = 218 s
+Balance PbI2_g [mol]: gas 4.49508e-07 wall 0 sample 4.39049e-06 released 0 transport 5.06835e-19 removed 0 clamped -4.53379e-23 restart 0 solverDefect -1.31791e-20 (relative -2.72295e-15) closure 0 (relative 0)
+ExecutionTime = 174.46 s  ClockTime = 220 s
+Balance PbI2_g [mol]: gas 4.52127e-07 wall 0 sample 4.38787e-06 released 0 transport 5.30127e-19 removed 0 clamped -6.22427e-23 restart 0 solverDefect -1.32074e-20 (relative -2.7288e-15) closure 0 (relative 0)
+ExecutionTime = 176.54 s  ClockTime = 222 s
+Balance PbI2_g [mol]: gas 4.54738e-07 wall 0 sample 4.38526e-06 released 0 transport 5.55419e-19 removed 0 clamped -7.91412e-23 restart 0 solverDefect -1.31834e-20 (relative -2.72385e-15) closure 0 (relative 0)
+ExecutionTime = 178.28 s  ClockTime = 224 s
+Balance PbI2_g [mol]: gas 4.57341e-07 wall 0 sample 4.38266e-06 released 0 transport 5.83192e-19 removed 0 clamped -8.81762e-23 restart 0 solverDefect -1.33836e-20 (relative -2.76521e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 180.07 s  ClockTime = 226 s
+Balance PbI2_g [mol]: gas 4.59936e-07 wall 0 sample 4.38006e-06 released 0 transport 6.13824e-19 removed 0 clamped -4.78741e-23 restart 0 solverDefect -1.35657e-20 (relative -2.80283e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 181.82 s  ClockTime = 227 s
+Balance PbI2_g [mol]: gas 4.62524e-07 wall 0 sample 4.37748e-06 released 0 transport 6.47655e-19 removed 0 clamped -1.01791e-22 restart 0 solverDefect -1.37239e-20 (relative -2.83552e-15) closure 0 (relative 0)
+ExecutionTime = 183.55 s  ClockTime = 229 s
+Balance PbI2_g [mol]: gas 4.65104e-07 wall 0 sample 4.3749e-06 released 0 transport 6.85149e-19 removed 0 clamped -1.35544e-22 restart 0 solverDefect -1.38174e-20 (relative -2.85484e-15) closure 0 (relative 0)
+ExecutionTime = 185.54 s  ClockTime = 231 s
+Balance PbI2_g [mol]: gas 4.67678e-07 wall 0 sample 4.37232e-06 released 0 transport 7.26824e-19 removed 0 clamped -1.27209e-22 restart 0 solverDefect -1.3917e-20 (relative -2.87541e-15) closure 0 (relative 0)
+ExecutionTime = 187.28 s  ClockTime = 233 s
+Balance PbI2_g [mol]: gas 4.70245e-07 wall 0 sample 4.36976e-06 released 0 transport 7.73215e-19 removed 0 clamped -1.35589e-22 restart 0 solverDefect -1.39834e-20 (relative -2.88914e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 189.06 s  ClockTime = 235 s
+Balance PbI2_g [mol]: gas 4.72805e-07 wall 0 sample 4.3672e-06 released 0 transport 8.24842e-19 removed 0 clamped -1.18991e-22 restart 0 solverDefect -1.41343e-20 (relative -2.92032e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 190.75 s  ClockTime = 236 s
+Balance PbI2_g [mol]: gas 4.75359e-07 wall 0 sample 4.36464e-06 released 0 transport 8.82195e-19 removed 0 clamped -1.04873e-22 restart 0 solverDefect -1.41253e-20 (relative -2.91845e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 192.54 s  ClockTime = 238 s
+Balance PbI2_g [mol]: gas 4.77907e-07 wall 0 sample 4.36209e-06 released 0 transport 9.45638e-19 removed 0 clamped -1.2248e-22 restart 0 solverDefect -1.41725e-20 (relative -2.9282e-15) closure 0 (relative 0)
+ExecutionTime = 194.35 s  ClockTime = 240 s
+Balance PbI2_g [mol]: gas 4.80449e-07 wall 0 sample 4.35955e-06 released 0 transport 1.01571e-18 removed 0 clamped -1.29344e-22 restart 0 solverDefect -1.42144e-20 (relative -2.93687e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 196.11 s  ClockTime = 242 s
+Balance PbI2_g [mol]: gas 4.82986e-07 wall 0 sample 4.35701e-06 released 0 transport 1.09293e-18 removed 0 clamped -1.40966e-22 restart 0 solverDefect -1.42633e-20 (relative -2.94695e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 197.94 s  ClockTime = 243 s
+Balance PbI2_g [mol]: gas 4.85517e-07 wall 0 sample 4.35448e-06 released 0 transport 1.17794e-18 removed 0 clamped -1.54724e-22 restart 0 solverDefect -1.42736e-20 (relative -2.94909e-15) closure 9.18673e-22 (relative 1.89808e-16)
+ExecutionTime = 199.64 s  ClockTime = 245 s
+Balance PbI2_g [mol]: gas 4.88044e-07 wall 0 sample 4.35196e-06 released 0 transport 1.27154e-18 removed 0 clamped -1.62366e-22 restart 0 solverDefect -1.43869e-20 (relative -2.9725e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 201.4 s  ClockTime = 247 s
+Balance PbI2_g [mol]: gas 4.90566e-07 wall 0 sample 4.34943e-06 released 0 transport 1.37451e-18 removed 0 clamped -1.38653e-22 restart 0 solverDefect -1.4483e-20 (relative -2.99236e-15) closure 0 (relative 0)
+ExecutionTime = 203.2 s  ClockTime = 249 s
+Balance PbI2_g [mol]: gas 4.93082e-07 wall 0 sample 4.34692e-06 released 0 transport 1.48803e-18 removed 0 clamped -1.44978e-22 restart 0 solverDefect -1.45426e-20 (relative -3.00467e-15) closure 0 (relative 0)
+ExecutionTime = 204.96 s  ClockTime = 250 s
+Balance PbI2_g [mol]: gas 4.95595e-07 wall 0 sample 4.34441e-06 released 0 transport 1.61308e-18 removed 0 clamped -1.32049e-22 restart 0 solverDefect -1.45806e-20 (relative -3.01252e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 206.7 s  ClockTime = 252 s
+Balance PbI2_g [mol]: gas 4.98102e-07 wall 0 sample 4.3419e-06 released 0 transport 1.75084e-18 removed 0 clamped -1.34883e-22 restart 0 solverDefect -1.46027e-20 (relative -3.01709e-15) closure 0 (relative 0)
+ExecutionTime = 208.47 s  ClockTime = 254 s
+Balance PbI2_g [mol]: gas 5.00606e-07 wall 0 sample 4.33939e-06 released 0 transport 1.9025e-18 removed 0 clamped -1.64878e-22 restart 0 solverDefect -1.45886e-20 (relative -3.01418e-15) closure 0 (relative 0)
+ExecutionTime = 210.17 s  ClockTime = 256 s
+Balance PbI2_g [mol]: gas 5.03105e-07 wall 0 sample 4.33689e-06 released 0 transport 2.06921e-18 removed 0 clamped -1.75967e-22 restart 0 solverDefect -1.46585e-20 (relative -3.02862e-15) closure -9.18673e-22 (relative -1.89808e-16)
+ExecutionTime = 212.1 s  ClockTime = 258 s

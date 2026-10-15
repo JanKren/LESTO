@@ -1,0 +1,18 @@
+Build  : _8dbc61e11c-20241220 OPENFOAM=2412 version=v2412
+Exec   : rhoFixedFlowFoam -parallel
+Date   : Oct 15 2026
+Integrated source PbI2_g = 0 kg/s
+Integrated source tracer = 0 kg/s
+Net thermochemistry source = 0 kg/s
+ExecutionTime = 2.77 s  ClockTime = 4 s
+Integrated source PbI2_g = 0 kg/s
+Integrated source tracer = 0 kg/s
+Net thermochemistry source = 0 kg/s
+ExecutionTime = 5.59 s  ClockTime = 8 s
+Integrated source PbI2_g = 0 kg/s
+Net thermochemistry source = 0 kg/s
+ExecutionTime = 233.74 s  ClockTime = 256 s
+Integrated source PbI2_g = 0 kg/s
+Integrated source tracer = 0 kg/s
+Net thermochemistry source = 0 kg/s
+ExecutionTime = 234.26 s  ClockTime = 256 s
