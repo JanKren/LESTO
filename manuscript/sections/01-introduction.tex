@@ -4,7 +4,7 @@ Iodine released from lead--bismuth eutectic (LBE) can travel in several
 chemical forms before it deposits on cooler surfaces. The chemical form
 matters because it sets both the gas-phase inventory available for
 transport and the equilibrium pressure that governs wall exchange.
-Liu et al.\ \cite{Liu2025chemical} studied this behaviour by evaporating
+Liu et al.\ \cite{Liu2025chemical} studied this behavior by evaporating
 pure iodides and iodine-containing LBE into helium, separating the
 products along a negative temperature gradient and characterising the
 deposits. Their measurements give spatially resolved evidence for
@@ -17,10 +17,10 @@ and the gas composition all affect the predicted distribution.
 Seen as a fluid-dynamics problem, a thermal-gradient column is a slow
 laminar flow of an inert carrier through a long, narrow tube whose wall
 temperature falls by several hundred kelvin along its length
-(\cref{fig:temperature}). Trace vapours released near the hot end are
+(\cref{fig:temperature}). Trace vapors released near the hot end are
 advected downstream by a carrier whose density and velocity vary with
 the imposed temperature, and they diffuse radially towards the wall.
-Where the local vapour pressure exceeds the equilibrium pressure at the
+Where the local vapor pressure exceeds the equilibrium pressure at the
 wall temperature, material is lost to the wall; where it falls below
 that pressure, existing deposits can evaporate again. The deposition
 profile is therefore set by the competition between axial advection,
@@ -34,7 +34,7 @@ interpretation of thermochromatographic experiments
 Existing CFD treatments of such wall exchange differ mainly in where the
 exchange is applied and in how many coupled species they carry.
 Lobresco et al.\ \cite{Lobresco2026assessment} compared a calibrated
-temperature-based deposition law with a vapour-pressure-driven
+temperature-based deposition law with a vapor-pressure-driven
 Hertz--Knudsen--Schrage law for PbI$_2$, both formulated as volumetric
 source terms rather than boundary fluxes. For steam condensation with
 non-condensable gases, Vijaya Kumar et al.\ \cite{VijayaKumar2021implementation}
@@ -52,22 +52,22 @@ OpenFOAM \cite{Weller1998tensorial}. Our contribution has three parts.
 First, element-conserving homogeneous equilibrium among nine Pb--Bi--I
 gases is coupled to reversible face-flux wall exchange, in which the
 interfacial kinetic conductance acts in series with diffusion over the
-distance from the cell centre to the wall; the Graetz--Robin
+distance from the cell center to the wall; the Graetz--Robin
 verification shows that this face flux is second-order accurate where
-the same kinetic law applied to the cell-centre value, the form of a
+the same kinetic law applied to the cell-center value, the form of a
 first-cell sink, is first order. Second, gas pathways that
 lead to the same condensed material share one physical wall inventory,
 so that switching between deposition, evaporation and reaction cannot
-create or duplicate material. Third, we characterise the transport
-behaviour that results in these columns: wall exchange limited by
-radial diffusion rather than by interfacial kinetics, profiles whose
+create or duplicate material. Third, we characterize the transport
+behavior within the tested model: evidence for predominantly
+diffusion-controlled wall exchange, profiles whose
 local shape is far more resolution-sensitive than their integrals, and
 an iodide partition that is controlled by thermodynamic input.
 % TODO(review-B): Damkoehler sweep; confirm the diffusion-limited
-% characterisation in the third contribution.
+% characterization in the third contribution.
 The software also has an interface to the GEMS3K kernel of
 GEM-Selektor \cite{Kulik2013gemselektor}, but the reported calculations
-use a specialised ideal-gas element-potential solver.
+use a specialized ideal-gas element-potential solver.
 
 All experimental input comes from published papers, so we report the
 consequences of two explicit source models and of selected input
@@ -90,7 +90,7 @@ assessments of this model, not independent predictive validation.
 
 \Cref{sec:experiments,sec:model,sec:numerics} define the reconstructed
 inputs, equations and case matrix. \Cref{sec:verification} verifies the
-wall discretisation and assesses conservation and resolution, and
+wall discretization and assesses conservation and resolution, and
 \cref{sec:comparison,sec:sensitivity} examine experimental
 discrepancies and input sensitivity. \Cref{sec:discussion} states what
 the evidence supports and collects the limitations.

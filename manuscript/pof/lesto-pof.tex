@@ -30,7 +30,7 @@
   pdfauthor={Jan Kren and Bojan Niceno}}
 
 \begin{document}
-\preprint{Submitted to Physics of Fluids}
+\preprint{Prepared for Physics of Fluids}
 
 % TODO(review-B): do not change the title before the Damkoehler sweep is in.
 \title{Competition between radial diffusion and interfacial exchange in
@@ -47,36 +47,33 @@ transport}
 \date{\today}
 
 \begin{abstract}
-We present an OpenFOAM finite-volume model of vapour transport in
-laminar thermal-gradient columns: nine Pb--Bi--I gases in a frozen
-helium carrier, with element-conserving gas equilibrium and shared wall
-inventories.
-Reversible iodide exchange follows a Hertz--Knudsen--Schrage law in
-series with the near-wall diffusive resistance; on a Graetz--Robin
-problem this face flux converges at second order, a cell-centre sink at
-first order. Fifteen
-baseline and 64 follow-up simulations separate numerical refinement
-from input sensitivities. The largest raw
-element-balance residue is $1.41\times10^{-12}$ of supplied material.
-Halving the time step or adding correctors changes iodine profiles by
-at most 0.323\%. First-order upwind advection differs from
-a bounded limited-linear scheme by up to 20.8\% at equal mesh; with the
-bounded scheme, the most sensitive profile changes by 1.98\% from 41,472
-to 93,312 cells, without a consistent observed order. Radial diffusion,
-not interfacial kinetics, limits wall exchange.
-% TODO(review-B): Damkoehler sweep; revisit the previous sentence.
-% TODO(review-A): production-scheme sensitivities; add one sentence.
-A $+29\units{kJ\,mol^{-1}}$ shift in the BiI gas Gibbs energy changes
-the BiI$_3$ share of deposited iodide iodine from 94.58\% to 2.01\%,
-showing how strongly the partition depends on thermodynamic data. For
-silica, shifts derived from the published temperature labels expose a
-coordinate inconsistency without resolving it. Without tuning, the wall
-law gives deposition-onset temperatures of five PbI$_2$ experiments
-with an RMS deviation of 18 K, against 35 K for two published models;
-because carrier, vapour-pressure and source assumptions also differ and
-computed peaks lie 1--4 cm upstream, this promising result does not yet
-isolate the wall treatment. The results support a conservative method,
-not independent predictive validation.
+We present a conservative finite-volume model of vapor transport and wall
+ deposition in laminar thermal-gradient columns. Nine Pb--Bi--I gases
+ undergo element-conserving equilibrium in a frozen helium carrier and
+ exchange material with shared wall inventories. A Hertz--Knudsen--Schrage
+ law acts in series with near-wall diffusion. On a Graetz--Robin
+ reference problem, this face-flux treatment converges at second order,
+ whereas a cell-center sink converges at first order. Fifteen baseline
+ and 64 follow-up simulations, supplemented by production and refinement
+ studies, distinguish numerical sensitivity from uncertain physical
+ inputs. The maximum raw element-balance residue is
+ $1.41\times10^{-12}$ of supplied material. Halving the time step or
+ adding species correctors changes iodine profiles by at most 0.323\%.
+ Upwind and bounded limited-linear advection differ by up to 20.8\% at
+ equal mesh. With limited-linear advection, the most sensitive profile
+ changes by 1.98\% between 41,472 and 93,312 cells, without a consistent
+ observed order. Scaling estimates and upwind sensitivities suggest
+ predominantly diffusion-controlled exchange. A $+29\units{kJ\,mol^{-1}}$
+ shift in BiI gas Gibbs energy changes the BiI$_3$ share of deposited
+ iodide iodine from 94.58\% to 2.01\%. Silica comparisons expose an
+ unresolved temperature-coordinate inconsistency. For five published
+ PbI$_2$ experiments, wall-only main-deposit onset temperatures have an
+ RMS deviation of 18 K, compared with 35 K for two published models.
+ This comparison is conditional on the onset region and differing
+ carrier, vapor-pressure, and source assumptions; computed peaks remain
+ 1--4 cm upstream. The evidence establishes conservation and verifies
+ the wall discretization, while identifying limitations of predictive
+ experimental agreement.
 \end{abstract}
 
 \maketitle
@@ -90,6 +87,13 @@ not independent predictive validation.
 \input{../sections/07-multispecies}
 \input{../sections/07b-discussion}
 \input{../sections/08-conclusions}
+
+\section*{Supplementary Material}
+See the supplementary material for the case inventory, the detailed
+material-ledger and solver diagnostics, the scalar mesh checks of the
+upwind campaign, the comparison-bin-width analysis, the property and
+thermodynamic records, and the complete Graetz--Robin verification
+table.
 
 \begin{acknowledgments}
 \confirm{acknowledgments and any funding statement with grant numbers.
@@ -105,13 +109,6 @@ confirm that they apply to this work.}
 \textbf{Jan Kren}: \confirm{CRediT roles}.
 \textbf{Bojan Ni\v{c}eno}: \confirm{CRediT roles}.
 
-\section*{Supplementary Material}
-See the supplementary material for the case inventory, the detailed
-material-ledger and solver diagnostics, the scalar mesh checks of the
-upwind campaign, the comparison-bin-width analysis, the property and
-thermodynamic records, and the complete Graetz--Robin verification
-table.
-
 \section*{Data Availability}
 The solver, the benchmark preparation scripts and the data that support
 the findings of this study are openly available in the LESTO repository
@@ -122,12 +119,12 @@ follow-up, production, scheme and mesh, and iteration-check metrics,
 the Graetz--Robin verification records, saved axial profiles,
 generated tables,
 figure-generation code and SHA-256 provenance records. The experimental
-curves were digitised from Liu et al.\ \cite{Liu2025chemical}; they
+curves were digitized from Liu et al.\ \cite{Liu2025chemical}; they
 reconstruct published figures, are not author-supplied measurements,
-and are adapted under the source paper's CC BY 4.0 licence. The
+and are adapted under the source paper's CC BY 4.0 license. The
 measured profiles, wall temperatures and model curves of Lobresco et
-al.\ \cite{Lobresco2026assessment} were digitised in the same way and
-are adapted under that paper's CC BY 4.0 licence; the case set-up and
+al.\ \cite{Lobresco2026assessment} were digitized in the same way and
+are adapted under that paper's CC BY 4.0 license; the case set-up and
 final profiles of our comparison runs are included. Some
 thermodynamic coefficient files are external inputs that are not
 redistributed; their local identifiers and the provenance of the derived

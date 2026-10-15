@@ -1,5 +1,29 @@
 # Physics of Fluids submission checklist
 
+## 15 October revision and three-day submission schedule
+
+Target confirmed by Jan: **Physics of Fluids**, submission target **18 October 2026**. This is a working draft; nothing has been submitted.
+
+- Revised the abstract to 237 words; distinguished verified wall discretization from conditional experimental agreement. Explicitly identified the main-deposit onset convention in the abstract.
+- Qualified diffusion-control claims throughout the introduction, sensitivity discussion and conclusions: current support is a tube-scale estimate and upwind sensitivities. Review-A/B remain outstanding; no new simulation results were inferred.
+- Separated tube radius `R_t` from universal gas constant `R`; standardized common American spellings; corrected the four-part evidence framework and placed Supplementary Material before acknowledgments.
+- Compiled and visually reviewed all 25 pages. No overfull boxes or unresolved references. BibTeX reports the existing REVTeX internal `jnrlst` control warning.
+- Independent arithmetic checks passed: 19 production cases, 27 scheme/mesh differences, three corrector checks, ten Lobresco onset calculations. Full provenance checking is **blocked**: `manuscript/data/graetz/criteria.log` is absent. Every other input listed in `generated/results.json` is present and matches its recorded hash. Recover the original log from the workstation; do not regenerate a substitute and change the expected hash simply to pass the check.
+- `alt-text.txt` provides draft descriptions for all seven main figures and the supplementary figure. Table accessibility and journal submission fields still need final review.
+- Existing review packages and alternate PDFs are not refreshed by this edit. The authoritative current review PDF is `lesto-pof.pdf`; rebuild the submission archive only after final approval.
+
+| Date | Required outcome |
+|---|---|
+| 15 October | Revised review PDF and claim audit; locate review-A/B outputs and recover original Graetz criteria log. |
+| 16 October | Integrate and verify completed studies; decide final scope/title if results cannot be completed; obtain Bojan's scientific review and confirm author details. |
+| 17 October | Address coauthor comments; finalize declarations and data availability, verify the public release/archive, rebuild manuscript and supplement, and check figures and submission metadata. |
+| 18 October | Final author approval, final reproducibility check and journal submission. Do not label the paper submitted until the journal confirms receipt. |
+
+The deadline depends on access to the missing evidence and author decisions. Outstanding author facts: corresponding email, funding/acknowledgments, conflicts, CRediT roles, and coauthor agreement. Substantial AI-assisted drafting/revision must be described accurately in the disclosure chosen by the authors; do not describe this work as proofreading only.
+
+The older status entries below are retained as history. In particular, their abstract word count and alt-text status are superseded above, and the earlier remote-branch observation must be rechecked before claiming public availability. AIP instructions were rechecked on 15 October: **do not upload a cover letter to Physics of Fluids**.
+
+
 Prepared 13 October 2026 for `manuscript/pof/lesto-pof.tex`; updated
 14 October 2026 after integrating the completed simulation campaigns
 (production runs, scheme/mesh study, iteration check, Lobresco

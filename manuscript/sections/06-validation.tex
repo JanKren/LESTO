@@ -76,7 +76,7 @@ for model error.}
 \Cref{fig:baseline} shows the complete profiles. The raw discrepancies
 $L_{\rm raw}$ are 46.33, 52.97 and 183.84 percentage points for pure
 PbI$_2$, steel LBE and silica LBE (53.90, 53.45 and 181.84 on the
-18,432-cell upwind mesh), and the corresponding normalised overlaps are
+18,432-cell upwind mesh), and the corresponding normalized overlaps are
 76.97\%, 72.13\% and 6.13\% (72.93\%, 71.88\% and 7.20\%). The silica
 case has a large profile discrepancy even though both printed
 temperature ranges contain its calculated binned maxima.
@@ -84,12 +84,12 @@ temperature ranges contain its calculated binned maxima.
 \centering
 \includegraphics{baseline_profiles.pdf}
 \caption{Production Q1 iodine profiles (41,472 cells, limited-linear
-advection) compared with the digitised
+advection) compared with the digitized
 published scans (grey histograms) \cite{Liu2025chemical}. Solid black
 lines are total modelled wall iodine; dashed lines show its two iodide
-contributions. Model totals are normalised to 100\%, 93.4\% and 93.0\%
+contributions. Model totals are normalized to 100\%, 93.4\% and 93.0\%
 for pure PbI$_2$, steel LBE and silica LBE, respectively, to expose the
-omitted KI yield; experimental bars keep their digitised values.}
+omitted KI yield; experimental bars keep their digitized values.}
 \label{fig:baseline}
 \end{figure*}
 
@@ -111,7 +111,7 @@ samples in a 4.8 mm steel column. Unlike the Liu et al.\ cases, they do
 not require a deposit-derived source. That study also reports the
 deposition temperatures of two of its own CFD models: a
 temperature-based model calibrated against one reference experiment,
-and a vapour-pressure-based Hertz--Knudsen--Schrage model with a
+and a vapor-pressure-based Hertz--Knudsen--Schrage model with a
 near-wall interaction layer and an effective rate multiplier $C_e$. We
 ran the five cases without adjusting any parameter to these data.
 
@@ -119,12 +119,12 @@ ran the five cases without adjusting any parameter to these data.
 in that study: the wall temperature at the first position where the
 deposit exceeds 1\% of its peak, linearly interpolated between 1 cm
 points. We apply this rule to the measured profiles from their first
-digitised point, and to our computed deposits downstream of the end of
+digitized point, and to our computed deposits downstream of the end of
 the sample, in all five cases. We take the rule to locate the onset of
 the main deposit formed by transport down the gradient, and the
-measured profiles contain only that deposit: the measured T5\_60 profile, digitised from 2 cm, has no
+measured profiles contain only that deposit: the measured T5\_60 profile, digitized from 2 cm, has no
 deposit above the threshold upstream of 37 cm. For four cases the
-restriction makes no difference. At 5 mL/min, however, computed vapour
+restriction makes no difference. At 5 mL/min, however, computed vapor
 diffuses upstream against the slow carrier through the zero-total-flux
 inlet condition (below), and \LobFiveUpstream\% of the T5\_60 deposit
 forms upstream of the sample, near the cold inlet. Applied from the
@@ -138,33 +138,33 @@ discrepancy with the measurement.
 \paragraph{Inputs.} Flows (standard volumetric rates at 273.15 K and
 101,325 Pa), durations and sample amounts are those of Table 1 of that
 study. The wall temperature of each flow rate, the measured profiles,
-the sample position and both published model curves were digitised from
-its Figs.~13--14 (CC BY 4.0); the 1\% rule applied to the digitised
+the sample position and both published model curves were digitized from
+its Figs.~13--14 (CC BY 4.0); the 1\% rule applied to the digitized
 measured profiles reproduces the published experimental deposition
 temperatures within \LobDigitised{} K. The model is that of
 \cref{sec:model,sec:numerics} reduced to one species: an expanding
 laminar helium carrier computed with the wall temperature, HKS exchange
 with $C_e=\alpha=1$ in series with the half-cell diffusion resistance,
 the PbI$_2$--He diffusivity correlation of that study, our own
-phase-resolved PbI$_2$ vapour-pressure table, an inlet condition of zero
+phase-resolved PbI$_2$ vapor-pressure table, an inlet condition of zero
 total species flux, and an evaporating sample of the Table 1 amount at
-the digitised position, removed at the end of the experiment. Mesh
+the digitized position, removed at the end of the experiment. Mesh
 spacings follow the production and 18,432-cell meshes
 (\LobCellsProd{} and \LobCellsCoarse{} cells), with limited-linear
 advection; details, including a wall-temperature table of the T-Flows
 test case that differs from the published curves, are in Sec.~S6 of the
 supplementary material. Our calculation thus differs from both
 published models in more than the wall treatment: they prescribe a
-fully developed laminar velocity profile, take the PbI$_2$ vapour
+fully developed laminar velocity profile, take the PbI$_2$ vapor
 pressure from a gas--solid equilibrium calculation, and represent the
 source as a timed inlet release (temperature-based model) or a
-volumetric solid inventory (vapour-pressure model).
+volumetric solid inventory (vapor-pressure model).
 
 \paragraph{Results.} \Cref{tab:lobresco,fig:lobresco} summarise the
 comparison. Our onset temperatures differ from the measurements by
 \LobDiffA, \LobDiffB, \LobDiffC, \LobDiffD{} and \LobDiffE{} K, an RMS
 deviation of \LobRMS{} K, against \LobRMSTemp{} K for the calibrated
-temperature-based model and \LobRMSVap{} K for the vapour-pressure-based
+temperature-based model and \LobRMSVap{} K for the vapor-pressure-based
 model. The two meshes agree within \LobCoarse{} K. The measured decrease
 of the onset temperature with duration at 106 mL/min is reproduced with
 a warm offset of 16--26 K; the onsets at 5 and 540 mL/min are 11--14 K
@@ -180,7 +180,7 @@ onset agreement can show. First, the comparison-region choice above
 decides the T5\_60 result. Second, the near-source state lies outside
 the model: next to the sample the computed PbI$_2$ mole fraction
 reaches 0.33--0.36, which violates the dilute, frozen-carrier
-assumption (the vapour would alter density, velocity and diffusion),
+assumption (the vapor would alter density, velocity and diffusion),
 and the boat is not represented. Third, the release history is not
 constrained. In the model the sample is fully evaporated before the end
 of even the shortest, 6 s experiment: by then \LobSixDeposit\% of the T106\_6
@@ -193,12 +193,12 @@ and the actual sample surface are unknown, and the computed release
 rate comes from the non-dilute region where the model does not apply.
 The experiments also end by stopping the flow, withdrawing the sample
 and pulling the column out of the furnace, which is not simulated;
-counting the vapour still in the tube at the end time changes only
+counting the vapor still in the tube at the end time changes only
 T5\_60 noticeably, to \LobFiveGas{} K, because \LobFiveGasFraction\% of
 its inventory is still gaseous (RMS \LobRMSGas{} K).
 
 The onset comparison is therefore promising but conditional. Carrier,
-vapour-pressure and source assumptions differ from those of the
+vapor-pressure and source assumptions differ from those of the
 published models, so the smaller RMS deviation cannot yet be attributed
 to the wall treatment, and the profile discrepancies above remain. It
 is an untuned comparison with published measurements and published
@@ -212,10 +212,10 @@ model results, not a validation.
 of Lobresco et al.\ \cite{Lobresco2026assessment}: flow $\dot V$
 (mL/min, standard), duration $t$ (s), measured onset $T_{\rm exp}$ (K,
 their Table 2), and the onset of this work and of their
-temperature-based and vapour-pressure-based models minus $T_{\rm exp}$
+temperature-based and vapor-pressure-based models minus $T_{\rm exp}$
 (K; the latter two from their Table 2). $\Delta x_{\rm pk}$ is our
 deposit peak minus the measured peak (cm), and $L_1/n_0$ the summed
-absolute difference of our deposit and the digitised measured profile
+absolute difference of our deposit and the digitized measured profile
 divided by the sample amount. This work: \LobCellsProd{} cells,
 deposit at the end of the experiment, onset rule applied downstream of
 the sample in every case.}
@@ -227,10 +227,10 @@ the sample in every case.}
 \includegraphics{lobresco_comparison.pdf}
 \caption{Deposited PbI$_2$ for the five experiments of Lobresco et al.\
 \cite{Lobresco2026assessment}: measured profiles, their
-temperature-based and vapour-pressure-based model results (all
-digitised from their Figs.~13--14 and adapted under CC BY 4.0), and the
+temperature-based and vapor-pressure-based model results (all
+digitized from their Figs.~13--14 and adapted under CC BY 4.0), and the
 deposit of this work at the end of each experiment (1 cm bins,
-\LobCellsProd{} cells). Dashed red lines: digitised wall temperature
+\LobCellsProd{} cells). Dashed red lines: digitized wall temperature
 used as input (right axes).}
 \label{fig:lobresco}
 \end{figure*}

@@ -66,7 +66,7 @@ qualified thermodynamic dataset.}
 In the silica experiment the published peak labels do not match the
 published temperature curve. The scan places the PbI$_2$ and BiI$_3$
 maxima at 51 and 59 cm, labelled 306$\pm$24 and 127$\pm$39\,$^\circ$C.
-At those positions the digitised temperature curve gives approximately
+At those positions the digitized temperature curve gives approximately
 369 and 235\,$^\circ$C, 63 and 108 K above the labels; on the same curve,
 306 and 127\,$^\circ$C occur at 55.096 and 63.653 cm. The discrepancy
 exceeds the nominal raster temperature resolution, so the published
@@ -82,7 +82,7 @@ derived from the published curve and labels, not optimised against the
 CFD profiles.
 
 \Cref{tab:alignment,fig:alignment} show that the shifts move the Q1
-maxima from 56/63 cm to 51/59 or 51/58 cm and raise the normalised
+maxima from 56/63 cm to 51/59 or 51/58 cm and raise the normalized
 overlap from 6.13\% to 77.80\% or 73.26\%. The low-loading Q2 variants
 place the maxima at 51/59 or 51/58 cm, with overlaps of 77.88\% and
 75.54\%. On the 18,432-cell upwind mesh the order of the two shifts was
@@ -116,7 +116,7 @@ saturation.}
 \includegraphics{silica_alignment.pdf}
 \caption{Input-derived silica mappings and their consequences.
 Top: the original reconstructed temperature curve, the two shifts and
-the printed peak labels. Bottom: common-scan-normalised iodine
+the printed peak labels. Bottom: common-scan-normalized iodine
 profiles for Q1 and low-loading Q2. The improved agreement is
 conditional on an unconfirmed coordinate hypothesis. Published data
 are adapted from Liu et al.\ \cite{Liu2025chemical}.}
@@ -163,9 +163,13 @@ differences has not been quantified, so effects of comparable size are
 not ranked precisely. The tube-scale Damk\"ohler numbers of
 \cref{sec:regime} and the small accommodation response, at most 0.41\%
 for $\alpha=0.1$ and 4.21\% for $\alpha=0.01$, against 3.83--14.20\% for
-halving or doubling $D$, indicate that radial diffusion, not
-interfacial kinetics, limits the wall exchange in these columns; the
-wall temperature acts mainly through the equilibrium pressure.
+halving or doubling $D$, are consistent with predominantly
+diffusion-controlled exchange in the tested model. This interpretation
+combines a tube-scale estimate with sensitivities from the upwind
+campaign; it does not establish a resolved transition between kinetic
+and diffusion control. The wall temperature also changes the
+equilibrium pressure, so its effect cannot be reduced to a change in
+transport resistance alone.
 % TODO(review-B): Damkoehler sweep. Confirm or qualify the
 % diffusion-limited statement above with the swept response.
 

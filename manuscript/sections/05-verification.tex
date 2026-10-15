@@ -1,11 +1,11 @@
 \section{Numerical verification and resolution limits}
 \label{sec:verification}
-This section verifies the wall-exchange discretisation on a problem with
+This section verifies the wall-exchange discretization on a problem with
 a reference solution, then reports material conservation and the
 time-step, iteration, mesh and scheme dependence of the iodine
 calculations.
 
-\subsection{Verification of the wall-exchange discretisation}
+\subsection{Verification of the wall-exchange discretization}
 \label{sec:graetz}
 The half-cell series law of \cref{eq:halfcell} is verified on an
 extended Graetz problem with a Robin wall condition
@@ -30,12 +30,12 @@ the parabolic carrier enters through exact face fluxes. Steady states
 are obtained by implicit Euler steps with a very large time step, and
 $\mu$ is fitted to the computed gas line density in a window chosen from
 the spectrum. Two wall laws are compared: the half-cell series law and
-the kinetic law applied directly to the cell-centre value (no half-cell
+the kinetic law applied directly to the cell-center value (no half-cell
 resistance), which is the form of a volumetric first-cell sink. Every
 fitted $\mu$ equals the decay rate of the developed discrete mode of
 the documented scheme within $\GraetzMuH$, and moving the fit window or
 changing the outlet condition changes it by less than $10^{-7}$, so the
-differences below are discretisation errors. All \GraetzCriteria{}
+differences below are discretization errors. All \GraetzCriteria{}
 acceptance criteria of the study pass (records, provenance and
 regeneration: Sec.~S7 of the supplementary material).
 
@@ -45,12 +45,12 @@ et al.\ \cite{Celik2008procedure} on $N_r=64/128/256$. The half-cell law
 converges at order \GraetzOrderHalfMin--\GraetzOrderHalfMax{} with
 GCI$_{\rm fine}\le\GraetzGCIHalfMax\%$, and its Richardson-extrapolated
 decay rate matches the reference within $\GraetzExtHalfMax$. The
-cell-centre law converges at first order
+cell-center law converges at first order
 (\GraetzOrderNoneMin--\GraetzOrderNoneMax) with
 GCI$_{\rm fine}=\GraetzGCINoneMin$--\GraetzGCINoneMax\%. With bounded
 SuperBee advection the observed orders are \GraetzOrderSBHalf{} and
 \GraetzOrderSBNone{}, respectively (supplementary material, Table~S4).
-On the coarsest mesh the cell-centre law errs by 1--2\% in the decay
+On the coarsest mesh the cell-center law errs by 1--2\% in the decay
 rate, the half-cell law by at most $10^{-4}$.
 \begin{table*}[tb]
 \centering
@@ -58,13 +58,13 @@ rate, the half-cell law by at most $10^{-4}$.
 $\mu/\mu_{\rm ref}-1$ of the fitted decay rate on $N_r$ radial cells,
 observed order $p$ and GCI$_{\rm fine}$ \cite{Celik2008procedure} on
 $N_r=64/128/256$, Gauss linear advection, zero-gradient outlet.
-Half-cell series: \cref{eq:halfcell}; cell-centre value: kinetic law
+Half-cell series: \cref{eq:halfcell}; cell-center value: kinetic law
 without the half-cell resistance.}
 \label{tab:graetz}
 \small\input{generated/graetz-table}
 \end{table*}
 
-This test verifies the discretisation of the wall exchange and its
+This test verifies the discretization of the wall exchange and its
 coupling to advection and diffusion for a linear wall law at
 $\mathrm{Bi}\le50$. It does not verify the nonlinear HKS law with
 tabulated equilibrium pressures, the gas equilibrium or the wall
@@ -97,7 +97,7 @@ maximised over steps and elements, the largest raw residue is
 $\ProductionResidue$ for the 19 production cases and
 $8.85\times10^{-13}$ for the 60 source-driven follow-up cases. The
 calculations conserve the represented elements to round-off; this says
-nothing about physical accuracy or discretisation error. The ledger
+nothing about physical accuracy or discretization error. The ledger
 terms, the equilibrium-solver diagnostics, the startup sign flags and
 the trace-loading bound are given in Sec.~S2 of the supplementary
 material.
@@ -153,7 +153,7 @@ upwind advection. All steel cases are Q2; the shifted-BiI case uses
 \caption{Mesh sequences of the iodine deposition profile for pure
 PbI$_2$ (top) and the shifted-BiI steel case at 1\% metal saturation
 (bottom), with first-order upwind (left) and limited-linear (right)
-advection. Each curve is normalised over the common scanned interval
+advection. Each curve is normalized over the common scanned interval
 so that shapes can be compared; the unnormalised differences are given
 in \cref{tab:numerical}. Grey histograms are the reconstructed
 experimental iodine scans \cite{Liu2025chemical} and include any KI

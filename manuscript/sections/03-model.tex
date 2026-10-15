@@ -68,7 +68,7 @@ potential, and a Schur complement treats the remaining coupling.
 Re-speciation is requested at every
 time step in cells with $T\ge350\units{K}$; below this threshold the
 transported gas composition is kept. This cutoff is a numerical
-modelling choice, not a demonstration that reactions cease at 350 K.
+modeling choice, not a demonstration that reactions cease at 350 K.
 Homogeneous condensed phases are excluded, and instantaneous gas
 equilibrium stands in for unmeasured finite reaction rates.
 
@@ -89,14 +89,14 @@ accommodation coefficient and $C_e$, $s_i$ are dimensionless
 multipliers. The baseline uses $C_e=s_i=\alpha_i=1$.
 This is the Hertz--Knudsen--Schrage (HKS) form
 \cite{Hertz1882verdunstung,Knudsen1915maximale,Schrage1953theoretical}
-used in vapour-pressure-driven deposition modelling
+used in vapor-pressure-driven deposition modeling
 \cite{Lobresco2026assessment}. The condensed-state pressure follows from
 the gas and condensed Gibbs energies on the stable tabulated condensed
 branch. The wall temperature selects this pressure; no deposition
 threshold is prescribed.
 
-The kinetic law must also connect to the cell-centre concentration
-through molecular diffusion. With $d_f$ the cell-centre-to-wall
+The kinetic law must also connect to the cell-center concentration
+through molecular diffusion. With $d_f$ the cell-center-to-wall
 distance, $p_{i,c}=\chi_{i,c}Y_{i,c}$ and
 $\chi_{i,c}=\rho_cRT_c/M_i$, eliminating the wall concentration gives
 \begin{equation}
@@ -119,7 +119,7 @@ The gas equation receives the face flow $A_f j_{i,f}$ as an implicit
 cell contribution, and the wall inventory receives its negative.
 Evaporation is limited by the face inventory available over the time
 step, so a bare wall cannot evaporate. Inventory updates use the
-exchange actually realised by the final gas solve, including active
+exchange actually realized by the final gas solve, including active
 bounds, not an independently evaluated explicit predictor. Switching
 between deposition and evaporation therefore does not create material.
 

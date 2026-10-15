@@ -3,14 +3,14 @@
 \subsection{Geometry, carrier and boundary conditions}
 \label{sec:geometry}
 A structured axisymmetric 5$^\circ$ wedge represents the 1.25 m column
-(\cref{fig:geometry}). The steel and silica radii are 2.4 and 2.5 mm.
+(\cref{fig:geometry}). The tube radius $R_t$ is 2.4 mm for steel and 2.5 mm for silica.
 The production mesh has $576\times72\times1=41{,}472$ cells. The
 64 follow-up sensitivities use the original
 $384\times48\times1=18{,}432$-cell mesh. The mesh studies use
 $256\times32\times1=8{,}192$, 18,432, 41,472 and, for one case,
 $864\times108\times1=93{,}312$ cells; successive levels refine the
 axial and radial spacing by a factor of 1.5. The source occupies
-$x=0.09$--0.105 m and the radial interval $r=0.25R$--$0.75R$. Its
+$x=0.09$--0.105 m and the radial interval $r=0.25R_t$--$0.75R_t$. Its
 position and cell selection are computational assumptions, and the
 physical boat is omitted from the carrier geometry. Full-column source
 and inlet rates are multiplied by $5/360=1/72$ for the wedge.
@@ -54,7 +54,7 @@ the baseline diffusivity, the Schmidt number is 2.0--11.3 between 400
 and 1173 K, and the diameter-based P\'eclet number $\mathrm{Pe}=\mathrm{Re}\,\mathrm{Sc}$
 is 5.9--17.4 at 100 mL/min and 2.6--7.8 at 45 mL/min. Axial diffusion
 is therefore not negligible next to advection, and the fixed zero
-inlet value permits a diffusive loss of vapour through the inlet; it is
+inlet value permits a diffusive loss of vapor through the inlet; it is
 included in the outward transport of the material ledger
 (\cref{eq:balance}). The flow-stop cases replace both end conditions by
 zero normal species flux (supplementary material, Sec.~S1).
@@ -66,20 +66,19 @@ and the Sutherland viscosity, $\mathrm{Re}=4\dot m/(\pi d\mu)$ is
 1.5--3.0 for the 100 mL/min steel case and 0.7--1.3 for the 45 mL/min
 cases between the source-furnace temperature of 1173 K and 400 K; the
 carrier is laminar throughout. With the baseline diffusivity, the
-radial diffusion time $R^2/D_i$ is 58 ms in steel and 63 ms in silica.
+radial diffusion time $R_t^2/D_i$ is 58 ms in steel and 63 ms in silica.
 Placing the conductance of \cref{eq:hks} in series with diffusion over
-the tube radius, as in \cref{eq:halfcell} with $d_f$ replaced by $R$
+the tube radius, as in \cref{eq:halfcell} with $d_f$ replaced by $R_t$
 and $T_c=T_w$, defines a wall Damk\"ohler number
 \begin{equation}
  \begin{aligned}
- \mathrm{Da}_i&=\frac{G_i\chi_iR}{\rho D_i}\\
+ \mathrm{Da}_i&=\frac{G_i\chi_iR_t}{\rho D_i}\\
  &=C_es_i\frac{2\alpha_i}{2-\alpha_i}
-  \sqrt{\frac{RT_w}{2\pi M_i}}\,\frac{R}{D_i},
+  \sqrt{\frac{RT_w}{2\pi M_i}}\,\frac{R_t}{D_i},
  \end{aligned}
  \label{eq:damkohler}
 \end{equation}
-where $R$ is the gas constant under the square root and the tube
-radius in the last factor. Because $\chi_i/\rho=RT_w/M_i$, it does not
+where $R$ is the universal gas constant and $R_t$ is the tube radius. Because $\chi_i/\rho=RT_w/M_i$, it does not
 depend on pressure. For
 PbI$_2$ and BiI$_3$ between 400 and 1173 K, the baseline coefficients
 give $\mathrm{Da}_i\approx1.4\times10^3$--$2.9\times10^3$, and the
@@ -94,7 +93,7 @@ resolved near-wall gradients of the calculations.
 % whether it confirms the diffusion-limited reading of this paragraph and
 % of Sec. 7.3. Do not change the PoF title before this is in.
 
-Two omitted effects can be bounded with the same inputs, the digitised
+Two omitted effects can be bounded with the same inputs, the digitized
 wall profiles and the 101,325 Pa outlet pressure. The first is
 buoyancy. Neither experimental paper states the column orientation. For
 developed laminar flow with a linearly varying wall temperature, the
@@ -120,7 +119,7 @@ unquantified limitation of the model. The second effect is thermal
 $\alpha_T=1$ as a generous bound, the Soret drift velocity
 $D_i\alpha_T|\mathrm{d}T_w/\mathrm{d}x|/T$ is at most 2.2\% of the
 carrier velocity. The radial Soret flux, relative to a Fickian flux
-$x_iD_i/R$ towards the wall, is at most $\alpha_T\Delta T_r/T\le0.7\%$,
+$x_iD_i/R_t$ towards the wall, is at most $\alpha_T\Delta T_r/T\le0.7\%$,
 with $\Delta T_r$ the wall-to-bulk difference above. Both are small
 compared with the factor-of-two diffusivity variations examined in
 \cref{sec:sensitivity}.
@@ -147,7 +146,7 @@ within a case. The baseline time
 step is 2 ms. Wall exchange is assembled implicitly with nonnegative
 source and sink coefficients and shared inventory bounds. Configured
 species correctors and active-bound guards reconcile the final gas
-solution with the realised wall transfer. Gas re-speciation then
+solution with the realized wall transfer. Gas re-speciation then
 redistributes species under the local element constraints. The
 sequence is first order in time; a conservative equilibrium projection
 alone does not remove splitting or transport error. The baseline

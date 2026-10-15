@@ -64,7 +64,7 @@
 \fancyhf{}
 \fancyhead[L]{\raisebox{-0.25\height}{\includegraphics[height=13pt]{psi-full-black}}}
 \fancyhead[R]{\small\color{PSIgray}LESTO Task 3.4 \enspace|\enspace The case ladder, explained}
-\fancyfoot[L]{\small\color{PSIgray}Jan Kren \enspace|\enspace 15.10.2026}
+\fancyfoot[L]{\small\color{PSIgray}Jan Kren and Bojan Ničeno \enspace|\enspace 15.10.2026}
 \fancyfoot[R]{\small\color{PSIgray}\thepage\,/\,\pageref{LastPage}}
 \renewcommand{\headrule}{{\color{PSIblue}\hrule height 1.2pt}}
 \renewcommand{\footrulewidth}{0pt}
@@ -96,14 +96,15 @@
     {\large From the T-Flows benchmark to conservative wall exchange:\\
      model equations, verification and experimental comparison\par}
     \vspace{0.5cm}
-    {\normalsize Jan Kren \enspace|\enspace Paul Scherrer Institute, Villigen \enspace|\enspace 15 October 2026\par}
+    {\normalsize Jan Kren and Bojan Ničeno\par}
+    {\small Paul Scherrer Institute, Villigen \enspace|\enspace 15 October 2026\par}
     \vspace{0.15cm}
     {\small Cases 001--011: Bojan Ničeno \enspace\textbullet\enspace Cases 012--024: Jan Kren\par}};
 \end{tikzpicture}
 \vspace*{5.75cm}
 
 \begin{inshort}[Purpose of this report]
-This report summarises my recent work on LESTO, building on your carrier
+This report summarises recent work on LESTO, building on the carrier
 and transport cases 001--011. Cases 012--024 extend that foundation with
 wall exchange, equilibrium chemistry and comparisons with the experiments
 and T-Flows results in the Lobresco paper~\cite{Lobresco2026}.
@@ -299,11 +300,17 @@ choice; it should not be read as a complete reversible surface mechanism.
 
 \clearpage
 \subsection{OpenFOAM--GEMS3K coupling \hfill\normalfont\small\color{PSIgray}Jan Kren}
-Jan implemented the optional GEMS3K coupling in the OpenFOAM solver through
-a compiled bridge library. OpenFOAM advances transport and manages the
-gas and wall inventories; GEMS3K supplies thermodynamic information.
-The adapter maps species and elements, passes temperature, pressure and
-composition, and checks returned states before they are used.
+Bojan had already integrated xGEMS: a probe application and a solver
+start-up call demonstrated an equilibrium calculation on a cement example.
+That call tested the library connection; its result was not used by the
+transport calculation. His baseline also included conservative mock
+gas-to-solid exchange and per-species balance checks.
+
+Jan added a separate GEMS3K bridge and connected thermodynamic results
+to the Pb--I and Pb--Bi--I calculations described below. OpenFOAM advances
+transport and manages gas and wall inventories; the adapter passes local
+states to GEMS3K, maps returned quantities and checks them before use.
+The original xGEMS demonstration is retained as an optional build path.
 
 There are two distinct uses. In case 015, local GEMS3K calculations supply
 $p_{{\rm eq},i}$ for the HKS wall and boat exchange. OpenFOAM then evaluates
@@ -319,8 +326,10 @@ kernel refines the result and provides fallback, enforcing the transported
 element amounts. Chemistry is therefore coupled sequentially to transport,
 with no feedback to the frozen helium flow. Cases 015 and 020 verify these
 optional paths; the main benchmark chain does not require a live GEMS3K
-call. This coupling is Jan's implementation contribution, distinct from
-the existing OpenFOAM and GEMS3K software.
+call. Jan's contribution is this application-specific coupling and its
+verification, extending Bojan's initial integration and conservative
+transport foundation; neither the first GEMS connection nor conservation
+itself is claimed as new here.
 
 \begin{center}
 \begin{tikzpicture}[
