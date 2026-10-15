@@ -1,98 +1,77 @@
-\section{Discussion: implications for predictive modelling}
+\section{Discussion: what the evidence supports}
 \label{sec:discussion}
 \subsection{Conservation, resolution and experimental agreement}
 The results separate three requirements that a deposition calculation
 must satisfy. Element balance tests the consistency of the discrete
-transport--equilibrium--wall coupling. Resolution studies test how much
-the computed observables depend on numerical choices. Experimental
-comparison tests the combined consequences of that numerical model,
-its physical assumptions and its input data. Passing the first test
-does not establish the other two.
+transport--equilibrium--wall coupling; the Graetz--Robin test verifies
+the wall discretisation against a reference solution; resolution
+studies test how much the computed observables depend on numerical
+choices; and experimental comparison tests the combined consequences of
+the numerical model, its physical assumptions and its input data.
+Passing the first two does not establish the others.
 
-This distinction is consequential here. The raw material residues are
-small, but the original upwind fine/medium profile differences are
-2.06--10.58\%.
-Meanwhile, total deposition changes by less than 0.014\% under the same
-refinement. An integral balance can therefore appear stable while the
-spatial distribution remains sensitive. A binned peak introduces an
-additional loss of information: nearly equal neighbouring bins can
-exchange rank and produce a large change in the reported peak
-temperature. Profile differences, centroids and deposited amounts
-should accompany peak comparisons when assessing this model.
-The production scheme and mesh study reduces the most sensitive
-limited-linear profile change to \SteelLLThree\% between 41,472 and
-93,312 cells, without a consistent apparent order.
-The saved-profile aggregation check in \cref{sec:bin-audit} strengthens
-this distinction: wider bins can suppress the apparent mesh difference,
-but the result depends strongly on their origin. Conversely, the small
-binned transport distances support stability of broad deposition location
-between the tested meshes without qualifying local peak heights.
-
-The physical-input variations also need to be interpreted against this
-resolution evidence. Their ranges are finite responses over selected
-cases, not components of a probabilistic uncertainty budget. They cannot
-be added in quadrature or used to infer a universal parameter ranking.
-The refined BiI perturbation retains a large change in iodide partition,
-whereas several transport and accommodation responses are comparable
-in magnitude to the unresolved spatial differences. The latter require
-further numerical qualification before small physical effects can be
-distinguished reliably.
+Here the raw material residues are at round-off and the half-cell wall
+law converges at second order, yet local profile shapes remain
+resolution-sensitive while integrals are stable, and nearly equal bins
+can shift a reported peak temperature by tens of kelvin. Profile
+differences, centroids and deposited amounts should therefore accompany
+peak comparisons. The physical-input responses are finite responses over
+selected cases; they cannot be added in quadrature or read as a
+universal parameter ranking, and several are comparable in magnitude to
+the unresolved spatial differences.
 
 \subsection{What the experimental comparisons can identify}
-The source constructions expose a limitation of inferring release
-chemistry from final deposits. Q1 uses deposit-derived compound masses
-for LBE, so agreement in the iodide split partly reflects information
-already supplied to the calculation. Q2 allows the split to emerge,
-but combines a deposit-derived iodine loading with an unmeasured metal
-saturation. The response to BiI thermodynamics then shows that the
-same observed split may constrain several coupled assumptions rather
-than identify a unique source or thermodynamic description.
+Q1 uses deposit-derived compound masses for LBE, so agreement in the
+iodide split partly reflects information supplied to the calculation.
+Q2 lets the split emerge but combines a deposit-derived iodine loading
+with an unmeasured metal saturation; the computed split responds
+strongly to both the BiI thermodynamic input and the source loading, so
+one observed split constrains several coupled assumptions rather than
+identifying one of them. The silica scan and its printed temperatures are
+mutually inconsistent, and the two diagnostic shifts expose rather than
+resolve this. The untuned Lobresco comparison gives onset temperatures
+closer to the measurements than both published models, but with
+different carrier, vapour-pressure and source assumptions, a
+rule-dependent T5\_60 value and profiles displaced upstream; it is
+encouraging for the transport and wall law, not a demonstration of
+them. The practical contribution is therefore a framework for testing
+explicit input hypotheses while retaining conservation and exposing
+profile discrepancies. Fitting an interfacial coefficient to a single
+peak under these conditions could compensate for an error elsewhere in
+the model.
 
-The silica results reveal a separate ambiguity. Both the printed peak
-temperatures and the digitised spatial scan appear plausible when
-considered individually, yet they disagree through the reconstructed
-temperature-coordinate mapping. The two diagnostic shifts substantially
-improve the profiles without resolving which mapping is physically
-correct; their overlap ranking reverses between upwind and limited-linear
-advection. Moreover, these shifts use labels from the same experiment
-being compared. Although they were not fitted to CFD output, their
-improved agreement is still not an independent validation test.
-
-The untuned single-species comparison with Lobresco et al.\
-\cite{Lobresco2026assessment} supplies an additional experimental test:
-the onset-temperature RMS deviation is \LobRMS{} K, but the computed
-peaks lie \LobShiftMin--\LobShiftMax{} cm upstream and the shutdown
-transient and non-dilute source region remain unrepresented. It strengthens
-the evidence for the transport and wall law within those limits.
-
-The practical contribution is therefore a framework for testing explicit
-input hypotheses while retaining conservation and exposing profile
-discrepancies. The present data do not uniquely separate release,
-thermodynamic, coordinate and omitted-chemistry effects. Fitting an
-interfacial coefficient to a single peak under these conditions could
-compensate for an error elsewhere in the model.
-
-\subsection{Evidence needed to extend the present scope}
-The scheme and mesh study now extends the shifted-BiI steel branch to
-93,312 cells with bounded advection, and full-duration corrector checks
-are available for three cases. Spatial qualification still needs to extend
-beyond that one refined branch and include cases with competing binned
-maxima. Full profiles and integral observables should both be assessed.
-The full-duration shifted-BiI corrector comparison remains unreported.
-
-On the experimental side, the most direct constraints would be the
-original thermocouple and scan coordinates, controller reference
-conditions and an independently measured release history. Qualified
-BiI thermodynamics and the provenance of the constructed condensed
-records are also needed before selecting a thermochemical branch on
-physical grounds. These requirements address specific ambiguities
-demonstrated by the completed cases.
-
-Finally, comparison with post-experiment deposits requires the release
-and cooling protocol to be represented or its effect independently
-bounded. The current 60 s calculations preserve the assumed three-hour
-mean source rate, while the flow-stop restarts retain the original
-temperature field. Neither calculation supplies the missing history.
-The role of potassium chemistry, substrate reactions, finite gas
-kinetics and boat obstruction remains outside the evidence presented
-here and cannot be inferred from the present sensitivity ranges.
+\subsection{Limitations}
+\label{sec:limitations}
+The limitations are collected here and referred to elsewhere.
+\begin{itemize}
+\item \emph{Physics not represented:} a frozen, trace-loaded carrier
+  with the wall temperature imposed over each cross-section, so no
+  buoyancy-driven secondary flow (possibly significant locally in a
+  horizontal column; orientation unknown), no conjugate heat transfer
+  and no non-dilute effects near a source; no aerosols, nucleation,
+  Soret transport, KI or water/oxygen chemistry, substrate reactions or
+  boat obstruction; instantaneous ideal-gas equilibrium and an
+  irreversible BiI wall channel in place of unmeasured kinetics.
+\item \emph{Inputs:} digitised rather than tabulated wall temperatures;
+  an unconfirmed coordinate origin and the silica inconsistency;
+  assumed controller reference conditions and column pressure;
+  deposit-conditioned source masses and an unmeasured metal saturation;
+  BiI and constructed BiI$_3$(l) thermodynamic records that need
+  independent qualification.
+\item \emph{Protocol:} 60 s source-driven runs at the three-hour mean
+  release rate, flow-stop runs at fixed temperature, and no simulation
+  of the cooling or withdrawal at the end of any experiment.
+\item \emph{Numerics:} spatial qualification beyond one refined case,
+  a consistent observed order for the iodine profiles, the follow-up
+  sensitivities with the production scheme, a verification of the
+  nonlinear HKS law, and the full-duration shifted-BiI corrector
+  comparison are outstanding.
+\end{itemize}
+Each item addresses an ambiguity demonstrated by the completed cases.
+The most direct experimental constraints would be the original
+thermocouple and scan coordinates, controller reference conditions, an
+independently measured release history and the column orientation and
+pressure. None of the omitted effects can be inferred from the present
+sensitivity ranges.
+% TODO(review-A): update the Numerics item once the production-scheme
+% sensitivities are in.

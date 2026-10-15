@@ -1,0 +1,14 @@
+{
+ "study": "M7.1 Graetz-Robin verification (applications/rhoFixedFlowFoam/doc/phase-change-plan.md, M7 acceptance 1)",
+ "openfoam_build": "_8dbc61e11c-20241220 OPENFOAM=2412 version=v2412",
+ "run_date": "Oct 11 2026",
+ "solver_executable": "/home/jan/OpenFOAM/jan-v2412/platforms/linux64GccDPInt32Opt/bin/rhoFixedFlowFoam",
+ "solver_sha256_at_collection": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+ "run_input_keys": [
+  "b2c871c93856eeca00437255e4172431"
+ ],
+ "input_key_recomputed_at_collection": "b2c871c93856eeca00437255e4172431",
+ "runs_made_with_this_solver": true,
+ "repository_head_at_collection": "3cea3993914f87d7694832f673fda8abcfd918c4",
+ "number_of_runs": 45
+}

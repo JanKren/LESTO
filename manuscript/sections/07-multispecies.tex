@@ -4,62 +4,55 @@ This section examines how source loading, BiI thermodynamic data, the
 silica temperature coordinate, and transport, kinetic and flow inputs
 change the computed deposits.
 
-\subsection{Source loading and thermodynamic information}
+\subsection{Source loading and thermodynamic input}
 The Q2 cases expose a sensitivity that is hidden when the iodide split
 is prescribed. \Cref{fig:thermo} shows the BiI$_3$ share of deposited
 iodide iodine,
 \begin{equation}
  f_{\rm BiI_3}=
  \frac{3N^{\rm wall}_{\rm BiI_3}}
- {2N^{\rm wall}_{\rm PbI_2}+3N^{\rm wall}_{\rm BiI_3}}.
+ {2N^{\rm wall}_{\rm PbI_2}+3N^{\rm wall}_{\rm BiI_3}},
  \label{eq:split}
 \end{equation}
-This share counts only the iodine in the two modelled deposited
-iodides. It differs from the BiI$_3$ fraction of all experimental
-iodine, which also contains KI. Additional metal-saturation cases fill
-selected points between the original 0.1\% and 1\% levels; line
-segments connect computed points and are not a fitted release law.
+which counts only the iodine in the two modelled iodides and therefore
+differs from the BiI$_3$ fraction of all experimental iodine, which also
+contains KI.
 
 At 1\% metal saturation on the production steel mesh, the baseline
 thermodynamics give $f_{\rm BiI_3}=94.58\%$ (94.57\% with upwind
-advection). Raising the BiI(g) standard Gibbs energy by 29 kJ/mol gives
-2.01\% (2.00\%) at the same numerical resolution. This large difference survives refinement. It therefore
-reflects conditional thermodynamic sensitivity, not numerical noise.
-The perturbation is applied consistently to the formation and
-reactive-wall constants. A constant Gibbs-energy shift scales the
-formation constant by $\exp[-29{,}000/(RT)]$, approximately 0.051 at
-1173 K and 0.00093 at 500 K. It is a substantial surrogate
-perturbation, not an independently measured correction to BiI
-thermodynamics.
-
-An independent integration of the saved species profiles gives a
-BiI$_3$ iodine share of 94.532--94.569\% for the baseline branch and
-1.922--2.004\% for the shifted branch in the original upwind campaign over the three meshes and the
-medium-mesh half-step run. Comparing the two branches at each matched
-resolution gives separations of 92.555--92.619 percentage points.
-The qualitative thermodynamic response therefore persists across every
-tested resolution. These ranges describe the executed cases; they are
-not confidence intervals or extrapolated continuum bounds.
+advection). Raising the BiI(g) standard Gibbs energy by 29 kJ/mol,
+consistently in the formation and reactive-wall constants, gives 2.01\%
+(2.00\%). A constant shift of this size scales the formation constant by
+$\exp[-29{,}000/(RT)]$, approximately 0.051 at 1173 K and 0.00093 at
+500 K. An independent integration of the saved species profiles of the
+original upwind campaign gives 94.532--94.569\% and 1.922--2.004\% over
+three meshes and the half-step run, a separation of 92.555--92.619
+percentage points at every matched resolution. The response is
+therefore not numerical noise. What it measures is the importance of
+the BiI thermodynamic input for the predicted iodide partition: a
+single, arbitrarily sized perturbation moves the partition almost from
+one iodide to the other. The shift is not an estimate of the
+uncertainty of the BiI data, the two branches do not bound an
+uncertainty interval, and the comparison with the measured split is not
+a basis for selecting either dataset.
 
 Source loading also matters. With baseline thermodynamics, the steel
 BiI$_3$ share at 0.2\%, 0.316\% and 0.562\% metal saturation
-(follow-up cases, 18,432 cells, upwind) is
-52.50\%, 70.58\% and 94.56\%; the shifted branch gives 47.66\%,
-37.43\% and 15.88\%. The low-loading trend is not universally
-monotonic. The original steel 0.1\% case with baseline thermodynamics
-gives 56.48\% and an 80.66\% scan overlap (56.47\% and 81.10\% on the
-18,432-cell upwind mesh). This makes it a useful
-diagnostic comparison, but not an identified physical saturation. The
-published deposits alone cannot uniquely separate source loading,
-thermodynamic data and omitted chemistry. Choosing a branch because it
-best matches one scan would introduce calibration and would require
-independent validation.
+(follow-up cases, 18,432 cells, upwind) is 52.50\%, 70.58\% and
+94.56\%; the shifted branch gives 47.66\%, 37.43\% and 15.88\%. The
+low-loading trend is not universally monotonic. The steel 0.1\% case
+with baseline thermodynamics gives 56.48\% and an 80.66\% scan overlap
+(56.47\% and 81.10\% on the 18,432-cell upwind mesh), a useful
+diagnostic comparison but not an identified physical saturation. The
+published deposits alone cannot separate source loading, thermodynamic
+data and omitted chemistry; choosing a branch because it best matches
+one scan would be a calibration.
 
 \begin{figure*}[tb]
 \centering
 \includegraphics{source_thermodynamics.pdf}
-\caption{Conditional sensitivity of the BiI$_3$ share of deposited
-iodide iodine (\cref{eq:split}) to source loading and BiI
+\caption{BiI$_3$ share of deposited iodide iodine (\cref{eq:split})
+against source loading for the baseline and the $+29$ kJ/mol BiI
 thermodynamics, for steel and silica LBE. Symbols denote completed Q2
 cases; segments only connect those points. Dashed grey lines show the
 published BiI$_3$ share after excluding KI \cite{Liu2025chemical}.
@@ -68,26 +61,25 @@ qualified thermodynamic dataset.}
 \label{fig:thermo}
 \end{figure*}
 
-\subsection{Silica temperature-coordinate discrepancy}
+\subsection{Silica temperature-coordinate inconsistency}
 \label{sec:silica}
-In the silica experiment, the published peak labels do not match the
+In the silica experiment the published peak labels do not match the
 published temperature curve. The scan places the PbI$_2$ and BiI$_3$
 maxima at 51 and 59 cm, labelled 306$\pm$24 and 127$\pm$39\,$^\circ$C.
 At those positions the digitised temperature curve gives approximately
-369 and 235\,$^\circ$C, which differ from the labels by 63 and 108 K.
-On the same curve, 306 and 127\,$^\circ$C occur at 55.096 and 63.653 cm.
-The discrepancy exceeds the nominal raster temperature resolution and
-suggests a temperature-coordinate inconsistency in the supplied inputs.
-It does not identify which measurement, annotation or registration
-needs correction.
+369 and 235\,$^\circ$C, 63 and 108 K above the labels; on the same curve,
+306 and 127\,$^\circ$C occur at 55.096 and 63.653 cm. The discrepancy
+exceeds the nominal raster temperature resolution, so the published
+inputs contain a temperature-coordinate inconsistency; they do not say
+which measurement, annotation or registration is in error.
 
 Two diagnostic mappings shift only the silica temperature curve
 upstream, by 4.096 or 4.653 cm, so that one of these curve crossings
-aligns with the corresponding labelled position. Equivalently,
+aligns with the corresponding labelled position:
 $T_\delta(x)=T_0(x+\delta)$ for $\delta>0$, with
 $\Delta x_T=-\delta$. The iodine scan stays fixed. The shifts are
 derived from the published curve and labels, not optimised against the
-CFD profiles. All original unshifted results are retained.
+CFD profiles.
 
 \Cref{tab:alignment,fig:alignment} show that the shifts move the Q1
 maxima from 56/63 cm to 51/59 or 51/58 cm and raise the normalised
@@ -95,13 +87,19 @@ overlap from 6.13\% to 77.80\% or 73.26\%. The low-loading Q2 variants
 place the maxima at 51/59 or 51/58 cm, with overlaps of 77.88\% and
 75.54\%. On the 18,432-cell upwind mesh the order of the two shifts was
 the opposite (75.29\% and 81.00\% for Q1; 79.16\% and 83.33\% for Q2),
-so the ranking of the two hypotheses by overlap is not robust to the
-advection scheme and should not be used to prefer one of them.
-A plausible coordinate change thus has a larger effect than the tested
-source-position or time-step changes. This does not confirm either
-shift as the experimental truth. The two shifts also give different
-peak temperatures, and no uniquely established mapping reconciles both
-original temperature labels at once.
+so the overlap does not rank the two hypotheses robustly. The two shifts
+also give different peak temperatures, and no single mapping reconciles
+both labels. The shifted low-loading Q2 cases keep a BiI$_3$ share near
+23.97\%, about five percentage points below the published iodide-only
+split, so correct peak positions do not ensure the correct partition.
+
+These results demonstrate the inconsistency and show that a plausible
+coordinate change has a larger effect on the computed agreement than
+the tested source-position or time-step changes. They do not resolve
+the inconsistency: both shifts use labels from the same experiment,
+neither is confirmed, and the improved agreement is conditional on an
+unconfirmed hypothesis. Resolving it requires the original thermocouple
+profile and its coordinate registration.
 \begin{table}[tb]
 \centering
 \caption{Silica temperature-coordinate hypotheses: computed peak
@@ -125,22 +123,15 @@ are adapted from Liu et al.\ \cite{Liu2025chemical}.}
 \label{fig:alignment}
 \end{figure*}
 
-The shifted low-loading Q2 cases keep a BiI$_3$ share near 23.97\%,
-about five percentage points below the published iodide-only split.
-Correct peak positions therefore do not ensure the correct partition.
-Resolving the discrepancy requires the original thermocouple profile
-and its coordinate registration, not selection of the CFD variant with
-the highest overlap.
-
 \subsection{Transport, kinetics, flow reference and flow stop}
+\label{sec:transport-sensitivity}
 \Cref{tab:sensitivity} reports, for each tested category, the range of
 iodine profile changes $E_{L1}$ (\cref{eq:numeric-l1}) from the
 designated baseline. These are responses to finite hypothetical
 changes, not statistical confidence limits. The source-loading row uses
 its 1\% reference case. The temperature-coordinate row measures changes
 from the original silica input and can approach 200\% when the profile
-supports move apart. These baseline-relative changes must not be
-confused with the raw discrepancies against the experimental scan.
+supports move apart.
 \begin{table}[tb]
 \centering
 \caption{Range of the baseline-relative iodine profile change $E_{L1}$
@@ -150,48 +141,36 @@ compare 60 s inventories. The silica temperature-coordinate row uses
 the production cases (41,472 cells, limited-linear advection); all
 other rows are upwind follow-up cases on 18,432 cells compared with
 their own upwind baselines. Case counts and variations are listed in
-\cref{tab:study}.}
+Table~S1 of the supplementary material.}
 \label{tab:sensitivity}
 \small\input{generated/sensitivity-table}
 \end{table}
+% TODO(review-A): replace or complement the upwind rows of Table VII and
+% Fig. S1 with the production-scheme sensitivities when they are complete;
+% update the caption and the paragraph below (the 12--14% caveat).
 
-Diffusion alternatives change profiles by up to
-14.20\%. A 273.15 K flow reference raises the inferred helium mass flow
-by 9.15\% relative to 298.15 K and changes profiles by up to 10.93\%.
-Iodide accommodation changes give up to 4.21\%, whereas moving the
-prescribed source region by $\pm1.5$ cm gives at most 0.19\%. This
-small source-position response concerns the selected empty-tube source
-model; it cannot rule out an effect of a real boat on the flow or
-thermal fields. \Cref{fig:physical} shows the maxima for these
-categories. They are differences between upwind cases on the same
-18,432-cell mesh, which itself differs from the production scheme by
-12--14\% for the two cases of the scheme study
+Diffusion alternatives change profiles by up to 14.20\%. A 273.15 K flow
+reference raises the inferred helium mass flow by 9.15\% relative to
+298.15 K and changes profiles by up to 10.93\%. Iodide accommodation
+changes give up to 4.21\%, whereas moving the prescribed source region
+by $\pm1.5$ cm gives at most 0.19\%, a statement about the empty-tube
+source model that cannot rule out an effect of a real boat on the flow.
+Fig.~S1 of the supplementary material shows the maxima. They are differences between
+upwind cases on the 18,432-cell mesh, which itself differs from the
+production scheme by 12--14\% for the two cases of the scheme study
 (\cref{sec:verification}); how much of that error cancels in the
-differences has not been quantified. Where numerical and input changes
-have comparable magnitude, the present results do not rank their
-physical importance precisely. The tube-scale Damk\"ohler numbers of
-\cref{sec:numerics} and the small accommodation response, at most
-0.41\% for $\alpha=0.1$ and 4.21\% for $\alpha=0.01$, against
-3.83--14.20\% for halving or doubling $D$, indicate that radial diffusion, not
+differences has not been quantified, so effects of comparable size are
+not ranked precisely. The tube-scale Damk\"ohler numbers of
+\cref{sec:regime} and the small accommodation response, at most 0.41\%
+for $\alpha=0.1$ and 4.21\% for $\alpha=0.01$, against 3.83--14.20\% for
+halving or doubling $D$, indicate that radial diffusion, not
 interfacial kinetics, limits the wall exchange in these columns; the
 wall temperature acts mainly through the equilibrium pressure.
+% TODO(review-B): Damkoehler sweep. Confirm or qualify the
+% diffusion-limited statement above with the swept response.
 
 The four fixed-temperature flow-stop cases change the deposited iodine
 profiles by 1.10--4.63\% over 20 s, with centroid shifts of at most
 0.0422 cm. Residual gas can therefore alter wall inventories after
-release stops. Because these runs neither cool the column nor flush it
-with clean helium (\cref{sec:numerics}), they do not predict the actual
-end-of-experiment redistribution after the furnaces are turned off.
-Likewise, equilibrium speciation and the irreversible BiI wall channel
-remain unqualified kinetic approximations.
-
-\begin{figure*}[tb]
-\centering
-\includegraphics{physical_sensitivity.pdf}
-\caption{Maximum baseline-relative iodine profile change $E_{L1}$ in
-each selected physical-input category. The flow-stop value uses an
-80 s endpoint; the others use 60 s. These maxima describe the tested
-case set, not a general uncertainty budget or an experimentally
-identified parameter ranking.}
-\label{fig:physical}
-\end{figure*}
+release stops, but because these runs neither cool the column nor flush
+it, they do not predict the end-of-experiment redistribution.

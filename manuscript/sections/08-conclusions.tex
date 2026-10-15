@@ -1,73 +1,67 @@
 \section{Conclusions}
 \label{sec:conclusions}
 We have applied a conservative finite-volume treatment of nine
-Pb--Bi--I gases and four shared condensed wall inventories in 15
-baseline and 64 follow-up cases, 19 production re-runs and a scheme,
-mesh and iteration study. The columns are treated as laminar
-helium flows ($\mathrm{Re}\approx0.7$--3) in tubes with a steep axial
-wall-temperature gradient, where axial advection, radial diffusion to
-the wall and a reversible interfacial exchange law together set the
-deposition profile. The reported calculations use a
-specialised ideal-gas equilibrium kernel, a prescribed helium carrier
-and reversible iodide wall exchange with half-cell diffusion
-resistance. Material bookkeeping is tight: the worst raw element
-residue is $8.85\times10^{-13}$ of supplied material in the follow-up
-cases and $\ProductionResidue$ in the production cases. Conservation
-is a numerical property of this model; it is not evidence that all
-physical pathways are represented. Within the model, radial diffusion
-rather than interfacial kinetics limits the wall exchange: the wall
-Damk\"ohler number is large, and the profiles respond far more to the
-diffusivity than to the accommodation coefficient.
+Pb--Bi--I gases and four shared condensed wall inventories, with
+element-conserving gas equilibrium and reversible face-flux wall
+exchange, to 15 baseline and 64 follow-up cases, 19 production re-runs
+and a scheme, mesh and iteration study. The columns are laminar helium
+flows ($\mathrm{Re}\approx0.7$--3) in tubes with a steep axial
+wall-temperature gradient, where axial advection, radial diffusion and
+the interfacial exchange law together set the deposition profile. The
+worst raw element residue is $8.85\times10^{-13}$ of supplied material
+in the follow-up cases and $\ProductionResidue$ in the production
+cases; conservation is a numerical property of the model, not evidence
+that all physical pathways are represented. On a Graetz--Robin problem
+the half-cell wall law converges at second order to the reference decay
+rate, whereas applying the kinetic law to the cell-centre value is first
+order; this verifies the wall discretisation, not the convergence of
+the iodine calculations. Within the model, radial diffusion rather than
+interfacial kinetics limits the wall exchange: the wall Damk\"ohler
+number is large, and the profiles respond far more to the diffusivity
+than to the accommodation coefficient.
+% TODO(review-B): Damkoehler sweep; revisit this sentence and the PoF title.
 
 Integral results are much less sensitive to resolution than local
 profiles. Halving the time step changes iodine profiles by at most
-\TimeMax\%, and eight instead of three species correctors over a full
-run by at most \IterSteelHigh\%. The spatial error is larger and is
-dominated by the numerical diffusion of the first-order upwind scheme
-of the original campaign: at equal mesh it differs from the
-limited-linear scheme by \UpLLFour--\UpLLOne\% in the most sensitive
-case, whereas two bounded schemes differ by at most \VLSteelMax\%. With
-limited-linear advection that case changes by \SteelLLThree\% between
-41,472 and 93,312 cells, its total deposit by \SteelTotalThree\% and
-its centroid by less than 1 mm, but the apparent orders are
-inconsistent, so we quote this change rather than a formal grid
-convergence index. The production cases therefore use limited-linear
-advection on 41,472 cells, while the follow-up sensitivities remain
-upwind differences on 18,432 cells. Closely competing 1 cm bins can make
-a reported peak temperature switch by tens of kelvin under refinement,
-so peaks are reported with their 3 cm smoothed maximum and centroid
-temperature as well.
+\TimeMax\%, and eight instead of three species correctors by at most
+\IterSteelHigh\%. The spatial error is larger and is dominated by the
+numerical diffusion of first-order upwind advection, which differs
+from the limited-linear scheme by \UpLLFour--\UpLLOne\% at equal mesh in
+the most sensitive case, whereas two bounded schemes differ by at most
+\VLSteelMax\%. With limited-linear advection that case changes by
+\SteelLLThree\% between 41,472 and 93,312 cells, but the apparent orders
+are inconsistent, so we quote this change rather than a formal grid
+convergence index. Closely competing 1 cm bins can shift a reported
+peak temperature by tens of kelvin, so peaks are reported with their
+smoothed maximum and centroid temperature as well.
+% TODO(review-A): add the production-scheme sensitivities here.
 
-Thermodynamic and source assumptions substantially affect the computed
-iodide partition. In the refined steel case, a $+29$ kJ/mol surrogate
-shift of the BiI gas Gibbs energy changes the BiI$_3$ iodine share from
-94.58\% to 2.01\% (94.57\% to 2.00\% with upwind advection on
-18,432 cells). This sensitivity survives refinement, but it does
-not determine which thermodynamic branch represents the experiment.
-Q1 agreement is conditioned on inferred deposit masses, and Q2 keeps a
-deposit-derived iodine source and an unmeasured metal saturation.
+The computed iodide partition depends strongly on thermodynamic input. In the
+refined steel case, a $+29$ kJ/mol shift of the BiI gas Gibbs energy
+changes the BiI$_3$ iodine share from 94.58\% to 2.01\%, and a
+comparable separation persists at every tested resolution. This shows how much the prediction depends on the BiI data;
+it is neither an uncertainty interval nor a criterion for choosing a
+dataset. For silica, temperature-coordinate shifts derived from the
+published curve and labels reduce 4--5 cm position discrepancies to
+0--1 cm. This demonstrates an inconsistency in the published coordinates
+without resolving it; the overlap ranking of the two shifts even
+reverses between advection schemes.
 
-For silica, temperature-coordinate shifts derived from the published
-inputs reduce the original 4--5 cm position discrepancies to 0--1 cm.
-This identifies coordinate registration as a consequential
-uncertainty, but it does not establish a corrected experimental
-dataset, and the ranking of the two shifts by profile overlap reverses
-between the upwind and limited-linear schemes. The supplied paper resolves neither that registration nor the
-flow-reference conditions.
+On five single-species PbI$_2$ experiments of Lobresco et al., the
+untuned model gives deposition-onset temperatures with an RMS deviation
+of \LobRMS{} K, against \LobRMSTemp{} and \LobRMSVap{} K for the two
+models of that study. The result is promising but conditional: it
+depends on applying the onset rule to the main deposit (from the inlet,
+the RMS would be \LobRMSInlet{} K), the near-source mole fraction of
+0.33--0.36 violates the dilute frozen-carrier assumption, and the
+release history is unconstrained below 6 s. Because carrier,
+vapour-pressure and source assumptions also differ from the published
+models, the improvement cannot yet be attributed to the wall treatment,
+and the computed peaks lie \LobShiftMin--\LobShiftMax{} cm upstream
+with summed profile differences of \LobLOneMin--\LobLOneMax{} of the
+sample amount.
 
-On five independent single-species PbI$_2$ experiments of Lobresco et
-al., the same wall law without any tuning gives deposition-onset
-temperatures with an RMS deviation of \LobRMS{} K, against
-\LobRMSTemp{} and \LobRMSVap{} K for the two models of that study,
-although the computed deposits lie \LobShiftMin--\LobShiftMax{} cm
-upstream of the measured peaks and the flow-stop transient and the
-non-dilute source region are not represented.
-
-The present evidence supports a methods and input-sensitivity study.
-Independent predictive validation would require better-constrained
-source and thermodynamic inputs, consistent experimental coordinates,
-tabulated wall temperatures, spatially qualified profile calculations
-for more than one case and a treatment of the release and cooling
-protocol. The completed cases show where
-this additional evidence is needed, without hiding the original profile
-discrepancies.
+The evidence supports a conservative method with a verified wall
+discretisation and an explicit assessment of uncertain inputs, not
+independent predictive validation. The requirements for the latter are
+listed in \cref{sec:limitations}.

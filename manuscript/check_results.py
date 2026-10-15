@@ -119,6 +119,7 @@ def check_lobresco(generated):
         xo = x[k - 1] + (threshold - y[k - 1]) * (x[k] - x[k - 1]) / (y[k] - y[k - 1])
         return np.interp(xo, wall_x, wall_t)
     squares = []
+    inlet_squares = []
     recomputed = 0
     for level in ['prod', 'coarse']:
         for case_dir in sorted((run / 'cases' / level).iterdir()):
@@ -133,6 +134,10 @@ def check_lobresco(generated):
             x = np.array([r['x'] for r in data]); deposit = np.array([r['wall'] for r in data])
             keep = x > info['boat']['x_m'][1]
             onset = first_crossing(x[keep], deposit[keep], wall[:, 0], wall[:, 1])
+            if level == 'prod':
+                inlet = first_crossing(x, deposit, wall[:, 0], wall[:, 1])
+                assert abs(inlet - rows_out[name]['ours_from_inlet_K']) < 1e-9, name
+                inlet_squares.append((inlet - provenance['table2_verbatim'][name]['experiment_K']) ** 2)
             table2 = provenance['table2_verbatim'][name]
             key = 'ours_minus_exp_K' if level == 'prod' else 'ours_coarse_minus_exp_K'
             assert abs(onset - table2['experiment_K'] - rows_out[name][key]) < 1e-9, (level, name)
@@ -142,6 +147,7 @@ def check_lobresco(generated):
     assert len(squares) == 5
     rms = (sum(squares) / 5) ** 0.5
     assert abs(rms - generated['lobresco2026']['summary']['rms_ours_K']) < 1e-9
+    assert abs((sum(inlet_squares) / 5) ** 0.5 - generated['lobresco2026']['summary']['rms_ours_from_inlet_K']) < 1e-9
     table = (HERE / 'generated/lobresco-table.tex').read_text()
     assert f'& {rms:.0f} &' in table
     for check in provenance['tdep_checks']:
@@ -151,6 +157,45 @@ def check_lobresco(generated):
             assert 'claude' not in path.read_text(errors='ignore').lower(), path
     assert recomputed == 10
     return recomputed
+
+
+def check_graetz(generated):
+    """Graetz-Robin verification: recompute observed orders and GCI from the tracked per-run fits and compare
+    them with the solver-test summary table (table.md) and the manuscript tables."""
+    root = HERE / 'data/graetz'
+    provenance = json.loads((root / 'provenance.json').read_text())
+    assert provenance['runs_made_with_this_solver'], 'Graetz runs not made with the recorded solver'
+    assert provenance['solver_sha256_at_collection'] == generated['solver_sha256'], 'Graetz solver differs'
+    criteria = (root / 'criteria.log').read_text().splitlines()
+    assert criteria and all(line.startswith('PASS') for line in criteria), 'Graetz criterion not passed'
+    reference = {r['Bi']: r for r in json.loads((root / 'reference.json').read_text())}
+    for r in reference.values():
+        values = list(r['methods'].values())
+        assert max(abs(v / r['m'] - 1) for v in values) <= 1.01 * r['bound'] and r['bound'] < 1e-10
+    fits = {(f['scheme'], f['outlet'], f['Bi'], f['law'], f['nr']): f
+            for f in json.loads((root / 'fits.json').read_text()) if f['scheme'] in ('linear', 'SuperBee')}
+    summary = {}
+    for line in (root / 'table.md').read_text().splitlines():
+        cells = [c.strip() for c in line.strip('|').split('|')]
+        if len(cells) == 10 and '/' in cells[4]:
+            summary[(cells[0], cells[1], float(cells[2]), cells[3], cells[4])] = (float(cells[5]), cells[8])
+    main_table = (HERE / 'generated/graetz-table.tex').read_text()
+    checked = 0
+    for (scheme, outlet, bi, law, levels), (p_table, gci_table) in summary.items():
+        mu = [fits[(scheme, outlet, bi, law, int(n))]['mu'] for n in levels.split('/')]
+        e21, e32 = mu[1] - mu[2], mu[0] - mu[1]
+        p = abs(np.log(abs(e32 / e21))) / np.log(2.0)
+        gci = 125 * abs((mu[2] - mu[1]) / mu[2]) / (2.0 ** p - 1)
+        assert abs(p - p_table) < 6e-5, (scheme, outlet, bi, law, levels)
+        assert f'{gci:.3g}' == f"{float(gci_table.split()[0]):.3g}", (scheme, outlet, bi, law, levels, gci)
+        assert e32 / e21 > 0, 'non-monotone Graetz triplet'
+        if scheme == 'linear' and outlet == 'zeroGradient' and levels == '64/128/256':
+            assert f'& {p:.3f} & {gci:.3g} \\\\' in main_table, (bi, law)
+        checked += 1
+    for (scheme, outlet, bi, law, nr), f in fits.items():
+        assert abs(f['mu'] / f['muH'] - 1) < 1e-7, (scheme, outlet, bi, law, nr)
+    assert checked == 20, checked
+    return checked
 
 
 def main():
@@ -199,7 +244,9 @@ def main():
     scheme_checks = check_scheme_study(full, follow)
     iteration = check_iteration(full)
     lobresco = check_lobresco(generated)
-    source = '\n'.join(p.read_text() for p in [HERE / 'main.tex', *sorted((HERE / 'sections').glob('*.tex'))])
+    graetz = check_graetz(generated)
+    source = '\n'.join(p.read_text() for p in [HERE / 'main.tex', HERE / 'supplementary.tex',
+                                               *sorted((HERE / 'sections').glob('*.tex'))])
     from assess_resolution import evaluate
     resolution = json.loads((HERE / 'generated/resolution-audit.json').read_text())
     assert resolution == evaluate(), 'Saved-profile resolution reassessment is stale'
@@ -207,18 +254,26 @@ def main():
         assert hashlib.sha256((REPO / name).read_bytes()).hexdigest() == expected, name
         hashes += 1
     assert not re.search(r'\\(?:todo|decide)\b', source)
-    log = (HERE / 'build/main.log').read_text()
-    assert not re.search(r'undefined|Overfull|LaTeX Error|^!', log, re.MULTILINE), 'LaTeX issue'
-    for pof_log in [HERE / 'pof/build/lesto-pof.log']:
+    for latex_log in [HERE / 'build/main.log', HERE / 'build/supplementary.log']:
+        log = latex_log.read_text()
+        assert not re.search(r'undefined|Overfull|LaTeX Error|^!', log, re.MULTILINE), ('LaTeX issue', latex_log)
+    for pof_log in [HERE / 'pof/build/lesto-pof.log', HERE / 'pof/build/supplementary.log']:
         pof_text = pof_log.read_text()
         assert not re.search(r'undefined|^Overfull|LaTeX Error|^!', pof_text, re.MULTILINE | re.IGNORECASE), pof_log
-    bibliography = (HERE / 'build/main.blg').read_text()
-    assert 'Warning' not in bibliography and 'error' not in bibliography.lower(), 'Bibliography issue'
+    for blg in [HERE / 'build/main.blg', HERE / 'build/supplementary.blg']:
+        bibliography = blg.read_text()
+        assert 'Warning' not in bibliography and 'error' not in bibliography.lower(), ('Bibliography issue', blg)
     pdf = HERE / 'lesto-iodine-methods.pdf'
     pdf_info = subprocess.check_output(['pdfinfo', str(pdf)], text=True)
     pages = int(re.search(r'^Pages:\s+(\d+)', pdf_info, re.MULTILINE).group(1))
     text = subprocess.check_output(['pdftotext', str(pdf), '-'], text=True)
     assert '[?]' not in text and '[TODO' not in text and '[DECIDE' not in text
+    supplement = HERE / 'lesto-iodine-supplementary.pdf'
+    supplement_pages = int(re.search(r'^Pages:\s+(\d+)', subprocess.check_output(['pdfinfo', str(supplement)], text=True),
+                                     re.MULTILINE).group(1))
+    supplement_text = subprocess.check_output(['pdftotext', str(supplement), '-'], text=True)
+    assert '[?]' not in supplement_text and '??' not in supplement_text and 'TODO' not in supplement_text
+    assert 'TODO' not in text and '??' not in text
     checks = {
         'status': 'PASS', 'baseline_cases': 15, 'followup_cases': 64,
         'independently_recomputed_profile_comparisons': nonzero,
@@ -226,6 +281,8 @@ def main():
         'iodine_stoichiometry_profiles_checked': stoichiometric,
         'production_cases_checked': production, 'scheme_mesh_differences_recomputed': scheme_checks,
         'iteration_check_cases_recomputed': iteration, 'lobresco_onsets_recomputed': lobresco,
+        'graetz_triplets_recomputed': graetz, 'supplement_pdf_pages': supplement_pages,
+        'supplement_pdf_sha256': hashlib.sha256(supplement.read_bytes()).hexdigest(),
         'resolution_aggregation_comparisons': len(resolution['aggregation']),
         'thermodynamic_resolution_pairs': len(resolution['thermodynamic_resolution']),
         'input_and_artifact_hashes_checked': hashes, 'pdf_pages': pages,

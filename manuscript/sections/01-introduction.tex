@@ -31,78 +31,66 @@ temperature and condensed inventory. The same coupling underlies the
 interpretation of thermochromatographic experiments
 \cite{Eichler1975verfluchtigung,Zvara1985simulation,Zvara2008inorganic}.
 
-Lobresco et al.\ \cite{Lobresco2026assessment} compared temperature-based
-and vapour-pressure-driven CFD deposition models. Temperature-based
-models require a calibrated deposition law; vapour-pressure-driven
-models link deposition to vapour-pressure data through interfacial
-kinetics. Their study also motivates extending transport models to
-multiple chemical species and to thermodynamic equilibrium. Its five
-PbI$_2$ experiments, with measured deposition temperatures at three
-flows and three durations, also provide a single-species test of the
-transport and wall-exchange model used here. A
-multispecies model adds a consistency requirement. Changes in chemical
-form must conserve the transported elements, and different gas pathways
-that lead to the same condensed material must share one physical wall
-inventory. Even an internally consistent implementation can give
-uncertain experimental predictions if its thermodynamic or source
-inputs are poorly constrained.
+Existing CFD treatments of such wall exchange differ mainly in where the
+exchange is applied and in how many coupled species they carry.
+Lobresco et al.\ \cite{Lobresco2026assessment} compared a calibrated
+temperature-based deposition law with a vapour-pressure-driven
+Hertz--Knudsen--Schrage law for PbI$_2$, both formulated as volumetric
+source terms rather than boundary fluxes. For steam condensation with
+non-condensable gases, Vijaya Kumar et al.\ \cite{VijayaKumar2021implementation}
+implemented a diffusion-layer wall model in the OpenFOAM-based
+containmentFOAM both as volumetric sources and as face fluxes, and found
+the face-flux form more accurate, cheaper and less sensitive to the
+grid. Mixed (Robin) deposition boundary conditions for fission-product
+transport in OpenFOAM have been verified against analytical solutions
+\cite{DiRonco2021eulerian}. In these studies each depositing or
+condensing species is transported on its own; gas-phase changes of
+chemical form are not coupled to the wall exchange.
 
-We address these issues in the finite-volume framework of OpenFOAM
-\cite{Weller1998tensorial}. The model transports nine Pb--Bi--I gases in
-a prescribed helium carrier. Homogeneous gas equilibrium redistributes
-the local elemental inventory, and separate interfacial channels
-exchange material with immobile condensed wall inventories. The wall
-flux combines interfacial kinetic conductance with diffusion over the
-distance from the neighbouring cell centre to the wall. This avoids
-representing deposition through an arbitrarily chosen volumetric
-wall-layer thickness. It does not remove spatial discretisation error.
+This paper adds that coupling, in the finite-volume framework of
+OpenFOAM \cite{Weller1998tensorial}. Our contribution has three parts.
+First, element-conserving homogeneous equilibrium among nine Pb--Bi--I
+gases is coupled to reversible face-flux wall exchange, in which the
+interfacial kinetic conductance acts in series with diffusion over the
+distance from the cell centre to the wall; the Graetz--Robin
+verification shows that this face flux is second-order accurate where
+the same kinetic law applied to the cell-centre value, the form of a
+first-cell sink, is first order. Second, gas pathways that
+lead to the same condensed material share one physical wall inventory,
+so that switching between deposition, evaporation and reaction cannot
+create or duplicate material. Third, we characterise the transport
+behaviour that results in these columns: wall exchange limited by
+radial diffusion rather than by interfacial kinetics, profiles whose
+local shape is far more resolution-sensitive than their integrals, and
+an iodide partition that is controlled by thermodynamic input.
+% TODO(review-B): Damkoehler sweep; confirm the diffusion-limited
+% characterisation in the third contribution.
+The software also has an interface to the GEMS3K kernel of
+GEM-Selektor \cite{Kulik2013gemselektor}, but the reported calculations
+use a specialised ideal-gas element-potential solver.
 
-General thermodynamic packages such as GEM-Selektor and its GEMS3K
-kernel \cite{Kulik2013gemselektor} also support equilibrium-based
-reactive transport. The software developed here has a GEMS3K interface,
-but the calculations reported in this paper use a specialised ideal-gas
-element-potential solver with tabulated formation constants. We
-therefore distinguish the thermodynamic formulation from the numerical
-engine used for the reported simulations. Condensed phases enter
-through wall exchange, not through homogeneous cell equilibrium.
-
-All experimental input comes from the published paper. No
-author-supplied temperature files, release histories or
-mass-flow-controller reference conditions are available. We therefore
-do not infer a unique physical source from the deposition data.
-Instead, we report the consequences of two explicit source models and
-of selected variations in flow, diffusion, interfacial accommodation
-and thermodynamic data. Separate time-step and mesh studies show which
-conclusions survive numerical refinement. We treat a
-temperature-coordinate discrepancy in the silica experiment as an
-input-consistency problem: alternative mappings are defined from
-published quantities before the resulting CFD profiles are compared.
-
-The study addresses three questions. First, can transport, gas equilibrium
-and competing wall channels be coupled while preserving each represented
-element? Second, how strongly do deposition profiles depend on time step
-and mesh resolution, including when total deposition appears stable?
-Third, which changes in source, thermodynamic and experimental-coordinate
-inputs materially alter the interpretation of the computed deposits?
-The contribution is a documented, conservative coupling of transport,
-gas equilibrium and wall exchange, together with a completed numerical
-and input-sensitivity assessment. The evidence comprises 15 baseline
-and 64 follow-up simulations of the three available experimental
-configurations, production re-runs of the baselines with a bounded
-advection scheme on a finer mesh, a scheme and mesh study up to 93,312
-cells and a full-run iteration check. These are computational cases,
-not independent experimental replicates. In addition, the same model
-is compared, without adjustment, with five single-species PbI$_2$
-experiments of Lobresco et al.\ and with the two models of that study. The scope is deliberately limited to the
-executed model: a fixed carrier and temperature field, prescribed
-release, ideal-gas speciation, and wall deposits without aerosol
-formation or surface-material-specific chemistry. Comparisons with
-experiment are conditional assessments of this model, not a claim of
-independent predictive validation.
+All experimental input comes from published papers, so we report the
+consequences of two explicit source models and of selected input
+variations rather than infer a unique physical source. The study addresses three questions. Can
+transport, gas equilibrium and competing wall channels be coupled while
+preserving each represented element? How strongly do deposition
+profiles depend on time step, iteration, mesh and advection scheme,
+including when total deposition appears stable? Which input changes
+materially alter the interpretation of the computed deposits? The
+evidence comprises 79 computational cases of the three available Liu et
+al.\ configurations (not experimental replicates), production re-runs
+with a bounded advection scheme, a scheme and mesh study, an iteration
+check, the Graetz--Robin verification, and an untuned comparison with
+five single-species experiments of Lobresco et al.\ and with the two
+models of that study. The scope is the executed model: a fixed carrier
+and temperature field, prescribed release, ideal-gas speciation, and
+wall deposits without aerosol formation or substrate chemistry
+(\cref{sec:limitations}). Comparisons with experiment are conditional
+assessments of this model, not independent predictive validation.
 
 \Cref{sec:experiments,sec:model,sec:numerics} define the reconstructed
-inputs, equations and case matrix. \Cref{sec:verification} assesses
-conservation and resolution, and \cref{sec:comparison,sec:sensitivity}
-examines experimental discrepancies and input sensitivity.
-\Cref{sec:discussion} brings these results together to identify what
-the model establishes and what is still needed for predictive validation.
+inputs, equations and case matrix. \Cref{sec:verification} verifies the
+wall discretisation and assesses conservation and resolution, and
+\cref{sec:comparison,sec:sensitivity} examine experimental
+discrepancies and input sensitivity. \Cref{sec:discussion} states what
+the evidence supports and collects the limitations.

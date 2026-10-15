@@ -34,6 +34,8 @@ ITER = REPO / 'run/024-liu2025/iteration_check'
 # Head-to-head on Lobresco et al. (2026): digitised published data and our ten runs.
 LOB_BENCH = REPO / 'thermochemistry/benchmarks/lobresco2026'
 LOB_RUN = REPO / 'run/023-lobresco2026'
+# Graetz-Robin verification (M7.1): tracked summary records of the solver test runs.
+GRAETZ = HERE / 'data/graetz'
 LOB_CASES = ['T106_6', 'T106_60', 'T106_300', 'T5_60', 'T540_60']
 BASES = ['PbI2_SS_Q1_baseline', 'LBE-I_SS_II_Q2_baseline_sat0.001',
          'LBE-I_SS_II_Q2_baseline_sat0.01', 'LBE-I_SS_II_Q2_shift29k_sat0.01']
@@ -160,13 +162,76 @@ def lobresco_case(level, name):
             'T_onset_deposit_K': t_main, 'x_onset_deposit_m': x_main, 'T_onset_from_inlet_K': t_inlet,
             'x_onset_from_inlet_m': x_inlet, 'T_onset_deposit_plus_gas_K': t_gas,
             'x_peak_m': peak_main, 'x_peak_experiment_m': peak_exp, 'T_onset_digitised_experiment_K': t_exp,
-            'deposit_over_n0': float(deposit.sum() * 0.01 / n0), 'gas_fraction': float(gas.sum() / (gas.sum() + deposit.sum())),
+            'deposit_over_n0': float(deposit.sum() * 0.01 / n0),
+            'upstream_deposit_fraction': float(deposit[~main].sum() / deposit.sum()), 'gas_fraction': float(gas.sum() / (gas.sum() + deposit.sum())),
             'L1_deposit_minus_experiment_over_n0': float(np.abs(deposit - ye_full).sum() * 0.01 / n0),
             'x_m': x, 'deposit_mol_per_m': deposit, 'wall_T': wall_t, 'experiment': (xe, ye)}
 
 
+def gci(f3, f2, f1, r=2.0):
+    """Celik et al. (2008), constant ratio: f3 coarse, f2 medium, f1 fine (as graetz.py of the solver tests)."""
+    e21, e32 = f2 - f1, f3 - f2
+    p = abs(math.log(abs(e32 / e21))) / math.log(r)
+    f_ext = (r ** p * f1 - f2) / (r ** p - 1)
+    return {'p': p, 'f_ext': f_ext, 'gci': 1.25 * abs((f1 - f2) / f1) / (r ** p - 1), 'monotone': e32 / e21 > 0}
+
+
+def graetz_study():
+    """Graetz-Robin verification (M7.1) from the tracked summary records in data/graetz."""
+    reference = {r['Bi']: r for r in json.loads((GRAETZ / 'reference.json').read_text())}
+    fits = json.loads((GRAETZ / 'fits.json').read_text())
+    provenance = json.loads((GRAETZ / 'provenance.json').read_text())
+    assert provenance['runs_made_with_this_solver']
+    mu_ref = {bi: r['m'] / 0.0024 for bi, r in reference.items()}   # m = mu R, R = 2.4 mm
+    runs = {(f['scheme'], f['outlet'], f['Bi'], f['law'], f['nr']): f for f in fits if f['scheme'] in ('linear', 'SuperBee')}
+    triplets = []
+    for scheme, outlet in [('linear', 'zeroGradient'), ('linear', 'fixedValue'), ('SuperBee', 'zeroGradient')]:
+        for bi in [1.0, 50.0]:
+            for law in ['halfCell', 'none']:
+                for levels in [(32, 64, 128), (64, 128, 256)]:
+                    if not all((scheme, outlet, bi, law, n) in runs for n in levels):
+                        continue
+                    mu = [runs[(scheme, outlet, bi, law, n)]['mu'] for n in levels]
+                    g = gci(*mu)
+                    triplets.append({'scheme': scheme, 'outlet': outlet, 'Bi': bi, 'law': law, 'levels': list(levels),
+                                     'mu': mu, 'p': g['p'], 'monotone': g['monotone'], 'mu_ext': g['f_ext'],
+                                     'ext_rel_error': g['f_ext'] / mu_ref[bi] - 1, 'gci_fine_pct': 100 * g['gci']})
+    errors = {f"{f['scheme']}.{f['outlet']}.{f['Bi']:g}.{f['law']}.{f['nr']}": f['mu'] / mu_ref[f['Bi']] - 1
+              for f in fits if f['scheme'] in ('linear', 'SuperBee')}
+    consistency = max(abs(f['mu'] / f['muH'] - 1) for f in fits)
+    return {'mu_ref_per_m': {f'{bi:g}': v for bi, v in mu_ref.items()},
+            'reference_bound': {f'{bi:g}': r['bound'] for bi, r in reference.items()},
+            'relative_error_by_run': errors, 'triplets': triplets,
+            'max_fit_vs_discrete_mode': consistency, 'runs': len(fits),
+            'criteria_pass': sum(l.startswith('PASS') for l in (GRAETZ / 'criteria.log').read_text().splitlines()),
+            'criteria_total': len((GRAETZ / 'criteria.log').read_text().splitlines()),
+            'solver_sha256': provenance['solver_sha256_at_collection'], 'run_date': provenance['run_date']}
+
+
+def tex_sci(v, digits=1):
+    m, e = f'{v:.{digits}e}'.split('e')
+    return f'${m}\\times10^{{{int(e)}}}$'
+
+
 def main():
     generated = HERE / 'generated'; generated.mkdir(exist_ok=True)
+    # ---- Graetz-Robin verification of the wall-exchange discretisation ---------------------------------
+    graetz = graetz_study()
+    main_rows = []
+    for bi in [1.0, 50.0]:
+        for law, label in [('halfCell', 'Half-cell series'), ('none', 'Cell-centre value')]:
+            t = next(r for r in graetz['triplets'] if (r['scheme'], r['outlet'], r['Bi'], r['law'], r['levels'][0])
+                     == ('linear', 'zeroGradient', bi, law, 64))
+            errs = [graetz['relative_error_by_run'][f'linear.zeroGradient.{bi:g}.{law}.{n}'] for n in [32, 64, 128, 256]]
+            main_rows.append([f'{bi:g}', label] + [tex_sci(e) for e in errs] +
+                             [f"{t['p']:.3f}", f"{t['gci_fine_pct']:.3g}"])
+    table(generated / 'graetz-table.tex', 'llrrrrrr',
+          ['Bi', 'Wall law', '$N_r=32$', '64', '128', '256', '$p$', r'GCI (\%)'], main_rows, midrules=(2,))
+    full_rows = [[r['scheme'], r['outlet'], f"{r['Bi']:g}", r['law'], '/'.join(map(str, r['levels'])), f"{r['p']:.4f}",
+                  tex_sci(r['ext_rel_error'], 2), tex_sci(r['gci_fine_pct'], 2)] for r in graetz['triplets']]
+    table(generated / 'graetz-full-table.tex', 'lllllrrr',
+          ['Scheme', 'Outlet', 'Bi', 'Wall law', '$N_r$', '$p$', r'$\mu_{\rm ext}/\mu_{\rm ref}-1$', r'GCI (\%)'],
+          full_rows)
     figures = HERE / 'figures'; figures.mkdir(exist_ok=True)
     legacy = json.loads((FULL / 'analysis.json').read_text())   # 18,432 cells, upwind
     original = json.loads((PROD / 'analysis.json').read_text())  # production baselines
@@ -324,10 +389,15 @@ def main():
                          'peak_shift_cm': 100 * (r['x_peak_m'] - r['x_peak_experiment_m']),
                          'L1_over_n0': r['L1_deposit_minus_experiment_over_n0'],
                          'deposit_over_n0': r['deposit_over_n0'], 'gas_fraction': r['gas_fraction'],
+                         'upstream_deposit_fraction': r['upstream_deposit_fraction'],
                          'cells_prod': r['cells'], 'cells_coarse': c['cells']})
     rms = lambda key: math.sqrt(sum(r[key] ** 2 for r in lob_rows) / len(lob_rows))
     lob_summary = {'rms_ours_K': rms('ours_minus_exp_K'), 'rms_ours_coarse_K': rms('ours_coarse_minus_exp_K'),
                    'rms_ours_with_gas_K': rms('ours_with_gas_minus_exp_K'),
+                   'rms_ours_from_inlet_K': math.sqrt(sum((r['ours_from_inlet_K'] - r['experiment_K']) ** 2
+                                                          for r in lob_rows) / len(lob_rows)),
+                   'cases_where_inlet_rule_differs': [r['case'] for r in lob_rows
+                                                      if abs(r['ours_from_inlet_K'] - r['ours_K']) > 1e-9],
                    'rms_temperature_based_K': rms('temperature_based_minus_exp_K'),
                    'rms_vapour_pressure_based_K': rms('vapour_pressure_based_minus_exp_K'),
                    'max_coarse_vs_prod_K': max(abs(r['ours_coarse_minus_exp_K'] - r['ours_minus_exp_K']) for r in lob_rows),
@@ -389,12 +459,34 @@ def main():
               'LobFiveInlet': f"{t_lob['T5_60']['ours_from_inlet_K']:.0f}",
               'LobFiveGas': sign(t_lob['T5_60']['ours_with_gas_minus_exp_K']),
               'LobFiveGasFraction': f"{100 * t_lob['T5_60']['gas_fraction']:.1f}",
-              'LobLOneMin': f"{min(r['L1_over_n0'] for r in lob_rows):.1f}",
-              'LobLOneMax': f"{max(r['L1_over_n0'] for r in lob_rows):.1f}",
+              'LobLOneMin': f"{min(r['L1_over_n0'] for r in lob_rows):.2f}",
+              'LobLOneMax': f"{max(r['L1_over_n0'] for r in lob_rows):.2f}",
+              'LobRMSInlet': f"{lob_summary['rms_ours_from_inlet_K']:.0f}",
+              'LobFiveMain': f"{t_lob['T5_60']['ours_K']:.0f}",
+              'LobSixDeposit': f"{100 * t_lob['T106_6']['deposit_over_n0']:.1f}",
+              'LobFiveUpstream': f"{100 * t_lob['T5_60']['upstream_deposit_fraction']:.1f}",
               'LobShiftMin': f"{min(-r['peak_shift_cm'] for r in lob_rows):.0f}",
               'LobShiftMax': f"{max(-r['peak_shift_cm'] for r in lob_rows):.0f}",
               'LobCellsProd': f"{lob_prod['T106_60']['cells']:,}".replace(',', '{,}'),
               'LobCellsCoarse': f"{lob['coarse'][0]['cells']:,}".replace(',', '{,}')}
+    halfcell = [t for t in graetz['triplets'] if t['scheme'] == 'linear' and t['outlet'] == 'zeroGradient'
+                and t['levels'][0] == 64 and t['law'] == 'halfCell']
+    nonelaw = [t for t in graetz['triplets'] if t['scheme'] == 'linear' and t['outlet'] == 'zeroGradient'
+               and t['levels'][0] == 64 and t['law'] == 'none']
+    superbee = [t for t in graetz['triplets'] if t['scheme'] == 'SuperBee']
+    macros.update({
+        'GraetzBound': sci(max(graetz['reference_bound'].values())),
+        'GraetzRuns': graetz['runs'], 'GraetzCriteria': graetz['criteria_pass'],
+        'GraetzOrderHalfMin': f"{min(t['p'] for t in halfcell):.2f}", 'GraetzOrderHalfMax': f"{max(t['p'] for t in halfcell):.2f}",
+        'GraetzOrderNoneMin': f"{min(t['p'] for t in nonelaw):.3f}", 'GraetzOrderNoneMax': f"{max(t['p'] for t in nonelaw):.3f}",
+        'GraetzOrderSBHalf': '--'.join(f"{v:.2f}" for v in sorted(t['p'] for t in superbee if t['law'] == 'halfCell')),
+        'GraetzOrderSBNone': '--'.join(f"{v:.2f}" for v in sorted(t['p'] for t in superbee if t['law'] == 'none')),
+        'GraetzGCIHalfMax': sci(max(t['gci_fine_pct'] for t in halfcell)),
+        'GraetzGCINoneMin': f"{min(t['gci_fine_pct'] for t in nonelaw):.3f}",
+        'GraetzGCINoneMax': f"{max(t['gci_fine_pct'] for t in nonelaw):.3f}",
+        'GraetzExtHalfMax': sci(max(abs(t['ext_rel_error']) for t in halfcell)),
+        'GraetzExtNoneMax': sci(max(abs(t['ext_rel_error']) for t in nonelaw)),
+        'GraetzMuH': sci(graetz['max_fit_vs_discrete_mode'])})
     for r, tag in zip(lob_rows, 'ABCDE'):   # model minus experiment onset, in LOB_CASES order
         macros['LobDiff' + tag] = sign(r['ours_minus_exp_K'])
     (generated / 'numbers.tex').write_text('% Generated from saved completed reports.\n' + ''.join(
@@ -404,7 +496,7 @@ def main():
             'followup_cases': follow['completed_cases'], 'numerical': numeric, 'scheme_mesh_study': scheme_study,
             'iteration_check_iodine_L1_pct': iteration_l1, 'production_max_raw_residue': production_residue,
             'sensitivity': sensitivity, 'alignment': alignment, 'integrity_60s_followup': integrity,
-            'lobresco2026': {'rows': lob_rows, 'summary': lob_summary},
+            'lobresco2026': {'rows': lob_rows, 'summary': lob_summary}, 'graetz_robin': graetz,
             'baseline_trace_mole_fraction_upper_bound': original['max_trace_mole_fraction_upper_bound'],
             'legacy_18432_upwind_q1_peaks': legacy['q1_peaks'],
             'baseline_max_negative_I_over_supplied_I': original['max_negative_I_over_supplied_I'],
@@ -559,12 +651,13 @@ def main():
         input_files += list(root.rglob('*.dat')) + list(root.rglob('*.csv'))
     input_files += list((LOB_RUN / 'cases').rglob('*.dat')) + list((LOB_RUN / 'cases').rglob('case.json'))
     input_files += list((LOB_RUN / 'inputs').glob('*.csv'))
+    input_files += [GRAETZ / name for name in ['reference.json', 'fits.json', 'table.md', 'criteria.log', 'provenance.json']]
     data['input_sha256'] = {str(p.relative_to(REPO)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(input_files)}
     dump(generated / 'results.json', data)
     dump(generated / 'artifact_sha256.json', {str(p.relative_to(HERE)): hashlib.sha256(p.read_bytes()).hexdigest()
         for directory in [generated, figures] for p in sorted(directory.iterdir())
         if p.is_file() and p.name != 'artifact_sha256.json'})
-    print('Generated 8 figures, 6 tables and numerical provenance for 15 baseline + 64 follow-up cases, '
+    print('Generated 8 figures, 8 tables and numerical provenance for 15 baseline + 64 follow-up cases, '
           '19 production cases, the scheme/mesh study, the iteration check and the Lobresco comparison.')
 
 

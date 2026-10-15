@@ -24,3 +24,8 @@ XDG_CACHE_HOME="${XDG_CACHE_HOME:-/tmp/lesto-beamer-cache}" \
     "$compiler" --keep-logs --keep-intermediates --outdir build main.tex
 cp build/main.pdf lesto-iodine-methods.pdf
 printf 'Built %s/lesto-iodine-methods.pdf\n' "$manuscript_dir"
+# Supplementary material (shares generated/, figures/ and references.bib).
+XDG_CACHE_HOME="${XDG_CACHE_HOME:-/tmp/lesto-beamer-cache}" \
+    "$compiler" --keep-logs --keep-intermediates --outdir build supplementary.tex
+cp build/supplementary.pdf lesto-iodine-supplementary.pdf
+printf 'Built %s/lesto-iodine-supplementary.pdf\n' "$manuscript_dir"

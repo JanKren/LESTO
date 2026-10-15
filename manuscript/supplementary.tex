@@ -1,0 +1,329 @@
+\documentclass{article}
+\usepackage{arxiv}
+\usepackage{iftex}
+\ifPDFTeX\usepackage[utf8]{inputenc}\fi
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,booktabs,graphicx,microtype}
+\usepackage[version=4]{mhchem}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{authblk}
+\graphicspath{{figures/}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+% Shared with main.tex and pof/lesto-pof.tex: the generated macros, tables and the bibliography.
+\input{generated/numbers}
+\newcommand{\vect}[1]{\mathbf{#1}}
+\newcommand{\units}[1]{\,\mathrm{#1}}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\crefname{section}{Sec.}{Secs.}
+\Crefname{section}{Section}{Sections}
+\title{Supplementary material: Competition between radial diffusion and
+interfacial exchange in thermal-gradient deposition columns}
+\renewcommand\Authfont{\bfseries}
+\setlength{\affilsep}{0em}
+\author[1]{Jan Kren}
+\author[1]{Bojan Ni\v{c}eno}
+\affil[1]{Paul Scherrer Institute, 5232 Villigen PSI, Switzerland}
+\date{14 October 2026}
+\renewcommand{\shorttitle}{Supplementary material}
+\renewcommand{\headeright}{Supplementary material}
+\renewcommand{\undertitle}{Supplementary material to the working manuscript}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue,
+  pdftitle={Supplementary material: conservative modelling of iodine transport},
+  pdfauthor={Jan Kren and Bojan Niceno}}
+\begin{document}
+\raggedbottom
+\maketitle
+\noindent This document collects the case inventory, the detailed
+material-ledger and solver diagnostics, the scalar mesh checks of the
+original upwind campaign, the comparison-bin-width analysis, the
+property and thermodynamic records and the complete Graetz--Robin
+verification table. Equations, tables and sections of the main text are
+referred to by name. All numbers are generated from the same saved
+results as the main text (\texttt{manuscript/prepare\_results.py},
+\texttt{manuscript/assess\_resolution.py}).
+
+\section{Case inventory}
+\label{sec:s-cases}
+\Cref{tab:study} lists the 64 follow-up cases of the original
+18,432-cell upwind campaign. They cover the following cases:
+\begin{itemize}
+\item mesh and time-step checks: pure PbI$_2$ and three steel Q2 cases
+  (baseline thermodynamics at 0.1\% and 1\% metal saturation, and
+  shifted BiI thermodynamics at 1\%);
+\item physical transport, accommodation, source-position and
+  flow-reference variations: pure PbI$_2$, the two steel Q2 cases with
+  baseline thermodynamics, and silica Q2 at 0.1\%;
+\item extra source-loading cases: both columns and both thermodynamic
+  branches;
+\item temperature-coordinate variants: silica Q1 and silica Q2 at
+  0.1\%.
+\end{itemize}
+This is a structured set of conditional comparisons, not a factorial
+uncertainty study. Each numerical comparison changes one resolution
+setting at a time.
+\begin{table}[htbp]
+\centering
+\caption{Completed follow-up matrix: number of cases and the variation
+applied in each study. The 15 baseline cases serve as additional
+references. Flow-stop cases continue a 60 s baseline to 80 s.}
+\label{tab:study}
+\small\input{generated/study-table}
+\end{table}
+
+The source-position alternatives move the release region by
+$\pm1.5\units{cm}$ without adding a boat obstruction. The flow-stop
+cases restart from the saved 60 s fields, remove injection, set the
+carrier flow to zero and impose zero normal species flux at both ends.
+The original nonuniform temperature profile stays fixed. These cases
+therefore measure how residual gas redistributes during a 20 s flow
+stop at fixed temperature; they are neither a clean-helium purge nor a
+full cooling calculation.
+
+\Cref{fig:physical} shows the largest baseline-relative iodine profile
+change in each physical-input category of the main-text sensitivity
+table.
+\begin{figure}[htbp]
+\centering
+\includegraphics{physical_sensitivity.pdf}
+\caption{Maximum baseline-relative iodine profile change $E_{L1}$ in
+each selected physical-input category (upwind follow-up cases on
+18,432 cells). The flow-stop value uses an 80 s endpoint; the others use
+60 s. These maxima describe the tested case set, not a general
+uncertainty budget or an experimentally identified parameter ranking.}
+\label{fig:physical}
+\end{figure}
+
+Four further sets of runs complete the evidence, all with the same
+solver executable. (i) The \ProductionCases{} production cases repeat
+the 15 baselines and the four silica temperature-coordinate cases on
+41,472 cells with the limited-linear scheme; all other inputs are
+unchanged. (ii) A scheme and mesh study takes two cases, pure PbI$_2$
+and the shifted-BiI steel case at 1\% metal saturation, which had the
+largest upwind fine/medium change. It runs them with upwind,
+limited-linear and van Leer advection on 8,192 to 41,472 cells, and the
+steel case with upwind and limited-linear also on 93,312 cells. This
+adds 12 runs to the existing upwind levels and the production runs.
+(iii) Three original 18,432-cell upwind cases are repeated over the full
+60 s with eight instead of three species correctors. (iv) Ten runs
+simulate five single-species PbI$_2$ experiments of Lobresco et al.\
+\cite{Lobresco2026assessment} on two meshes. The stand-alone BiI$_3$
+experiment at 800\,$^\circ$C was not run because its axial temperature
+profile is not published.
+
+\section{Material ledger and solver diagnostics}
+\label{sec:s-ledger}
+The frozen carrier keeps the converged face mass flux of the
+\texttt{rhoSimpleFoam} solution rather than a flux reconstructed from
+interpolated velocity. At these low mass flows, a zero-initialised
+potential correction removes residual discrete divergence before species
+transport. Carrier preparation rejects a carrier if its original cell or
+global flux defect exceeds $10^{-6}$ of the inlet flow, or if a flux or
+velocity correction exceeds $10^{-5}$ of the corresponding scale. After
+correction, inlet, global and cell continuity and leakage through
+impermeable boundaries are checked against $10^{-12}$ of the inlet flow.
+This procedure is neither a new physical flow model nor evidence that
+the velocity field has converged.
+
+Element conservation is examined in two ways: through the solver
+ledger and through the independently formed raw material residue of the
+main text (Eq.~``balance''). The ledger also records the linear-solve
+defect and any clamping correction separately. These terms explain
+bookkeeping closure, but they are not inserted into the residue when
+the raw material balance is assessed.
+
+All residues are divided by the supplied material and taken as the
+largest value over recorded steps and represented elements. The largest
+raw residue is $\ProductionResidue$ for the 19 production cases
+(41,472 cells, limited-linear advection) and $8.85\times10^{-13}$ for
+the 60 source-driven follow-up cases; the 18,432-cell upwind baselines
+had $5.97\times10^{-13}$. For the follow-up cases, the largest
+accounted closure is $9.60\times10^{-16}$ and the largest recorded
+solver defect is $8.64\times10^{-13}$; for the production cases they
+are $1.12\times10^{-15}$ and $1.45\times10^{-12}$. The four flow-stop
+cases keep their restart ledger and are excluded from this summary of
+newly accumulated source material.
+
+Canonical initialisation of the equilibrium solver makes a restarted
+case independent of an unsaved equilibrium warm state. The baseline logs report no gas-equilibrium solver failures and a
+maximum equilibrium element residue of $6.43\times10^{-16}$.
+Input-validity and solver-success counters are distinct. At startup,
+sign flags caused equilibrium to be skipped in up to 1,170 cells on
+one step, and the maximum negative iodine diagnostic was
+$1.14\times10^{-124}$ of supplied iodine. Matched five-step startup
+replays identified extremely small leading-tail inventories at these
+flags; no flagged cells remained at the final step. The calculations
+should therefore not be described as free of negative trace values,
+even though the reported amount is immaterial to the macroscopic
+balance. The sum of the individual species mole-fraction maxima was at
+most $9.19\times10^{-5}$. Because these maxima need not coincide, this
+is an upper bound on the reactive trace loading, not a measured
+mixture mole fraction at one location.
+
+Some paired wall-coupling iterations did not meet the requested
+$10^{-16}$ outer criterion. This is reported separately from
+equilibrium failure, the final transport defect and the inventory-bound
+checks. To test its effect, matched restarts of four representative
+cases at 59 s compared three and eight correctors, and outer
+tolerances of $10^{-16}$ and $10^{-14}$, over 20 time steps (40 ms).
+The largest species-field change, scaled by its control maximum, was
+below $3.6\times10^{-8}$, and the changes in new wall increments were
+negligible. In the three full-run checks with eight correctors the
+largest outer initial residual is still
+$2.4\times10^{-15}$--$4.4\times10^{-15}$, and nearly every step ends at
+the corrector limit, as with three: the requested $10^{-16}$ lies below
+the attainable residual floor. A fourth full-run check (shifted BiI)
+had not finished and is not used. No manufactured-solution test of the
+full coupled system is presented; the Graetz--Robin test of the main
+text verifies the wall discretisation only.
+
+\section{Scalar mesh checks and binned maxima}
+\label{sec:s-mesh}
+Three-grid scalar checks follow the distinction between refinement
+trends and an established asymptotic range
+\cite{NASAGridConvergence,Roache1994perspective,Celik2008procedure}.
+For the upwind follow-up triplets (8,192, 18,432 and 41,472 cells), 17
+of the 34 nontrivial or zero-valued combinations of species, total,
+centroid and width are oscillatory, four have nondecreasing
+differences, one is unresolved at round-off and 12 admit only
+conditional Richardson/GCI estimates. With upwind advection the
+shifted-BiI steel case changes by essentially the same amount on the
+first two refinements (\SteelUpOne\% and \SteelUpTwo\%). On 41,472
+cells, van Leer and limited-linear advection differ by \VLSteelThree\%
+(steel) and \VLPureThree\% (pure PbI$_2$).
+
+With the production scheme (41,472 cells, limited-linear) the pure
+PbI$_2$ binned maximum stays at 36 cm and 366.4--366.5\,$^\circ$C on all
+three levels, and on 41,472 cells the 37 cm bin is 23\% lower; yet the
+maximum of the 3 cm smoothed profile is at 37 cm and 350.5\,$^\circ$C,
+and the wall temperature at the deposit centroid (37.11 cm) is
+348.7\,$^\circ$C. In the upwind steel Q2 0.1\% case, the dominant
+BiI$_3$ bin moves from 57 to 58 cm, and its reported temperature changes
+from about 166.4 to 138.8\,$^\circ$C: a one-bin switch changes the peak
+temperature by nearly 28 K without a comparable displacement of the
+profile as a whole.
+
+The local one-dimensional estimate $D_{\rm num}\simeq|u_x|\Delta x/2$
+of the upwind numerical diffusion is a Taylor-series screening
+estimate, not a measured truncation error for the radial,
+variable-density coupled problem; it exceeds the prescribed
+$10^{-4}\units{m^2\,s^{-1}}$ where $|u_x|$ exceeds 0.061 m/s on the
+18,432-cell mesh.
+
+\section{Dependence on comparison-bin width}
+\label{sec:s-bins}
+To distinguish sensitivity of the reported observable from a change in
+the CFD mesh, the saved 1 cm iodine inventories of the original upwind
+campaign were summed into groups of two and four consecutive bins.
+Every possible integer-bin offset was tested for each width, retaining
+partial end groups and the full deposited inventory. No CFD field was
+recomputed and no sub-bin reconstruction was introduced.
+\Cref{tab:bin-audit} gives the fine/medium inventory differences for
+these coarser observables. Ranges reflect bin origin, not statistical
+uncertainty.
+\begin{table}[htbp]
+\centering
+\caption{Original upwind fine/medium iodine inventory-profile
+differences (percent, 41,472 versus 18,432 cells) after aggregation of
+native bins. The 2 and 4 cm ranges cover all respective integer-bin
+offsets. $W_1$ uses the original 1 cm bin centres and separately
+normalised profiles; it measures redistribution distance, not position
+error against the experiment.}
+\label{tab:bin-audit}
+\small\input{generated/resolution-audit-table}
+\end{table}
+
+For the shifted-BiI case, a 4 cm comparison gives differences from
+0.52\% to 10.02\% depending on the grouping origin, so a favourable
+aggregation can hide a substantial local difference. Summing signed
+bin differences before taking their absolute values necessarily allows
+cancellation; a reduced aggregated L1 is not additional convergence
+evidence.
+
+As a complementary position-sensitive measure, let $p_b$ and $q_b$ be
+the fine and medium iodine inventories normalised separately over the
+whole column, and $x_b$ their common native bin centres. The
+one-dimensional transport distance for these discrete distributions is
+\begin{equation}
+ W_1=\sum_{b=1}^{B-1}\left|\sum_{j=1}^{b}(p_j-q_j)\right|
+                  (x_{b+1}-x_b).
+ \label{eq:binned-wasserstein}
+\end{equation}
+It is the minimum mean distance needed to redistribute one normalised
+binned inventory into the other. Values of 0.0115--0.0711 cm indicate
+small average spatial redistribution between the two tested meshes,
+despite larger local L1 differences. This is a distance between
+computed binned profiles, not a bound on continuum error or evidence
+that the experimental position uncertainty has been resolved. Four
+analytical tests (edge-inventory preservation, signed-change
+cancellation on aggregation, amplitude invariance of the shape measures
+and a known point-mass displacement) check this post-processing, not
+the CFD solver.
+
+\input{sections/A-properties}
+
+\section{Lobresco et al.\ comparison: set-up details}
+\label{sec:s-lobresco}
+The five cases of Lobresco et al.\ \cite{Lobresco2026assessment} are
+computed on a 0.69 m, 5$^\circ$ wedge of 4.8 mm inner diameter whose
+origin is taken to be the figure origin of that study (clean helium
+enters at $x=0$ at the wall temperature there). The production mesh has
+\LobCellsProd{} cells ($318\times72$), the axial and radial spacing of
+the 41,472-cell Liu mesh, and the coarse mesh \LobCellsCoarse{} cells
+($212\times48$), that of the 18,432-cell mesh. The time step is 2 ms,
+0.5 ms at 540 mL/min. The sample is an evaporating inventory of the
+Table 1 amount (times $5/360$ for the wedge), a cylinder 1 cm long and
+0.48 mm in radius on the axis at the digitised sample arrow (0.13 m at
+106 mL/min, 0.15 m at 5 and 540 mL/min); this geometry is an
+assumption. The 106 mL/min wall temperature is the mean of the curves
+of the T106\_6 and T106\_300 panels. Helium properties are those of the
+Liu cases, not the NIST tables of that study. Carriers are audited to
+$10^{-12}$ of the inflow; the largest absolute ledger closure over all
+steps and runs is $3.3\times10^{-16}$ of the inventory.
+
+A wall-temperature table distributed with the T-Flows test case of that
+study differs from the published curves: its maximum of 1210 K lies at
+0.04 m, whereas the figures peak at 1060--1070 K at 0.13--0.15 m, and
+between 0.30 and 0.60 m it differs from them by up to 68--92 K. We use
+the published curves.
+
+\section{Graetz--Robin verification: all runs}
+\label{sec:s-graetz}
+\Cref{tab:graetz-full} lists every three-level sequence of the
+Graetz--Robin verification (Pe = 5, \GraetzRuns{} runs including one
+time-accurate control): Gauss linear advection with zero-gradient and
+fixed-value outlets, and SuperBee advection, for both wall laws and
+both Biot numbers. ``halfCell'' is the half-cell series law of the main
+text and ``none'' the kinetic law applied to the cell-centre value. Every fitted decay rate equals that of the developed discrete mode of
+the documented scheme within $\GraetzMuH$. Moving either or both ends
+of the fit window by $\pm1.5R$, or fitting the mixing-cup concentration
+or the wall uptake instead of the line density, changes $\mu$ by less
+than $10^{-7}$; the fixed-value outlet changes it by less than
+$10^{-8}$. The reference error bound is $\GraetzBound$. On the
+coarser 32/64/128 sequence the cell-centre law at Bi = 50 has
+GCI$_{\rm fine}=0.678\%$; this triplet is too coarse for a first-order
+wall law. The time-accurate control run ($N_r=32$, Bi = 50, half-cell
+law, Courant number 1) reaches the decay rate of the discrete mode of
+its mesh within $10^{-9}$. The records (reference, per-run fits,
+criteria log and provenance, including the solver SHA-256) are in
+\texttt{manuscript/data/graetz} with instructions to regenerate them.
+\begin{table}[htbp]
+\centering
+\caption{Observed order $p$, relative error of the Richardson-extrapolated
+decay rate and GCI$_{\rm fine}$ \cite{Celik2008procedure} (refinement
+ratio 2, safety factor 1.25) for every three-level sequence of the
+Graetz--Robin verification.}
+\label{tab:graetz-full}
+\small\input{generated/graetz-full-table}
+\end{table}
+
+\bibliographystyle{unsrtnat}
+\begingroup
+\small
+\bibliography{references}
+\endgroup
+\end{document}

@@ -32,6 +32,7 @@ columns: numerical verification and input sensitivity}
 \author[1]{Bojan Ni\v{c}eno}
 \affil[1]{Paul Scherrer Institute, 5232 Villigen PSI, Switzerland}
 \date{14 October 2026}
+% TODO(review-B): do not change the title before the Damkoehler sweep is in.
 \renewcommand{\shorttitle}{Conservative CFD modelling of iodine deposition}
 \renewcommand{\headeright}{Working manuscript}
 \renewcommand{\undertitle}{Working manuscript for author review}
@@ -49,7 +50,9 @@ for nine Pb--Bi--I gases in a frozen helium carrier, with
 element-conserving gas equilibrium and shared wall inventories.
 Reversible iodide exchange follows a Hertz--Knudsen--Schrage law in
 series with the diffusive resistance between a cell centre and its
-wall face. Published thermosublimatography measurements supply three
+wall face; on a Graetz--Robin problem with a reference solution this
+face flux converges at second order, whereas the same law applied to the
+cell-centre value converges at first order. Published thermosublimatography measurements supply three
 temperature profiles and deposition scans; unreported source histories
 and flow-reference conditions are treated as assumptions. Fifteen
 baseline and 64 follow-up simulations separate numerical refinement
@@ -60,21 +63,28 @@ differences from their own baselines. In 60 s runs, the largest raw
 element-balance residue is $1.41\times10^{-12}$ of supplied material.
 Halving the time step changes iodine deposition profiles by at most
 0.323\%, and eight instead of three species correctors by at most
-0.021\%. In the most mesh-sensitive case, upwind advection differs from
+0.021\%.
+% TODO(review-A): production-scheme sensitivities; add one sentence.
+In the most mesh-sensitive case, upwind advection differs from
 the bounded scheme by 7.7--20.8\% at equal mesh, and the bounded-scheme
 profile changes by 1.98\% from 41,472 to 93,312 cells; apparent orders
 are inconsistent, so no formal grid-convergence index is claimed. A
 $+29\units{kJ\,mol^{-1}}$ shift in the BiI gas Gibbs energy changes the
 BiI$_3$ share of deposited iodide iodine in the steel case from 94.58\%
-to 2.01\%, a strong but conditional thermochemical sensitivity. For
-silica, two shifts derived from discrepancies between the published
-temperature curve and its peak labels reduce 4--5 cm position errors to
-0--1 cm, but they do not establish a corrected experimental coordinate
-system. Without tuning, the same wall law reproduces the
-deposition-onset temperatures of five independent single-species PbI$_2$
-experiments with an RMS deviation of 18 K, against 35 K for both
-models of the study that reported them, although the computed deposit
-peaks lie 1--4 cm upstream. The results support a conservative
+to 2.01\%. This shows how strongly the computed partition depends on
+the thermodynamic input; it is neither an uncertainty interval nor a
+basis for choosing a dataset. For silica, two shifts derived from
+discrepancies between the published temperature curve and its peak
+labels reduce 4--5 cm position errors to 0--1 cm; they demonstrate a
+coordinate inconsistency in the published data without resolving it.
+Without tuning, the same wall law gives deposition-onset temperatures
+of five single-species PbI$_2$ experiments with an RMS deviation of
+18 K, against 35 K for both models of the study that reported them.
+This result is promising but conditional: it depends on applying the
+onset rule to the main deposit; the gas near the source is not dilute;
+and because carrier, vapour-pressure and source assumptions differ from
+the published models, the improvement cannot yet be attributed to the
+wall treatment. The computed deposit peaks lie 1--4 cm upstream. The results support a conservative
 computational method and an explicit assessment of uncertain inputs;
 they neither establish independent predictive validation nor reproduce
 the three-hour experiment and subsequent cooling.
@@ -91,12 +101,18 @@ the three-hour experiment and subsequent cooling.
 \FloatBarrier
 \input{sections/07b-discussion}
 \input{sections/08-conclusions}
+\section*{Supplementary material}
+The supplementary material contains the case inventory, the detailed
+material-ledger and solver diagnostics, the scalar mesh checks of the
+upwind campaign, the comparison-bin-width analysis, the property and
+thermodynamic records, and the complete Graetz--Robin verification
+table.
 \section*{Data and software availability}
 The solver and benchmark preparation scripts are maintained in the
 LESTO repository, \url{https://github.com/JanKren/LESTO}. The accompanying
 working-manuscript files contain the completed baseline, follow-up,
-production, scheme and mesh, and iteration-check metrics, saved axial
-profiles, generated tables, figure-generation code
+production, scheme and mesh, and iteration-check metrics, the
+Graetz--Robin verification records, saved axial profiles, generated tables, figure-generation code
 and SHA-256 provenance records. Experimental curves were digitised from
 Liu et al.\ \cite{Liu2025chemical}; they reconstruct published figures
 and are not author-supplied measurements. Figure data are adapted under
@@ -110,8 +126,6 @@ identifiers and derived-table provenance are recorded with the
 benchmark. Reproducing the CFD calculation from coefficients requires
 access to those inputs. Regenerating the manuscript figures uses only
 the saved results and does not require them.
-\appendix
-\input{sections/A-properties}
 \bibliographystyle{unsrtnat}
 \begingroup
 \small

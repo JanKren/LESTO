@@ -38,3 +38,15 @@ printf 'Built %s/%s\n' "$pof_dir" "$out"
 printf 'Overfull boxes: %s; undefined references/citations: %s\n' \
     "$(grep -c '^Overfull' "$log" || true)" \
     "$(grep -ciE 'undefined' "$log" || true)"
+# Supplementary material: the shared ../supplementary.tex, built from the
+# manuscript root so that its generated/ and references.bib paths resolve.
+if [[ "$mode" == reprint ]]; then
+    (cd .. && XDG_CACHE_HOME="${XDG_CACHE_HOME:-/tmp/lesto-beamer-cache}" \
+        "$compiler" --keep-logs --keep-intermediates --outdir pof/build supplementary.tex)
+    cp build/supplementary.pdf lesto-pof-supplementary.pdf
+    slog=build/supplementary.log
+    printf 'Built %s/lesto-pof-supplementary.pdf\n' "$pof_dir"
+    printf 'Supplement overfull boxes: %s; undefined references/citations: %s\n' \
+        "$(grep -c '^Overfull' "$slog" || true)" \
+        "$(grep -ciE 'undefined' "$slog" || true)"
+fi

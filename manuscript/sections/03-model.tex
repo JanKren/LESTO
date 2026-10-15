@@ -1,9 +1,5 @@
 \section{Transport, speciation and wall exchange}
 \label{sec:model}
-This section states the model: trace-species transport in a frozen
-carrier, homogeneous gas equilibrium, reversible and reactive wall
-exchange, and the two prescribed source models.
-
 \subsection{Frozen carrier and trace-species equations}
 The carrier fields $\rho$, $\vect{u}$, $T$ and $p$ come from a steady
 laminar helium calculation and are then held fixed. The reconstructed
@@ -33,11 +29,9 @@ The model does not represent bulk nucleation, aerosols and their
 thermophoretic deposition
 \cite{Walker1979thermophoretic,Batchelor1985thermophoretic}, thermal
 (Soret) diffusion \cite{Rosner2000heavy,Rosner2007soret},
-hydrogen/oxygen chemistry, latent-heat feedback or chemical
-reaction with the steel or silica substrate. Differences between the
-column cases therefore come from their prescribed thermal profiles,
-dimensions and source inputs, not from a fitted substrate-specific
-sticking law.
+hydrogen/oxygen chemistry, latent-heat feedback or substrate reactions,
+so differences between the columns come from their thermal profiles,
+dimensions and sources, not from a substrate-specific sticking law.
 
 \subsection{Homogeneous ideal-gas equilibrium}
 \label{sec:equilibrium}
@@ -60,7 +54,9 @@ dimensionless element potentials $\lambda_k$ that satisfy
  \label{eq:equilibrium}
 \end{equation}
 The tabulated $K_{f,i}$ share a common elemental reference and the
-stated standard pressure. Concentrations are converted back through
+stated standard pressure; the thermodynamic records, their provenance
+and the phase treatment are summarised in Sec.~S5 of the supplementary
+material. Concentrations are converted back through
 $Y_i=M_i p_i/(\rho RT)$. Re-speciation therefore conserves elements,
 not individual species. The helium pressure is not an additional
 reactive element constraint; under the trace-species approximation its
@@ -69,8 +65,7 @@ field stays prescribed.
 The solver works in logarithmic variables with a safeguarded Newton
 iteration. The Pb and Bi subproblems are reduced at fixed iodine
 potential, and a Schur complement treats the remaining coupling.
-Canonical initialisation makes a restarted case independent of an
-unsaved equilibrium warm state. Re-speciation is requested at every
+Re-speciation is requested at every
 time step in cells with $T\ge350\units{K}$; below this threshold the
 transported gas composition is kept. This cutoff is a numerical
 modelling choice, not a demonstration that reactions cease at 350 K.
@@ -150,18 +145,16 @@ effective reactant equilibrium pressure are
                   [p_{{\rm eq},\rm BiI}-p_{\rm BiI,c}]\}.
  \label{eq:reactive-flux}
 \end{align}
-All Gibbs energies in $K_r$ are evaluated at $T_w$. This channel is a
-phenomenological treatment: it applies the HKS conductance to the
-reaction driving force, with the same half-cell resistance as the other
-channels. The coproduct pressure is taken from the beginning-of-step
-gas field, and the minimum suppresses the reverse reaction. The
-reaction consumes three BiI molecules, returns one BiI$_3$ molecule to
-the gas and adds two Bi atoms to the shared wall inventory. All
-channels draw on this one Bi inventory; a separate inventory for each
-reaction would duplicate a physical material. Coproducts are applied
-after the transported reactants have been solved. This irreversible
-channel is a model assumption and must not be read as a fully
-reversible surface-equilibrium model.
+All Gibbs energies in $K_r$ are evaluated at $T_w$. This
+phenomenological channel applies the HKS conductance, with the same
+half-cell resistance, to the reaction driving force; the coproduct
+pressure is taken from the beginning-of-step gas field, and the minimum
+suppresses the reverse reaction. The reaction returns one BiI$_3$
+molecule to the gas and adds two Bi atoms to the shared wall inventory,
+on which all Bi channels draw; a separate inventory per reaction would
+duplicate a physical material. Coproducts are applied after the
+transported reactants have been solved. The channel is an irreversible
+model assumption, not a surface-equilibrium model.
 
 \subsection{Prescribed source models}
 \label{sec:source}

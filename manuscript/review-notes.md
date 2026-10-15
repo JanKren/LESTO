@@ -1,5 +1,63 @@
 # Author review: 14 October 2026 (update of 9 October)
 
+## Revision after the internal review (14 October, afternoon)
+
+No new CFD runs. Two simulation sets are still running and are **not**
+reported: production-scheme sensitivities (`% TODO(review-A)` comments in
+`main.tex` and `pof/lesto-pof.tex` abstracts, Secs. 4.3, 7.3 and 9,
+the limitations list of Sec. 8.3) and a Damkoehler sweep (`% TODO(review-B)` at both
+titles, the PoF abstract, Secs. 1, 4.2, 6.3, 7.3 and 9; arXiv
+numbering). Titles unchanged.
+
+1. **Graetz-Robin verification** (new Sec. 5.1, Table II, Table S4). The
+   M7.1 runs of 11 October (45 runs, OpenFOAM v2412, solver SHA-256
+   16fd804e..., the production executable: every run key equals the key
+   recomputed from it) were re-evaluated with `graetzRobin check` (no new
+   runs): 27/27 PASS, `table.md`, `log.fit`, `reference.json` identical.
+   Summary records are tracked in `data/graetz/` (README, collect.py);
+   `prepare_results.py` builds the tables and macros from them,
+   `check_results.py` recomputes orders and GCI of all 20 triplets and
+   checks them against `table.md`. Half-cell law: order 1.99-2.00,
+   GCI_fine <= 1.9e-4 %; cell-centre law: order 1.004-1.008, GCI_fine
+   0.155-0.341 %. Stated scope: wall discretisation at Bi <= 50 only.
+2. **Introduction**: positioning against Vijaya Kumar et al. (2021, Appl.
+   Therm. Eng. 187, 116546; doi:10.1016/j.applthermaleng.2021.116546),
+   the 2021 OpenFOAM (containmentFOAM) study comparing volumetric-source
+   and face-flux wall condensation (verified on Crossref and the
+   University of Twente record), and Di Ronco et al. (2021, Front. Energy
+   Res. 9, 692627; doi:10.3389/fenrg.2021.692627). Contribution stated as
+   element-conserving equilibrium coupled to face-flux exchange, shared
+   inventories and the resulting transport behaviour.
+3. **Lobresco comparison** (Sec. 6.3, abstracts, conclusions): comparison
+   region defined up front (rule applied downstream of the sample in all
+   five cases; identical to the inlet rule except T5_60, 548 vs 836 K;
+   RMS 135 K instead of 18 K with the inlet rule; 1.2 % of the computed
+   T5_60 deposit lies upstream, absent from the measurement); three named
+   limits; release pulse: the "< 0.5 s" figure could not be traced to a
+   saved record and was removed; the text now says the sample is fully
+   evaporated within the 6 s run (98.1 % deposited) and cites Lobresco et
+   al.'s confirmation of complete evaporation; differing carrier,
+   vapour-pressure and source assumptions stated, so the RMS improvement
+   is not attributed to the wall law; L1/n0 0.37-0.89 and 1-4 cm offsets
+   kept in text, table and conclusions.
+4. **Scope**: BiI +29 kJ/mol = importance of thermodynamic input, not an
+   uncertainty interval or dataset selection (Secs. 7.1, 9, abstracts);
+   silica shifts demonstrate the inconsistency without resolving it.
+5. **Small corrections**: centroid 348.7 C is 1.3 K below 350 C and
+   smoothed 269.2 C is 0.8 K below 270 C, stated; Liu boundary
+   conditions stated from the case dictionaries (inlet Y = 0 fixed, clean
+   helium; outlet p = 101,325 Pa fixed, species zero gradient; wall zero
+   gradient + face fluxes) with Sc and Pe at that pressure
+   (`estimates/dimensionless.txt`); buoyancy reworded as a possibly
+   significant, unquantified limitation.
+6. **Length**: limitations collected once (Sec. 8.3, "Limitations");
+   new supplementary material (`supplementary.tex`, built by both build
+   scripts) holds the case inventory, ledger/solver diagnostics, carrier
+   checks, upwind scalar mesh checks, bin-width audit, property appendix,
+   Lobresco set-up details, the full Graetz table and the sensitivity bar
+   chart. PoF 28 -> 25 pages, preprint 44 -> 39, supplement 6 pages,
+   arXiv 21 pages.
+
 ## Scientific reassessment on 12 October
 
 Saved profiles now support 28 mass-preserving bin-aggregation comparisons

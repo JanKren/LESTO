@@ -1,9 +1,7 @@
 \section{Numerical implementation and study design}
 \label{sec:numerics}
-This section describes the geometry and carrier preparation, the
-discretisation and coupling, and the completed case matrix.
-
-\subsection{Geometry and carrier preparation}
+\subsection{Geometry, carrier and boundary conditions}
+\label{sec:geometry}
 A structured axisymmetric 5$^\circ$ wedge represents the 1.25 m column
 (\cref{fig:geometry}). The steel and silica radii are 2.4 and 2.5 mm.
 The production mesh has $576\times72\times1=41{,}472$ cells. The
@@ -29,31 +27,42 @@ axisymmetric reduction.}
 \end{figure*}
 
 The inlet flow rates are converted to helium mass flow assuming a
-controller reference of 298.15 K and 101,325 Pa. The supplied paper
-does not specify these reference conditions. Full-column rates are
+controller reference of 298.15 K and 101,325 Pa, which the supplied
+paper does not specify. Full-column rates are
 $2.727\times10^{-7}\units{kg\,s^{-1}}$ at 100 mL/min and
-$1.227\times10^{-7}\units{kg\,s^{-1}}$ at 45 mL/min. A separate study
-uses 273.15 K at the same reference pressure. Helium follows the
-perfect-gas law with constant heat capacity and Sutherland viscosity
-(\cref{app:properties}). Steady laminar carriers are computed with
-\texttt{rhoSimpleFoam}, while the reconstructed temperature profile
-stays prescribed.
+$1.227\times10^{-7}\units{kg\,s^{-1}}$ at 45 mL/min; a separate study
+uses a 273.15 K reference. Helium follows the perfect-gas law with
+constant heat capacity and Sutherland viscosity (supplementary
+material, Sec.~S5). Steady laminar carriers are computed with
+\texttt{rhoSimpleFoam} while the reconstructed temperature profile stays
+prescribed. The converged face mass flux is corrected to discrete
+continuity within $10^{-12}$ of the inlet flow (supplementary material,
+Sec.~S2), which makes the frozen transport field conservative but is
+not evidence that the velocity field has converged.
 
-The converged face mass flux is kept, rather than reconstructed from
-interpolated velocity. At these low mass flows, a zero-initialised
-potential correction removes residual discrete divergence before
-species transport. Carrier preparation rejects a carrier if its
-original cell or global flux defect exceeds $10^{-6}$ of the inlet
-flow, or if a flux or velocity correction exceeds $10^{-5}$ of the
-corresponding scale. After correction, inlet, global and cell continuity and leakage
-through impermeable boundaries are checked against $10^{-12}$ of the
-inlet flow. This procedure makes the frozen transport field discretely
-conservative. It is neither a new physical flow model nor evidence that
-the velocity field has converged.
+The boundary conditions are the same in all Liu et al.\ cases. At the
+inlet the carrier enters with the prescribed mass flow at the local
+wall temperature, and every reactive gas has a fixed mass fraction of
+zero: clean helium enters, and the release is a volumetric source in
+the source cells. At the outlet the static pressure is fixed at
+101,325 Pa, an assumed value because neither experimental paper states
+the column pressure, and all gases have zero normal gradient, so they
+leave by advection. At the wall the transported gases have zero normal
+gradient in the transport operator, and all wall exchange enters as the
+face fluxes of \cref{sec:wall}. With the 101,325 Pa outlet pressure and
+the baseline diffusivity, the Schmidt number is 2.0--11.3 between 400
+and 1173 K, and the diameter-based P\'eclet number $\mathrm{Pe}=\mathrm{Re}\,\mathrm{Sc}$
+is 5.9--17.4 at 100 mL/min and 2.6--7.8 at 45 mL/min. Axial diffusion
+is therefore not negligible next to advection, and the fixed zero
+inlet value permits a diffusive loss of vapour through the inlet; it is
+included in the outward transport of the material ledger
+(\cref{eq:balance}). The flow-stop cases replace both end conditions by
+zero normal species flux (supplementary material, Sec.~S1).
 
-The stated inputs fix the transport regime. With the full-column
-helium mass flow $\dot m$, the tube diameter $d$ and the Sutherland
-viscosity of \cref{app:properties}, $\mathrm{Re}=4\dot m/(\pi d\mu)$ is
+\subsection{Transport regime}
+\label{sec:regime}
+With the full-column helium mass flow $\dot m$, the tube diameter $d$
+and the Sutherland viscosity, $\mathrm{Re}=4\dot m/(\pi d\mu)$ is
 1.5--3.0 for the 100 mL/min steel case and 0.7--1.3 for the 45 mL/min
 cases between the source-furnace temperature of 1173 K and 400 K; the
 carrier is laminar throughout. With the baseline diffusivity, the
@@ -80,12 +89,16 @@ resistance well below the radial diffusion resistance for
 $\alpha_i=1$ and 0.1, and about an order of magnitude below it for
 $\alpha_i=0.01$. It is a scaling estimate, not a substitute for the
 resolved near-wall gradients of the calculations.
+% TODO(review-B): Damkoehler sweep (running). Insert its result here: the
+% computed response of the iodine profiles over the swept Da range, and
+% whether it confirms the diffusion-limited reading of this paragraph and
+% of Sec. 7.3. Do not change the PoF title before this is in.
 
-Two effects that the model omits can be bounded with the same inputs,
-the digitised wall profiles and the computed absolute pressure of
-101.33 kPa. The first is buoyancy. Neither experimental paper states
-the column orientation. For developed laminar flow with a linearly
-varying wall temperature, the wall-to-bulk temperature difference is
+Two omitted effects can be bounded with the same inputs, the digitised
+wall profiles and the 101,325 Pa outlet pressure. The first is
+buoyancy. Neither experimental paper states the column orientation. For
+developed laminar flow with a linearly varying wall temperature, the
+wall-to-bulk temperature difference is
 $(11/192)\,U d^2|\mathrm{d}T_w/\mathrm{d}x|/a$, with $a$ the thermal
 diffusivity of helium; it stays below 2.6 K. A Grashof number based
 on the axial temperature change over one diameter,
@@ -96,10 +109,14 @@ $\mathrm{Gr}/\mathrm{Re}^2$ reaches 0.15 (pure PbI$_2$) to 0.78
 (silica) in that range, and about 1.2 in the steepest cold section of
 the silica profile. Compositional buoyancy at the largest computed
 trace mole fraction, $9.2\times10^{-5}$ evaluated with the molar mass
-of BiI$_3$, gives $\mathrm{Gr}/\mathrm{Re}^2\le0.32$. Buoyancy-driven
-secondary flow is therefore weak, but in a horizontal column it cannot
-be excluded, and the frozen carrier does not represent it. The second
-effect is thermal (Soret) diffusion. Taking a thermal diffusion factor
+of BiI$_3$, gives $\mathrm{Gr}/\mathrm{Re}^2\le0.32$. Richardson numbers
+of order 0.1--1 do not show that buoyancy is negligible: in a
+horizontal column, buoyancy-driven secondary flow may be significant
+locally, in particular in the steep cold sections where deposition
+occurs. The frozen carrier does not represent it, and with the
+orientation unknown its effect on the deposition profiles is an
+unquantified limitation of the model. The second effect is thermal
+(Soret) diffusion. Taking a thermal diffusion factor
 $\alpha_T=1$ as a generous bound, the Soret drift velocity
 $D_i\alpha_T|\mathrm{d}T_w/\mathrm{d}x|/T$ is at most 2.2\% of the
 carrier velocity. The radial Soret flux, relative to a Fickian flux
@@ -115,10 +132,14 @@ baselines and four silica temperature-coordinate cases) use the bounded
 OpenFOAM scheme \texttt{Gauss limitedLinear 1}
 \cite{Jasak1996error,Sweby1984high} for advection on 41,472 cells. It
 blends linear and upwind interpolation through a TVD-type flux limiter,
-which reverts to upwinding near extrema and steep gradients. The 64 follow-up cases and the time-step
-comparisons keep the first-order upwind advection of the original
-campaign on 18,432 cells, and the follow-up sensitivities are always
-reported as differences from their own upwind baselines on that mesh.
+which reverts to upwinding near extrema and steep gradients. The 64
+follow-up cases and the time-step comparisons keep the first-order
+upwind advection of the original campaign on 18,432 cells, and the
+follow-up sensitivities are always reported as differences from their
+own upwind baselines on that mesh.
+% TODO(review-A): production-scheme sensitivities (running). When they are
+% complete, state here which follow-up sensitivities were repeated with
+% limitedLinear on 41,472 cells and that Sec. 7.3 / Table VII report them.
 The scheme and mesh study adds the van Leer limiter
 \cite{vanLeer1974towards} (\texttt{Gauss vanLeer}) as a second bounded
 scheme. All nine transported gases use the same advection scheme
@@ -129,81 +150,35 @@ species correctors and active-bound guards reconcile the final gas
 solution with the realised wall transfer. Gas re-speciation then
 redistributes species under the local element constraints. The
 sequence is first order in time; a conservative equilibrium projection
-alone does not remove splitting or transport error.
-
-The baseline configuration requests three species correctors with a
-$10^{-16}$ tolerance and up to eight bound guards with a $10^{-13}$
-guard tolerance. These are stopping settings. They do not guarantee
-that every outer wall-regime iteration reaches the requested
-tolerance, so the final transport defect, bound status and material
-ledger are examined separately (\cref{sec:conservation}). Short
-corrector replays and three full runs with eight correctors test the
-effect of this stopping criterion (\cref{sec:conservation}).
+alone does not remove splitting or transport error. The baseline
+configuration requests three species correctors with a $10^{-16}$
+tolerance and up to eight bound guards with a $10^{-13}$ guard
+tolerance; the effect of this stopping criterion is tested in
+\cref{sec:conservation}.
 
 Every gas has the baseline diffusivity $D_i=10^{-4}\units{m^2\,s^{-1}}$.
 Three transport alternatives halve or double this value for all gases,
 or replace only the PbI$_2$ coefficient with a temperature- and
-pressure-dependent PbI$_2$--He estimate. The collision parameters of
-that estimate are themselves estimates, not independently measured
-binary transport data. Accommodation variations set $\alpha=0.1$ or
-0.01 for the two reversible iodide pairs and keep the baseline
-metal-channel coefficients.
+pressure-dependent PbI$_2$--He estimate whose collision parameters are
+themselves estimates (supplementary material, Sec.~S5). Accommodation
+variations set $\alpha=0.1$ or 0.01 for the two reversible iodide pairs
+and keep the baseline metal-channel coefficients.
 
 \subsection{Completed case matrix}
 The 15 baseline cases are Q1 for each available configuration, plus Q2
 for the two LBE columns at $\beta\in\{0.001,0.01,0.1\}$ with two
 thermodynamic branches. The second branch adds a constant 29 kJ/mol to
-the standard Gibbs energy of BiI(g). It is a sensitivity surrogate, not
-a second experimentally qualified dataset. All completed calculations
-use the same solver executable, identified by its SHA-256 in the saved
-reports.
-
-\Cref{tab:study} lists the 64 follow-up cases. The studies cover the
-following cases:
-\begin{itemize}
-\item mesh and time-step checks: pure PbI$_2$ and three steel Q2 cases
-  (baseline thermodynamics at 0.1\% and 1\% metal saturation, and
-  shifted BiI thermodynamics at 1\%);
-\item physical transport, accommodation, source-position and
-  flow-reference variations: pure PbI$_2$, the two steel Q2 cases with
-  baseline thermodynamics, and silica Q2 at 0.1\%;
-\item extra source-loading cases: both columns and both thermodynamic
-  branches;
-\item temperature-coordinate variants: silica Q1 and silica Q2 at
-  0.1\%.
-\end{itemize}
-This is a structured set of conditional comparisons, not a factorial
-uncertainty study.
-\begin{table*}[tb]
-\centering
-\caption{Completed follow-up matrix: number of cases and the variation
-applied in each study. The baseline cases serve as additional
-references. Each numerical comparison changes one resolution setting
-at a time; flow-stop cases continue a 60 s baseline to 80 s.}
-\label{tab:study}
-\small\input{generated/study-table}
-\end{table*}
-
-The source-position alternatives move the release region by
-$\pm1.5\units{cm}$ without adding a boat obstruction. The flow-stop
-cases restart from the saved 60 s fields, remove injection, set the
-carrier flow to zero and impose zero normal species flux at both ends.
-The original nonuniform temperature profile stays fixed. These cases
-therefore measure how residual gas redistributes during a 20 s flow
-stop at fixed temperature; they are neither a clean-helium purge nor a
-full cooling calculation.
-
-Four further sets of runs complete the evidence, all with the same
-solver executable. (i) The \ProductionCases{} production cases repeat
-the 15 baselines and the four silica temperature-coordinate cases on
-41,472 cells with the limited-linear scheme; all other inputs are
-unchanged. (ii) A scheme and mesh study takes two cases, pure PbI$_2$
-and the shifted-BiI steel case at 1\% metal saturation, which had the
-largest upwind fine/medium change. It runs them with upwind,
-limited-linear and van Leer advection on 8,192 to 41,472 cells, and the
-steel case with upwind and limited-linear also on 93,312 cells. This
-adds 12 runs to the existing upwind levels and the production runs.
-(iii) Three original 18,432-cell upwind cases are repeated over the full
-60 s with eight instead of three species correctors. (iv) Ten runs
-simulate five single-species PbI$_2$ experiments of Lobresco et al.\
-\cite{Lobresco2026assessment} on two meshes (\cref{sec:lobresco}).
+the standard Gibbs energy of BiI(g); it is a sensitivity surrogate, not
+a second dataset. The 64 follow-up cases vary mesh and time step,
+diffusivity, accommodation, source position, Q2 metal loading, flow
+reference, silica temperature coordinate and a fixed-temperature flow
+stop; they are a structured set of conditional comparisons, not a
+factorial uncertainty study. Four further sets complete the evidence:
+the \ProductionCases{} production re-runs (\cref{sec:verification}), a
+scheme and mesh study of two cases up to 93,312 cells, three full-run
+corrector checks, and ten runs of five single-species experiments of
+Lobresco et al.\ \cite{Lobresco2026assessment} on two meshes
+(\cref{sec:lobresco}). All Liu et al.\ calculations and the Lobresco
+runs use the same solver executable, identified by its SHA-256 in the
+saved reports. Table~S1 and Sec.~S1 of the supplementary material list
+every case, its variation and its reference case.

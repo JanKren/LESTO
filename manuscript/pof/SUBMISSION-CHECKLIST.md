@@ -22,6 +22,7 @@ both read on 13 October 2026. Re-check them before submitting.
 | B3 | Author declarations | CRediT roles, conflict-of-interest statement, acknowledgments/funding, corresponding e-mail: all placeholders. Required by AIP. |
 | B4 | ~~Figure text below 8 pt~~ **resolved 14 Oct** | Figures are drawn at printed size (≤ 5.4 in) and included unscaled; text 8–9 pt (Section 5). Only mathtext sub/superscripts are smaller. |
 | B5 | Co-author approval | Ničeno must see and approve the manuscript and the CRediT statement (AIP: corresponding author ensures all authors agree). `review-notes.md`: no messages have been sent. |
+| B6 | Running studies (review-A, review-B) | Production-scheme sensitivities and the Damkoehler sweep are still running; their results are not in the text. `% TODO(review-A)`/`% TODO(review-B)` comments mark every place (abstracts, Secs. 1, 4, 6.3, 7.3, 8, 9, titles). |
 
 ## 1. AIP / PoF requirements
 
@@ -32,8 +33,8 @@ both read on 13 October 2026. Re-check them before submitting.
 | `\author`/`\affiliation` | **done** | Affiliation kept as in `main.tex`: "Paul Scherrer Institute, 5232 Villigen PSI, Switzerland". **decision**: PSI's current preferred affiliation string (e.g. centre/laboratory name). |
 | Corresponding author e-mail | **placeholder** | `\email{...}` reads verbatim, so the placeholder is plain bracketed text, not red. |
 | ORCIDs | **placeholder** | Entered in the submission system, not in the TeX. Not invented here. |
-| Title | **done** (changed 14 Oct) | Alternative 2 of Section 6 adopted; see Section 6 for the basis. arXiv title unchanged. |
-| Abstract ≤ 250 words, one paragraph, no citations/equations/footnotes | **done** | 247 words after the 14 Oct update (inline math counted as one word). No citations or displayed equations. It now reports the production scheme, the iteration and mesh results, the transport-limited reading and the Lobresco comparison; recount after any edit. |
+| Title | **done** (changed 14 Oct); **blocked** on review-B | Alternative 2 of Section 6 adopted; see Section 6 for the basis. arXiv title unchanged. A `% TODO(review-B)` above both titles: do not change them before the Damkoehler sweep is in. |
+| Abstract ≤ 250 words, one paragraph, no citations/equations/footnotes | **done** | 248 words after the internal-review revision (inline math counted as one word; `%` comment lines excluded). Adds the Graetz-Robin result and qualifies the Lobresco and BiI sentences. Two `% TODO(review-A/B)` comments mark where the running studies go; recount after any edit. |
 | Keywords | **decision** | AIP's instructions state no keyword requirement; the TeX has none. If the submission form asks: thermal-gradient tube flow; vapor deposition; Hertz–Knudsen–Schrage; laminar mass transfer; finite-volume method; OpenFOAM; numerical verification. |
 | Acknowledgments | **placeholder** | `acknowledgments` environment. The earlier draft's funding statements and grant numbers were removed pending confirmation; none invented. |
 | Author Declarations: Conflict of Interest | **placeholder** | AIP standard text "The authors have no conflicts to disclose." inside the placeholder; confirm or replace with AIP's disclosure template. |
@@ -213,7 +214,7 @@ are the usual places.
 
 ## 9. References
 
-- 21 cited entries (Jasak 1996, Sweby 1984 and van Leer 1974 added for
+- 23 cited entries (Vijaya Kumar 2021 and Di Ronco 2021 added after the internal review; Jasak 1996, Sweby 1984 and van Leer 1974 added for
   the schemes); all articles have journal, volume, pages or article
   number, year and DOI. Books and chapters have publisher and year.
 - **Incomplete:** `NASAGridConvergence` (NPARC Alliance web page) has
@@ -248,17 +249,22 @@ are the usual places.
    profile; the carrier sees the wall temperature everywhere. The estimated
    wall-to-bulk temperature lag of developed flow is <= 2.6 K (Sec. 4.1),
    which supports the approximation away from the furnace entrance.
-4. **Buoyancy: bounded (Sec. 4.1, `manuscript/estimates/`).** Gr <= 2.2,
-   Gr/Re^2 0.15-0.78 in the 400-750 K deposition range and about 1.2 in the
-   steepest cold silica section; compositional Gr/Re^2 <= 0.32. Stated as weak
-   but not excluded in a horizontal column. The column orientation is still
-   unknown: ask the experimenters (add to `manuscript/requests-draft.md`).
+4. **Buoyancy: estimated, not excluded (Sec. 4.2, `manuscript/estimates/`).**
+   Gr <= 2.2, Gr/Re^2 0.15-0.78 in the 400-750 K deposition range and about
+   1.2 in the steepest cold silica section; compositional Gr/Re^2 <= 0.32.
+   Since the internal review the text no longer calls this weak: Richardson
+   numbers of order 0.1-1 do not show buoyancy to be negligible, it may be
+   significant locally in a horizontal column, and it is listed as an
+   unquantified limitation (orientation unknown; ask the experimenters).
 5. **Soret diffusion: bounded (Sec. 4.1).** With alpha_T = 1 as a generous
    bound, Soret drift <= 2.2 % of the carrier velocity and radial Soret flux
    <= 0.7 % of a Fickian wall flux.
-6. **Axial diffusion and inlet species conditions.** Pe is O(1–10)
-   (at 1 atm), so upstream diffusion from the source and the species
-   inlet condition matter; these are not discussed.
+6. **Axial diffusion and inlet species conditions.** Now stated (Sec.
+   4.1): inlet Y = 0 fixed, outlet p = 101,325 Pa fixed (assumed) with
+   zero-gradient species, wall zero gradient plus face fluxes; Sc 2.0-11.3
+   and Pe 5.9-17.4 (100 mL/min) / 2.6-7.8 (45 mL/min) at that pressure; the
+   diffusive loss through the inlet is in the ledger. Not quantified: its
+   size.
 7. **Fluid-dynamics novelty.** Most of the paper is chemistry, provenance
    and input reconstruction. Even with the framing, an editor may judge
    the fit marginal. Alternatives are a heat/mass-transfer or nuclear
@@ -270,18 +276,35 @@ are the usual places.
    inconclusive.
 9. **79 cases versus three experiments.** The paper already says these
    are computational cases, not replicates; keep that wording.
-10. **Length.** About 21 pages in PoF reprint layout, with seven tables
-    and seven figures; a reviewer may ask to move the property appendix
-    and the case-matrix details to supplementary material.
+10. **Length.** Done: 25 pages in PoF reprint layout (was 28), seven
+    tables and seven figures; property appendix, case inventory, ledger
+    diagnostics, bin-width audit, Lobresco set-up details, the full
+    Graetz table and the sensitivity bar chart are in the 6-page
+    supplementary material (`supplementary.tex`).
 
-## 11. Build record (14 October 2026)
+## 11. Build record (14 October 2026, after the internal review)
 
 | Build | Command | Pages | Overfull | Undefined refs | BibTeX |
 |---|---|---|---|---|---|
-| PoF reprint | `bash manuscript/pof/build.sh` | 26 | 0 | 0 | 1 benign (REVTeX `jnrlst`) |
-| PoF preprint | `bash manuscript/pof/build.sh --preprint` | 40 | 0 | 0 | same |
-| arXiv | `bash manuscript/build.sh --figures` | 22 | 0 | 0 | 0 |
+| PoF reprint | `bash manuscript/pof/build.sh` | 25 | 0 | 0 | 1 benign (REVTeX `jnrlst`) |
+| PoF supplement | (built by the same command) `pof/lesto-pof-supplementary.pdf` | 6 | 0 | 0 | 0 |
+| PoF preprint | `bash manuscript/pof/build.sh --preprint` | 39 | 0 | 0 | same |
+| arXiv | `bash manuscript/build.sh --figures` | 21 | 0 | 0 | 0 |
+| arXiv supplement | (same command) `lesto-iodine-supplementary.pdf` | 6 | 0 | 0 | 0 |
 | Consistency | `python3 manuscript/check_results.py` | PASS | | | rewrote `review-checks.json` |
 
-The two-column `jap` test build was not repeated. The numerical table
-was narrowed to fit the 396 pt column; Tables IV and V are `table*`.
+The checker now also recomputes the 20 Graetz-Robin GCI triplets from
+`manuscript/data/graetz/fits.json`, checks them against the solver test's
+`table.md`, the criteria log (27 PASS) and the solver hash, recomputes the
+Lobresco from-inlet onsets and RMS, and checks the supplement logs and PDF.
+
+## 12. Internal review revision (14 October 2026)
+
+See `manuscript/review-notes.md`, top section. Supplementary material:
+PoF accepts it as a separate file; upload `pof/lesto-pof-supplementary.pdf`
+(arXiv-style layout; references are self-contained). References added:
+Vijaya Kumar et al. 2021 (doi:10.1016/j.applthermaleng.2021.116546) and
+Di Ronco et al. 2021 (doi:10.3389/fenrg.2021.692627, `pages` added to the
+entry); 23 entries cited in the main text. Open: `% TODO(review-A)` and
+`% TODO(review-B)` comments (running simulation sets) must be resolved
+before submission; `grep -rn "TODO(review" manuscript/` lists them.

@@ -1,20 +1,87 @@
 \section{Numerical verification and resolution limits}
 \label{sec:verification}
-This section reports material conservation and solver diagnostics, then
-the separate time-step and mesh comparisons, and finally two effects
-that limit how precisely local profile features are resolved.
+This section verifies the wall-exchange discretisation on a problem with
+a reference solution, then reports material conservation and the
+time-step, iteration, mesh and scheme dependence of the iodine
+calculations.
 
-\subsection{Completion, material balance and solver diagnostics}
+\subsection{Verification of the wall-exchange discretisation}
+\label{sec:graetz}
+The half-cell series law of \cref{eq:halfcell} is verified on an
+extended Graetz problem with a Robin wall condition
+\cite{Shah1978circular}: fully developed laminar flow in a pipe,
+axial diffusion included, and a constant first-order wall uptake
+$-\rho D\,\partial Y/\partial r=\rho k_wY$ at $r=R$. Far from the inlet
+and the outlet every cross-sectional measure decays as
+$\exp(-\mu x)$, and the decay rate depends only on the P\'eclet number
+$\mathrm{Pe}=U_bR/D$ and the Biot number $\mathrm{Bi}=k_wR/D$, the
+analogue of the wall Damk\"ohler number of \cref{eq:damkohler}. The
+reference $\mu R$ for $\mathrm{Pe}=5$ and $\mathrm{Bi}=1$ and 50 is the
+smallest positive eigenvalue of the radial problem, computed by a power
+series in extended precision, by shooting and by Chebyshev
+collocation; the three agree within a relative $\GraetzBound$.
+
+The test uses the solver's own wall-exchange implementation with a
+constant uptake velocity $k_w$ ($R=2.4$ mm, $T=500$ K, $p=1$ atm,
+$D=7.6963\times10^{-5}\units{m^2\,s^{-1}}$, a pipe of length $24R$). The
+meshes are 2$^\circ$ wedges with exactly axisymmetric cell metrics and
+$N_r=32$, 64, 128 and 256 uniform radial cells, $\Delta x=2\Delta r$, and
+the parabolic carrier enters through exact face fluxes. Steady states
+are obtained by implicit Euler steps with a very large time step, and
+$\mu$ is fitted to the computed gas line density in a window chosen from
+the spectrum. Two wall laws are compared: the half-cell series law and
+the kinetic law applied directly to the cell-centre value (no half-cell
+resistance), which is the form of a volumetric first-cell sink. Every
+fitted $\mu$ equals the decay rate of the developed discrete mode of
+the documented scheme within $\GraetzMuH$, and moving the fit window or
+changing the outlet condition changes it by less than $10^{-7}$, so the
+differences below are discretisation errors. All \GraetzCriteria{}
+acceptance criteria of the study pass (records, provenance and
+regeneration: Sec.~S7 of the supplementary material).
+
+\Cref{tab:graetz} gives the relative error of $\mu$ on each mesh, the
+observed order and the grid convergence index GCI$_{\rm fine}$ of Celik
+et al.\ \cite{Celik2008procedure} on $N_r=64/128/256$. The half-cell law
+converges at order \GraetzOrderHalfMin--\GraetzOrderHalfMax{} with
+GCI$_{\rm fine}\le\GraetzGCIHalfMax\%$, and its Richardson-extrapolated
+decay rate matches the reference within $\GraetzExtHalfMax$. The
+cell-centre law converges at first order
+(\GraetzOrderNoneMin--\GraetzOrderNoneMax) with
+GCI$_{\rm fine}=\GraetzGCINoneMin$--\GraetzGCINoneMax\%. With bounded
+SuperBee advection the observed orders are \GraetzOrderSBHalf{} and
+\GraetzOrderSBNone{}, respectively (supplementary material, Table~S4).
+On the coarsest mesh the cell-centre law errs by 1--2\% in the decay
+rate, the half-cell law by at most $10^{-4}$.
+\begin{table*}[tb]
+\centering
+\caption{Graetz--Robin verification ($\mathrm{Pe}=5$): relative error
+$\mu/\mu_{\rm ref}-1$ of the fitted decay rate on $N_r$ radial cells,
+observed order $p$ and GCI$_{\rm fine}$ \cite{Celik2008procedure} on
+$N_r=64/128/256$, Gauss linear advection, zero-gradient outlet.
+Half-cell series: \cref{eq:halfcell}; cell-centre value: kinetic law
+without the half-cell resistance.}
+\label{tab:graetz}
+\small\input{generated/graetz-table}
+\end{table*}
+
+This test verifies the discretisation of the wall exchange and its
+coupling to advection and diffusion for a linear wall law at
+$\mathrm{Bi}\le50$. It does not verify the nonlinear HKS law with
+tabulated equilibrium pressures, the gas equilibrium or the wall
+inventories, and it does not show that the full iodine calculations are
+mesh-converged; their resolution is assessed separately below. The
+iodide Damk\"ohler numbers of \cref{sec:regime} also exceed the tested
+Biot numbers, and the meshes of the iodine calculations have cell
+aspect ratios far from the $\Delta x=2\Delta r$ of the test.
+
+\subsection{Material balance and solver diagnostics}
 \label{sec:conservation}
 All 15 runnable baseline cases, all 64 follow-up cases, the 19
 production cases and the three full-run corrector cases completed and
 passed their configured numerical acceptance checks; the scheme and
-mesh runs completed with the same ledgers. This PASS
-classification means only that the computation completed and passed
-those checks; it is not an experimental-validation classification.
-Element conservation is examined in two ways: through the solver
-ledger and through an independently formed material residue. For
-element $k$ the residue is
+mesh runs completed with the same ledgers. This PASS classification is
+not an experimental-validation classification. For element $k$ the raw
+material residue is
 \begin{equation}
  \begin{aligned}
  R_k={}&N_k^{\rm gas}+N_k^{\rm wall}+N_k^{\rm sample}
@@ -23,68 +90,32 @@ element $k$ the residue is
  \end{aligned}
  \label{eq:balance}
 \end{equation}
-where $N_k$ are molar atom inventories and outward transport is signed.
-The ledger also records the linear-solve defect and any clamping
-correction separately. These terms explain bookkeeping closure, but
-they are not inserted into $R_k$ when the raw material balance is
-assessed.
+where $N_k$ are molar atom inventories and outward transport is signed;
+the linear-solve defect and clamping corrections are recorded separately
+and are not inserted into $R_k$. Divided by the supplied material and
+maximised over steps and elements, the largest raw residue is
+$\ProductionResidue$ for the 19 production cases and
+$8.85\times10^{-13}$ for the 60 source-driven follow-up cases. The
+calculations conserve the represented elements to round-off; this says
+nothing about physical accuracy or discretisation error. The ledger
+terms, the equilibrium-solver diagnostics, the startup sign flags and
+the trace-loading bound are given in Sec.~S2 of the supplementary
+material.
 
-All residues below are divided by the supplied material and taken as
-the largest value over recorded steps and represented elements. The
-largest raw residue is $\ProductionResidue$ for the 19 production cases
-(41,472 cells, limited-linear advection) and $8.85\times10^{-13}$ for
-the 60 source-driven follow-up cases; the 18,432-cell upwind baselines
-had $5.97\times10^{-13}$. For the follow-up cases, the largest
-accounted closure is $9.60\times10^{-16}$ and the largest recorded
-solver defect is $8.64\times10^{-13}$; for the production cases they
-are $1.12\times10^{-15}$ and $1.45\times10^{-12}$. The four
-flow-stop cases keep their restart ledger and are excluded from this
-summary of newly accumulated source material. These results support
-conservation of the executed discrete model. They do not quantify
-physical accuracy or discretisation error.
+Some paired wall-coupling iterations do not meet the requested
+$10^{-16}$ outer criterion. Three cases were therefore repeated over the
+full 60 s with eight instead of three correctors (18,432 cells, upwind).
+The iodine profiles of pure PbI$_2$ and of the steel Q2 case at 0.1\%
+saturation change by $\IterPure\%$ and $\IterSteelLow\%$, that is, at
+round-off; the steel case at 1\% saturation changes by
+\IterSteelHigh\%. The requested tolerance lies below the attainable
+residual floor (Sec.~S2), and the iteration error of the reported
+profiles is negligible next to the time-step and spatial errors below.
 
-The baseline logs report no gas-equilibrium solver failures and a
-maximum equilibrium element residue of $6.43\times10^{-16}$.
-Input-validity and solver-success counters are distinct. At startup,
-sign flags caused equilibrium to be skipped in up to 1,170 cells on
-one step, and the maximum negative iodine diagnostic was
-$1.14\times10^{-124}$ of supplied iodine. Matched five-step startup
-replays identified extremely small leading-tail inventories at these
-flags; no flagged cells remained at the final step. The calculations
-should therefore not be described as free of negative trace values,
-even though the reported amount is immaterial to the macroscopic
-balance. The sum of the individual species mole-fraction maxima was at
-most $9.19\times10^{-5}$. Because these maxima need not coincide, this
-is an upper bound on the reactive trace loading, not a measured
-mixture mole fraction at one location.
-
-Some paired wall-coupling iterations did not meet the requested
-$10^{-16}$ outer criterion. This is reported separately from
-equilibrium failure, the final transport defect and the inventory-bound
-checks. To test its effect, matched restarts of four representative
-cases at 59 s compared three and eight correctors, and outer
-tolerances of $10^{-16}$ and $10^{-14}$, over 20 time steps (40 ms).
-The largest species-field change, scaled by its control maximum, was
-below $3.6\times10^{-8}$, and the changes in new wall increments were
-negligible. Three cases were then repeated over the full 60 s with
-eight instead of three correctors (18,432 cells, upwind). The iodine
-profiles of pure PbI$_2$ and of the steel Q2 case at 0.1\% saturation
-change by $\IterPure\%$ and $\IterSteelLow\%$, that is, at round-off;
-the steel case at 1\% saturation changes by \IterSteelHigh\%. With
-eight correctors the largest outer initial residual is still
-$2.4\times10^{-15}$--$4.4\times10^{-15}$, and nearly every step ends
-at the corrector limit, as with three. The requested $10^{-16}$ lies
-below the attainable residual floor, and the iteration error of the
-reported profiles is negligible next to the time-step and spatial
-errors below. No manufactured-solution test is presented.
-\Cref{sec:lobresco} compares the model with published measurements
-and published model results; it is not a code-to-code verification
-with identical inputs.
-
-\subsection{Separate time-step and mesh comparisons}
+\subsection{Time-step, mesh and scheme dependence}
 For profiles on the common 1 cm bins, let $a_b$ be the deposited
 iodine atoms in bin $b$ for a comparison case and $a_b^0$ the
-corresponding baseline inventory. We report the profile change
+corresponding reference inventory. We report the profile change
 $E_{L1}$ and the total change $\Delta N_I$:
 \begin{equation}
  E_{L1}=100\frac{\sum_b|a_b-a_b^0|}{\sum_b a_b^0},
@@ -92,32 +123,26 @@ $E_{L1}$ and the total change $\Delta N_I$:
  \Delta N_I=100\frac{\sum_b a_b-\sum_b a_b^0}{\sum_b a_b^0}.
  \label{eq:numeric-l1}
 \end{equation}
-Both measures retain changes in amount. The figures also show
-normalised shape curves; these must not be confused with the
-unnormalised profile change. Source, physical coefficients,
+Both measures retain changes in amount. Source, physical coefficients,
 equilibrium engine and executable are fixed within each numerical
 comparison.
 
-\Cref{tab:numerical} separates time-step from mesh and scheme effects.
-For successive mesh levels the reference $a_b^0$ is the finer level.
+\Cref{tab:numerical} separates time-step from mesh and scheme effects;
+for successive mesh levels the reference $a_b^0$ is the finer level.
 Reducing the time step from 2 to 1 ms on 18,432 cells changes the
 iodine profile by \TimeMin--0.3228\%. With the upwind scheme of the
 original campaign, the 18,432 to 41,472-cell differences of the four
-follow-up cases are \MeshMin--\MeshMax\%, and the shifted-BiI steel
-case changes by essentially the same amount on the first two
-refinements (\SteelUpOne\% and \SteelUpTwo\%). Total deposited iodine
-changes by less than 0.014\% from 18,432 to 41,472 cells, and the
-centroid moves by at most 0.0652 cm. Integral quantities are thus
-stable while local profile shapes still differ appreciably.
+follow-up cases are \MeshMin--\MeshMax\%, while total deposited iodine
+changes by less than 0.014\% and the centroid moves by at most
+0.0652 cm. Integral quantities are thus stable while local profile
+shapes still differ appreciably.
 \begin{table*}[tb]
 \centering
 \caption{Iodine profile changes $E_{L1}$ (percent) between successive
 mesh levels at 2 ms, relative to the finer level, for three advection
 schemes, and the effect of halving the time step on 18,432 cells with
 upwind advection. All steel cases are Q2; the shifted-BiI case uses
-1\% metal saturation. The upwind levels of the two lower steel cases
-are the follow-up cases of \cref{tab:study}. A dash marks a combination
-that was not run.}
+1\% metal saturation. A dash marks a combination that was not run.}
 \label{tab:numerical}
 \small\input{generated/numerical-table}
 \end{table*}
@@ -137,125 +162,64 @@ contribution.}
 \end{figure*}
 
 The scheme and mesh study (\cref{tab:numerical,fig:refinement})
-addresses the shifted-BiI steel case directly. With the limited-linear
-scheme its iodine profile changes by \SteelLLOne, \SteelLLTwo{} and
-\SteelLLThree\% over the three refinements to 93,312 cells; with
-upwind, by \SteelUpOne, \SteelUpTwo{} and \SteelUpThree\%. Pure
-PbI$_2$ changes by \PureLLOne{} and \PureLLTwo\% with limited-linear,
-against \PureUpOne{} and \PureUpTwo\% with upwind. The van Leer scheme
-gives successive changes close to those of limited-linear and differs
-from it by at most \VLSteelMax\% (steel) and \VLPureMax\% (pure
-PbI$_2$) at equal mesh, and by \VLSteelThree\% and \VLPureThree\% on
-41,472 cells. Between 41,472 and 93,312 cells, the 3 cm smoothed
-profile of the steel case changes by \SteelSmoothThree\% and its total
-deposit by \SteelTotalThree\%; over all four levels its centroid stays
-within \SteelCentroidRange{} mm and the wall temperature at the PbI$_2$
+addresses the shifted-BiI steel case, which had the largest upwind
+change. With limited-linear advection its iodine profile changes by
+\SteelLLOne, \SteelLLTwo{} and \SteelLLThree\% over the three
+refinements to 93,312 cells; with upwind, by \SteelUpOne, \SteelUpTwo{}
+and \SteelUpThree\%. Pure PbI$_2$ changes by \PureLLOne{} and
+\PureLLTwo\% with limited-linear, against \PureUpOne{} and \PureUpTwo\%
+with upwind. The van Leer scheme differs from limited-linear by at most
+\VLSteelMax\% (steel) and \VLPureMax\% (pure PbI$_2$) at equal mesh.
+Between 41,472 and 93,312 cells, the 3 cm smoothed profile of the steel
+case changes by \SteelSmoothThree\% and its total deposit by
+\SteelTotalThree\%; over all four levels its centroid stays within
+\SteelCentroidRange{} mm and the wall temperature at the PbI$_2$
 centroid within \SteelCentroidTRange{} K.
 
-Three-grid scalar checks follow the distinction between refinement
-trends and an established asymptotic range
-\cite{NASAGridConvergence,Roache1994perspective,Celik2008procedure}.
-For the earlier upwind follow-up triplets, 17 of the 34 nontrivial or
-zero-valued combinations of species, total, centroid and width are
-oscillatory, four have nondecreasing differences, one is unresolved at
-roundoff and 12 admit only conditional Richardson/GCI estimates. For
-the limited-linear steel sequence, the iodine total, centroid and
-width oscillate on both triplets, and the successive profile changes
-give apparent orders of \SteelOrderOne{} and \SteelOrderTwo. These
-orders are inconsistent, so no formal grid convergence index is
-claimed. We quote the measured 41,472 to 93,312-cell change of
-\SteelLLThree\% as the spatial uncertainty indicator of the production
-profiles. If the last change were extrapolated at the last apparent
-order, the 41,472-cell profile would lie about \SteelErrApparent\% from
-the mesh limit; assuming second order, about \SteelErrSecond\%. These
-are indicative estimates for one case, not confirmed uncertainty
-bounds, and they do not establish mesh independence of local profile
-shapes in other cases.
+The successive limited-linear profile changes of the steel case give
+apparent orders of \SteelOrderOne{} and \SteelOrderTwo, and its iodine
+total, centroid and width oscillate on both triplets. These orders are
+inconsistent, so no formal grid convergence index is claimed
+\cite{NASAGridConvergence,Roache1994perspective,Celik2008procedure}. We
+quote the measured 41,472 to 93,312-cell change of \SteelLLThree\% as the
+spatial uncertainty indicator of the production profiles. Extrapolating
+the last change at the last apparent order would place the 41,472-cell
+profile about \SteelErrApparent\% from the mesh limit, and assuming
+second order about \SteelErrSecond\%. These are indicative estimates for
+one case, not confirmed bounds, and they do not establish mesh
+independence of local profile shapes in other cases. The three-grid
+scalar checks of the earlier upwind triplets are in Sec.~S3 of the
+supplementary material.
 
-\subsection{Binned maxima and numerical diffusion}
+At equal mesh, upwind differs from limited-linear by \UpLLOne, \UpLLTwo,
+\UpLLThree{} and \UpLLFour\% for the steel case on the four levels and
+by \PureUpLLMin--\PureUpLLMax\% for pure PbI$_2$, much more than the two
+bounded schemes differ from each other. This is consistent with the
+local estimate $D_{\rm num}\simeq|u_x|\Delta x/2$, which is comparable
+to or greater than the prescribed $10^{-4}\units{m^2\,s^{-1}}$ in parts
+of the carriers. Upwind numerical diffusion is therefore the dominant
+spatial error of the original campaign, and it is why halving the time
+step could not establish convergence of profile widths. Across the 19
+production cases, the production profiles differ from the 18,432-cell
+upwind profiles by 9.1--22.3\%. The follow-up sensitivities of
+\cref{sec:sensitivity} remain upwind differences on 18,432 cells, taken
+against baselines with the same numerical error.
+
+\subsection{Binned maxima and observation width}
 A deposition maximum picked on a 1 cm grid is fragile when adjacent
 bins have similar heights. In pure PbI$_2$ the 18,432-cell upwind
 maximum is at 37 cm and 350.7\,$^\circ$C, while the 36 cm bin is only
-about 0.05\% lower. On the 41,472-cell upwind mesh the maximum moves to
-36 cm and 366.5\,$^\circ$C, although the centroid shifts by only
-$-0.0585$ cm. With the production scheme (41,472 cells, limited-linear)
-the binned maximum stays at 36 cm and 366.4--366.5\,$^\circ$C on all
-three levels, and on 41,472 cells the 37 cm bin is 23\% lower, yet the maximum of the 3 cm
-smoothed profile is at 37 cm and 350.5\,$^\circ$C, and the wall
-temperature at the deposit centroid (37.11 cm) is 348.7\,$^\circ$C.
-In the limited-linear steel sequence the PbI$_2$ maximum alternates
-between two nearly equal bins, 50 and 51 cm (306.3, 288.1, 306.7 and
+about 0.05\% lower; on 41,472 cells it moves to 36 cm and
+366.5\,$^\circ$C although the centroid shifts by only $-0.0585$ cm. In
+the limited-linear steel sequence the PbI$_2$ maximum alternates between
+two nearly equal bins, 50 and 51 cm (306.3, 288.1, 306.7 and
 288.1\,$^\circ$C on the four levels), while the 3 cm smoothed maximum
 stays at 51 cm and 288.0--288.1\,$^\circ$C and the centroid temperature
-at 290.6--291.5\,$^\circ$C. In the upwind steel Q2 0.1\% case, the
-dominant BiI$_3$ bin moves from 57 to 58 cm, and its reported
-temperature changes from about 166.4 to 138.8\,$^\circ$C. A one-bin
-switch can therefore change the peak temperature by nearly 28 K without
-a comparable displacement of the profile as a whole. Peak temperature
-alone is an insufficient convergence metric; \cref{tab:peaks} therefore
-also reports the smoothed and centroid values.
-
-First-order upwind advection, used in the original campaign and the
-follow-up cases, smooths the profiles. The local one-dimensional
-estimate $D_{\rm num}\simeq|u_x|\Delta x/2$ is comparable to or greater
-than the prescribed $10^{-4}\units{m^2\,s^{-1}}$ diffusivity in parts of
-the carriers. This is a Taylor-series screening estimate, not a
-measured truncation error for the radial, variable-density coupled
-problem, but the scheme study confirms its consequence. At equal mesh,
-upwind differs from limited-linear by \UpLLOne, \UpLLTwo, \UpLLThree{}
-and \UpLLFour\% for the steel case on the four levels and by
-\PureUpLLMin--\PureUpLLMax\% for pure PbI$_2$, much more than the two
-bounded schemes differ from each other. Upwind numerical diffusion is
-therefore the dominant spatial error of the original campaign, and it
-is why halving the time step could not establish convergence of
-profile widths. Across the 19 production cases, the production profiles
-differ from the 18,432-cell upwind profiles by 9.1--22.3\%. The
-follow-up sensitivities of \cref{sec:sensitivity} remain upwind
-differences on 18,432 cells, taken against baselines with the same
-numerical error.
-
-\subsection{Dependence on comparison-bin width}
-\label{sec:bin-audit}
-To distinguish sensitivity of the reported observable from a change in
-the CFD mesh, the saved 1 cm iodine inventories of the original upwind campaign
-were summed into groups
-of two and four consecutive bins. Every possible integer-bin offset was
-tested for each width, retaining partial end groups and the full deposited
-inventory. No CFD field was recomputed and no sub-bin reconstruction was
-introduced. \Cref{tab:bin-audit} gives the fine/medium inventory differences
-for these coarser observables. Ranges reflect bin origin, not statistical
-uncertainty.
-\begin{table*}[tbp]
-\centering
-\caption{Original upwind fine/medium iodine inventory-profile differences
-(percent, 41,472 versus 18,432 cells) after
-aggregation of native bins. The 2 and 4 cm ranges cover all respective
-integer-bin offsets. $W_1$ uses the original 1 cm bin centres and separately
-normalised profiles; it measures redistribution distance, not position error
-against the experiment.}
-\label{tab:bin-audit}
-\small\input{generated/resolution-audit-table}
-\end{table*}
-
-For the shifted-BiI case, a 4 cm comparison gives differences from
-0.52\% to 10.02\% depending on the grouping origin. Thus a favourable
-aggregation can hide a substantial local difference. Summing signed
-bin differences before taking their absolute values necessarily allows
-cancellation; reduced aggregated L1 is not additional convergence evidence.
-The largest difference remains appreciable even at 4 cm resolution.
-
-As a complementary position-sensitive measure, let $p_b$ and $q_b$ be
-the fine and medium iodine inventories normalised separately over the
-whole column, and $x_b$ their common native bin centres. The
-one-dimensional transport distance for these discrete distributions is
-\begin{equation}
- W_1=\sum_{b=1}^{B-1}\left|\sum_{j=1}^{b}(p_j-q_j)\right|
-                  (x_{b+1}-x_b).
- \label{eq:binned-wasserstein}
-\end{equation}
-It is the minimum mean distance needed to redistribute one normalised
-binned inventory into the other. Values of 0.0115--0.0711 cm indicate
-small average spatial redistribution between the two tested meshes,
-despite larger local L1 differences. This is a distance between computed
-binned profiles, not a bound on continuum error or evidence that the
-experimental position uncertainty has been resolved.
+at 290.6--291.5\,$^\circ$C. A one-bin switch can change the reported
+peak temperature by tens of kelvin without a comparable displacement of
+the profile, so \cref{tab:peaks} also reports the smoothed and centroid
+values. Conversely, comparing profiles on wider bins does not remove the
+mesh sensitivity: for the shifted-BiI case the original upwind
+fine/medium difference on 4 cm bins ranges from 0.52\% to 10.02\%
+depending on the bin origin (Sec.~S4 of the supplementary material,
+which also gives a transport distance between the binned profiles).
