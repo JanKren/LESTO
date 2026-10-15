@@ -60,14 +60,20 @@ lead to the same condensed material share one physical wall inventory,
 so that switching between deposition, evaporation and reaction cannot
 create or duplicate material. Third, we characterise the transport
 behaviour that results in these columns: wall exchange limited by
-radial diffusion rather than by interfacial kinetics, profiles whose
-local shape is far more resolution-sensitive than their integrals, and
-an iodide partition that is controlled by thermodynamic input.
-% TODO(review-B): Damkoehler sweep; confirm the diffusion-limited
-% characterisation in the third contribution.
+radial diffusion rather than by interfacial kinetics, which a sweep of
+the wall Damk\"ohler number over six decades confirms by reproducing
+both limits of the exchange and the transition between them; profiles
+whose local shape is far more resolution-sensitive than their
+integrals; and an iodide partition that is controlled by thermodynamic
+input.
 The software also has an interface to the GEMS3K kernel of
 GEM-Selektor \cite{Kulik2013gemselektor}, but the reported calculations
-use a specialised ideal-gas element-potential solver.
+use a specialised ideal-gas element-potential solver. Repeating one
+production case with GEMS3K standard-state data in every cell changes
+its deposit profiles by at most $2.1\times10^{-4}$ (relative $L_1$); a
+mode that also calls the GEMS3K solver in every cell
+($5.1\times10^{8}$ calls, none failed) gives bitwise identical results,
+because that solution only initialises the element-potential solve.
 
 All experimental input comes from published papers, so we report the
 consequences of two explicit source models and of selected input

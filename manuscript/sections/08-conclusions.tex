@@ -16,10 +16,13 @@ the half-cell wall law converges at second order to the reference decay
 rate, whereas applying the kinetic law to the cell-centre value is first
 order; this verifies the wall discretisation, not the convergence of
 the iodine calculations. Within the model, radial diffusion rather than
-interfacial kinetics limits the wall exchange: the wall Damk\"ohler
-number is large, and the profiles respond far more to the diffusivity
-than to the accommodation coefficient.
-% TODO(review-B): Damkoehler sweep; revisit this sentence and the PoF title.
+interfacial kinetics limits the wall exchange. A sweep of the wall
+Damk\"ohler number over six decades on a plane channel reproduces the
+kinetic limit, the diffusion limit and the series-resistance transition
+between them, and places the production accommodation coefficients on
+the diffusion-limited plateau or, for $\alpha=0.01$, at its edge; the
+deposition onset does not move across the sweep, because saturation
+fixes it.
 
 Integral results are much less sensitive to resolution than local
 profiles. Halving the time step changes iodine profiles by at most
@@ -33,8 +36,11 @@ the most sensitive case, whereas two bounded schemes differ by at most
 are inconsistent, so we quote this change rather than a formal grid
 convergence index. Closely competing 1 cm bins can shift a reported
 peak temperature by tens of kelvin, so peaks are reported with their
-smoothed maximum and centroid temperature as well.
-% TODO(review-A): add the production-scheme sensitivities here.
+smoothed maximum and centroid temperature as well. Repeated with the
+production scheme for two baselines, $\alpha=0.1$ changes the iodine
+profiles by at most \PSAlphaOneMax\% and halving or doubling the
+diffusivity by \PSDMin--\PSDMax\%; the steel response to the diffusivity
+is strongly asymmetric, so it is case-dependent and not linear.
 
 The computed iodide partition depends strongly on thermodynamic input. In the
 refined steel case, a $+29$ kJ/mol shift of the BiI gas Gibbs energy

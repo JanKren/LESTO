@@ -36,6 +36,10 @@ LOB_BENCH = REPO / 'thermochemistry/benchmarks/lobresco2026'
 LOB_RUN = REPO / 'run/023-lobresco2026'
 # Graetz-Robin verification (M7.1): tracked summary records of the solver test runs.
 GRAETZ = HERE / 'data/graetz'
+# Damkoehler sweep of the half-cell channel (case 016): tracked summary records of the 13 + 5 runs.
+DAMK = HERE / 'data/damkohler'
+# Production-scheme sensitivities: D and accommodation variants of two baselines, 41,472 cells, limitedLinear.
+PSENS = REPO / 'run/024-liu2025/production_sensitivities'
 LOB_CASES = ['T106_6', 'T106_60', 'T106_300', 'T5_60', 'T540_60']
 BASES = ['PbI2_SS_Q1_baseline', 'LBE-I_SS_II_Q2_baseline_sat0.001',
          'LBE-I_SS_II_Q2_baseline_sat0.01', 'LBE-I_SS_II_Q2_shift29k_sat0.01']
@@ -208,6 +212,62 @@ def graetz_study():
             'solver_sha256': provenance['solver_sha256_at_collection'], 'run_date': provenance['run_date']}
 
 
+def damkohler_study():
+    """Damkoehler sweep of the half-cell HKS channel (case 016) from the tracked records in data/damkohler."""
+    record = json.loads((DAMK / 'sweep_summary.json').read_text())
+    runs = record['sweep']['runs']; refined = record['refined_100x48']['runs']
+    plateau = math.pi ** 2 / 4
+    by_alpha = {r['alpha']: r for r in runs}
+    kinetic, diffusion = [], []
+    for r in runs:
+        for i in (84, 94):                     # downstream stations, c_eq/c_bar < 0.01
+            da, jhat = r['t1.5']['Da_loc'][i], r['t1.5']['Jhat'][i]
+            if da <= 0.01:
+                kinetic.append(abs(jhat / da - 1))
+            if da >= 250:                      # the two runs at Da = 300-1700
+                diffusion.append(abs(jhat / plateau - 1))
+    series = [abs(r['t1.5']['Jhat'][i] * (1 / r['t1.5']['Da_loc'][i] + 1 / plateau) - 1)
+              for r in runs for i in (84, 94)]
+    refine = []
+    for q in refined:
+        b = by_alpha[q['alpha']]
+        refine += [abs(q[k] / b[k] - 1) for k in ('deposited_fraction', 'centroid_mm', 'width_10_90_mm')]
+        refine.append(abs(q['t1.5']['Jhat'][84] / b['t1.5']['Jhat'][84] - 1))
+        assert q['x_peak_mm'] == b['x_peak_mm']
+    ref = np.array(by_alpha[1.0]['wall_profile'])
+    l1 = lambda r: float(np.abs(np.array(r['wall_profile']) - ref).sum() / ref.sum())
+    onsets = [r['T_onset'] for r in runs]
+    low, high = runs[0], by_alpha[1.0]
+    return {'runs': len(runs), 'refined_runs': len(refined), 'plateau': plateau,
+            'Da_561K_range': [low['Da_at_561K'], high['Da_at_561K']],
+            'kinetic_max_rel_dev': max(kinetic), 'diffusion_max_rel_dev': max(diffusion),
+            'series_max_rel_dev': max(series),
+            'captured_range': [low['deposited_fraction'], high['deposited_fraction']],
+            'centroid_range_mm': [low['centroid_mm'], high['centroid_mm']],
+            'width_range_mm': [low['width_10_90_mm'], high['width_10_90_mm']],
+            'onset_K': [min(onsets), max(onsets)],
+            'profile_L1_alpha_0.1': l1(by_alpha[0.1]), 'profile_L1_alpha_0.01': l1(by_alpha[0.01]),
+            'flux_deficit_alpha_0.01': 1 - by_alpha[0.01]['t1.5']['Jhat'][84] / plateau,
+            'channel_Da_400_1000': {a: by_alpha[a]['Da_400_1000'] for a in (1.0, 0.1, 0.01)},
+            'refinement_max_rel_change': max(refine),
+            'max_relative_closure': max(r['max_relative_closure'] for r in runs + refined)}
+
+
+def production_sensitivities(follow):
+    """D and accommodation variants with the production scheme, next to the upwind follow-up values."""
+    rows = read_csv(PSENS / 'comparison.csv')
+    up = {(r['case'], r['species']): r for r in follow['comparisons']}
+    out = []
+    for r in rows:
+        f = {k: (float(v) if v not in ('', None) and k not in ('case', 'base', 'variant', 'ended') else v)
+             for k, v in r.items()}
+        f['upwind_BiI3_L1_pct'] = (100 * up[(r['case'], 'BiI3')]['profile_L1_relative_to_base']
+                                   if (r['case'], 'BiI3') in up and up[(r['case'], 'BiI3')]['profile_L1_relative_to_base']
+                                   is not None else None)
+        out.append(f)
+    return out
+
+
 def tex_sci(v, digits=1):
     m, e = f'{v:.{digits}e}'.split('e')
     return f'${m}\\times10^{{{int(e)}}}$'
@@ -345,6 +405,18 @@ def main():
         sensitivity.append({'category': category, 'label': label, 'min_L1_pct': min(values), 'max_L1_pct': max(values)})
     table(generated / 'sensitivity-table.tex', 'lrr', ['Assumption', 'Minimum', 'Maximum'],
           [[r['label'], f"{r['min_L1_pct']:.2f}", f"{r['max_L1_pct']:.2f}"] for r in sensitivity])
+    psens = production_sensitivities(follow)
+    variation = {'D5e-05': '$D/2$', 'D0.0002': '$2D$', 'alpha0.1': r'$\alpha=0.1$', 'alpha0.01': r'$\alpha=0.01$'}
+    order = ['D5e-05', 'D0.0002', 'alpha0.1', 'alpha0.01']
+    case_label = {'PbI2_SS_Q1_baseline': r'Pure PbI$_2$', 'LBE-I_SS_II_Q2_baseline_sat0.01': r'Steel Q2, 1\%'}
+    ps_rows = sorted(psens, key=lambda r: (r['base'] != 'PbI2_SS_Q1_baseline', order.index(r['variant'])))
+    cm = lambda v: f'{v:+.3f}'.replace('-', '$-$')
+    table(generated / 'production-sensitivity-table.tex', 'llrrrr',
+          ['Case', 'Variation', r'$E_{L1}$ LL', r'$E_{L1}$ upwind', r'$\Delta x_c$ LL', r'$\Delta x_c$ upwind'],
+          [[case_label[r['base']] if i % 4 == 0 else '', variation[r['variant']], f"{r['I_L1_pct']:.2f}",
+            f"{r['upwind_I_L1_pct']:.2f}", cm(r['I_centroid_shift_cm']), cm(r['upwind_I_centroid_shift_cm'])]
+           for i, r in enumerate(ps_rows)], midrules=(4,))
+    damk = damkohler_study()
     q1_labels = {'PbI2_SS': r'Pure PbI$_2$, steel', 'LBE-I_SS_II': 'LBE, steel', 'LBE-I_SiO2_I': 'LBE, silica'}
     table(generated / 'peaks-table.tex', 'llrrrrrrr',
           ['Case', 'Species', r'$x_{\rm exp}$', r'$x_{\rm bin}$', r'$x_{3}$', r'$T_{\rm exp}$',
@@ -487,6 +559,43 @@ def main():
         'GraetzExtHalfMax': sci(max(abs(t['ext_rel_error']) for t in halfcell)),
         'GraetzExtNoneMax': sci(max(abs(t['ext_rel_error']) for t in nonelaw)),
         'GraetzMuH': sci(graetz['max_fit_vs_discrete_mode'])})
+    ps = lambda variants, key='I_L1_pct': [r[key] for r in psens if r['variant'] in variants]
+    steel = {r['variant']: r for r in psens if r['base'].startswith('LBE')}
+    pure = {r['variant']: r for r in psens if r['base'].startswith('PbI2')}
+    macros.update({
+        'PSRuns': len(psens),
+        'PSAlphaOneMin': f"{min(ps(['alpha0.1'])):.2f}", 'PSAlphaOneMax': f"{max(ps(['alpha0.1'])):.2f}",
+        'PSAlphaTwoMin': f"{min(ps(['alpha0.01'])):.2f}", 'PSAlphaTwoMax': f"{max(ps(['alpha0.01'])):.2f}",
+        'PSDMin': f"{min(ps(['D5e-05', 'D0.0002'])):.2f}", 'PSDMax': f"{max(ps(['D5e-05', 'D0.0002'])):.2f}",
+        'PSUpAlphaOneMax': f"{max(ps(['alpha0.1'], 'upwind_I_L1_pct')):.2f}",
+        'PSUpAlphaTwoMax': f"{max(ps(['alpha0.01'], 'upwind_I_L1_pct')):.2f}",
+        'PSUpDMin': f"{min(ps(['D5e-05', 'D0.0002'], 'upwind_I_L1_pct')):.2f}",
+        'PSUpDMax': f"{max(ps(['D5e-05', 'D0.0002'], 'upwind_I_L1_pct')):.2f}",
+        'PSTotalMax': f"{max(abs(r['I_total_change_pct']) for r in psens):.2f}",
+        'PSShareMax': f"{max(abs(r['BiI3_share_change_pp']) for r in psens):.2f}",
+        'PSSteelHalf': f"{steel['D5e-05']['I_L1_pct']:.2f}", 'PSSteelDouble': f"{steel['D0.0002']['I_L1_pct']:.2f}",
+        'PSSteelHalfUp': f"{steel['D5e-05']['upwind_I_L1_pct']:.2f}",
+        'PSSteelDoubleUp': f"{steel['D0.0002']['upwind_I_L1_pct']:.2f}",
+        'PSSteelHalfBiI': f"{steel['D5e-05']['BiI3_L1_pct']:.2f}",
+        'PSSteelHalfBiIUp': f"{steel['D5e-05']['upwind_BiI3_L1_pct']:.2f}",
+        'PSPureHalf': f"{pure['D5e-05']['I_L1_pct']:.2f}", 'PSPureDouble': f"{pure['D0.0002']['I_L1_pct']:.2f}",
+        'DaRuns': damk['runs'], 'DaRefineRuns': damk['refined_runs'],
+        'DaLow': sci(damk['Da_561K_range'][0]),
+        'DaHigh': sci(damk['Da_561K_range'][1]),
+        'DaPlateau': f"{damk['plateau']:.2f}",
+        'DaKinDev': f"{100 * damk['kinetic_max_rel_dev']:.1f}", 'DaDiffDev': f"{100 * damk['diffusion_max_rel_dev']:.1f}",
+        'DaChannelOne': '--'.join(tex_sci(v) for v in damk['channel_Da_400_1000'][1.0]),
+        'DaChannelTwo': f"{damk['channel_Da_400_1000'][0.1][0]:.0f}--{damk['channel_Da_400_1000'][0.1][1]:.0f}",
+        'DaChannelThree': f"{damk['channel_Da_400_1000'][0.01][0]:.1f}--{damk['channel_Da_400_1000'][0.01][1]:.1f}",
+        'DaSeriesDev': f"{100 * damk['series_max_rel_dev']:.0f}",
+        'DaCaptureLow': f"{100 * damk['captured_range'][0]:.1f}", 'DaCaptureHigh': f"{100 * damk['captured_range'][1]:.1f}",
+        'DaCentroidLow': f"{damk['centroid_range_mm'][0]:.1f}", 'DaCentroidHigh': f"{damk['centroid_range_mm'][1]:.1f}",
+        'DaCentroidShift': f"{damk['centroid_range_mm'][0] - damk['centroid_range_mm'][1]:.0f}",
+        'DaWidthLow': f"{damk['width_range_mm'][0]:.0f}", 'DaWidthHigh': f"{damk['width_range_mm'][1]:.0f}",
+        'DaOnset': f"{damk['onset_K'][0]:.0f}", 'DaOnsetSpread': f"{damk['onset_K'][1] - damk['onset_K'][0]:.1f}",
+        'DaProfOne': f"{100 * damk['profile_L1_alpha_0.1']:.1f}", 'DaProfTwo': f"{100 * damk['profile_L1_alpha_0.01']:.0f}",
+        'DaFluxDeficit': f"{100 * damk['flux_deficit_alpha_0.01']:.0f}",
+        'DaRefine': f"{100 * damk['refinement_max_rel_change']:.2f}"})
     for r, tag in zip(lob_rows, 'ABCDE'):   # model minus experiment onset, in LOB_CASES order
         macros['LobDiff' + tag] = sign(r['ours_minus_exp_K'])
     (generated / 'numbers.tex').write_text('% Generated from saved completed reports.\n' + ''.join(
@@ -497,6 +606,7 @@ def main():
             'iteration_check_iodine_L1_pct': iteration_l1, 'production_max_raw_residue': production_residue,
             'sensitivity': sensitivity, 'alignment': alignment, 'integrity_60s_followup': integrity,
             'lobresco2026': {'rows': lob_rows, 'summary': lob_summary}, 'graetz_robin': graetz,
+            'damkohler_sweep': damk, 'production_sensitivities': psens,
             'baseline_trace_mole_fraction_upper_bound': original['max_trace_mole_fraction_upper_bound'],
             'legacy_18432_upwind_q1_peaks': legacy['q1_peaks'],
             'baseline_max_negative_I_over_supplied_I': original['max_negative_I_over_supplied_I'],
@@ -652,12 +762,14 @@ def main():
     input_files += list((LOB_RUN / 'cases').rglob('*.dat')) + list((LOB_RUN / 'cases').rglob('case.json'))
     input_files += list((LOB_RUN / 'inputs').glob('*.csv'))
     input_files += [GRAETZ / name for name in ['reference.json', 'fits.json', 'table.md', 'criteria.log', 'provenance.json']]
+    input_files += [DAMK / name for name in ['sweep_summary.json', 'damkohler_sweep.csv', 'provenance.json']]
+    input_files += [PSENS / 'comparison.csv', PSENS / 'ledger.json'] + list((PSENS / 'profiles').rglob('*.dat'))
     data['input_sha256'] = {str(p.relative_to(REPO)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(input_files)}
     dump(generated / 'results.json', data)
     dump(generated / 'artifact_sha256.json', {str(p.relative_to(HERE)): hashlib.sha256(p.read_bytes()).hexdigest()
         for directory in [generated, figures] for p in sorted(directory.iterdir())
         if p.is_file() and p.name != 'artifact_sha256.json'})
-    print('Generated 8 figures, 8 tables and numerical provenance for 15 baseline + 64 follow-up cases, '
+    print('Generated 8 figures, 9 tables and numerical provenance for 15 baseline + 64 follow-up cases, '
           '19 production cases, the scheme/mesh study, the iteration check and the Lobresco comparison.')
 
 

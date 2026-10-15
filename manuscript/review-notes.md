@@ -1,13 +1,57 @@
-# Author review: 14 October 2026 (update of 9 October)
+# Author review: 15 October 2026 (update of 9 and 14 October)
+
+## Review round, part 2 (15 October)
+
+The two simulation sets of part 1 are complete and in the text; every
+`% TODO(review-A/B)` comment is resolved and removed.
+
+1. **Damkoehler sweep** (Sec. 4.2, new Fig. 3 of the PoF build, Secs. 1,
+   6.3, 7.3, 8, abstracts). Case 016 (half-cell plane channel), alpha =
+   1 ... 1e-6 in half decades (13 runs) plus a 100 x 48 wall-normal
+   refinement (5 runs), same solver SHA-256 16fd804e....  J^ = Da within
+   0.3 % for Da <= 0.01; pi^2/4 within 0.8 % for Da >= 300; series form
+   1/(1/Da + 4/pi^2) within 5 % everywhere; captured fraction 0.3 ->
+   99.5 %; centroid 85.4 -> 74.3 mm; width 24 -> 12 mm; onset 561 K for
+   every alpha (saturation-fixed); refinement <= 0.11 %.  Production
+   alpha: on the plateau (1, 0.1) or at its edge (0.01: profile 14 %
+   from alpha = 1, flux 20 % below the limit).  Records:
+   `data/damkohler/` (README, collect.py, figure.py); driver
+   `run/016-hks-channel-halfcell/Allrun-damkohler`, which reproduced the
+   first scratch sweep in every metric.  Stated scope: a plug-flow
+   channel with constant D, not the column cases.  The PoF title is kept;
+   the sweep supports "competition".  In Sec. 6.3 one sentence notes that
+   the 1 % onset does not move with alpha in the sweep, so the Lobresco
+   onset metric reflects saturation more than interfacial kinetics.
+2. **Production-scheme sensitivities** (Secs. 4.3, 4.4, 7.3, new Table
+   VIII, Secs. 8, 9, abstracts).  D/2, 2D, alpha 0.1, alpha 0.01 for pure
+   PbI2 and steel Q2 at 1 %, 41,472 cells, limitedLinear (8 runs).
+   alpha 0.1: 0.15-0.49 %; alpha 0.01: 1.90-5.14 %; D: 1.07-16.65 %;
+   totals <= 0.02 %, BiI3 share <= 0.03 pp.  Steel D is asymmetric (D/2
+   1.07 %, the BiI3 profile barely moves; 2D 12.53 %), so in steel
+   alpha = 0.01 changes the profile more than halving D; the text says
+   so.  The 12-14 % caveat is kept for the categories that stay upwind.
+   Records: `run/024-liu2025/production_sensitivities/` (profiles,
+   ledger, make_cases.py, analyse.py).
+3. **GEMS3K check** (Sec. 1): one sentence on the production-scale
+   per-cell GEMS3K run of D38 Sec. 4.5 (profiles within 2.1e-4; local
+   mode bitwise identical to frozen, because its solution only starts the
+   kernel solve).
+4. `prepare_results.py` reads both records (macros, Table VIII);
+   `check_results.py` recomputes them (`check_damkohler`, 18 runs;
+   `check_production_sensitivities`, 8 cases): PASS.
+5. PoF abstract 249 words (inline math = 1 word); the silica-coordinate
+   sentence was moved out of the PoF abstract to make room (it stays in
+   the arXiv abstract and the body).  Pages: PoF 27, preprint 42,
+   supplement 6, arXiv 23.
+6. Still outstanding: the full-duration shifted-BiI corrector run has
+   finished in `~/lesto-submission-followup` but is not yet folded into
+   `run/024-liu2025/iteration_check`; the 93,312-cell upwind shifted-BiI
+   run is still running.
 
 ## Revision after the internal review (14 October, afternoon)
 
-No new CFD runs. Two simulation sets are still running and are **not**
-reported: production-scheme sensitivities (`% TODO(review-A)` comments in
-`main.tex` and `pof/lesto-pof.tex` abstracts, Secs. 4.3, 7.3 and 9,
-the limitations list of Sec. 8.3) and a Damkoehler sweep (`% TODO(review-B)` at both
-titles, the PoF abstract, Secs. 1, 4.2, 6.3, 7.3 and 9; arXiv
-numbering). Titles unchanged.
+No new CFD runs at the time.  The two simulation sets that were then
+still running are reported in part 2 above.
 
 1. **Graetz-Robin verification** (new Sec. 5.1, Table II, Table S4). The
    M7.1 runs of 11 October (45 runs, OpenFOAM v2412, solver SHA-256
@@ -157,8 +201,10 @@ manufactured-solution test; a T-Flows run with identical inputs.
 `pof/lesto-pof.tex` now reads "Competition between radial diffusion and
 interfacial exchange in thermal-gradient deposition columns: conservative
 modeling of iodine transport". Basis: the wall Damkoehler number is
-1.4e3-2.9e3 at alpha = 1; alpha = 0.1 changes profiles by at most 0.41 %,
-alpha = 0.01 by at most 4.21 %, halving or doubling D by 3.83-14.20 %; and
+1.4e3-2.9e3 at alpha = 1; the channel sweep reproduces the kinetic and
+diffusion limits and the transition between them (part 2 above); with the
+production scheme alpha = 0.1 changes profiles by at most 0.49 %,
+alpha = 0.01 by at most 5.14 %, halving or doubling D by 1.07-16.65 %; and
 the untuned HKS wall law with the near-wall diffusion resistance gives the
 best onset RMS on the Lobresco cases. The arXiv title is unchanged. Revert
 if the authors prefer the descriptive title.

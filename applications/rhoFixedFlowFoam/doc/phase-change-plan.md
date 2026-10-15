@@ -8946,6 +8946,38 @@ been updated to it, uncommitted, for review.
    - External data: `LESTO_M10_*`, `LESTO_M10D_*` from
      `~/opt/gems-data/m10-design-2026-10-04`.  Previous aggregate: 319
      PASS, 0 FAIL, 1 NOTRUN at 5b8815c.
+8. **Review round, part 2 (2026-10-14/15; pending sign-off).**  Two sets
+   asked for by the internal review of the manuscript, same solver
+   (sha256 16fd804e...):
+   - *Damkoehler sweep* on case 016 (half-cell plane channel): the
+     accommodation coefficient at 10^0 ... 10^-6 in half decades (13
+     runs, `run/016-hks-channel-halfcell/Allrun-damkohler`) and a 100 x 48
+     refinement at 1 ... 1e-4 (5 runs).  With Da = (2a/(2-a))
+     sqrt(RT_w/(2 pi M)) h/D, h = 2.4 mm: the normalised wall flux
+     J h/[D(c_mean - c_eq)] equals Da within 0.3 % for Da <= 0.01, reaches
+     pi^2/4 (plug flow between absorbing plates) within 0.8 % for
+     Da >= 300 and follows 1/(1/Da + 4/pi^2) within 5 % in between;
+     captured fraction 0.3 -> 99.5 %, centroid 85.4 -> 74.3 mm, 10-90 %
+     width 24 -> 12 mm; the 1 % onset stays at 561 K (saturation-fixed);
+     refinement changes at most 0.11 %; alpha = 1 reproduces
+     `expect.json`.  The production coefficients sit on the plateau
+     (alpha 1, 0.1; profile 1.4 % from alpha = 1 at 0.1) or at its edge
+     (0.01: 14 %, flux 20 % below the limit).  Records:
+     `manuscript/data/damkohler`; re-running the driver reproduced the
+     first sweep in every metric.
+   - *Production-scheme sensitivities*: D/2, 2D, alpha 0.1, 0.01 for
+     `PbI2_SS_Q1_baseline` and `LBE-I_SS_II_Q2_baseline_sat0.01` on
+     576 x 72 with `Gauss limitedLinear 1` (8 runs, 17-28 h each, all to
+     60 s).  Iodine profile L1 against the own production base: alpha 0.1
+     0.15-0.49 %, alpha 0.01 1.90-5.14 %, D 1.07-16.65 % (upwind:
+     0.36-0.41, 3.67-4.21, 4.61-14.20 %); totals <= 0.02 %, BiI3 share
+     <= 0.03 pp.  Steel D is asymmetric: D/2 1.07 % (BiI3 L1 0.60 %
+     against 4.41 % upwind), 2D 12.53 %.  An intermediate D would be
+     needed before a per-case statement on the size of the D effect.
+     Records: `run/024-liu2025/production_sensitivities`.
+   - Both are in the manuscript (Secs. 1, 4.2-4.4, 6.3, 7.3, 8, 9, Table
+     VIII, Fig. 3 of the PoF build); `manuscript/check_results.py`
+     recomputes them: PASS.
 
 ---
 

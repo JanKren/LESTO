@@ -1,0 +1,43 @@
+#!/bin/bash
+# ./Allrun-damkohler [24|48]
+#                   the Damkoehler sweep of the manuscript (Fig. damkohler_sweep):
+#                   the case with the accommodation coefficient of the HKS law
+#                   at alpha = 10^0, 10^-0.5, ..., 10^-6 (13 runs, 5-8 s each)
+#                   into work/damkohler/ny24; with 48, the wall-normal
+#                   refinement 100 x 48 at alpha = 1, 0.1, ..., 1e-4 (5 runs)
+#                   into work/damkohler/ny48.  Then
+#                   python3 ../../manuscript/data/damkohler/collect.py \
+#                       work/damkohler/ny24 work/damkohler/ny48
+#                   writes the tracked records of manuscript/data/damkohler.
+. "${0%/*}/../RunFunctions"
+lestoInit
+ny=${1:-24}
+case "$ny" in
+  24) exponents="0 -0.5 -1 -1.5 -2 -2.5 -3 -3.5 -4 -4.5 -5 -5.5 -6" ;;
+  48) exponents="0 -1 -2 -3 -4" ;;
+  *) lestoUsage "[24|48]" ;;
+esac
+lestoRequireOpenFOAM
+
+for e in $exponents
+do
+  c=work/damkohler/ny$ny/a$e
+  alpha=$(python3 -c "print(repr(10**($e)))")
+  echo "== alpha $alpha"
+  lestoWorkCase "$c" replace
+  # both entries: the PbI2_g pair and HKSCoeffs; Ce and kineticScale stay 1
+  python3 - "$c/constant/thermochemistryProperties" "$alpha" <<'PY'
+import re, sys
+path, alpha = sys.argv[1], sys.argv[2]
+text, n = re.subn(r'\baccommodation\s+1;', f'accommodation {alpha};', open(path).read())
+assert n == 2, n
+open(path, 'w').write(text)
+PY
+  if [ "$ny" != 24 ]
+  then
+    sed -i "s/(100 24 1)/(100 $ny 1)/" "$c/system/blockMeshDict"
+    grep -q "(100 $ny 1)" "$c/system/blockMeshDict"
+  fi
+  lestoChannelCarrier "$c"
+  lestoSolve "$c"
+done

@@ -1,0 +1,15 @@
+{
+ "case": "run/016-hks-channel-halfcell",
+ "driver": "run/016-hks-channel-halfcell/Allrun-damkohler (24: 13 runs; 48: 5 runs)",
+ "openfoam_build": "_8dbc61e11c-20241220 OPENFOAM=2412 version=v2412",
+ "solver": "rhoFixedFlowFoam",
+ "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+ "vapour_pressure_table": "thermochemistry/systems/data/pv_PbI2_phases.csv",
+ "repository_head_at_collection": "7dea928",
+ "runs_dated": "2026-10-15 (first made 2026-10-14 from a scratch copy of the case; the records of both agree in every metric)",
+ "alpha_1_reproduces_case_016_expect_json": {
+  "wall_inventory_mol": 2.7849908018699395e-11,
+  "onset_K": 561.1593356306893,
+  "peak_bin_K": 541.75
+ }
+}

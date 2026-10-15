@@ -32,7 +32,6 @@
 \begin{document}
 \preprint{Submitted to Physics of Fluids}
 
-% TODO(review-B): do not change the title before the Damkoehler sweep is in.
 \title{Competition between radial diffusion and interfacial exchange in
 thermal-gradient deposition columns: conservative modeling of iodine
 transport}
@@ -54,26 +53,23 @@ inventories.
 Reversible iodide exchange follows a Hertz--Knudsen--Schrage law in
 series with the near-wall diffusive resistance; on a Graetz--Robin
 problem this face flux converges at second order, a cell-centre sink at
-first order. Fifteen
-baseline and 64 follow-up simulations separate numerical refinement
-from input sensitivities. The largest raw
-element-balance residue is $1.41\times10^{-12}$ of supplied material.
+first order. In 79 simulations the largest raw element-balance
+residue is $1.41\times10^{-12}$ of supplied material.
 Halving the time step or adding correctors changes iodine profiles by
 at most 0.323\%. First-order upwind advection differs from
 a bounded limited-linear scheme by up to 20.8\% at equal mesh; with the
 bounded scheme, the most sensitive profile changes by 1.98\% from 41,472
-to 93,312 cells, without a consistent observed order. Radial diffusion,
-not interfacial kinetics, limits wall exchange.
-% TODO(review-B): Damkoehler sweep; revisit the previous sentence.
-% TODO(review-A): production-scheme sensitivities; add one sentence.
+to 93,312 cells, without a consistent observed order. A wall
+Damk\"ohler sweep reproduces the kinetic and diffusion
+limits and shows that radial diffusion, not interfacial
+kinetics, limits wall exchange in the production cases; with the
+bounded scheme, accommodation changes alter iodine profiles by at most
+\PSAlphaTwoMax\%, diffusivity changes by up to \PSDMax\%.
 A $+29\units{kJ\,mol^{-1}}$ shift in the BiI gas Gibbs energy changes
-the BiI$_3$ share of deposited iodide iodine from 94.58\% to 2.01\%,
-showing how strongly the partition depends on thermodynamic data. For
-silica, shifts derived from the published temperature labels expose a
-coordinate inconsistency without resolving it. Without tuning, the wall
+the BiI$_3$ share of deposited iodide iodine from 94.58\% to 2.01\%. Without tuning, the wall
 law gives deposition-onset temperatures of five PbI$_2$ experiments
 with an RMS deviation of 18 K, against 35 K for two published models;
-because carrier, vapour-pressure and source assumptions also differ and
+because carrier, vapour-pressure and source assumptions differ and
 computed peaks lie 1--4 cm upstream, this promising result does not yet
 isolate the wall treatment. The results support a conservative method,
 not independent predictive validation.
