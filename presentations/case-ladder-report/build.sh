@@ -9,5 +9,5 @@ engine=${TECTONIC_BIN:-$(command -v tectonic || echo /home/jan/.local/opt/tecton
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-/tmp/lesto-beamer-cache}"
 mkdir -p build
 "$engine" --keep-logs --outdir build main.tex > build/compile.stdout 2>&1 || { tail -30 build/compile.stdout >&2; exit 1; }
-cp build/main.pdf lesto-case-ladder-explained.pdf
-printf 'Built %s/lesto-case-ladder-explained.pdf\n' "$PWD"
+cp build/main.pdf lesto-case-ladder-report.pdf
+printf 'Built %s/lesto-case-ladder-report.pdf\n' "$PWD"

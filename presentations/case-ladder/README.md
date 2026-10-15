@@ -9,7 +9,8 @@ are Jan Kren's. The slides and the section dividers say so.
 Open `lesto-case-ladder.pdf`. Edit `main.tex` for the slides; every
 content frame has a Beamer speaker note, extracted into `speaker-notes.txt`
 by `package_deck.py`. The PSI theme (`beamer*PSI.sty`, `psi-assets/`,
-`template-README.md`) is copied unchanged from `../m10-project-review`.
+`template-README.md`) is stored locally in this folder. It was originally
+copied from the older project-review deck, which is no longer retained.
 
 ## Every case slide
 
