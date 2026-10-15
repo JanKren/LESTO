@@ -39,6 +39,8 @@ production case of `../production_576x72_limitedLinear` (identical profiles).
 - `levels1-3_limitedLinear_results.json`, `levels1-3_successive_differences.csv`:
   the first stage (L1-L3, upwind and limitedLinear) before L4 and van Leer.
 - `analysis.txt`, `vanLeer_vs_limitedLinear.txt`: readable summaries.
+- `upwind_L4/`: upwind L4 runs of all four check bases (pure PbI2 and three
+  steel Q2 cases) from the submission package; see its README.
 
 `manuscript/prepare_results.py` reads these files for the numerical table and
 the refinement figure; `manuscript/check_results.py` recomputes the successive

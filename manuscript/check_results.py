@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Check saved-result arithmetic, provenance and the compiled review manuscript."""
+import csv
 import hashlib
 import json
 from pathlib import Path
@@ -88,11 +89,39 @@ def check_scheme_study(full, follow):
     return checked
 
 
+def check_upwind_l4(follow, generated):
+    """Upwind 93,312-cell package runs: recompute the 41,472 -> 93,312 changes and their table cells."""
+    root = REPO / 'run/024-liu2025/scheme_mesh_study/upwind_L4'
+    summary = json.loads((root / 'summary.json').read_text())
+    assert summary['solver_sha256'] == generated['solver_sha256'], 'upwind L4 solver differs'
+    assert len(summary['cases']) == 4
+    table = (HERE / 'generated/numerical-table.tex').read_text()
+    for case in summary['cases']:
+        base = case['base_case']
+        assert case['status'] == 'PASS' and case['scheme'] == 'Gauss upwind' and case['cells'] == 93312
+        assert set(case['element_gates'].values()) == {'PASS'} and case['max_respeciation_failures'] == 0
+        for species in ['element_I', 'PbI2_g', 'BiI3_g']:
+            x, fine = amounts(root / 'profiles' / base, species)
+            xc, coarse = amounts(follow / 'profiles' / (base + '__grid576x72'), species)
+            assert np.allclose(x, xc)
+            record = case['L3_to_L4'][species]
+            if fine.sum() > 0:
+                assert np.isclose(l1(coarse, fine), record['profile_L1_pct'], rtol=1e-9), (base, species)
+            else:
+                assert record is None
+        assert f"{case['L3_to_L4']['element_I']['profile_L1_pct']:.2f}" in table, base
+    repeat = summary['cases'][3]['repeat_of_study_steel_L4_up']
+    assert all(v['profile_L1_pct'] == 0 for v in repeat.values()), 'package L4 repeat differs from steel_L4_up'
+    return len(summary['cases'])
+
+
 def check_iteration(full):
     """Eight versus three correctors over 60 s: recompute the profile differences."""
     root = REPO / 'run/024-liu2025/iteration_check'
     summary = json.loads((root / 'summary.json').read_text())
-    assert len(summary['cases']) == 3
+    assert len(summary['cases']) == 4
+    assert max(c['eight_minus_three']['element_I']['profile_L1_pct'] for c in summary['cases']) == \
+        summary['max_iodine_profile_L1_pct']
     for case in summary['cases']:
         assert case['status'] == 'PASS' and case['species_correctors'] == 8
         for species in ['element_I', 'PbI2_g', 'BiI3_g']:
@@ -198,6 +227,88 @@ def check_graetz(generated):
     return checked
 
 
+def macro_values():
+    text = (HERE / 'generated/numbers.tex').read_text()
+    return dict(re.findall(r'\\newcommand\{\\(\w+)\}\{(.*)\}', text))
+
+
+def check_damkohler(generated):
+    """Damkoehler sweep (case 016): the record against case 016's own expectations, the csv against the
+    json record, and the manuscript numbers recomputed from the per-column records."""
+    root = HERE / 'data/damkohler'
+    provenance = json.loads((root / 'provenance.json').read_text())
+    assert provenance['solver_sha256'] == generated['solver_sha256'], 'Damkoehler solver differs'
+    record = json.loads((root / 'sweep_summary.json').read_text())
+    runs, refined = record['sweep']['runs'], record['refined_100x48']['runs']
+    assert len(runs) == 13 and len(refined) == 5
+    expect = {c['id'].split(' (')[0]: c for c in json.loads(
+        (REPO / 'run/016-hks-channel-halfcell/expect.json').read_text())['checks']}
+    a1 = next(r for r in runs if r['alpha'] == 1.0)
+    n0 = expect['released [mol] = n0']['value']
+    assert abs(a1['deposited_fraction'] * n0 / expect['wall inventory [mol]']['value'] - 1) < 1e-9
+    assert abs(a1['T_onset'] - expect['1 % onset of the PbI2 deposit']['value']) < 0.01
+    assert abs(a1['T_peak'] - expect['peak bin temperature']['value']) < 1e-6
+    assert max(r['max_relative_closure'] for r in runs + refined) < 1e-14
+    table = {float(r['alpha']): r for r in csv.DictReader((root / 'damkohler_sweep.csv').open())}
+    for r in runs:
+        t = table[float(f"{r['alpha']:.5g}")]
+        for key, column in [('deposited_fraction', 'deposited_fraction'), ('centroid_mm', 'centroid_mm'),
+                            ('Da_at_561K', 'Da_561K'), ('width_10_90_mm', 'width_10_90_mm')]:
+            assert f'{r[key]:.5g}' == t[column], (r['alpha'], key)
+        assert f"{r['t1.5']['Jhat'][84]:.5g}" == t['Jhat_84p5'], r['alpha']
+    plateau = np.pi ** 2 / 4
+    kinetic = max(abs(r['t1.5']['Jhat'][i] / r['t1.5']['Da_loc'][i] - 1)
+                  for r in runs for i in (84, 94) if r['t1.5']['Da_loc'][i] <= 0.01)
+    diffusion = max(abs(r['t1.5']['Jhat'][i] / plateau - 1)
+                    for r in runs for i in (84, 94) if r['t1.5']['Da_loc'][i] >= 250)
+    series = max(abs(r['t1.5']['Jhat'][i] * (1 / r['t1.5']['Da_loc'][i] + 1 / plateau) - 1)
+                 for r in runs for i in (84, 94))
+    by_alpha = {r['alpha']: r for r in runs}
+    ref = np.array(a1['wall_profile'])
+    prof = lambda a: 100 * np.abs(np.array(by_alpha[a]['wall_profile']) - ref).sum() / ref.sum()
+    m = macro_values()
+    assert m['DaKinDev'] == f'{100 * kinetic:.1f}' and m['DaDiffDev'] == f'{100 * diffusion:.1f}'
+    assert m['DaSeriesDev'] == f'{100 * series:.0f}'
+    assert m['DaProfOne'] == f'{prof(0.1):.1f}' and m['DaProfTwo'] == f'{prof(0.01):.0f}'
+    assert m['DaCaptureLow'] == f"{100 * runs[0]['deposited_fraction']:.1f}"
+    assert m['DaCaptureHigh'] == f"{100 * a1['deposited_fraction']:.1f}"
+    assert m['DaFluxDeficit'] == f"{100 * (1 - by_alpha[0.01]['t1.5']['Jhat'][84] / plateau):.0f}"
+    onsets = [r['T_onset'] for r in runs]
+    assert max(onsets) - min(onsets) < 0.2
+    refine = max(max(abs(q[k] / by_alpha[q['alpha']][k] - 1) for k in ('deposited_fraction', 'centroid_mm', 'width_10_90_mm'))
+                 for q in refined)
+    assert refine < 2e-3, refine
+    return len(runs) + len(refined)
+
+
+def check_production_sensitivities(follow):
+    """Production-scheme D and accommodation variants: L1 recomputed from the tracked profiles against their
+    production bases, the upwind columns against the follow-up record, and the manuscript table."""
+    run = REPO / 'run/024-liu2025'
+    root = run / 'production_sensitivities'
+    rows_ = list(csv.DictReader((root / 'comparison.csv').open()))
+    ledger = json.loads((root / 'ledger.json').read_text())
+    up = {(r['case'], r['species']): r for r in follow['comparisons']}
+    table = (HERE / 'generated/production-sensitivity-table.tex').read_text()
+    for r in rows_:
+        assert ledger[r['case']]['ended'] and ledger[r['case']]['end_time'] == 60.0, r['case']
+        for species in ['I', 'PbI2', 'BiI3']:
+            x, a = profile(root, r['case'], species)
+            xb, b = profile(run / 'production_576x72_limitedLinear', r['base'], species)
+            assert np.allclose(x, xb)
+            if b.sum():
+                assert np.isclose(l1(a, b), float(r[f'{species}_L1_pct']), rtol=1e-12), (r['case'], species)
+        assert np.isclose(100 * up[(r['case'], 'I')]['profile_L1_relative_to_base'], float(r['upwind_I_L1_pct']),
+                          rtol=1e-12), r['case']
+        assert f"& {float(r['I_L1_pct']):.2f} & {float(r['upwind_I_L1_pct']):.2f} &" in table, r['case']
+    m = macro_values()
+    l1s = {r['variant']: [float(q['I_L1_pct']) for q in rows_ if q['variant'] == r['variant']] for r in rows_}
+    assert m['PSDMin'] == f"{min(l1s['D5e-05'] + l1s['D0.0002']):.2f}"
+    assert m['PSDMax'] == f"{max(l1s['D5e-05'] + l1s['D0.0002']):.2f}"
+    assert m['PSAlphaTwoMax'] == f"{max(l1s['alpha0.01']):.2f}"
+    return len(rows_)
+
+
 def main():
     full = REPO / 'run/024-liu2025/full_analysis'
     follow = REPO / 'run/024-liu2025/followup_results'
@@ -243,8 +354,11 @@ def main():
     production = check_production(full, follow)
     scheme_checks = check_scheme_study(full, follow)
     iteration = check_iteration(full)
+    upwind_l4 = check_upwind_l4(follow, generated)
     lobresco = check_lobresco(generated)
     graetz = check_graetz(generated)
+    damkohler = check_damkohler(generated)
+    psens = check_production_sensitivities(result)
     source = '\n'.join(p.read_text() for p in [HERE / 'main.tex', HERE / 'supplementary.tex',
                                                *sorted((HERE / 'sections').glob('*.tex'))])
     from assess_resolution import evaluate
@@ -280,8 +394,10 @@ def main():
         'undefined_zero_reference_comparisons_confirmed': zero,
         'iodine_stoichiometry_profiles_checked': stoichiometric,
         'production_cases_checked': production, 'scheme_mesh_differences_recomputed': scheme_checks,
-        'iteration_check_cases_recomputed': iteration, 'lobresco_onsets_recomputed': lobresco,
-        'graetz_triplets_recomputed': graetz, 'supplement_pdf_pages': supplement_pages,
+        'iteration_check_cases_recomputed': iteration, 'upwind_L4_cases_recomputed': upwind_l4,
+        'lobresco_onsets_recomputed': lobresco,
+        'graetz_triplets_recomputed': graetz, 'damkohler_runs_checked': damkohler,
+        'production_scheme_sensitivities_recomputed': psens, 'supplement_pdf_pages': supplement_pages,
         'supplement_pdf_sha256': hashlib.sha256(supplement.read_bytes()).hexdigest(),
         'resolution_aggregation_comparisons': len(resolution['aggregation']),
         'thermodynamic_resolution_pairs': len(resolution['thermodynamic_resolution']),

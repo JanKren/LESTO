@@ -140,14 +140,25 @@ compares 80 s inventories with their 60 s restart state; the other rows
 compare 60 s inventories. The silica temperature-coordinate row uses
 the production cases (41,472 cells, limited-linear advection); all
 other rows are upwind follow-up cases on 18,432 cells compared with
-their own upwind baselines. Case counts and variations are listed in
-Table~S1 of the supplementary material.}
+their own upwind baselines; \cref{tab:production-sensitivity} repeats
+the diffusivity and accommodation rows with the production scheme for
+two cases. Case counts and variations are listed in Table~S1 of the
+supplementary material.}
 \label{tab:sensitivity}
 \small\input{generated/sensitivity-table}
 \end{table}
-% TODO(review-A): replace or complement the upwind rows of Table VII and
-% Fig. S1 with the production-scheme sensitivities when they are complete;
-% update the caption and the paragraph below (the 12--14% caveat).
+\begin{table}[tb]
+\centering
+\caption{Diffusivity and accommodation variations with the production
+scheme (LL: limited-linear, 41,472 cells) and with upwind on 18,432
+cells, each relative to its own baseline: iodine profile change
+$E_{L1}$ (percent) and centroid shift $\Delta x_c$ (cm). Steel Q2 uses
+baseline thermodynamics. Total deposits change by at most
+\PSTotalMax\% and the BiI$_3$ share of iodide iodine by at most
+\PSShareMax{} percentage points.}
+\label{tab:production-sensitivity}
+\small\input{generated/production-sensitivity-table}
+\end{table}
 
 Diffusion alternatives change profiles by up to 14.20\%. A 273.15 K flow
 reference raises the inferred helium mass flow by 9.15\% relative to
@@ -158,20 +169,30 @@ source model that cannot rule out an effect of a real boat on the flow.
 Fig.~S1 of the supplementary material shows the maxima. They are differences between
 upwind cases on the 18,432-cell mesh, which itself differs from the
 production scheme by 12--14\% for the two cases of the scheme study
-(\cref{sec:verification}); how much of that error cancels in the
-differences has not been quantified, so effects of comparable size are
-not ranked precisely. The tube-scale Damk\"ohler numbers of
-\cref{sec:regime} and the small accommodation response, at most 0.41\%
-for $\alpha=0.1$ and 4.21\% for $\alpha=0.01$, against 3.83--14.20\% for
-halving or doubling $D$, are consistent with predominantly
-diffusion-controlled exchange in the tested model. This interpretation
-combines a tube-scale estimate with sensitivities from the upwind
-campaign; it does not establish a resolved transition between kinetic
-and diffusion control. The wall temperature also changes the
-equilibrium pressure, so its effect cannot be reduced to a change in
-transport resistance alone.
-% TODO(review-B): Damkoehler sweep. Confirm or qualify the
-% diffusion-limited statement above with the swept response.
+(\cref{sec:verification}). For the diffusivity and accommodation
+variations, \cref{tab:production-sensitivity} shows how much of this
+survives the scheme change. With the production scheme, $\alpha=0.1$
+changes the iodine profile by \PSAlphaOneMin--\PSAlphaOneMax\% and
+$\alpha=0.01$ by \PSAlphaTwoMin--\PSAlphaTwoMax\%, against
+\PSDMin--\PSDMax\% for halving or doubling $D$; the pure PbI$_2$
+responses are slightly larger than with upwind and nearly symmetric in
+$D$. The steel response to $D$ is not: halving $D$ changes the iodine
+profile by only \PSSteelHalf\% (upwind \PSSteelHalfUp\%), because the
+BiI$_3$ profile, which carries most of the iodine, barely moves
+(\PSSteelHalfBiI\% against \PSSteelHalfBiIUp\%), whereas doubling $D$
+gives \PSSteelDouble\% (upwind \PSSteelDoubleUp\%). The diffusivity
+response is therefore case-dependent and not linear in $D$, and in the
+steel case $\alpha=0.01$ changes the profile more than halving $D$. The
+other categories of \cref{tab:sensitivity} have upwind differences
+only, so effects of comparable size there are not ranked precisely.
+In both production-scheme cases, $\alpha=0.1$ changes the profile far
+less than either diffusivity change. Together with the tube-scale
+Damk\"ohler numbers of \cref{sec:regime} and the channel sweep of
+\cref{fig:damkohler}, which places $\alpha=1$ and 0.1 on the
+diffusion-limited plateau and $\alpha=0.01$ at its edge, this indicates
+that radial diffusion, not interfacial kinetics, limits the wall
+exchange in these columns; the wall temperature acts mainly through the
+equilibrium pressure.
 
 The four fixed-temperature flow-stop cases change the deposited iodine
 profiles by 1.10--4.63\% over 20 s, with centroid shifts of at most

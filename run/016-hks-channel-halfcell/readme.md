@@ -34,6 +34,10 @@ ramp), so it controls the uptake at the wall.
 
     ./Allrun            # blockMesh, makeCarrier and the 3 s (about 10 s),
                         # then the numbers of expect.json
+    ./Allrun-damkohler  # the Damkoehler sweep of the manuscript: alpha
+                        # = 1 ... 1e-6, 13 runs (about 2 min); with 48,
+                        # the wall-normal refinement (5 runs).  Records
+                        # and figure: manuscript/data/damkohler
     ./Allclean
 
 ## What to check

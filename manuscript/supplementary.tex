@@ -98,7 +98,7 @@ uncertainty budget or an experimentally identified parameter ranking.}
 \label{fig:physical}
 \end{figure}
 
-Four further sets of runs complete the evidence, all with the same
+Six further sets of runs complete the evidence, all with the same
 solver executable. (i) The \ProductionCases{} production cases repeat
 the 15 baselines and the four silica temperature-coordinate cases on
 41,472 cells with the limited-linear scheme; all other inputs are
@@ -108,10 +108,20 @@ largest upwind fine/medium change. It runs them with upwind,
 limited-linear and van Leer advection on 8,192 to 41,472 cells, and the
 steel case with upwind and limited-linear also on 93,312 cells. This
 adds 12 runs to the existing upwind levels and the production runs.
-(iii) Three original 18,432-cell upwind cases are repeated over the full
-60 s with eight instead of three species correctors. (iv) Ten runs
+Pure PbI$_2$ and the two unshifted steel Q2 cases were also run with
+upwind on 93,312 cells, and a repeat of the shifted-BiI upwind run on
+that mesh reproduced it bitwise.
+(iii) Four original 18,432-cell upwind cases, the three baselines and
+the shifted-BiI steel case at 1\% metal saturation, are repeated over
+the full 60 s with eight instead of three species correctors. (iv) Ten runs
 simulate five single-species PbI$_2$ experiments of Lobresco et al.\
-\cite{Lobresco2026assessment} on two meshes. The stand-alone BiI$_3$
+\cite{Lobresco2026assessment} on two meshes. (v) The diffusivity
+($D/2$, $2D$) and accommodation ($\alpha=0.1$, 0.01) variations of pure
+PbI$_2$ and steel Q2 at 1\% metal saturation are repeated with the
+production scheme on 41,472 cells (\PSRuns{} runs). (vi) \DaRuns{} runs
+of a plane channel vary the accommodation coefficient over six decades
+for the Damk\"ohler sweep of the main text, and \DaRefineRuns{} repeat
+five of them with twice the wall-normal resolution. The stand-alone BiI$_3$
 experiment at 800\,$^\circ$C was not run because its axial temperature
 profile is not published.
 
@@ -172,12 +182,11 @@ cases at 59 s compared three and eight correctors, and outer
 tolerances of $10^{-16}$ and $10^{-14}$, over 20 time steps (40 ms).
 The largest species-field change, scaled by its control maximum, was
 below $3.6\times10^{-8}$, and the changes in new wall increments were
-negligible. In the three full-run checks with eight correctors the
+negligible. In the four full-run checks with eight correctors the
 largest outer initial residual is still
 $2.4\times10^{-15}$--$4.4\times10^{-15}$, and nearly every step ends at
 the corrector limit, as with three: the requested $10^{-16}$ lies below
-the attainable residual floor. A fourth full-run check (shifted BiI)
-had not finished and is not used. No manufactured-solution test of the
+the attainable residual floor. No manufactured-solution test of the
 full coupled system is presented; the Graetz--Robin test of the main
 text verifies the wall discretisation only.
 

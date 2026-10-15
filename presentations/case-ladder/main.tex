@@ -598,6 +598,34 @@ interface {patches (WALL);
   \note{On this mesh the half-cell conductance D over dy/2 is 1 m per second, 64 to 107 times smaller than the kinetic conductance, so it controls the uptake. Where the deposit starts, the gas reaches the wall by diffusion either way, so the onset moves by only 5 mK, far inside one 1 mm bin of 6.5 K. halfCell is the wall law of every physical run: 017, 023 and 024.}
 \end{frame}
 
+% 016, continued: Damkoehler sweep --------------------------------------
+\begin{frame}[t,fragile]{016 hks-channel-halfcell: Damk\"ohler sweep}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.53\textwidth}
+      \basedon{Case 016 unchanged except $\alpha$}{Jan Kren}
+      \change{Accommodation $\alpha$ over six decades: Da from $10^{-3}$ to $2\times10^{3}$}
+      \begin{beamercolorbox}[sep=0.3em,wd=\linewidth]{codebox}
+\begin{Verbatim}
+// PbI2_g pair and HKSCoeffs:
+accommodation 1e-6 ... 1;
+// 13 runs, 5 refined
+\end{Verbatim}
+      \end{beamercolorbox}
+      \begin{itemize}
+        \item $\hat J=\mathrm{Da}$ for Da $\le$ 0.01; plateau $\pi^2/4$ above 300
+        \item deposited 0.3 $\rightarrow$ 99.5 \%; onset stays at 561 K
+        \item $\alpha=0.1$: profile 1.4 \%; $\alpha=0.01$: 14 \%
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.45\textwidth}
+      \centering\includegraphics[width=\linewidth,height=0.5\textheight,keepaspectratio]{c016b}
+      \figsrc{Record \texttt{manuscript/data/damkohler}}
+      \runline{\texttt{./Allrun-damkohler}, a few minutes}
+    \end{column}
+  \end{columns}
+  \note{The wall Damkoehler number compares the kinetic conductance of the HKS law with diffusion over the channel half-height. Varying only the accommodation coefficient moves it over six decades. Below 0.1 the wall flux equals Da: the wall sees the bulk gas and the kinetics decide. Above about 300 it reaches pi squared over four, the diffusion limit of plug flow between absorbing plates, and between the two it follows the series-resistance curve. The deposit then moves 11 mm upstream and its width halves, but the onset temperature does not move, because saturation sets it. The grey bands are the Damkoehler numbers of the production tube cases: alpha 1 and 0.1 lie on the diffusion plateau, alpha 0.01 at its edge. This is the Damkoehler figure of Sec. 4.2 of the manuscript; refinement changes every number by less than 0.11 percent.}
+\end{frame}
+
 % 017 ---------------------------------------------------------------------
 \begin{frame}[t,fragile]{017 physical-carrier}
   \begin{columns}[T,onlytextwidth]
@@ -821,7 +849,7 @@ wallResistance halfCell;
       \begin{itemize}
         \item 576 x 72, limitedLinear: 19 PASS
         \item PbI$_2$ peak 36 cm / 366.5 $^\circ$C vs 368 $\pm$ 18 $^\circ$C
-        \item mesh 1.98 \%; correctors $\le$ 0.021 \%; closure $\le$ 8.63e-16
+        \item mesh 1.98 \% (one case); correctors $\le$ 0.021 \%
       \end{itemize}
     \end{column}
     \begin{column}{0.45\textwidth}
@@ -830,7 +858,34 @@ wallResistance halfCell;
       \runline{\texttt{./Allrun full} (6 h per case)}
     \end{column}
   \end{columns}
-  \note{Three configurations on 1.25 m columns of steel and silica, 5-degree wedges, measured wall temperatures, Q1 the deposited amount over three hours, Q2 LBE metal vapour with two BiI datasets, 2 ms steps, 60 s. Provisional numerical work: the release history, the flow reference conditions and several coordinates are assumptions. The mesh number is the iodine profile change between 41,472 and 93,312 cells; no formal GCI, the apparent orders are inconsistent. manuscript/check_results.py recomputes these numbers from the saved profiles.}
+  \note{Three configurations on 1.25 m columns of steel and silica, 5-degree wedges, measured wall temperatures, Q1 the deposited amount over three hours, Q2 LBE metal vapour with two BiI datasets, 2 ms steps, 60 s. Provisional numerical work: the release history, the flow reference conditions and several coordinates are assumptions. The mesh number is the iodine profile change of the shifted-BiI steel case between 41,472 and 93,312 cells with the production scheme; no formal GCI, the apparent orders are inconsistent. Every element closure stays at or below 8.63e-16. The next slide has the checks made after the review. manuscript/check_results.py recomputes these numbers from the saved profiles.}
+\end{frame}
+
+% 024, continued: checks of the production runs ------------------------
+\begin{frame}[t,fragile]{024 liu2025: sensitivities, mesh and GEMS3K}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.53\textwidth}
+      \basedon{Production cases of 024}{Jan Kren}
+      \change{The checks behind the production runs, made after the review}
+      \begin{beamercolorbox}[sep=0.3em,wd=\linewidth]{codebox}
+\begin{Verbatim}
+production_sensitivities/   // 8 runs
+scheme_mesh_study/upwind_L4/ // 4 runs
+\end{Verbatim}
+      \end{beamercolorbox}
+      \begin{itemize}
+        \item limitedLinear: $\alpha$ $\le$ 5.14 \%, $D$ 1.07--16.65 \%
+        \item 41,472 $\rightarrow$ 93,312 cells, upwind: 2.13--7.30 \%
+        \item GEMS3K in every cell: profiles within 2.1e-4
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.45\textwidth}
+      \centering\includegraphics[width=\linewidth,height=0.5\textheight,keepaspectratio]{c024b}
+      \figsrc{Record \texttt{024/production\_sensitivities}}
+      \runline{\texttt{make\_cases.py}; 17--28 h per case}
+    \end{column}
+  \end{columns}
+  \note{Sensitivities: the diffusivity and accommodation variations of two baselines repeated with the production scheme on 41,472 cells. Accommodation still matters far less than diffusivity, except that in steel halving D changes the profile by only 1.07 percent, because the BiI3 profile, which carries most of the iodine, barely moves; doubling D gives 12.53 percent. Totals change by at most 0.02 percent and the BiI3 share by at most 0.03 points. Mesh: upwind runs of four cases on 93,312 cells change the profiles by 2.13 to 7.30 percent, so the 1.98 percent of the one bounded-scheme case does not bound the others. Correctors: eight instead of three changes the four checked cases by at most 0.021 percent, the shifted-BiI case by 1e-7 percent. GEMS3K: standard-state data in every cell change the profiles by at most 2.1e-4; local mode, 5.1e8 calls without a failure, is bitwise identical to frozen, because its result only starts the kernel solve.}
 \end{frame}
 
 % closing -----------------------------------------------------------------
@@ -843,13 +898,14 @@ wallResistance halfCell;
         \item transport: frozen carrier, species list, coupled sources (008--011)
         \item exchange: every ledger closes at round-off
         \item onsets within 3.89 K of plug flow (021)
+        \item wall law: kinetic and diffusion limits (016 sweep)
         \item experiments: $T_{dep}$ RMS 18 K (023)
       \end{itemize}
     \end{column}
     \begin{column}{0.44\textwidth}
       \psiheading{Where it is used}
       \begin{itemize}
-        \item methods paper: 023 in Sec.~6.3, Table V, Fig.~5; 024 production runs
+        \item methods paper: 016 sweep, 023, 024
         \item deliverable D38: the case ladder of its availability section
         \item \texttt{./Allrun-ladder 012-024}: regression of every check
       \end{itemize}

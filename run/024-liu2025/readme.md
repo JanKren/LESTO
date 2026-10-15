@@ -63,6 +63,9 @@ with `--prepared <LESTO>/run/024-liu2025/work/prepared` and `--carrier-tool
   formal GCI (inconsistent apparent orders).
 - Iteration check (`iteration_check/`): eight against three correctors,
   iodine profile L1 at most 0.021 %.
+- Production-scheme sensitivities (`production_sensitivities/`): D and
+  accommodation variants of two baselines on 41,472 cells; accommodation
+  0.15-5.14 %, D 1.07-16.65 % (iodine profile L1 against their own base).
 - `python3 manuscript/check_results.py` recomputes these numbers from the
   saved profiles: PASS.
 
@@ -75,6 +78,7 @@ with `--prepared <LESTO>/run/024-liu2025/work/prepared` and `--carrier-tool
 | `followup_interim_20261008/` | the interim report of the follow-up |
 | `production_576x72_limitedLinear/` | the 19 production runs (manuscript) |
 | `scheme_mesh_study/`, `iteration_check/` | the numerical studies of plan section 39 |
+| `production_sensitivities/` | D and accommodation variants of two baselines with the production scheme |
 | `physical_input_audit/` | evidence and gaps of the physical inputs |
 | `profiles/`, `preliminary_*` | the preliminary (2026-10-06) profiles |
 | `verification.json`, `full_size_*.json` | the run records (absolute paths of their date) |

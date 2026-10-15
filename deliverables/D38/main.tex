@@ -135,7 +135,11 @@ inaccurate for trace species; the coupling therefore guards every call and
 refines or replaces it by the exact kernel. The production results
 reported here use the exact kernel with formation constants generated
 from the same standard-state data as the GEMS3K system; a full-size
-per-cell GEMS3K run is in progress (\cref{sec:pending}).
+per-cell GEMS3K run of the full production case (41,472 cells, 60\,s)
+reproduces the kernel deposits within $2.1\times10^{-4}$ (L1), the order
+of parallel round-off; its 514.5 million GEMS3K calls all succeeded, and
+the final speciation is computed by the kernel from GEMS3K's
+thermodynamic data (\cref{sec:pending}).
 
 \textbf{Modelling results.} Applied to Liu et al.\ (2025)
 \cite{Liu2025chemical}, the model places all five computed binned iodide
@@ -575,8 +579,10 @@ about 26 CPU-h in case (c).
   kernel with formation constants and vapour-pressure tables generated
   from the same standard-state records. The per-cell GEMS3K engines are a
   qualified capability (\cref{sec:gemsequiv}); in mode local the IPM
-  result is always refined by the exact kernel, a deliberate departure
-  from the original design, in which a polished IPM result was to be used.
+  result only starts a kernel solve and the final speciation is the
+  canonical cold kernel solve, so local and frozen are bitwise identical
+  (\cref{sec:pending}); this departs from the original design, in which a
+  polished IPM result was to be used.
 \item \textbf{Not coupled:} condensed-phase equilibrium inside GEMS3K
   (condensed phases are suppressed; condensation is wall exchange);
   source equilibrium with liquid LBE (source model Q4), which needs the
@@ -699,8 +705,8 @@ Serial / four-rank closure; frozen restarts & $\le10^{-14}$; byte-identical\\
 \end{tabular}
 \end{center}
 The raw IPM deviations of up to 0.64 decades at trace dilution are the
-reason why mode local always refines the IPM result with the exact
-kernel. Injected fatal and NaN-dual failures are counted, re-create the
+reason why mode local passes every IPM result through the exact kernel,
+which computes the final speciation (\cref{sec:pending}). Injected fatal and NaN-dual failures are counted, re-create the
 engine where required, and leave the fields byte-identical to the frozen
 kernel fallback. These are numerical results under provisional inputs
 (synthetic carrier ramp and common diffusivity).
@@ -708,35 +714,60 @@ kernel fallback. These are numerical results under provisional inputs
 \subsection{Production-scale per-cell GEMS3K run}
 \label{sec:pending}
 
-\PENDING{results of the full-size frozen/local run, expected
-2026-10-15}. The run repeats a full-size application case with the
-GEMS3K engines (the plan estimated about 23 h serial for mode local) to
-show the engine equivalence at production scale. \Cref{tab:pending}
-will be filled from its records.
+The full production case of the Liu et al.\ steel experiment (Q2
+source, 1\% metal saturation; $576\times72=41{,}472$ cells,
+\texttt{Gauss limitedLinear 1}, 60\,s at 2\,ms) was repeated with the
+GEMS3K engines, changing only the \texttt{respeciation} engine
+(\cref{tab:pending}). The bridge-enabled solver was built from the same
+solver sources as the production binary; run serially with the kernel
+engine it reproduces the production ledgers bit for bit. The GEMS3K runs
+used 8 MPI ranks (axial slabs, CPU-bound); an 8-rank kernel run with the
+same decomposition separates parallel round-off from the engine effect.
 
 \begin{table}[tb]
 \centering
-\caption{Production-scale comparison of the gas engines (skeleton; to be
-filled from the run records).}
+\caption{Production-scale comparison of the gas engines (records in
+\texttt{run/024-liu2025/gems\_engine\_check/}).}
 \label{tab:pending}
 \small
-\begin{tabular}{llll}
+\begin{tabular}{lllll}
 \toprule
-Quantity & \texttt{kernel} (reference) & \texttt{GEMS frozen} &
-  \texttt{GEMS local}\\
+Quantity & kernel, serial & kernel, 8 ranks & GEMS frozen & GEMS local\\
 \midrule
-Case, mesh, scheme & \multicolumn{3}{l}{\pend}\\
-Wall-clock time / CPU-h & \pend & \pend & \pend\\
-GEMS3K calls & -- & \pend & \pend\\
-Guard refusals / failures / kernel fallbacks & -- & \pend & \pend\\
-Engine re-creations & -- & \pend & \pend\\
-Mean cost per call [$\mu$s] & \pend & \pend & \pend\\
-Largest raw element residue & \pend & \pend & \pend\\
-Iodine-profile $E_{L1}$ vs kernel [\%] & 0 & \pend & \pend\\
-BiI$_3$ share of iodide iodine [\%] & \pend & \pend & \pend\\
+Wall-clock time [h] & 25.04 & 6.37 & 6.74 & 10.73\\
+CPU time [core-h] & 25.0 & 50.9 & 53.9 & 85.8\\
+GEMS3K interior-point calls & -- & -- & -- & $5.145\times10^{8}$\\
+Call failures / engine re-creations & -- & -- & -- & 0 / 0\\
+Lower-guard activations (trace $<10^{-12}$) & -- & -- & -- & 14.0\%\\
+Mean cost per call [$\mu$s] & -- & -- & -- & 150.8\\
+Largest element closure & $5.4\times10^{-16}$ & $5.5\times10^{-16}$ & $5.8\times10^{-16}$ & $5.8\times10^{-16}$\\
+Iodine profile $E_{L1}$ vs serial kernel & 0 & $1.8\times10^{-4}$ & $9.9\times10^{-5}$ & $9.9\times10^{-5}$\\
+BiI$_3$ share of iodide iodine [\%] & 94.5837 & -- & 94.5841 & 94.5841\\
 \bottomrule
 \end{tabular}
 \end{table}
+
+Using GEMS3K's standard-state energies in every re-speciated cell
+(19,944 distinct cell states; formation constants within
+$3.64\times10^{-4}$ decades of the kernel table) changes the iodine,
+PbI$_2$, BiI$_3$, Pb and Bi deposit profiles by at most
+$2.1\times10^{-4}$ (relative $L_1$ of the 1\,cm profiles), the BiI$_3$
+share of iodide iodine by 0.0004 percentage points and the peak
+temperatures by less than 0.003\,K. Parallel round-off alone is of the
+same order (up to $2.7\times10^{-4}$); at equal decomposition the engine
+effect is at most $1.8\times10^{-4}$.
+
+Modes frozen and local give bitwise identical results in all fields,
+profiles and ledger records. This follows from the implementation: in
+mode local the warm GEMS3K interior-point result starts a kernel solve,
+and the final speciation is then computed by the canonical cold kernel
+solve from the same GEMS3K thermodynamic data. The 514.5 million
+GEMS3K calls (none failed) therefore demonstrate the robustness and cost
+of per-cell GEMS3K calls at production scale (59\% above the frozen
+engine), but they do not shape the result. The coupling as used at
+production scale is GEMS3K thermodynamics per cell with an exact,
+element-conserving equilibrium solve; a GEMS3K-solved equilibrium, and
+condensed phases inside GEMS3K, are not demonstrated.
 
 %======================================================================
 \section{Modelling applications}

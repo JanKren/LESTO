@@ -77,7 +77,7 @@ aspect ratios far from the $\Delta x=2\Delta r$ of the test.
 \subsection{Material balance and solver diagnostics}
 \label{sec:conservation}
 All 15 runnable baseline cases, all 64 follow-up cases, the 19
-production cases and the three full-run corrector cases completed and
+production cases and the four full-run corrector cases completed and
 passed their configured numerical acceptance checks; the scheme and
 mesh runs completed with the same ledgers. This PASS classification is
 not an experimental-validation classification. For element $k$ the raw
@@ -103,12 +103,13 @@ the trace-loading bound are given in Sec.~S2 of the supplementary
 material.
 
 Some paired wall-coupling iterations do not meet the requested
-$10^{-16}$ outer criterion. Three cases were therefore repeated over the
+$10^{-16}$ outer criterion. Four cases were therefore repeated over the
 full 60 s with eight instead of three correctors (18,432 cells, upwind).
 The iodine profiles of pure PbI$_2$ and of the steel Q2 case at 0.1\%
 saturation change by $\IterPure\%$ and $\IterSteelLow\%$, that is, at
 round-off; the steel case at 1\% saturation changes by
-\IterSteelHigh\%. The requested tolerance lies below the attainable
+\IterSteelHigh\%, and the same case with the shifted BiI data by
+$\IterShift\%$. The requested tolerance lies below the attainable
 residual floor (Sec.~S2), and the iteration error of the reported
 profiles is negligible next to the time-step and spatial errors below.
 
@@ -142,7 +143,9 @@ shapes still differ appreciably.
 mesh levels at 2 ms, relative to the finer level, for three advection
 schemes, and the effect of halving the time step on 18,432 cells with
 upwind advection. All steel cases are Q2; the shifted-BiI case uses
-1\% metal saturation. A dash marks a combination that was not run.}
+1\% metal saturation. The 41,472$\to$93,312 upwind values of pure
+PbI$_2$ and the two unshifted steel cases come from separate runs of the
+follow-up campaign. A dash marks a combination that was not run.}
 \label{tab:numerical}
 \small\input{generated/numerical-table}
 \end{table*}
@@ -163,7 +166,7 @@ contribution.}
 
 The scheme and mesh study (\cref{tab:numerical,fig:refinement})
 addresses the shifted-BiI steel case, which had the largest upwind
-change. With limited-linear advection its iodine profile changes by
+change between 18,432 and 41,472 cells. With limited-linear advection its iodine profile changes by
 \SteelLLOne, \SteelLLTwo{} and \SteelLLThree\% over the three
 refinements to 93,312 cells; with upwind, by \SteelUpOne, \SteelUpTwo{}
 and \SteelUpThree\%. Pure PbI$_2$ changes by \PureLLOne{} and
@@ -182,12 +185,21 @@ total, centroid and width oscillate on both triplets. These orders are
 inconsistent, so no formal grid convergence index is claimed
 \cite{NASAGridConvergence,Roache1994perspective,Celik2008procedure}. We
 quote the measured 41,472 to 93,312-cell change of \SteelLLThree\% as the
-spatial uncertainty indicator of the production profiles. Extrapolating
+spatial uncertainty indicator of this production profile. Extrapolating
 the last change at the last apparent order would place the 41,472-cell
 profile about \SteelErrApparent\% from the mesh limit, and assuming
 second order about \SteelErrSecond\%. These are indicative estimates for
 one case, not confirmed bounds, and they do not establish mesh
-independence of local profile shapes in other cases. The three-grid
+independence of local profile shapes in other cases. Upwind runs of all
+four check cases on 93,312 cells show this directly: from 41,472 to
+93,312 cells the iodine profiles of pure PbI$_2$ and of the two
+unshifted steel cases change by \UpFourOthersMin--\UpFourOthersMax\%,
+more than the \SteelUpThree\% of the shifted-BiI case, while their
+totals change by less than 0.02\%. The shifted-BiI case is therefore
+not the most mesh-sensitive case at the finest step, and the
+\SteelLLThree\% bounded-scheme change does not bound the spatial error
+of the other production profiles; the bounded scheme was refined to
+93,312 cells for this case only. The three-grid
 scalar checks of the earlier upwind triplets are in Sec.~S3 of the
 supplementary material.
 

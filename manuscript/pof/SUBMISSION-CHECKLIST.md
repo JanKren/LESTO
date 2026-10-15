@@ -46,7 +46,7 @@ both read on 13 October 2026. Re-check them before submitting.
 | B3 | Author declarations | CRediT roles, conflict-of-interest statement, acknowledgments/funding, corresponding e-mail: all placeholders. Required by AIP. |
 | B4 | ~~Figure text below 8 pt~~ **resolved 14 Oct** | Figures are drawn at printed size (≤ 5.4 in) and included unscaled; text 8–9 pt (Section 5). Only mathtext sub/superscripts are smaller. |
 | B5 | Co-author approval | Ničeno must see and approve the manuscript and the CRediT statement (AIP: corresponding author ensures all authors agree). `review-notes.md`: no messages have been sent. |
-| B6 | Running studies (review-A, review-B) | Production-scheme sensitivities and the Damkoehler sweep are still running; their results are not in the text. `% TODO(review-A)`/`% TODO(review-B)` comments mark every place (abstracts, Secs. 1, 4, 6.3, 7.3, 8, 9, titles). |
+| B6 | ~~Running studies (review-A, review-B)~~ **resolved 15 Oct** | The production-scheme sensitivities (Table VIII) and the Damkoehler sweep (Fig. 3) are in the abstracts and Secs. 1, 4, 6.3, 7.3, 8 and 9; every `% TODO(review-A/B)` comment is removed. Title kept. Remaining: the researcher's sign-off of plan section 39, item 8. |
 
 ## 1. AIP / PoF requirements
 
@@ -58,7 +58,7 @@ both read on 13 October 2026. Re-check them before submitting.
 | Corresponding author e-mail | **placeholder** | `\email{...}` reads verbatim, so the placeholder is plain bracketed text, not red. |
 | ORCIDs | **placeholder** | Entered in the submission system, not in the TeX. Not invented here. |
 | Title | **done** (changed 14 Oct); **blocked** on review-B | Alternative 2 of Section 6 adopted; see Section 6 for the basis. arXiv title unchanged. A `% TODO(review-B)` above both titles: do not change them before the Damkoehler sweep is in. |
-| Abstract ≤ 250 words, one paragraph, no citations/equations/footnotes | **done** | 248 words after the internal-review revision (inline math counted as one word; `%` comment lines excluded). Adds the Graetz-Robin result and qualifies the Lobresco and BiI sentences. Two `% TODO(review-A/B)` comments mark where the running studies go; recount after any edit. |
+| Abstract ≤ 250 words, one paragraph, no citations/equations/footnotes | **done** | 250 words after the last package runs (15 Oct; inline math counted as one word; `%` comment lines excluded; note that `\%` is text, not a comment). Adds the Damkoehler sweep and the production-scheme sensitivities; the silica-coordinate sentence was moved out to make room. Recount after any edit. |
 | Keywords | **decision** | AIP's instructions state no keyword requirement; the TeX has none. If the submission form asks: thermal-gradient tube flow; vapor deposition; Hertz–Knudsen–Schrage; laminar mass transfer; finite-volume method; OpenFOAM; numerical verification. |
 | Acknowledgments | **placeholder** | `acknowledgments` environment. The earlier draft's funding statements and grant numbers were removed pending confirmation; none invented. |
 | Author Declarations: Conflict of Interest | **placeholder** | AIP standard text "The authors have no conflicts to disclose." inside the placeholder; confirm or replace with AIP's disclosure template. |
@@ -300,20 +300,21 @@ are the usual places.
    inconclusive.
 9. **79 cases versus three experiments.** The paper already says these
    are computational cases, not replicates; keep that wording.
-10. **Length.** Done: 25 pages in PoF reprint layout (was 28), seven
-    tables and seven figures; property appendix, case inventory, ledger
+10. **Length.** 27 pages in PoF reprint layout after review part 2 (25
+    before; the Damkoehler figure takes a float page of its own), eight
+    tables and eight figures; property appendix, case inventory, ledger
     diagnostics, bin-width audit, Lobresco set-up details, the full
     Graetz table and the sensitivity bar chart are in the 6-page
     supplementary material (`supplementary.tex`).
 
-## 11. Build record (14 October 2026, after the internal review)
+## 11. Build record (15 October 2026, after review part 2)
 
 | Build | Command | Pages | Overfull | Undefined refs | BibTeX |
 |---|---|---|---|---|---|
-| PoF reprint | `bash manuscript/pof/build.sh` | 25 | 0 | 0 | 1 benign (REVTeX `jnrlst`) |
+| PoF reprint | `bash manuscript/pof/build.sh` | 27 | 0 | 0 | 1 benign (REVTeX `jnrlst`) |
 | PoF supplement | (built by the same command) `pof/lesto-pof-supplementary.pdf` | 6 | 0 | 0 | 0 |
-| PoF preprint | `bash manuscript/pof/build.sh --preprint` | 39 | 0 | 0 | same |
-| arXiv | `bash manuscript/build.sh --figures` | 21 | 0 | 0 | 0 |
+| PoF preprint | `bash manuscript/pof/build.sh --preprint` | 42 | 0 | 0 | same |
+| arXiv | `bash manuscript/build.sh --figures` | 23 | 0 | 0 | 0 |
 | arXiv supplement | (same command) `lesto-iodine-supplementary.pdf` | 6 | 0 | 0 | 0 |
 | Consistency | `python3 manuscript/check_results.py` | PASS | | | rewrote `review-checks.json` |
 
@@ -321,6 +322,10 @@ The checker now also recomputes the 20 Graetz-Robin GCI triplets from
 `manuscript/data/graetz/fits.json`, checks them against the solver test's
 `table.md`, the criteria log (27 PASS) and the solver hash, recomputes the
 Lobresco from-inlet onsets and RMS, and checks the supplement logs and PDF.
+Since review part 2 it also checks the Damkoehler sweep record against case
+016's `expect.json` and recomputes the manuscript numbers of the sweep, and
+recomputes the eight production-scheme sensitivities from their tracked
+profiles.
 
 ## 12. Internal review revision (14 October 2026)
 

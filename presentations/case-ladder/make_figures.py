@@ -681,12 +681,67 @@ def fig024():
     used("c024", *files, note="Production runs (576 x 72, limitedLinear) of run/024: iodine wall profile against the digitised scan, as written by the analysis (iodine-comparison.csv).")
 
 
+def fig016b():
+    f = REPO / "manuscript" / "data" / "damkohler" / "damkohler_sweep.csv"
+    d = read_csv(f)
+    da = d["Da_561K"]
+    fig, axes = plt.subplots(2, 1, figsize=(SIZE[0], SIZE[1] * 1.05), sharex=True)
+    ax = axes[0]
+    ax.loglog(da, d["Jhat_84p5"], "o", color=BLUE, ms=3.5, label="sweep, x = 84.5 mm")
+    g = np.logspace(-3.2, 3.5, 200)
+    plateau = np.pi ** 2 / 4
+    ax.loglog(g, g, color=MUTED, ls=":", lw=1, label="kinetic: J = Da")
+    ax.axhline(plateau, color=MUTED, ls="--", lw=1, label="diffusion: $\\pi^2/4$")
+    ax.loglog(g, 1 / (1 / g + 1 / plateau), color=ORANGE, lw=1, label="series")
+    ax.set_ylim(5e-4, 6); ax.set_ylabel("wall flux $\\hat J$")
+    h, l = ax.get_legend_handles_labels()
+    fig.legend(h, l, loc="upper center", ncol=2, fontsize=6.3, handlelength=1.6,
+               bbox_to_anchor=(0.55, 1.10))
+    ax = axes[1]
+    ax.semilogx(da, 100 * d["deposited_fraction"], "o-", color=BLUE, ms=3.5)
+    ax.set_ylabel("deposited [%]"); ax.set_xlabel("Da at the onset (561 K)")
+    for a in axes:
+        a.axvspan(7, 15, color=GRID, alpha=0.6, lw=0)
+        a.axvspan(1.4e3, 2.9e3, color=GRID, alpha=0.6, lw=0)
+    axes[1].text(10, 45, "$\\alpha$=0.01", fontsize=6.5, color=MUTED, ha="center", rotation=90)
+    axes[1].text(2e3, 45, "$\\alpha$=1", fontsize=6.5, color=MUTED, ha="center", rotation=90)
+    fig.tight_layout(h_pad=0.3)
+    save(fig, "c016b")
+    used("c016b", f, note="Damkoehler sweep of run/016 (Allrun-damkohler), tracked record manuscript/data/damkohler; grey bands: tube Da of the production cases (manuscript Sec. 4.2).")
+
+
+def fig024b():
+    f = case("024") / "production_sensitivities" / "comparison.csv"
+    with open(f) as fh:
+        rows = list(csv.DictReader(fh))
+    order = ["D5e-05", "D0.0002", "alpha0.1", "alpha0.01"]
+    names = {"D5e-05": "D/2", "D0.0002": "2D", "alpha0.1": "α 0.1", "alpha0.01": "α 0.01"}
+    fig, axes = plt.subplots(1, 2, figsize=SIZE, sharey=True)
+    for ax, base, title in ((axes[0], "PbI2_SS_Q1_baseline", "pure PbI2"),
+                            (axes[1], "LBE-I_SS_II_Q2_baseline_sat0.01", "steel Q2, 1 %")):
+        r = {x["variant"]: x for x in rows if x["base"] == base}
+        y = np.arange(len(order))
+        ll = [float(r[v]["I_L1_pct"]) for v in order]
+        up = [float(r[v]["upwind_I_L1_pct"]) for v in order]
+        ax.barh(y - 0.2, ll, 0.4, color=BLUE, label="limitedLinear, 41,472")
+        ax.barh(y + 0.2, up, 0.4, color=GRID, edgecolor=MUTED, lw=0.3, label="upwind, 18,432")
+        ax.set_yticks(y, [names[v] for v in order])
+        ax.set_title(title, color=INK, fontsize=7.5, pad=2)
+        ax.set_xlabel("iodine L1 [%]")
+    axes[0].invert_yaxis()
+    h, l = axes[0].get_legend_handles_labels()
+    fig.legend(h, l, loc="upper center", ncol=2, fontsize=6.3, bbox_to_anchor=(0.55, 1.07))
+    fig.tight_layout(w_pad=0.4)
+    save(fig, "c024b")
+    used("c024b", f, note="Production-scheme sensitivities of run/024 (production_sensitivities/comparison.csv): iodine profile change against each variant's own baseline.")
+
+
 def main():
     FIG.mkdir(exist_ok=True)
     out = {}
     for f in (fig001, fig002, fig003, fig004, fig005, fig006, fig007,
               fig008, fig009, fig010, fig011, fig012, fig013, fig014, fig015,
-              fig016, fig017, fig018, fig019, fig020, fig021, fig022, fig023, fig024):
+              fig016, fig016b, fig017, fig018, fig019, fig020, fig021, fig022, fig023, fig024, fig024b):
         try:
             r = f()
         except FileNotFoundError as e:

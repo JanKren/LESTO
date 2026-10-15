@@ -7,8 +7,9 @@ A structured axisymmetric 5$^\circ$ wedge represents the 1.25 m column
 The production mesh has $576\times72\times1=41{,}472$ cells. The
 64 follow-up sensitivities use the original
 $384\times48\times1=18{,}432$-cell mesh. The mesh studies use
-$256\times32\times1=8{,}192$, 18,432, 41,472 and, for one case,
-$864\times108\times1=93{,}312$ cells; successive levels refine the
+$256\times32\times1=8{,}192$, 18,432, 41,472 and
+$864\times108\times1=93{,}312$ cells, the finest for four cases with
+upwind advection and one with the bounded scheme; successive levels refine the
 axial and radial spacing by a factor of 1.5. The source occupies
 $x=0.09$--0.105 m and the radial interval $r=0.25R_t$--$0.75R_t$. Its
 position and cell selection are computational assumptions, and the
@@ -88,10 +89,61 @@ resistance well below the radial diffusion resistance for
 $\alpha_i=1$ and 0.1, and about an order of magnitude below it for
 $\alpha_i=0.01$. It is a scaling estimate, not a substitute for the
 resolved near-wall gradients of the calculations.
-% TODO(review-B): Damkoehler sweep (running). Insert its result here: the
-% computed response of the iodine profiles over the swept Da range, and
-% whether it confirms the diffusion-limited reading of this paragraph and
-% of Sec. 7.3. Do not change the PoF title before this is in.
+
+The estimate can be tested directly on a plane channel with the same
+discretised wall law (\cref{fig:damkohler}): 0.1 m long and 4.8 mm
+high, with both walls condensing, a plug-flow helium carrier, a wall
+and gas temperature falling linearly from 1000 to 350 K, a constant
+$D=10^{-4}\units{m^2\,s^{-1}}$ and a 2 s PbI$_2$ release at mid-height.
+In \DaRuns{} runs the accommodation coefficient of the PbI$_2$ wall
+law is varied over six decades, which moves Da, defined by
+\cref{eq:damkohler} with the half-height $h=2.4$ mm in place of $R$,
+from $\DaLow$ to $\DaHigh$ at the onset temperature. The normalised wall
+flux $\hat J=Jh/[D(\bar c-c_{\rm eq})]$, with $\bar c$ the
+cross-section mean, equals Da within \DaKinDev\% for
+$\mathrm{Da}\le0.01$, where the cross-channel profile is flat. For
+$\mathrm{Da}\gtrsim300$ it approaches $\pi^2/4=\DaPlateau$, the
+diffusion limit of developed plug flow between absorbing plates, within
+\DaDiffDev\%, and between the two limits it follows the series form
+$1/(1/\mathrm{Da}+4/\pi^2)$ within \DaSeriesDev\%. Over the same range
+the deposited fraction of the release rises from \DaCaptureLow\% to
+\DaCaptureHigh\%, the deposit centroid moves upstream from
+\DaCentroidLow{} to \DaCentroidHigh{} mm and the 10--90\% width halves
+from \DaWidthLow{} to \DaWidthHigh{} mm. The 1\% onset temperature stays
+at \DaOnset{} K within \DaOnsetSpread{} K, because the saturation point,
+not the exchange rate, fixes it. Doubling the wall-normal resolution
+changes these quantities by at most \DaRefine\%. In the channel the
+production coefficients give $\mathrm{Da}={}$\DaChannelOne{} ($\alpha_i=1$),
+\DaChannelTwo{} (0.1) and \DaChannelThree{} (0.01) between 400 and
+1000 K, close to the tube values above. Relative to $\alpha_i=1$, the
+deposit profile changes by \DaProfOne\% for $\alpha_i=0.1$ and by
+\DaProfTwo\% for $\alpha_i=0.01$, where the wall flux is \DaFluxDeficit\%
+below the diffusion limit. The production coefficients therefore lie on
+the diffusion-limited plateau ($\alpha_i=1$ and 0.1) or at its edge
+($\alpha_i=0.01$). The channel has a plug-flow carrier, a linear
+temperature ramp and a constant diffusivity; it shows that the
+discretised wall law reproduces both limits and the transition between
+them, and where the production coefficients sit on that curve, but it
+does not vary the interfacial conductance in the column calculations.
+\begin{figure*}[tbp]
+\centering
+\includegraphics{damkohler_sweep.pdf}
+\caption{Wall Damk\"ohler sweep on a plane channel with the half-cell
+wall law (PbI$_2$, plug-flow helium, wall temperature 1000--350 K,
+$D=10^{-4}\units{m^2\,s^{-1}}$). (a) Normalised wall flux during the
+release ($t=1.5$ s) against the local Da at three axial stations, with
+the kinetic limit $\hat J=\mathrm{Da}$, the plug-flow diffusion limit
+$\pi^2/4$ and the series-resistance curve. (b) Wall-normal
+concentration profiles at 72.5 mm (dashed) and 84.5 mm (solid) for four
+values of Da. (c) Fraction of the release deposited at 3 s, with a
+plug-flow kinetic estimate that has no fitted parameter. (d) Onset,
+peak-bin and centroid positions of the deposit; for $\mathrm{Da}<0.05$
+the peak bin is the outlet bin, because the deposit reaches the end of
+the channel. In (c) and (d) Da is evaluated at the onset temperature,
+561 K. Grey bands: the tube Damk\"ohler numbers of the production cases
+for $\alpha_i=1$, 0.1 and 0.01 (\cref{sec:regime}).}
+\label{fig:damkohler}
+\end{figure*}
 
 Two omitted effects can be bounded with the same inputs, the digitized
 wall profiles and the 101,325 Pa outlet pressure. The first is
@@ -135,10 +187,10 @@ which reverts to upwinding near extrema and steep gradients. The 64
 follow-up cases and the time-step comparisons keep the first-order
 upwind advection of the original campaign on 18,432 cells, and the
 follow-up sensitivities are always reported as differences from their
-own upwind baselines on that mesh.
-% TODO(review-A): production-scheme sensitivities (running). When they are
-% complete, state here which follow-up sensitivities were repeated with
-% limitedLinear on 41,472 cells and that Sec. 7.3 / Table VII report them.
+own upwind baselines on that mesh. The diffusivity and accommodation
+variations were also repeated with the production scheme on 41,472
+cells for two baselines, pure PbI$_2$ and steel Q2 at 1\% metal
+saturation (\PSRuns{} runs, \cref{tab:production-sensitivity}).
 The scheme and mesh study adds the van Leer limiter
 \cite{vanLeer1974towards} (\texttt{Gauss vanLeer}) as a second bounded
 scheme. All nine transported gases use the same advection scheme
@@ -172,12 +224,15 @@ a second dataset. The 64 follow-up cases vary mesh and time step,
 diffusivity, accommodation, source position, Q2 metal loading, flow
 reference, silica temperature coordinate and a fixed-temperature flow
 stop; they are a structured set of conditional comparisons, not a
-factorial uncertainty study. Four further sets complete the evidence:
-the \ProductionCases{} production re-runs (\cref{sec:verification}), a
-scheme and mesh study of two cases up to 93,312 cells, three full-run
-corrector checks, and ten runs of five single-species experiments of
-Lobresco et al.\ \cite{Lobresco2026assessment} on two meshes
-(\cref{sec:lobresco}). All Liu et al.\ calculations and the Lobresco
-runs use the same solver executable, identified by its SHA-256 in the
-saved reports. Table~S1 and Sec.~S1 of the supplementary material list
+factorial uncertainty study. Six further sets complete the evidence:
+the \ProductionCases{} production re-runs (\cref{sec:verification}), the
+\PSRuns{} production-scheme sensitivities, a scheme and mesh study of two
+cases up to 93,312 cells with three further upwind runs on that mesh,
+four full-run corrector checks, ten runs of
+five single-species experiments of Lobresco et al.\
+\cite{Lobresco2026assessment} on two meshes (\cref{sec:lobresco}), and
+the \DaRuns{} channel runs of the Damk\"ohler sweep with
+\DaRefineRuns{} refined repeats (\cref{sec:regime}). All these
+calculations use the same solver executable, identified by its SHA-256
+in the saved reports. Table~S1 and Sec.~S1 of the supplementary material list
 every case, its variation and its reference case.

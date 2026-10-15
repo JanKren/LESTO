@@ -32,7 +32,6 @@ columns: numerical verification and input sensitivity}
 \author[1]{Bojan Ni\v{c}eno}
 \affil[1]{Paul Scherrer Institute, 5232 Villigen PSI, Switzerland}
 \date{14 October 2026}
-% TODO(review-B): do not change the title before the Damkoehler sweep is in.
 \renewcommand{\shorttitle}{Conservative CFD modelling of iodine deposition}
 \renewcommand{\headeright}{Working manuscript}
 \renewcommand{\undertitle}{Working manuscript for author review}
@@ -63,12 +62,20 @@ differences from their own baselines. In 60 s runs, the largest raw
 element-balance residue is $1.41\times10^{-12}$ of supplied material.
 Halving the time step changes iodine deposition profiles by at most
 0.323\%, and eight instead of three species correctors by at most
-0.021\%.
-% TODO(review-A): production-scheme sensitivities; add one sentence.
-In the most mesh-sensitive case, upwind advection differs from
-the bounded scheme by 7.7--20.8\% at equal mesh, and the bounded-scheme
-profile changes by 1.98\% from 41,472 to 93,312 cells; apparent orders
-are inconsistent, so no formal grid-convergence index is claimed. A
+0.021\%. Repeated with the bounded scheme for two baselines,
+accommodation changes alter the iodine profiles by at most
+\PSAlphaTwoMax\% and diffusivity changes by up to \PSDMax\%. A sweep of
+the wall Damk\"ohler number over six decades on a plane channel
+reproduces the kinetic and diffusion limits of the wall exchange and
+places the production accommodation coefficients on or near the
+diffusion-limited plateau.
+In the steel case selected for the scheme study, upwind advection
+differs from the bounded scheme by 7.7--20.8\% at equal mesh, and the
+bounded-scheme profile changes by 1.98\% from 41,472 to 93,312 cells;
+apparent orders are inconsistent, so no formal grid-convergence index is
+claimed. With upwind advection, the same refinement changes the
+profiles of four cases by \SteelUpThree--\UpFourOthersMax\%, so the
+bounded-scheme change of one case does not bound the others. A
 $+29\units{kJ\,mol^{-1}}$ shift in the BiI gas Gibbs energy changes the
 BiI$_3$ share of deposited iodide iodine in the steel case from 94.58\%
 to 2.01\%. This shows how strongly the computed partition depends on

@@ -119,6 +119,12 @@
    },
    "note": "Runs made for the deck: ./Allrun of run/014 and run/016 (both PASS)."
   },
+  "c016b": {
+   "inputs": {
+    "manuscript/data/damkohler/damkohler_sweep.csv": "c1dffe565d5b79ebf77f052a5020cb8693048ba1d38e8e8dfdfe97cce9ba0306"
+   },
+   "note": "Damkoehler sweep of run/016 (Allrun-damkohler), tracked record manuscript/data/damkohler; grey bands: tube Da of the production cases (manuscript Sec. 4.2)."
+  },
   "c017": {
    "inputs": {
     "run/023-lobresco2026/cases/coarse/T106_6/final_profiles/PbI2_g_gamma.dat": "18da798b8a7fc4e3e32c3d9be25652557fe34f1c72b32174dd35b31cfd51797d",
@@ -193,6 +199,12 @@
     "run/024-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q1_baseline/iodine-comparison.csv": "bf8c08d4e29701c5ad6225f4bea0ba4efacd9479e5c752daa27deaa48d3e029f"
    },
    "note": "Production runs (576 x 72, limitedLinear) of run/024: iodine wall profile against the digitised scan, as written by the analysis (iodine-comparison.csv)."
+  },
+  "c024b": {
+   "inputs": {
+    "run/024-liu2025/production_sensitivities/comparison.csv": "02f559681ae7f68b71e417d1656c83235f0107b40bc2aa6613e75035782a219d"
+   },
+   "note": "Production-scheme sensitivities of run/024 (production_sensitivities/comparison.csv): iodine profile change against each variant's own baseline."
   }
  }
 }

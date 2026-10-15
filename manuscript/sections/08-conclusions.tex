@@ -15,12 +15,14 @@ that all physical pathways are represented. On a Graetz--Robin problem
 the half-cell wall law converges at second order to the reference decay
 rate, whereas applying the kinetic law to the cell-center value is first
 order; this verifies the wall discretization, not the convergence of
-the iodine calculations. Large tube-scale wall Damk\"ohler numbers and
- the stronger response to diffusivity than to accommodation in the
- upwind sensitivity campaign are consistent with predominantly
- diffusion-controlled exchange. A resolved regime transition and the
- sensitivity ranking on the production scheme remain to be established.
-% TODO(review-B): Damkoehler sweep; revisit this sentence and the PoF title.
+the iodine calculations. Within the model, radial diffusion rather than
+interfacial kinetics limits the wall exchange. A sweep of the wall
+Damk\"ohler number over six decades on a plane channel reproduces the
+kinetic limit, the diffusion limit and the series-resistance transition
+between them, and places the production accommodation coefficients on
+the diffusion-limited plateau or, for $\alpha=0.01$, at its edge; the
+deposition onset does not move across the sweep, because saturation
+fixes it.
 
 Integral results are much less sensitive to resolution than local
 profiles. Halving the time step changes iodine profiles by at most
@@ -28,14 +30,21 @@ profiles. Halving the time step changes iodine profiles by at most
 \IterSteelHigh\%. The spatial error is larger and is dominated by the
 numerical diffusion of first-order upwind advection, which differs
 from the limited-linear scheme by \UpLLFour--\UpLLOne\% at equal mesh in
-the most sensitive case, whereas two bounded schemes differ by at most
-\VLSteelMax\%. With limited-linear advection that case changes by
-\SteelLLThree\% between 41,472 and 93,312 cells, but the apparent orders
-are inconsistent, so we quote this change rather than a formal grid
-convergence index. Closely competing 1 cm bins can shift a reported
+the steel case of the scheme study, whereas two bounded schemes differ
+by at most \VLSteelMax\%. With limited-linear advection that case
+changes by \SteelLLThree\% between 41,472 and 93,312 cells, but the
+apparent orders are inconsistent, so we quote this change rather than a
+formal grid convergence index. With upwind advection the same
+refinement changes the four checked cases by
+\SteelUpThree--\UpFourOthersMax\%, and three of them more than that
+steel case, so its bounded-scheme change is not a bound for the other
+production profiles. Closely competing 1 cm bins can shift a reported
 peak temperature by tens of kelvin, so peaks are reported with their
-smoothed maximum and centroid temperature as well.
-% TODO(review-A): add the production-scheme sensitivities here.
+smoothed maximum and centroid temperature as well. Repeated with the
+production scheme for two baselines, $\alpha=0.1$ changes the iodine
+profiles by at most \PSAlphaOneMax\% and halving or doubling the
+diffusivity by \PSDMin--\PSDMax\%; the steel response to the diffusivity
+is strongly asymmetric, so it is case-dependent and not linear.
 
 The computed iodide partition depends strongly on thermodynamic input. In the
 refined steel case, a $+29$ kJ/mol shift of the BiI gas Gibbs energy

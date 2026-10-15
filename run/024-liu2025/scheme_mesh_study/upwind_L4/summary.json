@@ -1,0 +1,169 @@
+{
+ "what": "Upwind 864x108 (93,312-cell) runs of the four iteration/mesh-check bases, made by the lesto-submission-run package; compared with the upwind 576x72 (41,472-cell) follow-up cases.",
+ "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+ "runner": "lesto-submission-run package (run_study.py), output directory ~/lesto-submission-followup on the workstation",
+ "scope": "Mesh sensitivity of the first-order upwind discretisation only; the production scheme is limitedLinear, refined to L4 for the shifted-BiI case only (../profiles/steel_L4_ll).",
+ "cases": [
+  {
+   "case": "PbI2_SS_Q1_baseline__grid864x108",
+   "base_case": "PbI2_SS_Q1_baseline",
+   "status": "PASS",
+   "finished_utc": "2026-10-14T04:50:58.350562+00:00",
+   "cells": 93312,
+   "scheme": "Gauss upwind",
+   "dt_s": 0.002,
+   "end_time_s": 60,
+   "carrier_audit": "PASS",
+   "element_gates": {
+    "Pb": "PASS",
+    "Bi": "PASS",
+    "I": "PASS"
+   },
+   "max_relative_closure": 1.8562772460581646e-15,
+   "max_respeciation_failures": 0,
+   "BiI3_share_of_iodide_I": 0.0,
+   "coarse_reference": "run/024-liu2025/followup_results/profiles/PbI2_SS_Q1_baseline__grid576x72",
+   "L3_to_L4": {
+    "element_I": {
+     "profile_L1_pct": 3.677528622980113,
+     "total_change_pct": 0.007536754163492075,
+     "centroid_shift_cm": -0.038694543139128346
+    },
+    "PbI2_g": {
+     "profile_L1_pct": 3.6775286229801236,
+     "total_change_pct": 0.00753675416347484,
+     "centroid_shift_cm": -0.038694543139122795
+    },
+    "BiI3_g": null
+   }
+  },
+  {
+   "case": "LBE-I_SS_II_Q2_baseline_sat0.001__grid864x108",
+   "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+   "status": "PASS",
+   "finished_utc": "2026-10-14T17:46:22.080767+00:00",
+   "cells": 93312,
+   "scheme": "Gauss upwind",
+   "dt_s": 0.002,
+   "end_time_s": 60,
+   "carrier_audit": "PASS",
+   "element_gates": {
+    "Pb": "PASS",
+    "Bi": "PASS",
+    "I": "PASS"
+   },
+   "max_relative_closure": 4.0994461411106535e-16,
+   "max_respeciation_failures": 0,
+   "BiI3_share_of_iodide_I": 0.5647672333728601,
+   "coarse_reference": "run/024-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.001__grid576x72",
+   "L3_to_L4": {
+    "element_I": {
+     "profile_L1_pct": 7.29529335602159,
+     "total_change_pct": 0.015285662100128442,
+     "centroid_shift_cm": -0.04200464281367555
+    },
+    "PbI2_g": {
+     "profile_L1_pct": 3.5508580359867414,
+     "total_change_pct": 0.014291142574150656,
+     "centroid_shift_cm": -0.023672367575311437
+    },
+    "BiI3_g": {
+     "profile_L1_pct": 10.183025790465209,
+     "total_change_pct": 0.01605207958889066,
+     "centroid_shift_cm": -0.05617777415185543
+    }
+   }
+  },
+  {
+   "case": "LBE-I_SS_II_Q2_baseline_sat0.01__grid864x108",
+   "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+   "status": "PASS",
+   "finished_utc": "2026-10-15T05:10:16.110726+00:00",
+   "cells": 93312,
+   "scheme": "Gauss upwind",
+   "dt_s": 0.002,
+   "end_time_s": 60,
+   "carrier_audit": "PASS",
+   "element_gates": {
+    "Pb": "PASS",
+    "Bi": "PASS",
+    "I": "PASS"
+   },
+   "max_relative_closure": 4.752214108160726e-16,
+   "max_respeciation_failures": 0,
+   "BiI3_share_of_iodide_I": 0.9457780026047485,
+   "coarse_reference": "run/024-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_baseline_sat0.01__grid576x72",
+   "L3_to_L4": {
+    "element_I": {
+     "profile_L1_pct": 6.6824995102492295,
+     "total_change_pct": 0.015205926862426042,
+     "centroid_shift_cm": -0.03625760699451641
+    },
+    "PbI2_g": {
+     "profile_L1_pct": 2.424006622102545,
+     "total_change_pct": -0.1483087783569627,
+     "centroid_shift_cm": -0.015747360938522803
+    },
+    "BiI3_g": {
+     "profile_L1_pct": 6.927902104561533,
+     "total_change_pct": 0.024580319051796806,
+     "centroid_shift_cm": -0.03780549346740214
+    }
+   }
+  },
+  {
+   "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__grid864x108",
+   "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+   "status": "PASS",
+   "finished_utc": "2026-10-15T16:20:53.508384+00:00",
+   "cells": 93312,
+   "scheme": "Gauss upwind",
+   "dt_s": 0.002,
+   "end_time_s": 60,
+   "carrier_audit": "PASS",
+   "element_gates": {
+    "Pb": "PASS",
+    "Bi": "PASS",
+    "I": "PASS"
+   },
+   "max_relative_closure": 5.157167404018904e-16,
+   "max_respeciation_failures": 0,
+   "BiI3_share_of_iodide_I": 0.02013040339378684,
+   "coarse_reference": "run/024-liu2025/followup_results/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01__grid576x72",
+   "L3_to_L4": {
+    "element_I": {
+     "profile_L1_pct": 2.1349674924076507,
+     "total_change_pct": 0.017811952006284767,
+     "centroid_shift_cm": -0.020821715564678378
+    },
+    "PbI2_g": {
+     "profile_L1_pct": 2.0655799525068996,
+     "total_change_pct": 0.008953880585345565,
+     "centroid_shift_cm": -0.022248291859283675
+    },
+    "BiI3_g": {
+     "profile_L1_pct": 5.513461333330185,
+     "total_change_pct": 0.4489883522072348,
+     "centroid_shift_cm": 0.01469478709854588
+    }
+   },
+   "repeat_of_study_steel_L4_up": {
+    "element_I": {
+     "profile_L1_pct": 0.0,
+     "total_change_pct": 0.0,
+     "centroid_shift_cm": 0.0
+    },
+    "PbI2_g": {
+     "profile_L1_pct": 0.0,
+     "total_change_pct": 0.0,
+     "centroid_shift_cm": 0.0
+    },
+    "BiI3_g": {
+     "profile_L1_pct": 0.0,
+     "total_change_pct": 0.0,
+     "centroid_shift_cm": 0.0
+    }
+   }
+  }
+ ]
+}
