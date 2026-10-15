@@ -1,0 +1,715 @@
+% The LESTO case ladder, explained: a technical discussion report for Bojan Niceno.
+% Companion to presentations/case-ladder (the deck); every number here is
+% taken from that deck, the case readmes in run/, or run/023 and run/024.
+% Figures and PSI assets are read from ../case-ladder.
+\documentclass[10pt,a4paper]{article}
+\usepackage[a4paper,left=2.0cm,right=2.0cm,top=2.4cm,bottom=2.0cm,headheight=22pt,headsep=12pt]{geometry}
+\usepackage{fontspec}
+% Liberation Sans as in the deck; TeX Gyre Heros where it is not installed
+\IfFontExistsTF{Liberation Sans}{\setmainfont{Liberation Sans}}{\setmainfont{texgyreheros}[Extension=.otf,UprightFont=*-regular,
+  BoldFont=*-bold,ItalicFont=*-italic,BoldItalicFont=*-bolditalic]}
+\IfFontExistsTF{Liberation Mono}{\setmonofont{Liberation Mono}}{\setmonofont{lmmono10-regular.otf}}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{booktabs,array,tabularx}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage[font=small,labelfont={bf,color=PSIblue}]{caption}
+\usepackage{subcaption}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+\usepackage{lastpage}
+\usepackage{placeins}
+\usepackage{float}
+
+\graphicspath{{../case-ladder/figures/}{../case-ladder/psi-assets/}}
+
+% ---- PSI palette (beamercolorthemePSI.sty) --------------------------------
+\definecolor{PSIblue}    {HTML}{0014E6}
+\definecolor{PSIgreen}   {HTML}{00F0A0}
+\definecolor{PSIred}     {HTML}{DC005A}
+\definecolor{PSIpurple}  {HTML}{6E14DC}
+\definecolor{PSIdarkblue}{HTML}{000073}
+\definecolor{PSIgray}    {HTML}{4B4B4B}
+\definecolor{PSIlightgray}{HTML}{B9B9B9}
+\colorlet{cCarrier}{PSIblue}
+\colorlet{cSpecies}{PSIpurple}
+\colorlet{cExchange}{PSIred}
+\colorlet{cBench}{PSIgreen!55!black}
+
+\newcommand{\PbI}{\ensuremath{\mathrm{PbI}_2}}
+\newcommand{\BiI}{\ensuremath{\mathrm{BiI}_3}}
+\newcommand{\Tdep}{\ensuremath{T_\mathrm{dep}}}
+\newcommand{\case}[1]{\textbf{\color{PSIgray}#1}}
+
+% ---- page layout ---------------------------------------------------------
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+\linespread{1.06}
+\setlist{itemsep=1pt,topsep=2pt,leftmargin=1.2em}
+\setlist[itemize]{label=\textcolor{PSIblue}{\small$\blacksquare$}}
+
+\titleformat{\section}{\large\bfseries}{%
+  \colorbox{PSIblue}{\makebox[1.15em]{\color{white}\thesection}}}{0.6em}{}
+\titlespacing*{\section}{0pt}{0.9em}{0.3em}
+\titleformat{\subsection}{\normalsize\bfseries\color{PSIblue}}{}{0pt}{}
+\titlespacing*{\subsection}{0pt}{0.6em}{0.1em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\raisebox{-0.25\height}{\includegraphics[height=13pt]{psi-full-black}}}
+\fancyhead[R]{\small\color{PSIgray}LESTO Task 3.4 \enspace|\enspace The case ladder, explained}
+\fancyfoot[L]{\small\color{PSIgray}Jan Kren \enspace|\enspace 15.10.2026}
+\fancyfoot[R]{\small\color{PSIgray}\thepage\,/\,\pageref{LastPage}}
+\renewcommand{\headrule}{{\color{PSIblue}\hrule height 1.2pt}}
+\renewcommand{\footrulewidth}{0pt}
+\fancypagestyle{titlepg}{\fancyhead{}\renewcommand{\headrule}{}}
+
+% ---- boxes ---------------------------------------------------------------
+\newtcolorbox{inshort}[1][Key point]{enhanced,breakable,colback=PSIblue!6,colframe=PSIblue,
+  boxrule=0pt,leftrule=3pt,arc=0pt,left=8pt,right=8pt,top=5pt,bottom=5pt,
+  title={#1},fonttitle=\bfseries\small,coltitle=PSIblue,attach title to upper={\enspace}}
+\newtcolorbox{jargon}{enhanced,colback=PSIlightgray!14,colframe=PSIlightgray!14,
+  boxrule=0pt,arc=0pt,left=8pt,right=8pt,top=4pt,bottom=4pt,fontupper=\small}
+
+\begin{document}
+
+% ==========================================================================
+% title banner
+\thispagestyle{titlepg}
+\begin{tikzpicture}[remember picture,overlay]
+  \node[anchor=north west,inner sep=0] at (current page.north west)
+    {\includegraphics[width=\paperwidth,height=8.2cm]{psi-bg-blue}};
+  \node[anchor=north west,inner sep=0] at ($(current page.north west)+(2.0cm,-1.1cm)$)
+    {\includegraphics[height=17pt]{psi-full-white}};
+  \node[anchor=north west,inner sep=0,text width=\textwidth,align=left,text=white]
+      at ($(current page.north west)+(2.0cm,-2.35cm)$) {%
+    {\small\bfseries LESTO TASK 3.4 \enspace|\enspace REPORT\par}
+    \vspace{0.45cm}
+    {\fontsize{24}{28}\selectfont\bfseries The LESTO case ladder, explained\par}
+    \vspace{0.25cm}
+    {\large From the T-Flows benchmark to conservative wall exchange:\\
+     model equations, verification and experimental comparison\par}
+    \vspace{0.5cm}
+    {\normalsize Jan Kren \enspace|\enspace Paul Scherrer Institute, Villigen \enspace|\enspace 15 October 2026\par}
+    \vspace{0.15cm}
+    {\small Cases 001--011: Bojan Ničeno \enspace\textbullet\enspace Cases 012--024: Jan Kren\par}};
+\end{tikzpicture}
+\vspace*{5.75cm}
+
+\begin{inshort}[Purpose of this report]
+This report is prepared for Bojan Ničeno, developer of T-Flows and
+supervisor of the master's work by Lobresco that led to the benchmark
+paper~\cite{Lobresco2026}. It connects that shared starting point to the
+OpenFOAM case ladder: Bojan's carrier and transport cases 001--011, then
+Jan's wall-exchange and chemistry cases 012--024. The central questions
+are which equations have changed, how conservation is enforced, and what
+the comparisons actually establish. Case 022 checks reproduction of the
+T-Flows temperature model; case 023 tests the extended physical model
+against five experiments. These are different tests, not a ranking of CFD
+codes. The reported onset RMS error is 18\,K versus about 35\,K for the
+published models, conditional on the reconstructed experimental inputs.
+\end{inshort}
+
+% ==========================================================================
+\section{The question}
+
+Lead--bismuth eutectic (LBE) is the liquid-metal coolant of some fast reactor
+designs. Fission products dissolved in it, iodine among them, can evaporate,
+and iodine does not leave as pure iodine: it combines with lead and bismuth
+into gases such as \PbI{} and \BiI{}. Which compound forms matters, because
+each one condenses at a different temperature, and therefore ends up in a
+different place.
+
+To study this, radiochemists use \textbf{thermosublimatography}: a long,
+narrow tube (a few millimetres wide, about a metre long) whose wall
+temperature falls steadily from about 1000\,K at one end to near room
+temperature at the other. A small boat of material is heated near the hot
+end; a slow stream of helium carries the vapour downstream; each compound
+sticks to the wall where the wall is cold enough for it. Afterwards the tube
+is scanned, and the position of each deposit tells you its
+\textbf{deposition temperature}, \Tdep{}.
+
+The coupled problem is: the gas
+\emph{flows} along the tube, the vapour \emph{diffuses} sideways to the wall,
+and at the wall it \emph{condenses} or \emph{re-evaporates} depending on the
+local wall temperature and on what is already deposited there. The goal of
+the LESTO work in Task 3.4 is a computational fluid dynamics (CFD) model,
+built on OpenFOAM, that does all three and can be checked against the
+experiments.
+
+\begin{jargon}
+\textbf{Reading guide.} The next section defines the equations and sign
+conventions. The ladder then identifies the case that checks each added
+capability. The final sections separate numerical verification,
+reproduction of the T-Flows benchmark and comparison with experiments.
+Here ``frozen carrier'' means that the helium fields are computed first
+and held fixed while the dilute reactive species evolve.
+\end{jargon}
+
+
+\clearpage
+\section{Equations behind the added physics}
+
+\subsection{Transport on the frozen helium field}
+The steady carrier provides $\rho$, $\mathbf u$, $T$ and $p$. Each trace
+gas is advanced with
+\begin{equation}
+ \underbrace{\frac{\partial(\rho Y_i)}{\partial t}}_{\text{storage}}
+ +\underbrace{\nabla\cdot(\rho\mathbf uY_i)}_{\text{advection}}
+ =\underbrace{\nabla\cdot(\rho D_i\nabla Y_i)}_{\text{diffusion}}
+ +S_i^{\rm rel}+S_i^{\rm wall}.
+ \label{eq:transport}
+\end{equation}
+$Y_i$ is species mass per unit helium-carrier mass; $D_i$ is the molecular
+diffusivity. The two sources represent release from the boat and exchange
+with the wall, in $\mathrm{kg\,m^{-3}\,s^{-1}}$. The reactive $Y_i$ do not
+have to sum to one. Their evolution does not feed back into carrier
+momentum or temperature. This is the trace-species approximation, and it
+is least secure close to a strongly evaporating boat.
+
+\subsection{From a prescribed onset to reversible exchange}
+The temperature model activates deposition using an imposed threshold.
+The HKS model instead compares the local vapour pressure with the
+equilibrium pressure of the condensed phase:
+\begin{equation}
+ j_i=G_i[p_{{\rm eq},i}(T_w)-p_{i,w}],\qquad
+ G_i=C_e s_i\frac{2\alpha_i}{2-\alpha_i}
+       \sqrt{\frac{M_i}{2\pi RT_w}}.
+ \label{eq:hks}
+\end{equation}
+Here $j_i$ is mass flux in $\mathrm{kg\,m^{-2}\,s^{-1}}$, positive
+\emph{from the deposit into the gas}; $G_i$ is in $\mathrm{s/m}$.
+$M_i$ is molar mass in $\mathrm{kg/mol}$, $R$ the gas constant,
+$T_w$ interface temperature in K, and both pressures are in Pa.
+$\alpha_i$ is accommodation; $C_e$ and $s_i$ are dimensionless
+multipliers. The physical baseline sets all three to one.
+
+If $p_{i,w}>p_{{\rm eq},i}$, then $j_i<0$ and vapour condenses.
+If $p_{i,w}<p_{{\rm eq},i}$, then $j_i>0$ and existing material evaporates.
+A bare wall cannot evaporate: release is capped by the available inventory.
+The equilibrium-pressure table selects the stable solid or liquid branch.
+Thus deposition temperature is an \emph{output}, rather than an imposed
+threshold. The pressure law alone does not determine the profile: the gas
+must also reach the surface by diffusion.
+
+\subsection{Connecting the cell centre to the wall}
+The finite-volume unknown is $Y_{i,c}$ at the cell centre, not the wall
+pressure in Eq.~\eqref{eq:hks}. Define
+$\chi_{i,c}=\rho_cRT_c/M_i$, so that $p_{i,c}=\chi_{i,c}Y_{i,c}$.
+With wall distance $d_f$ and face diffusivity $(\rho D_i)_f$, eliminating
+the unresolved wall concentration gives
+\begin{equation}
+ \frac{1}{G_{i,f}^{\rm eff}}=\frac{1}{G_i}
+       +\frac{\chi_{i,c}d_f}{(\rho D_i)_f},\qquad
+ j_{i,f}=G_{i,f}^{\rm eff}
+       [p_{{\rm eq},i}(T_w)-\chi_{i,c}Y_{i,c}].
+ \label{eq:resistance}
+\end{equation}
+The two terms are kinetic and half-cell diffusion resistances in series.
+Even infinitely fast surface kinetics leave a finite diffusion limit.
+This is a connection to the resolved gas field, not an extra fitted
+sticking parameter. Case 016 checks precisely this change.
+
+In that synthetic case the diffusion conductance is $D/d_f=1$\,m/s,
+against a kinetic velocity $G_i\chi_{i,c}/\rho_c=63.7$--107\,m/s.
+The combined value is only 0.985--0.991\,m/s. Yet the 1\,\% onset
+moves by just 0.005\,K, while the peak drops by 7.4\,\% and moves one
+bin downstream. An unchanged onset therefore does not imply an unchanged
+deposition profile.
+
+\subsection{Meaning of the plug-flow reference}
+Here ``plug flow'' denotes an idealised, cross-sectionally uniform gas
+stream, not a two-phase flow regime. The reference calculations follow
+cooling and saturation without resolving the radial velocity or
+concentration fields. For case 014, the onset reference is the temperature
+where the imposed vapour partial pressure meets the equilibrium vapour
+pressure. The multispecies reference additionally follows equilibrium
+with fractional removal of condensate. These are simplified numerical
+checks, not a second CFD solution.
+
+The CFD model transports dilute vapour in helium and stores condensed
+material in stationary wall inventories. It includes phase change, but
+does not solve two moving phases: there are no transported droplets,
+aerosol particles or flowing liquid films.
+
+\clearpage
+\subsection{Conservation during wall exchange}
+For a single gas--condensate pair, the same realised face flux updates
+both inventories:
+\begin{equation}
+ S_{i,c}^{\rm wall}=\frac{1}{V_c}\sum_{f\in c}A_fj_{i,f},\qquad
+ \Delta m_{i,f}^{\rm wall}=-\Delta t\,A_fj_{i,f}.
+ \label{eq:pair}
+\end{equation}
+$A_f$ is wall-face area and $V_c$ cell volume. The flux used here is the
+one actually realised by the gas solve after inventory bounds have been
+applied. Independently updating the wall with a predicted flux would not
+guarantee cancellation.
+
+Once reactions change molecular identities, conservation must be checked
+for each element $k\in\{\mathrm{Pb},\mathrm{Bi},\mathrm I\}$:
+\begin{equation}
+ N_k^{0}+N_k^{\rm rel}+N_k^{\rm in}
+ -N_k^{\rm gas}-N_k^{\rm wall}-N_k^{\rm out}=0.
+ \label{eq:ledger}
+\end{equation}
+All $N_k$ are amounts of the element in mol; inlet and outlet terms
+include the accounted boundary transport. The ledger reports the residual
+relative to the case's reference inventory. Round-off closure verifies
+bookkeeping of the represented processes. It does not establish the
+accuracy of transport, thermodynamic data or experimental assumptions.
+
+\subsection{Gas equilibrium preserves atoms, not molecules}
+For gas species $i$ with $\nu_{ki}$ atoms of element $k$, local element
+concentrations are
+\begin{equation}
+ b_k=\sum_i\nu_{ki}\frac{\rho Y_i}{M_i}.
+ \label{eq:elements}
+\end{equation}
+The equilibrium step redistributes those atoms between the nine gases
+Pb, PbI, PbI$_2$, Bi, Bi$_2$, BiI, BiI$_3$, I and I$_2$:
+\begin{equation}
+ \frac{p_i}{p^\circ}=K_{f,i}(T)
+  \exp\!\left(\sum_k\nu_{ki}\lambda_k\right),\qquad
+ \sum_i\nu_{ki}\frac{p_i}{RT}=b_k,
+ \quad p^\circ=10^5\,\mathrm{Pa}.
+ \label{eq:equilibrium}
+\end{equation}
+$K_{f,i}$ comes from the thermodynamic tables and the dimensionless
+element potentials $\lambda_k$ are solved to satisfy the atom balances.
+The conversion back is $Y_i=M_ip_i/(\rho RT)$. This assumes instantaneous
+gas equilibrium, not measured reaction kinetics. In the implemented model
+the redistribution is requested at $T\ge350$\,K; colder cells retain the
+transported composition. Homogeneous nucleation and aerosols are excluded.
+
+Case 021 also adds shared metal deposits and the forward wall channel
+\begin{equation}
+ 3\mathrm{BiI}(g)\longrightarrow
+ 2\mathrm{Bi}(\mathrm{condensed})+\mathrm{BiI}_3(g).
+\end{equation}
+Both sides contain three Bi and three I atoms. Different channels draw
+on the same physical Bi inventory. The forward-only channel is a modelling
+choice; it should not be read as a complete reversible surface mechanism.
+
+\subsection{OpenFOAM--GEMS3K coupling \hfill\normalfont\small\color{PSIgray}Jan Kren}
+Jan implemented the optional GEMS3K coupling in the OpenFOAM solver through
+a compiled bridge library. OpenFOAM advances transport and manages the
+gas and wall inventories; GEMS3K supplies thermodynamic information.
+The adapter maps species and elements, passes temperature, pressure and
+composition, and checks returned states before they are used.
+
+There are two distinct uses. In case 015, local GEMS3K calculations supply
+$p_{{\rm eq},i}$ for the HKS wall and boat exchange. OpenFOAM then evaluates
+the exchange flux and updates both inventories conservatively. Temperature,
+dilution, convergence and table-deviation guards select the tabulated
+pressure when a GEMS result is unsuitable.
+
+In case 020, GEMS3K supplies gas standard states. The \emph{frozen} mode
+caches formation constants at the prescribed carrier conditions and uses
+the element-conserving equilibrium kernel each step. The \emph{local} mode
+also calls GEMS3K per cell and step with a saved initial state; the exact
+kernel refines the result and provides fallback, enforcing the transported
+element amounts. Chemistry is therefore coupled sequentially to transport,
+with no feedback to the frozen helium flow. Cases 015 and 020 verify these
+optional paths; the main benchmark chain does not require a live GEMS3K
+call. This coupling is Jan's implementation contribution, distinct from
+the existing OpenFOAM and GEMS3K software.
+
+\clearpage
+% ==========================================================================
+\section{The case ladder}
+
+A model like this has many ingredients: the gas flow, heat, variable gas
+properties, several chemical species, wall chemistry, gas-phase chemistry,
+and the real geometry and temperatures of each experiment. If you add them
+all at once and the answer is wrong, you do not know which ingredient is to
+blame. So we did the opposite. The folder \texttt{run/} of the LESTO
+repository holds 24 \emph{cases}, numbered 001 to 024, and every case obeys
+the same four rules:
+
+\begin{enumerate}[itemsep=0pt,label=\textbf{\color{PSIblue}\arabic*.}]
+  \item Its \texttt{readme.md} starts with \emph{``This case is based on case N''}.
+  \item It changes \textbf{one thing}, and shows the changed lines.
+  \item It lists the \textbf{numbers to check} (e.g.\ ``mass closure below $10^{-15}$'').
+  \item It says how to run it; cases 012--024 run with \texttt{./Allrun} and
+        print a single word: \texttt{PASS}, \texttt{FAIL} or \texttt{NOTRUN}.
+\end{enumerate}
+
+Figure~\ref{fig:ladder} shows the result. The ladder climbs in four stages,
+which the next sections walk through: the helium flow (001--007), moving
+vapour through it (008--011), letting the vapour interact with the wall
+(012--021), and finally the comparisons with experiments and with another
+code (022--024). Anyone can enter at any rung, rerun it, and see the same
+numbers.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[x=1.36cm,y=1.0cm,
+      lad/.style={draw=#1,fill=#1!10,rounded corners=1.5pt,minimum width=1.05cm,
+        minimum height=0.58cm,inner sep=1pt,font=\small\bfseries},
+      bk/.style={-{Stealth[length=4pt]},line width=0.6pt,draw=PSIgray}]
+    \foreach \n [count=\i from 0] in {001,002,003,004,005,006,007}
+      \node[lad=cCarrier] (n\n) at (\i,0) {\n};
+    \foreach \n [count=\i from 7] in {008,009,010,011}
+      \node[lad=cSpecies] (n\n) at (\i,0) {\n};
+    \foreach \a/\b in {001/002,002/003,003/004,004/005,005/006,006/007,007/008,008/009,009/010,010/011}
+      \draw[bk] (n\a) -- (n\b);
+    \node[lad=cExchange] (n012) at (10,-1.1) {012};
+    \node[lad=cExchange] (n013) at (9,-1.1) {013};
+    \node[lad=cExchange] (n014) at (8,-1.1) {014};
+    \node[lad=cExchange] (n016) at (7,-1.1) {016};
+    \node[lad=cExchange] (n017) at (6,-1.1) {017};
+    \node[lad=cExchange] (n015) at (9,-2.2) {015};
+    \node[lad=cExchange] (n018) at (8,-2.2) {018};
+    \node[lad=cExchange] (n019) at (7,-2.2) {019};
+    \node[lad=cExchange] (n020) at (7,-3.3) {020};
+    \node[lad=cExchange] (n021) at (6,-2.2) {021};
+    \node[lad=cBench] (n022) at (10,-2.2) {022};
+    \node[lad=cBench] (n023) at (5,-1.1) {023};
+    \node[lad=cBench] (n024) at (5,-2.2) {024};
+    \draw[bk] (n011) -- (n012);
+    \foreach \a/\b in {012/013,013/014,014/016,016/017,017/023,013/015,014/018,018/019,019/020,019/021,021/024,012/022}
+      \draw[bk] (n\a) -- (n\b);
+    \draw[bk,dashed] (n017) -- (n024);
+    \node[anchor=north west,align=left,font=\small] at (-0.45,-0.75) {%
+      \textcolor{cCarrier}{\rule{7pt}{7pt}} 001--007 \enspace helium carrier flow\\
+      \textcolor{cSpecies}{\rule{7pt}{7pt}} 008--011 \enspace vapour transport\\
+      \textcolor{cExchange}{\rule{7pt}{7pt}} 012--021 \enspace gas\,$\leftrightarrow$\,wall exchange\\
+      \textcolor{cBench}{\rule{7pt}{7pt}} 022--024 \enspace benchmarks\\[0.25em]
+      {\color{PSIgray}arrow: ``is based on''}};
+  \end{tikzpicture}
+  \caption{The 24 rungs. The trunk runs left to right along the top, then
+  turns back along the second row. Side branches (015, 018--021, 022) add
+  options that the main line does not need; 024 takes its chemistry from 021
+  and its realistic helium flow from 017 (dashed).}
+  \label{fig:ladder}
+\end{figure}
+
+% ==========================================================================
+\section{Climbing the ladder}
+
+\subsection{Rungs 001--007: get the helium flowing \hfill\normalfont\small\color{PSIgray}Bojan Ničeno}
+The first case is the plainest possible flow: helium through a pipe of
+2.4\,mm radius and 0.69\,m length, at room temperature, on a mesh of
+228,960 cells. Each next case adds one realistic touch: a parabolic
+velocity profile at the inlet (002) and inside the pipe from the start
+(003, which cuts the solver iterations from 388 to 222), the energy
+equation (004), a wall temperature that falls along the tube (005), a
+density that follows the ideal-gas law (006), and finally temperature-dependent
+viscosity and conductivity with a wall falling from 1000\,K to 300\,K
+(007, Fig.~\ref{fig:early}a). The saved result of 007 is the helium
+``carrier'' that the next rungs read.
+
+\subsection{Rungs 008--011: move vapour through it \hfill\normalfont\small\color{PSIgray}Bojan Ničeno}
+Now the flow is frozen and a new solver, \texttt{rhoFixedFlowFoam}, moves
+trace species through it. Case 008 sends \PbI{} vapour and an inert tracer
+with identical settings and checks that they stay identical (they do, to
+the last digit). 009 gives \PbI{} its real, temperature-dependent
+diffusivity, up to 25 times the tracer's on the hot side. 010 introduces a
+\emph{solid} species, the deposit, and the interface through which
+chemistry will later talk to the flow. 011 couples them: what leaves the
+gas appears as solid on the wall, and the two sources add up to exactly
+zero (Fig.~\ref{fig:early}b).
+
+\clearpage
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}\centering
+    \includegraphics[width=\linewidth,height=4.5cm,keepaspectratio]{c007}
+    \caption{007: the helium carrier. Top: temperature in the tube (radius
+    stretched); bottom: the gas on the axis follows the wall from 1000 to 300\,K.}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.48\textwidth}\centering
+    \includegraphics[width=\linewidth,height=4.5cm,keepaspectratio]{c011}
+    \caption{011: after 1\,s, \PbI{} gas enters from the left (top) and
+    turns into deposit on the wall (bottom), mass for mass.}
+  \end{subfigure}
+  \caption{The first two stages: a correct carrier, then vapour that moves
+  and deposits. (a) is drawn from the saved carrier of 007; (b) is a rerun
+  of 011 to 1\,s, made on 15 October 2026.}
+  \label{fig:early}
+\end{figure}
+
+\subsection{Rungs 012--021: wall exchange and chemistry \hfill\normalfont\small\color{PSIgray}Jan Kren}
+Up to 011 the deposition rule was a placeholder. From 012 on, the cases add
+real wall physics, again one piece at a time:
+
+\begin{itemize}
+  \item \case{012} The simple \emph{temperature model} of Lobresco et
+    al.~\cite{Lobresco2026}: vapour sticks once the wall is colder than a
+    set \Tdep{}. It also introduces a vapour source (a ``boat'') and the
+    \textbf{mass ledger}: every step, every kilogram is accounted for. The
+    unexplained remainder stays at about $10^{-16}$ of the released amount,
+    i.e.\ at the limit of computer arithmetic (Fig.~\ref{fig:wall}a).
+  \item \case{013} The physical wall law (HKS): condensation and
+    re-evaporation driven by the equilibrium vapour pressure of solid and
+    liquid \PbI{}, and a boat that evaporates its real inventory.
+  \item \case{014} A cheap synthetic test channel (1000\,K to 350\,K)
+    that runs in 10\,s. Here the model's \Tdep{} can be checked against the
+    idealised saturation reference: 561.2\,K against 567.1\,K, within the
+    10\,K gate (Fig.~\ref{fig:wall}b).
+  \item \case{016} The vapour has to \emph{diffuse} to the wall before it can
+    condense; this extra resistance turns out to control the uptake. It is
+    used in every realistic run after this one.
+  \item \case{017} The real helium flow and measured wall temperature of
+    one Lobresco experiment, instead of the synthetic channel.
+  \item \case{018--021} More chemistry: a second iodide (\BiI{}), nine
+    Pb--Bi--I gases that re-balance with each other everywhere in the tube
+    (019; 020 does the same with GEMS3K), and metal vapour from LBE with
+    shared deposits and wall reactions (021). In 021, all five deposit onsets
+    land within 3.9\,K of the simplified reference calculation.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}\centering
+    \includegraphics[width=\linewidth,height=4.5cm,keepaspectratio]{c012}
+    \caption{012: released and gas inventory (top) match; the unexplained
+    remainder (bottom) is $\sim\!10^{-16}$, machine round-off.}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.48\textwidth}\centering
+    \includegraphics[width=\linewidth,height=4.5cm,keepaspectratio]{c014}
+    \caption{014: \PbI{} deposit along the synthetic channel. The model's
+    onset (1\,\% rule, 561.2\,K) sits 5.9\,K from plug flow.}
+  \end{subfigure}
+  \caption{Two kinds of check used throughout the ladder: nothing is lost
+  (a), and the answer agrees with a simplified reference calculation where one exists (b).}
+  \label{fig:wall}
+\end{figure}
+
+% ==========================================================================
+\clearpage
+\section{The top rungs: does it match reality?}
+
+The last three cases do not add physics; they \emph{test} it.
+
+\textbf{022 --- reproduction of the T-Flows benchmark.} This case returns to
+the temperature-model calculations in Lobresco's master's work with Bojan,
+published in Ref.~\cite{Lobresco2026}, using Bojan's T-Flows code. In
+``paper mode'' our model repeats their calculation: the gas level agrees
+with their Fig.~9 to 0.5\,\%, and all ten lines of their Table~2 agree within
+the resolution of the wall temperature table. The one visible difference,
+a deposit starting 2.6\,cm earlier, disappears (to 0.9\,mm) with the
+T-Flows parameter set; confirming which set generated the published figures is a specific
+point to resolve with Bojan using the original T-Flows inputs. The remaining
+0.9\,mm is an onset-position comparison, not proof that the entire
+profiles coincide.
+
+\textbf{023 --- against five experiments.} The five \PbI{} experiments of
+Lobresco et al.~\cite{Lobresco2026} differ in helium flow (5, 106 and
+540\,mL/min) and duration (6 to 300\,s). We ran all five with the HKS wall
+law, the measured wall temperatures, and \emph{no parameter adjusted to the
+data}, then applied the paper's own rule for \Tdep{} (the point where the
+deposit reaches 1\,\% of its peak). Table~\ref{tab:023} and
+Fig.~\ref{fig:bench}a show the outcome: an RMS error of 18\,K, against
+about 35\,K for each of the two published model configurations. This
+is a comparison of complete modelling setups, not an isolated comparison
+of the OpenFOAM and T-Flows discretisations. A coarser mesh changes the
+answers by at most 0.3\,K, and the mass ledger closes to $3.3\times10^{-16}$.
+
+For a deposit profile $q(x)$, the reported onset is the first crossing
+of $0.01\max q$ in the selected deposit region:
+\begin{equation}
+ T_{{\rm dep},r}=T_w(x_{1\%,r}),\qquad
+ E_{\rm RMS}=\sqrt{\frac{1}{5}\sum_{r=1}^{5}
+ (T_{{\rm dep},r}^{\rm model}-T_{{\rm dep},r}^{\rm exp})^2}.
+\end{equation}
+It is an onset statistic, not a peak-position or full-profile error.
+The low-flow case uses the main downstream deposit, as noted below.
+
+\begin{table}[h]
+  \centering\small
+  \caption{Case 023: predicted minus measured deposition temperature,
+  production mesh. Experiment names: helium flow (mL/min)\,\_\,duration (s).}
+  \label{tab:023}
+  \begin{tabular}{l*{6}{c}}
+    \toprule
+    & T106\_6 & T106\_60 & T106\_300 & T5\_60\textsuperscript{a} & T540\_60 & \textbf{RMS} \\
+    \midrule
+    This work (023) & $+26$\,K & $+19$\,K & $+16$\,K & $-11$\,K & $-14$\,K & \textbf{18\,K} \\
+    Lobresco et al., both models & & & & & & 35\,K \\
+    \bottomrule
+  \end{tabular}\\[0.3em]
+  \parbox{0.86\textwidth}{\footnotesize\color{PSIgray}\textsuperscript{a}\,At 5\,mL/min some vapour
+  diffuses upstream and leaves a small deposit near the cold inlet; the
+  value is for the main deposit downstream of the boat.}
+\end{table}
+
+\textbf{024 --- the full Pb--Bi--I chemistry.} Liu et
+al.~\cite{Liu2025} evaporated pure iodides and iodine-containing LBE into
+helium in steel and silica columns. Case 024 runs their configurations with
+the full chemistry of 021 on the realistic flows of 017, 60\,s each on a
+mesh of 41,472 cells. For pure \PbI{} on steel the computed peak sits at
+36\,cm, 366.5\,$^\circ$C, against the measured 368\,$\pm$\,18\,$^\circ$C,
+and for iodine from LBE the model reproduces the two separate deposit bands
+(Fig.~\ref{fig:bench}b). Refining the mesh to 93,312 cells moves the
+profiles by 1.98\,\%.
+
+\clearpage
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.96\textwidth}\centering
+    \includegraphics[width=\linewidth,height=10.0cm,keepaspectratio]{c023}
+    \caption{023: deposit profiles of the five Lobresco experiments
+    (arbitrary units) against tube position.}
+  \end{subfigure}\par\vspace{0.6cm}
+  \begin{subfigure}[t]{0.96\textwidth}\centering
+    \includegraphics[width=\linewidth,height=9.0cm,keepaspectratio]{c024}
+    \caption{024: iodine deposit per cm, pure \PbI{} (top) and iodine from
+    LBE (bottom), against Liu et al.~(2025).}
+  \end{subfigure}
+  \caption{The benchmarks. Black dots and grey bars: measurements. Blue:
+  this work. Dashed and dotted: the two models of the original paper.}
+  \label{fig:bench}
+\end{figure}
+
+% ==========================================================================
+\clearpage
+\section{What this gives us, and what it does not}
+
+\subsection{What we have}
+\begin{itemize}
+  \item \textbf{A model with traceable verification checks.} Every capability of the
+    solver has a rung that isolates it and a number that checks it. When
+    something breaks later, \texttt{./Allrun-ladder 012-024} reruns all
+    checks and points at the first rung that fails.
+  \item \textbf{Nothing goes missing.} The recorded pair and element ledgers close near
+    round-off in the cited cases. These checks address conservation, not
+    the adequacy of the physical model.
+  \item \textbf{A useful prediction.} Against five experiments the
+    untuned model halves the error in \Tdep{} of the published models
+    (18\,K vs 35\,K RMS), and it reproduces the multi-band deposits of the
+    LBE experiments.
+  \item \textbf{A paper trail.} Cases 023 and 024 feed directly into the
+    methods manuscript (Sec.~6.3, Table~V, Fig.~5) and the ladder is the
+    availability section of LESTO deliverable D38.
+\end{itemize}
+
+\subsection{What we do not have yet}
+\begin{itemize}
+  \item Some inputs of the experiments are not published and are
+    \emph{assumed}: how fast the boat released its material, the reference
+    conditions of the flow, and several positions. The 024 results are
+    therefore labelled provisional.
+  \item The model's deposit peaks sit 1 to 4\,cm upstream of the measured
+    ones in 023; the boat's obstruction of the flow and the dense vapour
+    right next to it are not represented.
+  \item The \BiI{} cases (018, 019, 021) need restricted thermodynamic
+    tables that cannot be redistributed, and 015 and 020 need an optional
+    GEMS3K build; without them those cases print \texttt{NOTRUN}.
+  \item The mesh study of 024 shows small changes (1.98\,\%) but no formal
+    grid-convergence index: the apparent orders of convergence are not
+    consistent.
+\end{itemize}
+
+\subsection{Points to discuss with Bojan}
+\begin{enumerate}
+ \item Confirm the original T-Flows inputs for Figs.~8--10: the imposed
+ onset temperature, wall-layer thickness and rate parameters. This would
+ resolve the case-022 onset discrepancy at its source.
+ \item Review the HKS units and pressure convention in both implementations,
+ and compare the same interface law before attributing differences to
+ the flow solver. The physical runs here use SI units and Eq.~\eqref{eq:resistance}.
+ \item Prioritise the remaining input uncertainties: boat release history,
+ flow reference conditions and boat position. Compare complete deposit
+ profiles as well as the 1\,\% onset when assessing improvements.
+\end{enumerate}
+
+\begin{inshort}[How to try it]
+Every case lives in \texttt{run/<NNN-name>/}. Read its \texttt{readme.md},
+then run \texttt{./Allrun} (cases 012--024; outputs go into a
+git-ignored \texttt{work/} folder) and look for \texttt{PASS}. The cheap
+cases take seconds to minutes; 017 about 8 minutes; the full 023 and 024
+studies take hours per experiment. The slide-by-slide version of this
+report is \texttt{presentations/case-ladder/lesto-case-ladder.pdf}.
+\end{inshort}
+
+\vspace{-0.4em}
+{\small
+\renewcommand{\refname}{\normalsize References}
+\begin{thebibliography}{9}\setlength{\itemsep}{1pt}
+\bibitem{Lobresco2026} F.~Lobresco, G.~Tiebel, G.\,C.~Conigliaro, P.~Steinegger,
+  O.~Marinich, N.\,I.~Prasianakis, J.~Neuhausen, B.~Ničeno,
+  \emph{Assessment of temperature-based and vapor-pressure-driven models for
+  CFD simulation of volatile species deposition},
+  Nucl.\ Eng.\ Des.\ 459 (2026) 115201. doi:10.1016/j.nucengdes.2026.115201
+\bibitem{Liu2025} L.~Liu, V.~Zobnin, I.~Zivadinovic, R.~Eichler, A.~Vögele,
+  D.~Herrmann, A.~Aerts, P.~Steinegger, J.~Neuhausen,
+  \emph{Chemical speciation of iodine evaporated from liquid lead--bismuth
+  eutectic investigated by thermosublimatography},
+  J.\ Radioanal.\ Nucl.\ Chem.\ 334 (2025) 5201--5216. doi:10.1007/s10967-025-10246-4
+\end{thebibliography}}
+
+\clearpage
+\section*{Nomenclature}
+\label{sec:nomenclature}
+Symbols follow Eqs.~\eqref{eq:transport}--\eqref{eq:equilibrium} and the
+benchmark definitions. A dash denotes a dimensionless quantity.
+
+{\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}p{2.2cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.6cm}@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} & \textbf{SI unit} \\
+\midrule
+$A_f$ & Area of wall face $f$ & $\mathrm{m^2}$ \\
+$b_k$ & Gas-phase concentration of element $k$ (amount of atoms per volume) & $\mathrm{mol\,m^{-3}}$ \\
+$C_e$, $s_i$ & HKS prefactor and species kinetic multiplier; baseline values are one & -- \\
+$D_i$ & Molecular diffusivity of gas species $i$ in helium & $\mathrm{m^2\,s^{-1}}$ \\
+$d_f$ & Distance from cell centre to wall face & $\mathrm{m}$ \\
+$E_{\rm RMS}$ & Root-mean-square error of predicted deposition-onset temperatures & $\mathrm{K}$ \\
+$G_i$, $G_{i,f}^{\rm eff}$ & Kinetic and effective wall conductances, respectively & $\mathrm{s\,m^{-1}}$ \\
+$j_i$, $j_{i,f}$ & Wall mass flux; positive for evaporation into the gas & $\mathrm{kg\,m^{-2}\,s^{-1}}$ \\
+$K_{f,i}(T)$ & Formation equilibrium constant of gas species $i$; here $f$ means formation & -- \\
+$M_i$ & Molar mass of species $i$ & $\mathrm{kg\,mol^{-1}}$ \\
+$m_{i,f}^{\rm wall}$ & Condensed mass of species $i$ stored on wall face $f$ & $\mathrm{kg}$ \\
+$N_k$ & Amount of element $k$ in an inventory or cumulative transfer & $\mathrm{mol}$ \\
+$p$, $p_i$ & Prescribed carrier pressure and species partial pressure & $\mathrm{Pa}$ \\
+$p_{{\rm eq},i}$ & Equilibrium vapour pressure over the condensed phase & $\mathrm{Pa}$ \\
+$p^\circ$ & Standard pressure, $10^5$\,Pa & $\mathrm{Pa}$ \\
+$q(x)$ & Axial deposit profile used for the relative 1\,\% onset criterion & Profile-dependent\textsuperscript{a} \\
+$R$ & Universal gas constant & $\mathrm{J\,mol^{-1}\,K^{-1}}$ \\
+$S_i^{\rm rel}$, $S_i^{\rm wall}$ & Volumetric species mass sources from the boat and wall & $\mathrm{kg\,m^{-3}\,s^{-1}}$ \\
+$T$, $T_w$ & Gas and wall/interface temperatures & $\mathrm{K}$ \\
+$T_{\rm dep}$ & Wall temperature at the selected deposit onset & $\mathrm{K}$ \\
+$t$, $\Delta t$ & Time and time-step duration & $\mathrm{s}$ \\
+$\mathbf u$ & Helium-carrier velocity & $\mathrm{m\,s^{-1}}$ \\
+$V_c$ & Volume of cell $c$ & $\mathrm{m^3}$ \\
+$x$, $x_{1\%,r}$ & Axial coordinate and 1\,\%-of-peak onset position for run $r$ & $\mathrm{m}$ \\
+$Y_i$ & Species mass per unit helium-carrier mass & -- \\
+$\alpha_i$ & Accommodation coefficient; baseline value is one & -- \\
+$\lambda_k$ & Dimensionless element potential in the equilibrium solve & -- \\
+$\nu_{ki}$ & Number of atoms of element $k$ in one molecule of species $i$ & -- \\
+$\rho$ & Helium-carrier mass density & $\mathrm{kg\,m^{-3}}$ \\
+$\chi_{i,c}$ & Pressure conversion factor $\rho_cRT_c/M_i$, with $p_{i,c}=\chi_{i,c}Y_{i,c}$ & $\mathrm{Pa}$ \\
+\bottomrule
+\end{tabularx}
+
+\textsuperscript{a}The criterion uses $q/\max q$, so a uniform change of
+profile units or normalisation does not change the onset.
+
+\subsection{Indices and superscripts}
+$i$: gas species; $k$: element (Pb, Bi or I); $c$: cell centre;
+$f$: wall face, except in $K_{f,i}$; $w$: wall/interface;
+$r$: experimental run. Superscripts $0$, rel, in, gas, wall and out
+identify initial inventory, release, cumulative inflow, gas inventory,
+wall inventory and cumulative outflow. Superscripts model and exp denote
+prediction and measurement; $\Delta$ denotes a change over one step.
+
+\subsection{Abbreviations and chemical notation}
+\textbf{CFD}: computational fluid dynamics; \textbf{HKS}:
+Hertz--Knudsen--Schrage; \textbf{LBE}: lead--bismuth eutectic;
+\textbf{RMS}: root mean square; \textbf{SI}: International System of Units.
+\textbf{GEMS3K} is the chemical-equilibrium kernel used in the optional cases.
+He, Pb, Bi and I denote helium, lead, bismuth and iodine; subscripts in
+chemical formulae count atoms. The labels $g$ and condensed denote gas
+and the immobile condensed reservoir, respectively.
+}
+
+\end{document}

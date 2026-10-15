@@ -13,3 +13,5 @@ applications/rhoFixedFlowFoam/tests/work/
 /run/*/work/
 /thermochemistry/benchmarks/liu2025/carrierTool/Make/*/
 /thermochemistry/benchmarks/liu2025/carrierTool/lnInclude/
+# Local scratch (plot packages, one-off scripts)
+/tmp/

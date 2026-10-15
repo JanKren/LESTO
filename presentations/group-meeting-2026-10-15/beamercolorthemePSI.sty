@@ -1,0 +1,72 @@
+% ======================================================================
+%  beamercolorthemePSI.sty
+%  PSI - Center for Scientific Computing, Theory and Data
+%  Colour theme derived from the official PSI PowerPoint template.
+% ======================================================================
+\ProvidesPackage{beamercolorthemePSI}[2026/07/21 PSI beamer colour theme]
+
+\RequirePackage{xcolor}
+
+% ---- Brand palette (from the template theme: "Benutzerdefiniertes Design") ----
+\definecolor{PSIblue}    {HTML}{0014E6} % accent 1  (primary)
+\definecolor{PSIgreen}   {HTML}{00F0A0} % accent 2
+\definecolor{PSIred}     {HTML}{DC005A} % accent 3
+\definecolor{PSIpurple}  {HTML}{6E14DC} % accent 4
+\definecolor{PSIyellow}  {HTML}{F0F500} % accent 5
+\definecolor{PSImagenta} {HTML}{F050FA} % accent 6
+\definecolor{PSIdarkblue}{HTML}{000073} % dark-blue title background base
+\definecolor{PSIgray}    {HTML}{4B4B4B} % dark 2  (body / footer text)
+\definecolor{PSIlightgray}{HTML}{B9B9B9}% light 2
+\definecolor{PSIblack}   {HTML}{000000}
+\definecolor{PSIwhite}   {HTML}{FFFFFF}
+
+% Convenience: the accent colour driving the current deck.
+% Redefine \PSIaccent in your preamble to re-skin the whole theme, e.g.
+%   \colorlet{PSIaccent}{PSIred}
+\colorlet{PSIaccent}{PSIblue}
+
+% ---- Base beamer colours -------------------------------------------------
+\setbeamercolor{normal text}{fg=PSIblack,bg=PSIwhite}
+\setbeamercolor{alerted text}{fg=PSIred}
+\setbeamercolor{example text}{fg=PSIgreen!60!black}
+
+\setbeamercolor{structure}{fg=PSIaccent}          % bullets, etc.
+\setbeamercolor{frametitle}{fg=PSIblack,bg=}
+\setbeamercolor{framesubtitle}{fg=PSIgray}
+
+% ---- Title page ----------------------------------------------------------
+\setbeamercolor{title}{fg=PSIwhite}
+\setbeamercolor{subtitle}{fg=PSIwhite}
+\setbeamercolor{author}{fg=PSIwhite}
+\setbeamercolor{date}{fg=PSIwhite}
+\setbeamercolor{institute}{fg=PSIwhite}
+
+% ---- Footer --------------------------------------------------------------
+\setbeamercolor{PSI footer}{fg=PSIgray}
+\setbeamercolor{PSI page number}{fg=PSIgray}
+
+% ---- Section / part pages ------------------------------------------------
+\setbeamercolor{section page}{fg=PSIwhite}
+
+% ---- Blocks --------------------------------------------------------------
+\setbeamercolor{block title}{fg=PSIwhite,bg=PSIaccent}
+\setbeamercolor{block body}{fg=PSIblack,bg=PSIaccent!8}
+\setbeamercolor{block title alerted}{fg=PSIwhite,bg=PSIred}
+\setbeamercolor{block body alerted}{fg=PSIblack,bg=PSIred!8}
+\setbeamercolor{block title example}{fg=PSIwhite,bg=PSIgreen!60!black}
+\setbeamercolor{block body example}{fg=PSIblack,bg=PSIgreen!12}
+
+% ---- Itemize / enumerate markers ----------------------------------------
+\setbeamercolor{itemize item}{fg=PSIaccent}
+\setbeamercolor{itemize subitem}{fg=PSIaccent}
+\setbeamercolor{itemize subsubitem}{fg=PSIaccent}
+\setbeamercolor{enumerate item}{fg=PSIaccent}
+
+% ---- TOC / agenda --------------------------------------------------------
+\setbeamercolor{section in toc}{fg=PSIblack}
+\setbeamercolor{subsection in toc}{fg=PSIgray}
+
+% ---- Captions ------------------------------------------------------------
+\setbeamercolor{caption name}{fg=PSIaccent}
+
+\mode<all>
