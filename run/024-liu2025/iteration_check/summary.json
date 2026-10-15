@@ -1,156 +1,205 @@
 {
-  "what": "Full-run iteration check: eight instead of three species correctors over the whole 60 s, otherwise identical inputs (18,432 cells, upwind, 2 ms), compared with the original three-corrector profiles.",
-  "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
-  "runner": "lesto-submission-run package (run_study.py), output directory ~/lesto-submission-followup on the workstation",
-  "not_run": "LBE-I_SS_II_Q2_shift29k_sat0.01__correctors8_full60s was still queued when this summary was made; it is not part of the check.",
-  "cases": [
-    {
-      "case": "PbI2_SS_Q1_baseline__correctors8_full60s",
-      "base_case": "PbI2_SS_Q1_baseline",
-      "status": "PASS",
-      "finished_utc": "2026-10-12T23:20:00.509627+00:00",
-      "species_correctors": 8,
-      "reference_species_correctors": 3,
-      "cells": 18432,
-      "scheme": "Gauss upwind",
-      "dt_s": 0.002,
-      "end_time_s": 60,
-      "reference_profiles": "run/034-liu2025/full_analysis/profiles/PbI2_SS_Q1_baseline",
-      "element_I_gate": {
-        "max_relative_closure": 8.085250043078204e-16,
-        "max_relative_solver_defect": 2.346019035041449e-13,
-        "status": "PASS"
-      },
-      "BiI3_share_of_iodide_I": 0.0,
-      "steps_without_outer_convergence": {
-        "Y_PbI2_g": {
-          "unconverged": 30000,
-          "steps": 30000,
-          "max_initial_residual": 2.413695740137453e-15,
-          "tolerance": 1e-16
-        },
-        "Y_BiI3_g": {
-          "unconverged": 0,
-          "steps": 30000,
-          "max_initial_residual": 0.0,
-          "tolerance": 1e-16
-        }
-      },
-      "eight_minus_three": {
-        "element_I": {
-          "profile_L1_pct": 1.088590255043677e-13,
-          "total_change_pct": -8.617638765410717e-14,
-          "centroid_shift_cm": -5.551115123125783e-15
-        },
-        "PbI2_g": {
-          "profile_L1_pct": 1.144476754263173e-13,
-          "total_change_pct": -1.0341166518492858e-13,
-          "centroid_shift_cm": 5.551115123125783e-15
-        },
-        "BiI3_g": null
-      }
+ "what": "Full-run iteration check: eight instead of three species correctors over the whole 60 s, otherwise identical inputs (18,432 cells, upwind, 2 ms), compared with the original three-corrector profiles.",
+ "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+ "runner": "lesto-submission-run package (run_study.py), output directory ~/lesto-submission-followup on the workstation",
+ "cases": [
+  {
+   "case": "PbI2_SS_Q1_baseline__correctors8_full60s",
+   "base_case": "PbI2_SS_Q1_baseline",
+   "status": "PASS",
+   "finished_utc": "2026-10-12T23:20:00.509627+00:00",
+   "species_correctors": 8,
+   "reference_species_correctors": 3,
+   "cells": 18432,
+   "scheme": "Gauss upwind",
+   "dt_s": 0.002,
+   "end_time_s": 60,
+   "reference_profiles": "run/024-liu2025/full_analysis/profiles/PbI2_SS_Q1_baseline",
+   "element_I_gate": {
+    "max_relative_closure": 8.085250043078204e-16,
+    "max_relative_solver_defect": 2.346019035041449e-13,
+    "status": "PASS"
+   },
+   "BiI3_share_of_iodide_I": 0.0,
+   "steps_without_outer_convergence": {
+    "Y_PbI2_g": {
+     "unconverged": 30000,
+     "steps": 30000,
+     "max_initial_residual": 2.413695740137453e-15,
+     "tolerance": 1e-16
     },
-    {
-      "case": "LBE-I_SS_II_Q2_baseline_sat0.001__correctors8_full60s",
-      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
-      "status": "PASS",
-      "finished_utc": "2026-10-13T03:40:29.230257+00:00",
-      "species_correctors": 8,
-      "reference_species_correctors": 3,
-      "cells": 18432,
-      "scheme": "Gauss upwind",
-      "dt_s": 0.002,
-      "end_time_s": 60,
-      "reference_profiles": "run/034-liu2025/full_analysis/profiles/LBE-I_SS_II_Q2_baseline_sat0.001",
-      "element_I_gate": {
-        "max_relative_closure": 3.960874958014043e-16,
-        "max_relative_solver_defect": 1.3811685823975365e-13,
-        "status": "PASS"
-      },
-      "BiI3_share_of_iodide_I": 0.5647466193248344,
-      "steps_without_outer_convergence": {
-        "Y_PbI2_g": {
-          "unconverged": 29999,
-          "steps": 30000,
-          "max_initial_residual": 2.4443756777735494e-15,
-          "tolerance": 1e-16
-        },
-        "Y_BiI3_g": {
-          "unconverged": 29992,
-          "steps": 30000,
-          "max_initial_residual": 3.086202701376273e-15,
-          "tolerance": 1e-16
-        }
-      },
-      "eight_minus_three": {
-        "element_I": {
-          "profile_L1_pct": 4.88599429250703e-13,
-          "total_change_pct": -6.406053069003892e-14,
-          "centroid_shift_cm": 2.220446049250313e-14
-        },
-        "PbI2_g": {
-          "profile_L1_pct": 6.141323011431461e-13,
-          "total_change_pct": -5.740014455570787e-13,
-          "centroid_shift_cm": 1.1102230246251565e-14
-        },
-        "BiI3_g": {
-          "profile_L1_pct": 3.839665236506385e-13,
-          "total_change_pct": 3.2328216977178303e-13,
-          "centroid_shift_cm": 0.0
-        }
-      }
-    },
-    {
-      "case": "LBE-I_SS_II_Q2_baseline_sat0.01__correctors8_full60s",
-      "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
-      "status": "PASS",
-      "finished_utc": "2026-10-13T17:48:28.760308+00:00",
-      "species_correctors": 8,
-      "reference_species_correctors": 3,
-      "cells": 18432,
-      "scheme": "Gauss upwind",
-      "dt_s": 0.002,
-      "end_time_s": 60,
-      "reference_profiles": "run/034-liu2025/full_analysis/profiles/LBE-I_SS_II_Q2_baseline_sat0.01",
-      "element_I_gate": {
-        "max_relative_closure": 4.1307966210476216e-16,
-        "max_relative_solver_defect": 1.8889355287771086e-13,
-        "status": "PASS"
-      },
-      "BiI3_share_of_iodide_I": 0.945605962740429,
-      "steps_without_outer_convergence": {
-        "Y_PbI2_g": {
-          "unconverged": 29999,
-          "steps": 30000,
-          "max_initial_residual": 2.8678261582646482e-15,
-          "tolerance": 1e-16
-        },
-        "Y_BiI3_g": {
-          "unconverged": 29990,
-          "steps": 30000,
-          "max_initial_residual": 4.399557654222878e-15,
-          "tolerance": 1e-16
-        }
-      },
-      "eight_minus_three": {
-        "element_I": {
-          "profile_L1_pct": 0.02142375302177902,
-          "total_change_pct": -0.0002045064447349931,
-          "centroid_shift_cm": 0.00010079938013163314
-        },
-        "PbI2_g": {
-          "profile_L1_pct": 0.010331802516536027,
-          "total_change_pct": -0.01033180251655117,
-          "centroid_shift_cm": 6.259355923576848e-05
-        },
-        "BiI3_g": {
-          "profile_L1_pct": 0.022061867019935632,
-          "total_change_pct": 0.0003781078203985299,
-          "centroid_shift_cm": 7.997407812654345e-05
-        }
-      }
+    "Y_BiI3_g": {
+     "unconverged": 0,
+     "steps": 30000,
+     "max_initial_residual": 0.0,
+     "tolerance": 1e-16
     }
-  ],
-  "max_iodine_profile_L1_pct": 0.02142375302177902,
-  "scope": "Iteration (corrector) sensitivity of the executed discrete model only; not a mesh or experimental check."
+   },
+   "eight_minus_three": {
+    "element_I": {
+     "profile_L1_pct": 1.088590255043677e-13,
+     "total_change_pct": -8.617638765410717e-14,
+     "centroid_shift_cm": -5.551115123125783e-15
+    },
+    "PbI2_g": {
+     "profile_L1_pct": 1.144476754263173e-13,
+     "total_change_pct": -1.0341166518492858e-13,
+     "centroid_shift_cm": 5.551115123125783e-15
+    },
+    "BiI3_g": null
+   }
+  },
+  {
+   "case": "LBE-I_SS_II_Q2_baseline_sat0.001__correctors8_full60s",
+   "base_case": "LBE-I_SS_II_Q2_baseline_sat0.001",
+   "status": "PASS",
+   "finished_utc": "2026-10-13T03:40:29.230257+00:00",
+   "species_correctors": 8,
+   "reference_species_correctors": 3,
+   "cells": 18432,
+   "scheme": "Gauss upwind",
+   "dt_s": 0.002,
+   "end_time_s": 60,
+   "reference_profiles": "run/024-liu2025/full_analysis/profiles/LBE-I_SS_II_Q2_baseline_sat0.001",
+   "element_I_gate": {
+    "max_relative_closure": 3.960874958014043e-16,
+    "max_relative_solver_defect": 1.3811685823975365e-13,
+    "status": "PASS"
+   },
+   "BiI3_share_of_iodide_I": 0.5647466193248344,
+   "steps_without_outer_convergence": {
+    "Y_PbI2_g": {
+     "unconverged": 29999,
+     "steps": 30000,
+     "max_initial_residual": 2.4443756777735494e-15,
+     "tolerance": 1e-16
+    },
+    "Y_BiI3_g": {
+     "unconverged": 29992,
+     "steps": 30000,
+     "max_initial_residual": 3.086202701376273e-15,
+     "tolerance": 1e-16
+    }
+   },
+   "eight_minus_three": {
+    "element_I": {
+     "profile_L1_pct": 4.88599429250703e-13,
+     "total_change_pct": -6.406053069003892e-14,
+     "centroid_shift_cm": 2.220446049250313e-14
+    },
+    "PbI2_g": {
+     "profile_L1_pct": 6.141323011431461e-13,
+     "total_change_pct": -5.740014455570787e-13,
+     "centroid_shift_cm": 1.1102230246251565e-14
+    },
+    "BiI3_g": {
+     "profile_L1_pct": 3.839665236506385e-13,
+     "total_change_pct": 3.2328216977178303e-13,
+     "centroid_shift_cm": 0.0
+    }
+   }
+  },
+  {
+   "case": "LBE-I_SS_II_Q2_baseline_sat0.01__correctors8_full60s",
+   "base_case": "LBE-I_SS_II_Q2_baseline_sat0.01",
+   "status": "PASS",
+   "finished_utc": "2026-10-13T17:48:28.760308+00:00",
+   "species_correctors": 8,
+   "reference_species_correctors": 3,
+   "cells": 18432,
+   "scheme": "Gauss upwind",
+   "dt_s": 0.002,
+   "end_time_s": 60,
+   "reference_profiles": "run/024-liu2025/full_analysis/profiles/LBE-I_SS_II_Q2_baseline_sat0.01",
+   "element_I_gate": {
+    "max_relative_closure": 4.1307966210476216e-16,
+    "max_relative_solver_defect": 1.8889355287771086e-13,
+    "status": "PASS"
+   },
+   "BiI3_share_of_iodide_I": 0.945605962740429,
+   "steps_without_outer_convergence": {
+    "Y_PbI2_g": {
+     "unconverged": 29999,
+     "steps": 30000,
+     "max_initial_residual": 2.8678261582646482e-15,
+     "tolerance": 1e-16
+    },
+    "Y_BiI3_g": {
+     "unconverged": 29990,
+     "steps": 30000,
+     "max_initial_residual": 4.399557654222878e-15,
+     "tolerance": 1e-16
+    }
+   },
+   "eight_minus_three": {
+    "element_I": {
+     "profile_L1_pct": 0.02142375302177902,
+     "total_change_pct": -0.0002045064447349931,
+     "centroid_shift_cm": 0.00010079938013163314
+    },
+    "PbI2_g": {
+     "profile_L1_pct": 0.010331802516536027,
+     "total_change_pct": -0.01033180251655117,
+     "centroid_shift_cm": 6.259355923576848e-05
+    },
+    "BiI3_g": {
+     "profile_L1_pct": 0.022061867019935632,
+     "total_change_pct": 0.0003781078203985299,
+     "centroid_shift_cm": 7.997407812654345e-05
+    }
+   }
+  },
+  {
+   "case": "LBE-I_SS_II_Q2_shift29k_sat0.01__correctors8_full60s",
+   "base_case": "LBE-I_SS_II_Q2_shift29k_sat0.01",
+   "status": "PASS",
+   "finished_utc": "2026-10-14T17:48:23.832540+00:00",
+   "species_correctors": 8,
+   "reference_species_correctors": 3,
+   "cells": 18432,
+   "scheme": "Gauss upwind",
+   "dt_s": 0.002,
+   "end_time_s": 60,
+   "reference_profiles": "run/024-liu2025/full_analysis/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01",
+   "element_I_gate": {
+    "max_relative_closure": 3.652444518199524e-16,
+    "max_relative_solver_defect": 2.393112582271912e-13,
+    "status": "PASS"
+   },
+   "BiI3_share_of_iodide_I": 0.01996160330820431,
+   "steps_without_outer_convergence": {
+    "Y_PbI2_g": {
+     "unconverged": 29999,
+     "steps": 30000,
+     "max_initial_residual": 2.6060024448763623e-15,
+     "tolerance": 1e-16
+    },
+    "Y_BiI3_g": {
+     "unconverged": 29996,
+     "steps": 30000,
+     "max_initial_residual": 3.5342498307307986e-15,
+     "tolerance": 1e-16
+    }
+   },
+   "eight_minus_three": {
+    "element_I": {
+     "profile_L1_pct": 1.101293596178912e-07,
+     "total_change_pct": 2.9140335232325976e-08,
+     "centroid_shift_cm": 1.8563817150152317e-09
+    },
+    "PbI2_g": {
+     "profile_L1_pct": 8.213879671249216e-08,
+     "total_change_pct": -4.998345428159937e-10,
+     "centroid_shift_cm": -4.653832874623731e-10
+    },
+    "BiI3_g": {
+     "profile_L1_pct": 1.4843587772388887e-06,
+     "total_change_pct": 1.4843587640385737e-06,
+     "centroid_shift_cm": 2.3181789821080656e-09
+    }
+   }
+  }
+ ],
+ "max_iodine_profile_L1_pct": 0.02142375302177902,
+ "scope": "Iteration (corrector) sensitivity of the executed discrete model only; not a mesh or experimental check."
 }

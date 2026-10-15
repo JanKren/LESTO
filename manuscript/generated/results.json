@@ -255,7 +255,8 @@
   "iteration_check_iodine_L1_pct": {
     "PbI2_SS_Q1_baseline": 1.088590255043677e-13,
     "LBE-I_SS_II_Q2_baseline_sat0.001": 4.88599429250703e-13,
-    "LBE-I_SS_II_Q2_baseline_sat0.01": 0.02142375302177902
+    "LBE-I_SS_II_Q2_baseline_sat0.01": 0.02142375302177902,
+    "LBE-I_SS_II_Q2_shift29k_sat0.01": 1.101293596178912e-07
   },
   "production_max_raw_residue": 1.4083973977770984e-12,
   "sensitivity": [
@@ -1359,6 +1360,9 @@
     "IterPure": "1.09\\times10^{-13}",
     "IterSteelLow": "4.89\\times10^{-13}",
     "IterSteelHigh": "0.021",
+    "IterShift": "1.10\\times10^{-7}",
+    "IterCases": 4,
+    "IterMax": "0.021",
     "LobRMS": "18",
     "LobRMSTemp": "35",
     "LobRMSVap": "35",
@@ -1624,7 +1628,7 @@
     "manuscript/data/graetz/provenance.json": "e8664654efd15b56c6c67d55e26dab078deca9f6047280d6a1dc09d1167215f7",
     "manuscript/data/graetz/reference.json": "0f5676f177ad1fcf713874d66337f766b6abd0e179c688368d32bd01378f1694",
     "manuscript/data/graetz/table.md": "64110706e8d58f76f99134f1283f18bc6acdef7ccb413e14a6b6a402db334a97",
-    "manuscript/prepare_results.py": "c4877e4447d5327802f141fc0d816c7e254465257480bfc395c4a93698ce04ad",
+    "manuscript/prepare_results.py": "11ce71c25b4de4e53e7a36b5f23d1efedb7537a3e09ef155f816498a0e7e7a40",
     "run/023-lobresco2026/cases/coarse/T106_300/case.json": "6916fb1ffd523a43f44b44cd00e7ed99ceef2d82dbadc90f72c6d92227a501d4",
     "run/023-lobresco2026/cases/coarse/T106_300/final_profiles/PbI2_g_gamma.dat": "408c7abf67ea140cad2db50e19717b319cecedd02a718e91ca8b10eaff494d3c",
     "run/023-lobresco2026/cases/coarse/T106_300/final_profiles/PbI2_g_native.dat": "0e12ed0945dc95d6eaf8e02ee81aededf49c4211e40996c806e90b0df5960935",
@@ -1982,10 +1986,13 @@
     "run/024-liu2025/iteration_check/profiles/LBE-I_SS_II_Q2_baseline_sat0.01__correctors8_full60s/BiI3_g_native.dat": "d2aa809524d5198806733898013ecb225b6b04340cfb53488e07c9cc7785bd47",
     "run/024-liu2025/iteration_check/profiles/LBE-I_SS_II_Q2_baseline_sat0.01__correctors8_full60s/PbI2_g_native.dat": "720d4085238daa1e0d8f4aa971c418011ec28dc5e6725f9d1a968e7deb9cc105",
     "run/024-liu2025/iteration_check/profiles/LBE-I_SS_II_Q2_baseline_sat0.01__correctors8_full60s/element_I_native.dat": "def81b6c7e1b432e4bbace05ceaca7d77cb97e892a05316049a369c10182a105",
+    "run/024-liu2025/iteration_check/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01__correctors8_full60s/BiI3_g_native.dat": "a83820e3ae564a52f01bc9aa50ece1d97374a645be974724ae70933b058e35b2",
+    "run/024-liu2025/iteration_check/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01__correctors8_full60s/PbI2_g_native.dat": "ea4141eac8573edd0f69c290de3cd0a27bd43037f320a5cc023710960c686e5c",
+    "run/024-liu2025/iteration_check/profiles/LBE-I_SS_II_Q2_shift29k_sat0.01__correctors8_full60s/element_I_native.dat": "26da3a099a0e46130ad9c835d393967ba019d48bcd81fb1ad66abc8856d8d813",
     "run/024-liu2025/iteration_check/profiles/PbI2_SS_Q1_baseline__correctors8_full60s/BiI3_g_native.dat": "78965eda5f9c58b121ac8db9f9c8a38b433a4c1ecbeda30f4c243e5b5e0acd2f",
     "run/024-liu2025/iteration_check/profiles/PbI2_SS_Q1_baseline__correctors8_full60s/PbI2_g_native.dat": "1a448aa424b0b9f3104e85c97d6a4b7cbc9bbfa9d39d7f2fbe7b3c6439eb3d9b",
     "run/024-liu2025/iteration_check/profiles/PbI2_SS_Q1_baseline__correctors8_full60s/element_I_native.dat": "78937162dcc5b0fe8d298183013502ca93fee1acae2659be20d3928fb5413b57",
-    "run/024-liu2025/iteration_check/summary.json": "06b5385b9af02da10231a37ac8f0ca9b88341b97a28de45044683d34edc01788",
+    "run/024-liu2025/iteration_check/summary.json": "6a7c562e713a2a72d3d3f5047fecb16acbcf04263cc88775d1208b1ecbbca7f0",
     "run/024-liu2025/production_576x72_limitedLinear/analysis.json": "53f8162c390a2ae90727f09109aa1e90116d099a59e2e695a8147b1d2750b09b",
     "run/024-liu2025/production_576x72_limitedLinear/ledger.json": "451f231d6294252f057e3707d498a4136a2a5f5a303a0d030d0045dba4025dc7",
     "run/024-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SS_II_Q1_baseline/BiI3_g_native.dat": "88d8ec99eaa0c0f11dea4dce867880b012c68a59bf6900b732ccc6b39ce2aecc",

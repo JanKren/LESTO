@@ -77,7 +77,7 @@ aspect ratios far from the $\Delta x=2\Delta r$ of the test.
 \subsection{Material balance and solver diagnostics}
 \label{sec:conservation}
 All 15 runnable baseline cases, all 64 follow-up cases, the 19
-production cases and the three full-run corrector cases completed and
+production cases and the four full-run corrector cases completed and
 passed their configured numerical acceptance checks; the scheme and
 mesh runs completed with the same ledgers. This PASS classification is
 not an experimental-validation classification. For element $k$ the raw
@@ -103,12 +103,13 @@ the trace-loading bound are given in Sec.~S2 of the supplementary
 material.
 
 Some paired wall-coupling iterations do not meet the requested
-$10^{-16}$ outer criterion. Three cases were therefore repeated over the
+$10^{-16}$ outer criterion. Four cases were therefore repeated over the
 full 60 s with eight instead of three correctors (18,432 cells, upwind).
 The iodine profiles of pure PbI$_2$ and of the steel Q2 case at 0.1\%
 saturation change by $\IterPure\%$ and $\IterSteelLow\%$, that is, at
 round-off; the steel case at 1\% saturation changes by
-\IterSteelHigh\%. The requested tolerance lies below the attainable
+\IterSteelHigh\%, and the same case with the shifted BiI data by
+$\IterShift\%$. The requested tolerance lies below the attainable
 residual floor (Sec.~S2), and the iteration error of the reported
 profiles is negligible next to the time-step and spatial errors below.
 

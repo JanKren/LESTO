@@ -377,7 +377,7 @@ def main():
     # ---- iteration check ------------------------------------------------------------------------------
     iteration = json.loads((ITER / 'summary.json').read_text())
     iteration_l1 = {r['base_case']: r['eight_minus_three']['element_I']['profile_L1_pct'] for r in iteration['cases']}
-    assert set(iteration_l1) == set(BASES[:3])
+    assert set(iteration_l1) == set(BASES)
 
     # ---- study, sensitivity, peaks and alignment tables -------------------------------------------------
     categories = ['numerical', 'transport', 'kinetics', 'source_geometry', 'source_loading',
@@ -522,7 +522,8 @@ def main():
               'VLPureMax': f"{max(vl_ll[f'pure.L{L}'] for L in [1, 2, 3]):.1f}",
               'VLSteelThree': f"{vl_ll['steel.L3']:.2f}", 'VLPureThree': f"{vl_ll['pure.L3']:.2f}",
               'IterPure': sci(iteration_l1[BASES[0]]), 'IterSteelLow': sci(iteration_l1[BASES[1]]),
-              'IterSteelHigh': f'{iteration_l1[BASES[2]]:.3f}',
+              'IterSteelHigh': f'{iteration_l1[BASES[2]]:.3f}', 'IterShift': sci(iteration_l1[BASES[3]]),
+              'IterCases': len(iteration_l1), 'IterMax': f'{max(iteration_l1.values()):.3f}',
               'LobRMS': f"{lob_summary['rms_ours_K']:.0f}", 'LobRMSTemp': f"{lob_summary['rms_temperature_based_K']:.0f}",
               'LobRMSVap': f"{lob_summary['rms_vapour_pressure_based_K']:.0f}",
               'LobRMSGas': f"{lob_summary['rms_ours_with_gas_K']:.0f}",
@@ -753,11 +754,13 @@ def main():
     data['chemistry'] = chemistry
     input_files = [FULL / 'analysis.json', FOLLOW / 'analysis.json', PROD / 'analysis.json', PROD / 'ledger.json',
                    BENCH / 'experiments.csv', BENCH / 'targets.csv', BENCH / 'digitized/provenance.json',
-                   STUDY / 'results.json', ITER / 'summary.json', LOB_BENCH / 'digitized/provenance.json']
+                   STUDY / 'results.json', ITER / 'summary.json',
+                   LOB_BENCH / 'digitized/provenance.json']
     input_files += list((BENCH / 'digitized').glob('*.csv')) + list((LOB_BENCH / 'digitized').glob('*.csv'))
     input_files += [Path(__file__).resolve(), BENCH / 'analyse_matrix.py', BENCH / 'report.py',
                     BENCH / 'prepare.py', BENCH / 'carriers.py']
-    for root in [FULL / 'profiles', FOLLOW / 'profiles', PROD / 'profiles', STUDY / 'profiles', ITER / 'profiles']:
+    for root in [FULL / 'profiles', FOLLOW / 'profiles', PROD / 'profiles', STUDY / 'profiles',
+                 ITER / 'profiles']:
         input_files += list(root.rglob('*.dat')) + list(root.rglob('*.csv'))
     input_files += list((LOB_RUN / 'cases').rglob('*.dat')) + list((LOB_RUN / 'cases').rglob('case.json'))
     input_files += list((LOB_RUN / 'inputs').glob('*.csv'))

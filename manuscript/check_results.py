@@ -93,7 +93,9 @@ def check_iteration(full):
     """Eight versus three correctors over 60 s: recompute the profile differences."""
     root = REPO / 'run/024-liu2025/iteration_check'
     summary = json.loads((root / 'summary.json').read_text())
-    assert len(summary['cases']) == 3
+    assert len(summary['cases']) == 4
+    assert max(c['eight_minus_three']['element_I']['profile_L1_pct'] for c in summary['cases']) == \
+        summary['max_iodine_profile_L1_pct']
     for case in summary['cases']:
         assert case['status'] == 'PASS' and case['species_correctors'] == 8
         for species in ['element_I', 'PbI2_g', 'BiI3_g']:

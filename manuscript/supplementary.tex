@@ -108,8 +108,9 @@ largest upwind fine/medium change. It runs them with upwind,
 limited-linear and van Leer advection on 8,192 to 41,472 cells, and the
 steel case with upwind and limited-linear also on 93,312 cells. This
 adds 12 runs to the existing upwind levels and the production runs.
-(iii) Three original 18,432-cell upwind cases are repeated over the full
-60 s with eight instead of three species correctors. (iv) Ten runs
+(iii) Four original 18,432-cell upwind cases, the three baselines and
+the shifted-BiI steel case at 1\% metal saturation, are repeated over
+the full 60 s with eight instead of three species correctors. (iv) Ten runs
 simulate five single-species PbI$_2$ experiments of Lobresco et al.\
 \cite{Lobresco2026assessment} on two meshes. (v) The diffusivity
 ($D/2$, $2D$) and accommodation ($\alpha=0.1$, 0.01) variations of pure
@@ -178,12 +179,11 @@ cases at 59 s compared three and eight correctors, and outer
 tolerances of $10^{-16}$ and $10^{-14}$, over 20 time steps (40 ms).
 The largest species-field change, scaled by its control maximum, was
 below $3.6\times10^{-8}$, and the changes in new wall increments were
-negligible. In the three full-run checks with eight correctors the
+negligible. In the four full-run checks with eight correctors the
 largest outer initial residual is still
 $2.4\times10^{-15}$--$4.4\times10^{-15}$, and nearly every step ends at
 the corrector limit, as with three: the requested $10^{-16}$ lies below
-the attainable residual floor. A fourth full-run check (shifted BiI)
-had not finished and is not used. No manufactured-solution test of the
+the attainable residual floor. No manufactured-solution test of the
 full coupled system is presented; the Graetz--Robin test of the main
 text verifies the wall discretisation only.
 
