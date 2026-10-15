@@ -8832,7 +8832,7 @@ fitting or experimental qualification").  Not independent validation.
    current sources before any further commit of results.
 
 
-## 39. Results of the production, scheme/mesh, iteration and Lobresco runs (pending the researcher's sign-off)
+## 39. Results of the production, scheme/mesh, iteration and Lobresco runs (signed off by the researcher, 2026-10-15)
 
 All runs used the M10e solver binary unchanged (sha256 16fd804e...).  The
 evidence is in the repository; the manuscript (arXiv and PoF builds) has
@@ -8925,6 +8925,12 @@ been updated to it, uncommitted, for review.
    corrector case (still in `~/lesto-submission-followup`) into the paper;
    requests to the Lobresco authors (thermocouple tables, boat, inlet
    origin, C_e of Table 2).
+   Decided at sign-off (2026-10-15): items 1-5 accepted; the PoF title is
+   kept (the Damkoehler sweep of item 8 supports "competition"); the
+   remaining upwind 93,312-cell cases and the shifted-BiI corrector case
+   were run into the paper (item 9).  The request to the Lobresco authors
+   stays a draft (`manuscript/requests-draft.md`, section 3); sending it
+   is the researcher's decision.
 7. **Aggregate suite on the final sources (38 item 4).**  On f7c11cc
    (solver sources identical to fe214c6), 2026-10-11/12, v2412, bound to
    four cores while other runs loaded the machine (load 26-53):
@@ -8946,7 +8952,7 @@ been updated to it, uncommitted, for review.
    - External data: `LESTO_M10_*`, `LESTO_M10D_*` from
      `~/opt/gems-data/m10-design-2026-10-04`.  Previous aggregate: 319
      PASS, 0 FAIL, 1 NOTRUN at 5b8815c.
-8. **Review round, part 2 (2026-10-14/15; pending sign-off).**  Two sets
+8. **Review round, part 2 (2026-10-14/15).**  Two sets
    asked for by the internal review of the manuscript, same solver
    (sha256 16fd804e...):
    - *Damkoehler sweep* on case 016 (half-cell plane channel): the
@@ -8978,7 +8984,7 @@ been updated to it, uncommitted, for review.
    - Both are in the manuscript (Secs. 1, 4.2-4.4, 6.3, 7.3, 8, 9, Table
      VIII, Fig. 3 of the PoF build); `manuscript/check_results.py`
      recomputes them: PASS.
-9. **Last package runs (2026-10-15; pending sign-off).**  The
+9. **Last package runs (2026-10-15).**  The
    `lesto-submission-run` package (output `~/lesto-submission-followup`)
    completed all eight cases (state COMPLETE, archive
    `lesto-followup-results.tar.gz`); same solver (sha256 16fd804e...).
@@ -9006,7 +9012,7 @@ been updated to it, uncommitted, for review.
 
 ---
 
-## 40. Case ladder renumbering (pending the researcher's sign-off)
+## 40. Case ladder renumbering (signed off by the researcher, 2026-10-15)
 
 The run/ cases after 011 jumped twice: from 015 (one PbI2 pair in the
 development pipe) to 030 (two pairs in a synthetic channel: carrier,
