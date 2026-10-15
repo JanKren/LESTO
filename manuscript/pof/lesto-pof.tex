@@ -57,9 +57,10 @@ first order. In 79 simulations the largest raw element-balance
 residue is $1.41\times10^{-12}$ of supplied material.
 Halving the time step or adding correctors changes iodine profiles by
 at most 0.323\%. First-order upwind advection differs from
-a bounded limited-linear scheme by up to 20.8\% at equal mesh; with the
-bounded scheme, the most sensitive profile changes by 1.98\% from 41,472
-to 93,312 cells, without a consistent observed order. A wall
+a bounded limited-linear scheme by up to 20.8\% at equal mesh.
+Refining from 41,472 to 93,312 cells changes profiles by
+\SteelUpThree--\UpFourOthersMax\% (upwind, four cases) and 1.98\%
+(bounded, one case), with inconsistent observed orders. A wall
 Damk\"ohler sweep reproduces the kinetic and diffusion
 limits and shows that radial diffusion, not interfacial
 kinetics, limits wall exchange in the production cases; with the

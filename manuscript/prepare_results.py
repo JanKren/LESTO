@@ -336,6 +336,19 @@ def main():
                    curve(FOLLOW / 'profiles' / (base + '__grid576x72'))[1]]
         families[base + '.up'] = {'levels': [1, 2, 3], 'successive_L1_pct': [
             relative_l1(amounts[0], amounts[1]), relative_l1(amounts[1], amounts[2])]}
+    # Upwind 93,312-cell runs of all four bases (package runs; the shifted-BiI one repeats steel_L4_up).
+    up_l4 = json.loads((STUDY / 'upwind_L4/summary.json').read_text())
+    assert [c['base_case'] for c in up_l4['cases']] == BASES and {c['status'] for c in up_l4['cases']} == {'PASS'}
+    assert up_l4['solver_sha256'] == follow['solver_sha256']
+    up_l4_step = {}
+    for c in up_l4['cases']:
+        fine = curve(STUDY / 'upwind_L4/profiles' / c['base_case'])[1]
+        coarse = curve(FOLLOW / 'profiles' / (c['base_case'] + '__grid576x72'))[1]
+        up_l4_step[c['base_case']] = relative_l1(coarse, fine)
+        assert np.isclose(up_l4_step[c['base_case']], c['L3_to_L4']['element_I']['profile_L1_pct'], rtol=1e-9)
+    for species in ['element_I', 'PbI2_g', 'BiI3_g']:   # the package repeat of steel_L4_up is bitwise identical
+        assert np.array_equal(curve(STUDY / 'upwind_L4/profiles' / BASES[3], species)[1],
+                              curve(study_folder('steel', 4, 'up'), species)[1])
     scheme_names = {'up': 'upwind', 'll': 'limitedLinear', 'vl': 'van Leer'}
     records = []
     for key, family, label, case in [('pure', 'pure', 'Pure PbI$_2$', BASES[0]),
@@ -344,6 +357,8 @@ def main():
                                      (BASES[2], None, r'Steel Q2, 1\%', BASES[2])]:
         for i, scheme in enumerate(['up', 'll', 'vl'] if family else ['up']):
             steps = families[f'{key}.{scheme}']['successive_L1_pct']
+            if scheme == 'up' and len(steps) == 2:   # 41,472 -> 93,312 from the package upwind runs
+                steps = steps + [up_l4_step[case]]
             cells = [f'{v:.2f}' for v in steps] + ['--'] * (3 - len(steps))
             records.append([label if i == 0 else '', scheme_names[scheme]] + cells +
                            [f'{time_step[case]:.4f}' if scheme == 'up' else '--'])
@@ -364,6 +379,7 @@ def main():
     centroid_t = [steel_ll['per_level'][str(L)]['peaks']['PbI2']['T_at_centroid_C'] for L in [1, 2, 3, 4]]
     totals = [steel_ll['per_level'][str(L)]['total_I_wedge_mol'] for L in [1, 2, 3, 4]]
     scheme_study = {'families': families, 'vanLeer_vs_limitedLinear_L1_pct': vl_ll,
+                    'upwind_L3_to_L4_I_profile_L1_pct': up_l4_step,
                     'upwind_vs_limitedLinear_L1_pct': {k: v for k, v in cross.items() if 'll_vs_up' in k},
                     'steel_ll_apparent_orders': study['steel.ll']['apparent_order_from_differences'],
                     'steel_ll_L3_error_estimate_apparent_order_pct': error_l3_apparent,
@@ -504,6 +520,9 @@ def main():
               'MeshMax': f"{max(r['fine_L1_pct'] for r in numeric):.2f}",
               'ProductionResidue': sci(production_residue),
               'SteelLLOne': f'{ll_steps[0]:.2f}', 'SteelLLTwo': f'{ll_steps[1]:.2f}', 'SteelLLThree': f'{ll_steps[2]:.2f}',
+              'UpFourOthersMin': f'{min(up_l4_step[b] for b in BASES[:3]):.2f}',
+              'UpFourOthersMax': f'{max(up_l4_step[b] for b in BASES[:3]):.2f}',
+              'UpFourPure': f'{up_l4_step[BASES[0]]:.2f}',
               'SteelUpOne': f'{up_steps[0]:.2f}', 'SteelUpTwo': f'{up_steps[1]:.2f}', 'SteelUpThree': f'{up_steps[2]:.2f}',
               'PureLLOne': f'{pure_ll[0]:.2f}', 'PureLLTwo': f'{pure_ll[1]:.2f}',
               'PureUpOne': f'{pure_up[0]:.2f}', 'PureUpTwo': f'{pure_up[1]:.2f}',
@@ -754,13 +773,13 @@ def main():
     data['chemistry'] = chemistry
     input_files = [FULL / 'analysis.json', FOLLOW / 'analysis.json', PROD / 'analysis.json', PROD / 'ledger.json',
                    BENCH / 'experiments.csv', BENCH / 'targets.csv', BENCH / 'digitized/provenance.json',
-                   STUDY / 'results.json', ITER / 'summary.json',
+                   STUDY / 'results.json', STUDY / 'upwind_L4/summary.json', ITER / 'summary.json',
                    LOB_BENCH / 'digitized/provenance.json']
     input_files += list((BENCH / 'digitized').glob('*.csv')) + list((LOB_BENCH / 'digitized').glob('*.csv'))
     input_files += [Path(__file__).resolve(), BENCH / 'analyse_matrix.py', BENCH / 'report.py',
                     BENCH / 'prepare.py', BENCH / 'carriers.py']
     for root in [FULL / 'profiles', FOLLOW / 'profiles', PROD / 'profiles', STUDY / 'profiles',
-                 ITER / 'profiles']:
+                 STUDY / 'upwind_L4/profiles', ITER / 'profiles']:
         input_files += list(root.rglob('*.dat')) + list(root.rglob('*.csv'))
     input_files += list((LOB_RUN / 'cases').rglob('*.dat')) + list((LOB_RUN / 'cases').rglob('case.json'))
     input_files += list((LOB_RUN / 'inputs').glob('*.csv'))

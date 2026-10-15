@@ -30,11 +30,15 @@ profiles. Halving the time step changes iodine profiles by at most
 \IterSteelHigh\%. The spatial error is larger and is dominated by the
 numerical diffusion of first-order upwind advection, which differs
 from the limited-linear scheme by \UpLLFour--\UpLLOne\% at equal mesh in
-the most sensitive case, whereas two bounded schemes differ by at most
-\VLSteelMax\%. With limited-linear advection that case changes by
-\SteelLLThree\% between 41,472 and 93,312 cells, but the apparent orders
-are inconsistent, so we quote this change rather than a formal grid
-convergence index. Closely competing 1 cm bins can shift a reported
+the steel case of the scheme study, whereas two bounded schemes differ
+by at most \VLSteelMax\%. With limited-linear advection that case
+changes by \SteelLLThree\% between 41,472 and 93,312 cells, but the
+apparent orders are inconsistent, so we quote this change rather than a
+formal grid convergence index. With upwind advection the same
+refinement changes the four checked cases by
+\SteelUpThree--\UpFourOthersMax\%, and three of them more than that
+steel case, so its bounded-scheme change is not a bound for the other
+production profiles. Closely competing 1 cm bins can shift a reported
 peak temperature by tens of kelvin, so peaks are reported with their
 smoothed maximum and centroid temperature as well. Repeated with the
 production scheme for two baselines, $\alpha=0.1$ changes the iodine

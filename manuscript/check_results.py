@@ -89,6 +89,32 @@ def check_scheme_study(full, follow):
     return checked
 
 
+def check_upwind_l4(follow, generated):
+    """Upwind 93,312-cell package runs: recompute the 41,472 -> 93,312 changes and their table cells."""
+    root = REPO / 'run/024-liu2025/scheme_mesh_study/upwind_L4'
+    summary = json.loads((root / 'summary.json').read_text())
+    assert summary['solver_sha256'] == generated['solver_sha256'], 'upwind L4 solver differs'
+    assert len(summary['cases']) == 4
+    table = (HERE / 'generated/numerical-table.tex').read_text()
+    for case in summary['cases']:
+        base = case['base_case']
+        assert case['status'] == 'PASS' and case['scheme'] == 'Gauss upwind' and case['cells'] == 93312
+        assert set(case['element_gates'].values()) == {'PASS'} and case['max_respeciation_failures'] == 0
+        for species in ['element_I', 'PbI2_g', 'BiI3_g']:
+            x, fine = amounts(root / 'profiles' / base, species)
+            xc, coarse = amounts(follow / 'profiles' / (base + '__grid576x72'), species)
+            assert np.allclose(x, xc)
+            record = case['L3_to_L4'][species]
+            if fine.sum() > 0:
+                assert np.isclose(l1(coarse, fine), record['profile_L1_pct'], rtol=1e-9), (base, species)
+            else:
+                assert record is None
+        assert f"{case['L3_to_L4']['element_I']['profile_L1_pct']:.2f}" in table, base
+    repeat = summary['cases'][3]['repeat_of_study_steel_L4_up']
+    assert all(v['profile_L1_pct'] == 0 for v in repeat.values()), 'package L4 repeat differs from steel_L4_up'
+    return len(summary['cases'])
+
+
 def check_iteration(full):
     """Eight versus three correctors over 60 s: recompute the profile differences."""
     root = REPO / 'run/024-liu2025/iteration_check'
@@ -328,6 +354,7 @@ def main():
     production = check_production(full, follow)
     scheme_checks = check_scheme_study(full, follow)
     iteration = check_iteration(full)
+    upwind_l4 = check_upwind_l4(follow, generated)
     lobresco = check_lobresco(generated)
     graetz = check_graetz(generated)
     damkohler = check_damkohler(generated)
@@ -367,7 +394,8 @@ def main():
         'undefined_zero_reference_comparisons_confirmed': zero,
         'iodine_stoichiometry_profiles_checked': stoichiometric,
         'production_cases_checked': production, 'scheme_mesh_differences_recomputed': scheme_checks,
-        'iteration_check_cases_recomputed': iteration, 'lobresco_onsets_recomputed': lobresco,
+        'iteration_check_cases_recomputed': iteration, 'upwind_L4_cases_recomputed': upwind_l4,
+        'lobresco_onsets_recomputed': lobresco,
         'graetz_triplets_recomputed': graetz, 'damkohler_runs_checked': damkohler,
         'production_scheme_sensitivities_recomputed': psens, 'supplement_pdf_pages': supplement_pages,
         'supplement_pdf_sha256': hashlib.sha256(supplement.read_bytes()).hexdigest(),

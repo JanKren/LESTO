@@ -8978,6 +8978,31 @@ been updated to it, uncommitted, for review.
    - Both are in the manuscript (Secs. 1, 4.2-4.4, 6.3, 7.3, 8, 9, Table
      VIII, Fig. 3 of the PoF build); `manuscript/check_results.py`
      recomputes them: PASS.
+9. **Last package runs (2026-10-15; pending sign-off).**  The
+   `lesto-submission-run` package (output `~/lesto-submission-followup`)
+   completed all eight cases (state COMPLETE, archive
+   `lesto-followup-results.tar.gz`); same solver (sha256 16fd804e...).
+   - *Shifted-BiI corrector check*: `LBE-I_SS_II_Q2_shift29k_sat0.01` with
+     eight instead of three correctors over 60 s (18,432 cells, upwind):
+     iodine profile L1 1.1e-7 %, BiI3 1.5e-6 %, element-I closure 3.7e-16,
+     largest outer initial residual 3.5e-15.  The largest change of the
+     four corrector checks stays 0.021 % (steel 1 %).  Records:
+     `run/024-liu2025/iteration_check` (new `collect.py` reproduces the
+     three earlier records).
+   - *Upwind 864 x 108 runs of the four check bases* (93,312 cells, all
+     PASS).  Iodine profile L1 from 41,472 to 93,312 cells: pure PbI2
+     3.68 %, steel 0.1 % 7.30 %, steel 1 % 6.68 %, shifted BiI 2.13 %;
+     totals <= 0.018 %, centroids within 0.42 mm.  The shifted-BiI run
+     repeats the study's `steel_L4_up` and reproduces it bitwise.
+     Consequence: the shifted-BiI case, chosen for the scheme study as the
+     largest upwind change from 18,432 to 41,472 cells, is not the most
+     mesh-sensitive case at the finest step, and its 1.98 % limitedLinear
+     L3 -> L4 change does not bound the other production profiles.  The
+     manuscript says so (both abstracts, the numerics and verification
+     sections, the numerical-change table, limitations, conclusions and
+     supplement S1).  Bounded-scheme L4 runs of the other
+     production cases would be needed for a spatial bound on them.
+     Records: `run/024-liu2025/scheme_mesh_study/upwind_L4`.
 
 ---
 

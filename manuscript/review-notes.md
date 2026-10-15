@@ -1,5 +1,25 @@
 # Author review: 15 October 2026 (update of 9 and 14 October)
 
+## Last package runs (15 October, evening)
+
+The `lesto-submission-run` package finished all eight cases (plan 39, item 9).
+
+1. **Shifted-BiI corrector check** (Sec. 5.1, supplement S1/S2): eight
+   instead of three correctors over 60 s change the iodine profile by
+   1.1e-7 %. Four full-run corrector checks now; the largest change stays
+   0.021 % (steel 1 %). The item is removed from the limitations list.
+2. **Upwind 93,312-cell runs of all four check bases**: from 41,472 to
+   93,312 cells the iodine profiles change by 3.68 % (pure PbI2), 7.30 %
+   (steel 0.1 %), 6.68 % (steel 1 %) and 2.13 % (shifted BiI; this run
+   reproduces the study's own upwind L4 bitwise); totals < 0.02 %. The
+   shifted-BiI case is therefore not the most mesh-sensitive case at the
+   finest step. "Most (mesh-)sensitive case" is replaced in both abstracts,
+   the conclusions and Sec. 5.3; the 1.98 % limitedLinear change is now
+   stated as the indicator of that one profile, not of all production
+   profiles; the numerical table fills the upwind 41,472 -> 93,312 column
+   for all four cases; the limitations item now asks for bounded-scheme L4
+   runs beyond one case. PoF abstract: 250 words.
+
 ## Review round, part 2 (15 October)
 
 The two simulation sets of part 1 are complete and in the text; every
@@ -190,10 +210,10 @@ Time step 2 to 1 ms: 0.0043-0.3228 %. Correctors 3 to 8 over 60 s: at most
 spatial error of the original campaign, and the production profiles differ
 from the 18,432-cell upwind profiles by 9.1-22.3 %. Integral deposition is
 much more stable than local shape. Mesh independence of local profile shapes
-is not claimed; the L3-L4 check exists for one case only.
+is not claimed; the bounded-scheme L3-L4 check exists for one case only, and
+upwind L3-L4 changes of the four check cases are 2.13-7.30 %.
 
-Not done: the upwind 93,312-cell runs of the other follow-up cases in
-`~/lesto-submission-followup` were still running and are not used; a
+Not done: bounded-scheme 93,312-cell runs of the other production cases; a
 manufactured-solution test; a T-Flows run with identical inputs.
 
 ## Title (PoF only)

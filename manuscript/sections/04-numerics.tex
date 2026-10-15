@@ -7,8 +7,9 @@ A structured axisymmetric 5$^\circ$ wedge represents the 1.25 m column
 The production mesh has $576\times72\times1=41{,}472$ cells. The
 64 follow-up sensitivities use the original
 $384\times48\times1=18{,}432$-cell mesh. The mesh studies use
-$256\times32\times1=8{,}192$, 18,432, 41,472 and, for one case,
-$864\times108\times1=93{,}312$ cells; successive levels refine the
+$256\times32\times1=8{,}192$, 18,432, 41,472 and
+$864\times108\times1=93{,}312$ cells, the finest for four cases with
+upwind advection and one with the bounded scheme; successive levels refine the
 axial and radial spacing by a factor of 1.5. The source occupies
 $x=0.09$--0.105 m and the radial interval $r=0.25R$--$0.75R$. Its
 position and cell selection are computational assumptions, and the
@@ -227,7 +228,8 @@ stop; they are a structured set of conditional comparisons, not a
 factorial uncertainty study. Six further sets complete the evidence:
 the \ProductionCases{} production re-runs (\cref{sec:verification}), the
 \PSRuns{} production-scheme sensitivities, a scheme and mesh study of two
-cases up to 93,312 cells, four full-run corrector checks, ten runs of
+cases up to 93,312 cells with three further upwind runs on that mesh,
+four full-run corrector checks, ten runs of
 five single-species experiments of Lobresco et al.\
 \cite{Lobresco2026assessment} on two meshes (\cref{sec:lobresco}), and
 the \DaRuns{} channel runs of the Damk\"ohler sweep with
