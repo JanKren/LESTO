@@ -223,6 +223,32 @@ moves by just 0.005\,K, while the peak drops by 7.4\,\% and moves one
 bin downstream. An unchanged onset therefore does not imply an unchanged
 deposition profile.
 
+\textbf{Which resistance wins? The Damk\"ohler sweep of 016.} The ratio
+of the two conductances over the channel half-height $h$ is the wall
+Damk\"ohler number $\mathrm{Da}=G_i\chi_ih/(\rho D_i)$. Rerunning 016 with
+only the accommodation coefficient changed, from $10^{-6}$ to 1
+(\texttt{./Allrun-damkohler}, 13 runs), moves Da from $10^{-3}$ to
+$2\times10^{3}$ (Fig.~\ref{fig:damkohler}). For small Da the normalised
+wall flux equals Da: the wall sees the bulk gas and the kinetics decide.
+For large Da it levels off at $\pi^2/4$, the diffusion limit of plug flow
+between two absorbing plates, and in between it follows the two
+resistances in series. The deposited fraction rises from 0.3\,\% to
+99.5\,\%, yet the onset stays at 561\,K, because saturation, not the
+exchange rate, sets it. The accommodation coefficients of the physical
+runs (1, 0.1, 0.01) put them on the diffusion plateau or at its edge:
+radial diffusion, not surface kinetics, limits the deposition there.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.55\linewidth]{c016b}
+  \caption{Damk\"ohler sweep of case 016. Top: normalised wall flux
+  against Da with the kinetic limit, the diffusion limit $\pi^2/4$ and
+  the series curve. Bottom: fraction of the release deposited. Grey
+  bands: Da of the production cases for accommodation 0.01 and 1.
+  Doubling the wall-normal resolution changes the results by less than
+  0.11\,\%.}
+  \label{fig:damkohler}
+\end{figure}
+
 \subsection{Meaning of the plug-flow reference}
 Here ``plug flow'' denotes an idealised, cross-sectionally uniform gas
 stream, not a two-phase flow regime. The reference calculations follow
@@ -317,7 +343,13 @@ the element-conserving equilibrium kernel each step. The \emph{local} mode
 also calls GEMS3K per cell and step with a saved initial state; the exact
 kernel refines the result and provides fallback, enforcing the transported
 element amounts. Chemistry is therefore coupled sequentially to transport,
-with no feedback to the frozen helium flow. Cases 015 and 020 verify these
+with no feedback to the frozen helium flow. A production case of 024 run
+with GEMS3K standard states in every cell changes its deposit profiles by
+at most $2.1\times10^{-4}$ (relative $L_1$) against the tabulated data.
+The local mode, $5.1\times10^{8}$ GEMS3K calls without a failure, gives
+bitwise the same result as the frozen mode: its GEMS3K solution only
+starts the kernel solve, and the final speciation is always the
+kernel's. Cases 015 and 020 verify these
 optional paths; the main benchmark chain does not require a live GEMS3K
 call. This coupling is Jan's implementation contribution, distinct from
 the existing OpenFOAM and GEMS3K software.
@@ -636,8 +668,31 @@ the full chemistry of 021 on the realistic flows of 017, 60\,s each on a
 mesh of 41,472 cells. For pure \PbI{} on steel the computed peak sits at
 36\,cm, 366.5\,$^\circ$C, against the measured 368\,$\pm$\,18\,$^\circ$C,
 and for iodine from LBE the model reproduces the two separate deposit bands
-(Fig.~\ref{fig:bench}b). Refining the mesh to 93,312 cells moves the
-profiles by 1.98\,\%.
+(Fig.~\ref{fig:bench}b).
+
+Three checks stand behind these runs. \emph{Mesh:} refining to 93,312
+cells changes the iodine profile of the case refined with the production
+scheme by 1.98\,\%; with first-order upwind, four cases change by
+2.13--7.30\,\%, so that one case does not bound the others. \emph{Solver
+iterations:} eight instead of three species correctors change four cases
+by at most 0.021\,\%. \emph{Inputs:} with the production scheme, halving
+or doubling the diffusivity changes the profiles by 1.07--16.65\,\%,
+lowering the accommodation coefficient to 0.1 or 0.01 by at most
+5.14\,\%, as the sweep of 016 predicts (Fig.~\ref{fig:sens}). In steel
+the response to the diffusivity is lopsided: halving it changes the
+profile by only 1.07\,\%, because the \BiI{} profile that carries most of
+the iodine barely moves, doubling it by 12.53\,\%. Total deposits change
+by less than 0.02\,\% in every check.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.55\linewidth]{c024b}
+  \caption{Case 024: change of the iodine profile when the diffusivity
+  or the accommodation coefficient is varied, for pure \PbI{} and for
+  LBE on steel (Q2, 1\,\% metal saturation), each against its own
+  baseline. Blue: production scheme on 41,472 cells; grey: upwind on
+  18,432 cells.}
+  \label{fig:sens}
+\end{figure}
 
 \clearpage
 \begin{figure}[H]
@@ -692,8 +747,11 @@ profiles by 1.98\,\%.
     untuned model halves the error in \Tdep{} of the published models
     (18\,K vs 35\,K RMS), and it reproduces the multi-band deposits of the
     LBE experiments.
+  \item \textbf{A demonstrated regime.} The 016 sweep shows both limits
+    of the wall exchange in the solver and places the physical runs on
+    the diffusion-limited side.
   \item \textbf{A paper trail.} Cases 023 and 024 feed directly into the
-    methods manuscript (Sec.~6.3, Table~V, Fig.~5) and the ladder is the
+    methods manuscript (Secs.~4.2, 5, 6.3 and 7.3) and the ladder is the
     availability section of LESTO deliverable D38.
 \end{itemize}
 
@@ -709,9 +767,10 @@ profiles by 1.98\,\%.
   \item The \BiI{} cases (018, 019, 021) need restricted thermodynamic
     tables that cannot be redistributed, and 015 and 020 need an optional
     GEMS3K build; without them those cases print \texttt{NOTRUN}.
-  \item The mesh study of 024 shows small changes (1.98\,\%) but no formal
-    grid-convergence index: the apparent orders of convergence are not
-    consistent.
+  \item The mesh study of 024 gives no formal grid-convergence index: the
+    apparent orders of convergence are not consistent. Only one case was
+    refined to 93,312 cells with the production scheme (1.98\,\%); with
+    upwind, four cases change by 2.13--7.30\,\%.
 \end{itemize}
 
 \begin{inshort}[How to try it]

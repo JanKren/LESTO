@@ -1,6 +1,6 @@
 The LESTO case ladder — presenter notes
 Jan Kren, 15 October 2026
-(pages 4, 12, 17 and 28 are the section dividers)
+(pages 4, 12, 17 and 29 are the section dividers)
 
 Page 01. The LESTO case ladder (title)
 
@@ -78,38 +78,46 @@ Page 22. 016 hks-channel-halfcell
 
 On this mesh the half-cell conductance D over dy/2 is 1 m per second, 64 to 107 times smaller than the kinetic conductance, so it controls the uptake. Where the deposit starts, the gas reaches the wall by diffusion either way, so the onset moves by only 5 mK, far inside one 1 mm bin of 6.5 K. halfCell is the wall law of every physical run: 017, 023 and 024.
 
-Page 23. 017 physical-carrier
+Page 23. 016 hks-channel-halfcell: Damk\"ohler sweep
+
+The wall Damkoehler number compares the kinetic conductance of the HKS law with diffusion over the channel half-height. Varying only the accommodation coefficient moves it over six decades. Below 0.1 the wall flux equals Da: the wall sees the bulk gas and the kinetics decide. Above about 300 it reaches pi squared over four, the diffusion limit of plug flow between absorbing plates, and between the two it follows the series-resistance curve. The deposit then moves 11 mm upstream and its width halves, but the onset temperature does not move, because saturation sets it. The grey bands are the Damkoehler numbers of the production tube cases: alpha 1 and 0.1 lie on the diffusion plateau, alpha 0.01 at its edge. This is the Damkoehler figure of Sec. 4.2 of the manuscript; refinement changes every number by less than 0.11 percent.
+
+Page 24. 017 physical-carrier
 
 The carrier is computed with rhoSimpleFoam, expanding and laminar, projected to an exactly divergence-free flux, audited, and frozen. The boat of 013 returns at the digitised arrow, x = 0.13 m, with the wedge share of the inventory, 6.72e-8 mol. The inlet is zero-total-flux for the gas. Not represented: the boat obstruction, the end of the experiment and the non-dilute gas next to the boat. The figure is the tracked final profile of case 023's coarse T106_6, which 017's Allrun reproduces byte for byte with the M10e solver; the case was not rerun for the deck.
 
-Page 24. 018 pbi2-bii3-channel
+Page 25. 018 pbi2-bii3-channel
 
 The source ratio follows the inferred PbI2 and BiI3 deposits of Liu et al. 2025, LBE-I_SS_II. The two pairs do not interact, so the PbI2 results are those of 014 byte for byte, criterion M10a.1; the deck run confirmed that. The BiI3 table is made from restricted Bi thermodynamic records and is not redistributed; without it the case prints NOTRUN. A qualification case, not the paper's geometry.
 
-Page 25. 019 pbbi-gas-speciation
+Page 26. 019 pbbi-gas-speciation
 
 The exact kernel uses tabulated formation constants. The inlet is raised to 1173 K, the LBE furnace, so that there is something to re-speciate. The percentages are the 1 cm deposit L1 differences from the independent pairs of 018 run at the same inlet; 2 ms against 1 ms gives 0.0331 and 0.0575 percent. Numerical results under provisional inputs: synthetic ramp, common diffusivity, prescribed release.
 
-Page 26. 020 pbbi-gems-speciation
+Page 27. 020 pbbi-gems-speciation
 
 Mode frozen caches the formation constants at the frozen cell temperatures and pressures, then uses the exact kernel. Mode local calls GEMS3K per cell and step, warm started, with guards and the kernel as refinement and fallback. For an ideal gas both must reproduce 019, and they do. The figure shows why the refinement is needed: the raw interior-point result is off by up to about half a decade at mole fractions near 1e-10; decades above 1e-3 are guarded and never called.
 
-Page 27. 021 lbe-metal-vapour
+Page 28. 021 lbe-metal-vapour
 
 The Q2 source releases monatomic Pb, Bi and I; the metal vapour is 1 percent of the ideal-LBE saturation pressure at 1173 K. Pb_g condenses on Pb_s; Bi_g and Bi2_g on one shared Bi_s; BiI_g reacts irreversibly at the wall to 2 Bi_s and BiI3_g. Onsets, solver against fractional plug flow: Pb(l) 919.93 against 921, Bi(l) 882.89 against 885, PbI2(cr) 533.12 against 537, Bi(cr) 541.35 against 544, BiI3(cr) 450.82 against 451 K. The carrier is the plug-flow limit, 200 by 2 cells with D = 0, read at 1.2 s while the source is active.
 
-Page 29. 022 paper-temperature-model
+Page 30. 022 paper-temperature-model
 
 The layer is the T-Flows layer of cell centres within 0.1 mm of the wall, 30528 cells, A_I over V_I 8533.7 per metre. The plateau, n0 over the bulk velocity, agrees. The deposit starts where the wall table crosses the input Tdep of 680 K, at 0.476 m, 2.6 cm upstream of the published onset at 0.502 m; the T-Flows parameter set, Tdep 638.15 K, A 150, k 0.02, distance 2.4e-4, puts it at 0.5011 m. Which set produced the paper's figures is a question for the authors. The full 30 s case takes 2 to 3 hours on 16 ranks and was not rerun.
 
-Page 30. 023 lobresco2026
+Page 31. 023 lobresco2026
 
 No parameter is adjusted to these data. The rule is the paper's: 1 percent of the peak of the deposit, from the inlet, on the measured wall curve, minus the measurement of Table 2. At 5 mL per minute vapour diffuses upstream and deposits near the cold inlet; the table uses the main deposit downstream of the boat. Computed peaks lie 1 to 4 cm upstream of the measured ones. This is Sec. 6.3, Table V and Fig. 5 of the manuscript.
 
-Page 31. 024 liu2025
+Page 32. 024 liu2025
 
-Three configurations on 1.25 m columns of steel and silica, 5-degree wedges, measured wall temperatures, Q1 the deposited amount over three hours, Q2 LBE metal vapour with two BiI datasets, 2 ms steps, 60 s. Provisional numerical work: the release history, the flow reference conditions and several coordinates are assumptions. The mesh number is the iodine profile change between 41,472 and 93,312 cells; no formal GCI, the apparent orders are inconsistent. manuscript/check_results.py recomputes these numbers from the saved profiles.
+Three configurations on 1.25 m columns of steel and silica, 5-degree wedges, measured wall temperatures, Q1 the deposited amount over three hours, Q2 LBE metal vapour with two BiI datasets, 2 ms steps, 60 s. Provisional numerical work: the release history, the flow reference conditions and several coordinates are assumptions. The mesh number is the iodine profile change of the shifted-BiI steel case between 41,472 and 93,312 cells with the production scheme; no formal GCI, the apparent orders are inconsistent. Every element closure stays at or below 8.63e-16. The next slide has the checks made after the review. manuscript/check_results.py recomputes these numbers from the saved profiles.
 
-Page 32. What the ladder demonstrates
+Page 33. 024 liu2025: sensitivities, mesh and GEMS3K
+
+Sensitivities: the diffusivity and accommodation variations of two baselines repeated with the production scheme on 41,472 cells. Accommodation still matters far less than diffusivity, except that in steel halving D changes the profile by only 1.07 percent, because the BiI3 profile, which carries most of the iodine, barely moves; doubling D gives 12.53 percent. Totals change by at most 0.02 percent and the BiI3 share by at most 0.03 points. Mesh: upwind runs of four cases on 93,312 cells change the profiles by 2.13 to 7.30 percent, so the 1.98 percent of the one bounded-scheme case does not bound the others. Correctors: eight instead of three changes the four checked cases by at most 0.021 percent, the shifted-BiI case by 1e-7 percent. GEMS3K: standard-state data in every cell change the profiles by at most 2.1e-4; local mode, 5.1e8 calls without a failure, is bitwise identical to frozen, because its result only starts the kernel solve.
+
+Page 34. What the ladder demonstrates
 
 The ladder makes every capability of rhoFixedFlowFoam reproducible from a short readme: what changed, what to check, how to run. Cases 001 to 011 are Bojan Ničeno's groundwork; 012 to 024 add the exchange laws, the chemistry and the benchmark studies. The manuscript's prepare_results.py reads 023 and 024 directly. In this deck every default check that could run on this workstation passed; 015 and 020 need the GEMS3K bridge, 017, 023 and 024 take minutes to hours and are shown from their tracked records.

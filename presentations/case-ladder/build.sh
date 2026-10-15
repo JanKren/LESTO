@@ -10,7 +10,7 @@
 # list for the build, default 4,5,11), LESTO_BEAMER_OFFLINE=1 (cache only).
 set -euo pipefail
 cd -- "$(dirname -- "$0")"
-PAGES=32
+PAGES=34
 mkdir -p build
 cpus=${LESTO_CPUS:-4,5,11}
 if [[ "${1:-}" == "--refresh" ]]; then

@@ -15,7 +15,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PDF = HERE / "lesto-case-ladder.pdf"
-FRAMES, PAGES = 28, 32
+FRAMES, PAGES = 30, 34
 
 
 def main():
@@ -38,7 +38,7 @@ def main():
     assert len(notes) == FRAMES and page == PAGES, (len(notes), page)
     (HERE / "speaker-notes.txt").write_text(
         "The LESTO case ladder — presenter notes\nJan Kren, 15 October 2026\n"
-        "(pages 4, 12, 17 and 28 are the section dividers)\n\n" + "\n".join(notes))
+        "(pages 4, 12, 17 and 29 are the section dividers)\n\n" + "\n".join(notes))
     info = subprocess.check_output(["pdfinfo", str(PDF)], text=True)
     pages = int(re.search(r"^Pages:\s+(\d+)$", info, re.M)[1])
     assert pages == PAGES, pages

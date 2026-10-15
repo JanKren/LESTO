@@ -1,7 +1,9 @@
 # The LESTO case ladder — PSI Beamer
 
-A 32-page deck by Jan Kren, dated 15 October 2026: one slide per case of
-`run/` (001–024), with a title page, an overview of the ladder (the
+A 34-page deck by Jan Kren, dated 15 October 2026: one slide per case of
+`run/` (001–024), two follow-on slides with the checks made after the
+manuscript review (the Damköhler sweep of 016; the sensitivities, mesh,
+corrector and GEMS3K checks of 024), with a title page, an overview of the ladder (the
 "based on" links), a slide on how every case is organised, four section
 dividers and a closing slide. Cases 001–011 are Bojan Ničeno's; 012–024
 are Jan Kren's. The slides and the section dividers say so.
@@ -55,7 +57,7 @@ logs, 010 its `out_excerpt`. 018, 019 and 021 need the restricted Bi tables
 
 ## Build
 
-    bash build.sh              # Tectonic -> lesto-case-ladder.pdf (32 pages)
+    bash build.sh              # Tectonic -> lesto-case-ladder.pdf (34 pages)
     bash build.sh --refresh    # make_figures.py first
     python3 package_deck.py    # speaker-notes.txt, manifest, source zip
 
