@@ -1,6 +1,6 @@
 # Draft requests for external inputs (not sent)
 
-Status: drafts only, 2026-10-09. Nothing has been sent. Greeting names are
+Status: drafts only, 2026-10-09 (section 4 added 2026-10-15). Nothing has been sent. Greeting names are
 placeholders. Sources: `review-notes.md`, `notes-for-authors.md`,
 `sections/02-experiments.tex`, `06-validation.tex`, `07-multispecies.tex`,
 plan sections 26, 27, 36.1, 36.7, `thermochemistry/README.md`.
@@ -140,3 +140,74 @@ explicitly that no comparison was done.
 
 Kind regards,
 Jan Kren
+
+---
+
+## 4. To Jörg Neuhausen, PSI (supersedes section 1)
+
+Status: draft, 2026-10-15, not sent. Combines request 1 with a request for
+further validation cases. Section 1 stays as the itemised record.
+
+**Subject:** Iodine thermosublimatography (Liu et al. 2025): input data and possible further validation cases for the LESTO CFD model
+
+Dear Jörg,
+
+In LESTO Task 3.4 I have built a CFD model (OpenFOAM) of vapour transport
+and wall deposition in thermosublimatography columns, coupled to GEMS3K for
+the gas-phase speciation. I have reconstructed three of the experiments of
+Liu et al. (2025): PbI2_SS, LBE-I_SS_II and LBE-I_SiO2_I. In the steel
+columns the model reproduces the main deposition zones; the silica case
+still disagrees (see A.1). A manuscript for Physics of Fluids
+is nearly ready. All inputs so far come from the published figures, so the
+comparison is limited by what I could digitise. I would like to ask whether
+you could help with two things.
+
+**A. Inputs for the three experiments already modelled**
+
+1. The measured axial temperature profiles (1 cm thermocouple readings) and
+   the definition of the scan coordinate (origin relative to the boat and the
+   furnaces). In the silica LBE scan, the labelled peak temperatures sit
+   4.1-4.65 cm away from the labelled positions on my digitised curve. I
+   cannot tell whether this is a registration issue on my side, and I do not
+   want to present a fitted shift as a result.
+2. Any information on the release history: a time-resolved signal, or the
+   boat mass before and after the run. At present I use the mean rate over
+   the three hours.
+3. The reference conditions of the flow controller (standard temperature and
+   pressure), the absolute pressure in the column, and the column
+   orientation (horizontal or vertical). The last one decides whether
+   buoyancy-driven secondary flow can matter in the steep cold sections.
+4. The temperature profile of the BiI3_SiO2_800 experiment, which is not in
+   the paper. With it I can add the fourth case.
+5. Repeat measurements of any of these experiments, if they exist. They
+   would give an experimental scatter to compare the model against.
+
+**B. Further validation cases**
+
+Would any of the following data be available, published or unpublished?
+
+1. Runs in the same set-up at different carrier flow rates or evaporation
+   times. The model predicts that deposition in these columns is limited by
+   radial diffusion rather than by the wall reaction, so a flow-rate series
+   would be a direct test of that prediction.
+2. The raw temperature and deposition profiles of the Karlsson et al.
+   experiments with iodine from LBE in fused silica (2020) and 316L steel
+   (2021) columns, as a second, independent dataset.
+3. Single-compound runs, for example pure BiI3 in steel and silica, with a
+   known released amount. They test the wall model without the speciation
+   uncertainty.
+
+Machine-readable files (CSV or Excel) would be ideal, but scans of
+lab-book tables would also help. I will of course cite the data as you
+prefer. If unpublished data go into the paper, I would be glad to discuss
+co-authorship, and I will send you the manuscript before it is submitted.
+
+One related question: the Bi-I records I use from HERACLES agree with Barin
+(1995). Do you know whether derived tables from them may be published with
+the paper, or whom I should ask?
+
+I would be happy to show you the current results in a short meeting if that
+is easier.
+
+Kind regards,
+Jan
