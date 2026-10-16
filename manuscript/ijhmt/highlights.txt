@@ -1,0 +1,5 @@
+Conservative OpenFOAM model couples vapour transport, gas equilibrium and deposits
+Half-cell Hertz-Knudsen-Schrage wall flux converges at second order (Graetz test)
+Radial diffusion, not interfacial kinetics, limits wall exchange in the studied cases
+One BiI Gibbs-energy shift moves the BiI3 share of deposited iodine from 95% to 2%
+Untuned wall law gives deposition onsets of five experiments within 18 K RMS

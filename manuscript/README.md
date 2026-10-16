@@ -84,8 +84,15 @@ Run `python3 manuscript/package_review.py` to rebuild the review ZIP.
   included without scaling.
 - `generated/`: seven result tables, `numbers.tex` (macros used in the text),
   numerical values and SHA-256 manifests.
-- `pof/`: Physics of Fluids (REVTeX) version sharing `sections/`,
-  `generated/` and `figures/`; `bash manuscript/pof/build.sh`.
+- `ijhmt/`: **target journal** (since 16 October 2026): International
+  Journal of Heat and Mass Transfer (Elsevier `elsarticle`) version sharing
+  `sections/`, `generated/` and `figures/`.  `bash manuscript/ijhmt/build.sh`
+  builds the working draft (arxiv.sty with line numbers); `--elsarticle`
+  the Elsevier copy for submission.  Highlights, cover letter and
+  `SUBMISSION-CHECKLIST.md` are in the folder.
+- `pof/`: Physics of Fluids (REVTeX) version, kept as a fallback;
+  `bash manuscript/pof/build.sh`.  The journal abstract and data statement
+  are shared by both (`sections/*-journal.tex`).
 - `prepare_results.py`: results-to-manuscript pipeline.
 - `check_results.py`: independent profile arithmetic, input hashes and TeX checks.
 - `package_review.py`: portable review archive and its SHA-256 manifest.

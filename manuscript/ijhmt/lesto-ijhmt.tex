@@ -1,0 +1,105 @@
+% Working draft of the IJHMT version of the LESTO iodine methods paper, in
+% the arxiv.sty layout of ../main.tex with line numbers.  Same content as the
+% Elsevier wrapper lesto-ijhmt-elsarticle.tex: the IJHMT title, the shared
+% journal abstract and data statement (../sections/*-journal.tex), keywords,
+% nomenclature.tex, the shared sections and declarations.tex.
+% Build with ./build.sh in this folder.
+\documentclass{article}
+% Shared files are found relative to the manuscript root: ../arxiv.sty,
+% and the generated/... inputs of the section files.
+\makeatletter
+\def\input@path{{../}}
+\makeatother
+\usepackage{arxiv}
+\usepackage{iftex}
+\ifPDFTeX\usepackage[utf8]{inputenc}\fi
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,booktabs,graphicx,microtype,xcolor}
+\usepackage[version=4]{mhchem}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{authblk}
+\usepackage{lineno}
+% lineno skips the lines around amsmath displays; the usual patch numbers the
+% paragraph lines before and after each display environment again.
+\newcommand*\patchAmsMathEnvironmentForLineno[1]{%
+  \expandafter\let\csname old#1\expandafter\endcsname\csname #1\endcsname
+  \expandafter\let\csname oldend#1\expandafter\endcsname\csname end#1\endcsname
+  \renewenvironment{#1}%
+    {\linenomath\csname old#1\endcsname}%
+    {\csname oldend#1\endcsname\endlinenomath}}%
+\newcommand*\patchBothAmsMathEnvironmentsForLineno[1]{%
+  \patchAmsMathEnvironmentForLineno{#1}%
+  \patchAmsMathEnvironmentForLineno{#1*}}%
+\AtBeginDocument{%
+  \patchBothAmsMathEnvironmentsForLineno{equation}%
+  \patchBothAmsMathEnvironmentsForLineno{align}%
+  \patchBothAmsMathEnvironmentsForLineno{gather}%
+  \patchBothAmsMathEnvironmentsForLineno{multline}}
+% Shared sections use table* for wide tables (needed in two-column layouts);
+% give table* the same caption spacing that arxiv.sty gives table.
+\makeatletter
+\renewenvironment{table*}
+  {\setlength{\abovecaptionskip}{\@belowcaptionskip}%
+   \setlength{\belowcaptionskip}{\@abovecaptionskip}%
+   \@dblfloat{table}}
+  {\end@dblfloat}
+\makeatother
+\graphicspath{{../figures/}}
+\setlength{\emergencystretch}{1.5em}
+\input{../generated/numbers}
+\newcommand{\vect}[1]{\mathbf{#1}}
+\newcommand{\units}[1]{\,\mathrm{#1}}
+% Clearly visible placeholder for information only the authors can supply.
+\newcommand{\confirm}[1]{\textcolor{red}{[AUTHOR TO CONFIRM: #1]}}
+\title{Competition between radial diffusion and interfacial exchange in
+thermal-gradient deposition columns: conservative modeling of iodine
+transport}
+\renewcommand\Authfont{\bfseries}
+\setlength{\affilsep}{0em}
+\author[1]{Jan Kren\thanks{Corresponding author:
+  \confirm{corresponding e-mail}}}
+\author[1]{Bojan Ni\v{c}eno}
+\affil[1]{Paul Scherrer Institute, 5232 Villigen PSI, Switzerland}
+\date{\today}
+\renewcommand{\shorttitle}{Radial diffusion and interfacial exchange in
+  deposition columns}
+\renewcommand{\headeright}{Draft for IJHMT}
+\renewcommand{\undertitle}{Draft for the International Journal of Heat and
+  Mass Transfer}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue,
+  pdftitle={Competition between radial diffusion and interfacial exchange
+    in thermal-gradient deposition columns},
+  pdfauthor={Jan Kren and Bojan Niceno}}
+
+\begin{document}
+\raggedbottom
+\maketitle
+\begin{abstract}
+\input{../sections/abstract-journal}
+\end{abstract}
+\keywords{Thermal-gradient tube flow \and Vapor deposition \and
+Hertz--Knudsen--Schrage \and Laminar mass transfer \and Wall
+Damk\"ohler number \and Finite-volume method \and Numerical verification}
+
+\linenumbers
+
+\input{nomenclature}
+
+\input{../sections/01-introduction}
+\input{../sections/02-experiments}
+\input{../sections/03-model}
+\input{../sections/04-numerics}
+\input{../sections/05-verification}
+\input{../sections/06-validation}
+\input{../sections/07-multispecies}
+\input{../sections/07b-discussion}
+\input{../sections/08-conclusions}
+
+\input{declarations}
+
+\bibliographystyle{unsrtnat}
+\bibliography{../references}
+\end{document}

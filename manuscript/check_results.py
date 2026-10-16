@@ -415,6 +415,22 @@ def main():
     for pof_log in [HERE / 'pof/build/lesto-pof.log', HERE / 'pof/build/supplementary.log']:
         pof_text = pof_log.read_text()
         assert not re.search(r'undefined|^Overfull|LaTeX Error|^!', pof_text, re.MULTILINE | re.IGNORECASE), pof_log
+    # IJHMT working draft (arxiv.sty, line numbers) and its supplement: clean.
+    for ijhmt_log in [HERE / 'ijhmt/build/lesto-ijhmt.log', HERE / 'ijhmt/build/supplementary.log']:
+        assert not re.search(r'undefined|^Overfull|LaTeX Error|^!', ijhmt_log.read_text(),
+                             re.MULTILINE | re.IGNORECASE), ijhmt_log
+    # IJHMT Elsevier wrapper (build.sh --elsarticle), checked when built: one
+    # 2.6 pt overfull box while page 1 is shipped out is a quirk of the class
+    # (present without our content, invisible in the PDF); nothing else.
+    elsarticle_log = HERE / 'ijhmt/build/lesto-ijhmt-elsarticle.log'
+    elsarticle_overfull = []
+    if elsarticle_log.exists():
+        text = elsarticle_log.read_text()
+        elsarticle_overfull = re.findall(r'^Overfull .*$', text, re.MULTILINE)
+        assert len(elsarticle_overfull) <= 1 and all(
+            re.match(r'Overfull \\hbox \([0-3]\.\d+pt too wide\) has occurred while \\output is active', o)
+            for o in elsarticle_overfull), ('IJHMT elsarticle overfull', elsarticle_overfull)
+        assert not re.search(r'undefined|LaTeX Error|^!', text, re.MULTILINE | re.IGNORECASE), elsarticle_log
     for blg in [HERE / 'build/main.blg', HERE / 'build/supplementary.blg']:
         bibliography = blg.read_text()
         assert 'Warning' not in bibliography and 'error' not in bibliography.lower(), ('Bibliography issue', blg)
@@ -448,6 +464,8 @@ def main():
         'pdf_sha256': hashlib.sha256(pdf.read_bytes()).hexdigest(),
         'checker_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         'pof_overfull_latex_boxes': 0, 'pof_undefined_latex_references': 0,
+        'ijhmt_overfull_latex_boxes': 0, 'ijhmt_undefined_latex_references': 0,
+        'ijhmt_elsarticle_class_page1_overfull_boxes': len(elsarticle_overfull),
         'scope': 'Saved-results and manuscript consistency checks; not new CFD runs or experimental validation.'}
     (HERE / 'review-checks.json').write_text(json.dumps(checks, indent=2) + '\n')
     print(json.dumps(checks, indent=2))
