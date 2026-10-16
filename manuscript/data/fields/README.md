@@ -15,9 +15,10 @@ Both are `PbI2_SS_Q1_baseline`, 2 ms to 60 s, solver sha256 `16fd804e...`.
 The case directories at collection are recorded in `provenance.json`.  The
 production case was run in a session scratch directory; its 60 s
 `axialProfiles` file is byte-identical to the tracked production profile.
-The upwind case is in `~/lesto-submission-followup/cases/`.  **Neither case
-directory is archived**: if the fields are needed again, copy them
-somewhere durable first.
+It now lives, git-ignored, in
+`archive/liu2025-production-576x72/cases/` (see `archive/README.md`)
+(fields re-verified against `provenance.json` on 2026-10-16).  The upwind
+case is in `~/lesto-submission-followup/cases/`, outside the repository.
 
 ## Contents
 
