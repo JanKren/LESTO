@@ -126,14 +126,8 @@
     \end{column}
     \begin{column}{0.48\textwidth}
       \centering
-      \begin{tikzpicture}[node distance=0.7cm]
-        \node[blk=PSIblue] (gas) {\textbf{gas in the cell}\\partial pressure $p_i$};
-        \node[blk=PSIpurple,below=of gas] (wall) {\textbf{wall surface}\\vapour pressure $p_{\mathrm{eq},i}(T_w)$};
-        \node[blk=PSIred,below=of wall] (dep) {\textbf{wall inventory}\\condensed material};
-        \draw[bk,<->] (gas) -- node[right,font=\footnotesize]{diffusion} (wall);
-        \draw[bk,<->] (wall) -- node[right,font=\footnotesize]{surface kinetics (HKS)} (dep);
-      \end{tikzpicture}
-      \figsrc{Two resistances in series: whichever is larger controls the uptake.}
+      \includegraphics[width=\linewidth]{model_sketch}
+      \figsrc{Resistances in series; wall $T$ of the \PbI{} steel column}
     \end{column}
   \end{columns}
   \note{(2 min) The carrier is laminar, the Reynolds number is about 0.7 to 3, so the helium flow is computed once with the measured wall temperature and then frozen. The vapours are traces in it. At the wall, condensation and evaporation follow the Hertz-Knudsen-Schrage law, driven by the difference between the gas partial pressure and the equilibrium vapour pressure at the wall temperature. The important detail: the solver does not apply that law at the cell centre but puts it in series with the diffusion resistance between the cell centre and the wall. Deposited material stays on the wall as an inventory and can evaporate again when conditions change.}
@@ -203,7 +197,7 @@
       \textcolor{cBench}{\rule{7pt}{7pt}} experiments 022--024\\[0.25em]
       {\color{PSIgray}each case: a readme, \texttt{./Allrun}, a check}};
   \end{tikzpicture}
-  \note{(1.5 min) The code was built as a ladder of test cases in the repository. Each case is based on the one before and changes one thing: first the helium flow and species transport, Bojan Ničeno's groundwork, then the wall laws, the second iodide, the gas chemistry, the metal vapour, and finally the two experimental studies, 023 for Lobresco and 024 for Liu. Every case has a short readme and one command that reruns it and reports whether its check passes. This is also how we would hand cases to partners.}
+  \note{(1 min) The code was built as a ladder of test cases in the repository. Each case is based on the one before and changes one thing: first the helium flow and species transport, Bojan Ničeno's groundwork, then the wall laws, the second iodide, the gas chemistry, the metal vapour, and finally the two experimental studies, 023 for Lobresco and 024 for Liu. Every case has a short readme and one command that reruns it and reports whether its check passes. This is also how we would hand cases to partners.}
 \end{frame}
 
 % 7 verified --------------------------------------------------------------
@@ -251,7 +245,29 @@
       \figsrc{Test channel, 13 runs; grey: the column cases}
     \end{column}
   \end{columns}
-  \note{(2.5 min) Which of the two resistances controls deposition? We varied only the accommodation coefficient, which sets the surface kinetics, over six decades in a test channel. At small Damköhler number the wall flux equals Da: kinetics decide. At large Da it levels off at the diffusion limit of the channel, pi squared over four, and in between it follows the two resistances in series. The column experiments, with accommodation 1, 0.1 or 0.01, lie on the plateau or at its edge: transport to the wall is the bottleneck. For modelling partners this is useful: an uncertain sticking coefficient matters little here, while the diffusivity, the wall temperature and the vapour pressure matter a lot. The onset of deposition does not move at all, because saturation fixes it.}
+  \note{(1.5 min) Which of the two resistances controls deposition? We varied only the accommodation coefficient, which sets the surface kinetics, over six decades in a test channel. At small Damköhler number the wall flux equals Da: kinetics decide. At large Da it levels off at the diffusion limit of the channel, pi squared over four, and in between it follows the two resistances in series. The column experiments, with accommodation 1, 0.1 or 0.01, lie on the plateau or at its edge: transport to the wall is the bottleneck. For modelling partners this is useful: an uncertain sticking coefficient matters little here, while the diffusivity, the wall temperature and the vapour pressure matter a lot. The onset of deposition does not move at all, because saturation fixes it.}
+\end{frame}
+
+% 8b inside the column -----------------------------------------------------
+\begin{frame}[t]{Inside the column: the wall stays saturated}
+  \key{The gas next to the wall is at equilibrium; the core carries the excess}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.42\textwidth}
+      \begin{itemize}
+        \item saturation: vapour over its equilibrium value at the wall temperature
+        \item deposit starts where the mean reaches saturation (35.7 cm, 372\,$^\circ$C)
+        \item in the deposit zone: next to the wall $\le1.009$, mean up to 1.64, axis up to 2.03
+      \end{itemize}
+      \vspace{0.2em}
+      {\small\textbf{So:} uptake waits for diffusion; the supersaturated core is where aerosols could form, which the model leaves out.\par}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{field}
+      \figsrc{Pure \PbI{}, steel, 60 s; production case, 41,472 cells}
+    \end{column}
+  \end{columns}
+  \note{(1.5 min) The same result, seen inside the pure PbI2 column. The colour is the saturation of the vapour: its amount divided by the equilibrium amount at the local wall temperature. Upstream the gas is unsaturated and nothing deposits. The deposit starts exactly where the mean reaches saturation. From there on, the gas next to the wall stays at equilibrium, within one percent, while the centre of the tube becomes more and more supersaturated, about two times on the axis. A finer upwind run gives the same picture. The wall takes everything diffusion brings, so diffusion sets the rate. The supersaturated core is also where real aerosols could nucleate; the model does not represent that, and it is on the list of open points. The ripples come from the digitised wall temperature.}
 \end{frame}
 
 % 9 sensitivities ---------------------------------------------------------

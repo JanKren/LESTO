@@ -9,6 +9,12 @@
    },
    "note": "Wall temperatures digitised from Liu et al. (2025), as in the manuscript; source region of the computations (manuscript Sec. 4.1)."
   },
+  "model_sketch": {
+   "inputs": {
+    "thermochemistry/benchmarks/liu2025/digitized/PbI2_SS_temperature.csv": "905a0eed625bd9a1e1979b460a10362967e663d8d52f1bf058d16430c1342563"
+   },
+   "note": "Wall temperature of the pure PbI2 steel column digitised from Liu et al. (2025); release region x = 9-10.5 cm, r = 0.25R-0.75R (manuscript Sec. 4.1); wall law of manuscript Eqs. (4)-(5), Fig. 2."
+  },
   "graetz": {
    "inputs": {
     "manuscript/data/graetz/fits.json": "802d01f262ecec4f83c94cefcc791d577b42c4e0d6d5f7c3ad56aef04082c49d",
@@ -22,6 +28,13 @@
    },
    "note": "Damkoehler sweep of run/016 (manuscript Sec. 4.2): flux at x = 84.5 mm against Da at the onset temperature; grey: tube Da of the column cases for alpha = 0.01, 0.1, 1 (manuscript Sec. 4.2 text)."
   },
+  "field": {
+   "inputs": {
+    "manuscript/data/fields/pbi2_field_production.npz": "d0b6b0f1cb1f887621e6ade601fd5d7ef5181dac382ebcee827542d90797e5b8",
+    "manuscript/data/fields/provenance.json": "366cbfbbe70af4a0da40ad4dd05c51a4b7eb0dec03e6db4dc97a336fcbd94afb"
+   },
+   "note": "PbI2(g) saturation ratio S = x/x_eq(T_w) in the pure PbI2 steel column at 60 s, production run (41,472 cells, limitedLinear; manuscript Sec. 4.2, Fig. deposition_field)."
+  },
   "sensitivity": {
    "inputs": {
     "run/024-liu2025/production_sensitivities/comparison.csv": "02f559681ae7f68b71e417d1656c83235f0107b40bc2aa6613e75035782a219d"
@@ -30,7 +43,7 @@
   },
   "lobresco_onset": {
    "inputs": {
-    "manuscript/generated/results.json": "c64f05de7a1b2d7b98b81b273696b9db70f781727fe13282d11b2940f3c0770c"
+    "manuscript/generated/results.json": "d1a4695f2542c42f76333870e7a6a023ab9a25284c2d2f092e4075fea54d3619"
    },
    "note": "Manuscript Table V (results.json, lobresco2026): onset by the 1 % rule on the main deposit; published model values from Lobresco et al. (2026), Table 2."
   },
@@ -46,13 +59,13 @@
     "run/024-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline/iodine-comparison.csv": "3b72ee0b43ff9cc101860a9b59d09cc59e6153e930648b9532f2f9ac5ddee246",
     "run/024-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline__curveShiftPbI2/iodine-comparison.csv": "382db4a6c43b4d2b61e2a756b321a985647b12f0074d2eb6c4ca6b50c7bfa238",
     "run/024-liu2025/production_576x72_limitedLinear/profiles/LBE-I_SiO2_I_Q1_baseline__curveShiftBiI3/iodine-comparison.csv": "ca7d9ad43e9a22ae60df0097681f6acee8331ba29c8d4d7fa7c953f355b0441b",
-    "manuscript/generated/results.json": "c64f05de7a1b2d7b98b81b273696b9db70f781727fe13282d11b2940f3c0770c"
+    "manuscript/generated/results.json": "d1a4695f2542c42f76333870e7a6a023ab9a25284c2d2f092e4075fea54d3619"
    },
    "note": "Production runs of run/024, silica Q1, published and shifted temperature curves; overlap from results.json (alignment); measured scan digitised from Liu et al. (2025)."
   },
   "thermodynamics": {
    "inputs": {
-    "manuscript/generated/results.json": "c64f05de7a1b2d7b98b81b273696b9db70f781727fe13282d11b2940f3c0770c",
+    "manuscript/generated/results.json": "d1a4695f2542c42f76333870e7a6a023ab9a25284c2d2f092e4075fea54d3619",
     "run/024-liu2025/production_576x72_limitedLinear/analysis.json": "53f8162c390a2ae90727f09109aa1e90116d099a59e2e695a8147b1d2750b09b"
    },
    "note": "results.json (chemistry): Q2 cases; dashed: published iodide-I split (analysis.json of the production runs); the +29 kJ/mol branch is a surrogate perturbation, not a qualified dataset (manuscript Fig. thermo)."

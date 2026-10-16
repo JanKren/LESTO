@@ -3,7 +3,7 @@
 "CFD–GEMS3K modelling of iodine transport and deposition — LESTO Task 3.4
 progress", by Jan Kren with Bojan Ničeno, dated 15 October 2026. For the
 LESTO project partners (reactor safety, radiochemistry; not OpenFOAM
-developers): a 30-minute talk of 17 slides, followed by a backup section
+developers): a 30-minute talk of 18 slides, followed by a backup section
 (divider and two slides) that is not part of the 30 minutes.
 
 Open `lesto-partner-update.pdf`. Edit `main.tex`; every slide has a Beamer
@@ -19,19 +19,20 @@ which also sums the minute budget given at the start of each note.
 | 3 | Two sets of published column experiments | 2 |
 | 4 | Model, part 1: transport and wall exchange | 2 |
 | 5 | Model, part 2: chemistry with GEMS3K | 2 |
-| 6 | Built step by step: 24 test cases | 1.5 |
+| 6 | Built step by step: 24 test cases | 1 |
 | 7 | Verified: wall law and conservation | 2 |
-| 8 | Deposition is limited by diffusion (Damköhler sweep) | 2.5 |
-| 9 | What matters for the deposit (sensitivities) | 2 |
-| 10 | Lobresco et al.: onset within 18 K | 2 |
-| 11 | Liu et al.: the steel columns | 2 |
-| 12 | Liu et al.: the silica column | 1.5 |
-| 13 | Thermodynamic data decide the iodide | 1.5 |
-| 14 | D38: the coupled tool and what it offers | 2 |
-| 15 | What the model does not yet cover | 1.5 |
-| 16 | Where partners could help | 2 |
-| 17 | Next steps, thank you | 1 |
-| 18–20 | Backup: divider; spatial and iteration accuracy; omitted effects (buoyancy, Soret) | — |
+| 8 | Deposition is limited by diffusion (Damköhler sweep) | 1.5 |
+| 9 | Inside the column: the wall stays saturated (PbI2 field) | 1.5 |
+| 10 | What matters for the deposit (sensitivities) | 2 |
+| 11 | Lobresco et al.: onset within 18 K | 2 |
+| 12 | Liu et al.: the steel columns | 2 |
+| 13 | Liu et al.: the silica column | 1.5 |
+| 14 | Thermodynamic data decide the iodide | 1.5 |
+| 15 | D38: the coupled tool and what it offers | 2 |
+| 16 | What the model does not yet cover | 1.5 |
+| 17 | Where partners could help | 2 |
+| 18 | Next steps, thank you | 1 |
+| 19–21 | Backup: divider; spatial and iteration accuracy; omitted effects (buoyancy, Soret) | — |
 
 ## Sources of the numbers
 
@@ -55,13 +56,15 @@ input:
 | figure | slide | input |
 |---|---|---|
 | `temperature_profiles` | 3 | `thermochemistry/benchmarks/liu2025/digitized/*_temperature.csv` |
+| `model_sketch` | 4 | `thermochemistry/benchmarks/liu2025/digitized/PbI2_SS_temperature.csv` |
 | `graetz` | 7 | `manuscript/data/graetz/fits.json`, `reference.json` |
 | `damkohler` | 8 | `manuscript/data/damkohler/damkohler_sweep.csv` |
-| `sensitivity` | 9 | `run/024-liu2025/production_sensitivities/comparison.csv` |
-| `lobresco_onset` | 10 | `manuscript/generated/results.json` (lobresco2026) |
-| `liu_profiles` | 11 | `run/024-liu2025/production_576x72_limitedLinear/profiles/*/iodine-comparison.csv` |
-| `silica` | 12 | the same, silica Q1 cases, and `results.json` (alignment) |
-| `thermodynamics` | 13 | `results.json` (chemistry), production `analysis.json` |
+| `field` | 9 | `manuscript/data/fields/pbi2_field_production.npz` (numbers on the slide: `manuscript/generated/numbers.tex`, `Field*`) |
+| `sensitivity` | 10 | `run/024-liu2025/production_sensitivities/comparison.csv` |
+| `lobresco_onset` | 11 | `manuscript/generated/results.json` (lobresco2026) |
+| `liu_profiles` | 12 | `run/024-liu2025/production_576x72_limitedLinear/profiles/*/iodine-comparison.csv` |
+| `silica` | 13 | the same, silica Q1 cases, and `results.json` (alignment) |
+| `thermodynamics` | 14 | `results.json` (chemistry), production `analysis.json` |
 
 Published data: Lobresco et al. (2026) digitised measurements and model
 curves are CC BY 4.0 (attribution on the slide); Liu et al. (2025) scans

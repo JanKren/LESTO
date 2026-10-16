@@ -1,0 +1,58 @@
+{
+ "production": {
+  "case": "PbI2_SS_Q1_baseline",
+  "case_directory_at_collection": "/home/jan/.claude/tmp/claude-1000/-home-jan-LESTO/2b1263bd-4432-4d2e-922b-8c06c5c08659/scratchpad/sonnet-tasks/E/cases/PbI2_SS_Q1_baseline",
+  "tracked_profile": "run/024-liu2025/production_576x72_limitedLinear/profiles/PbI2_SS_Q1_baseline",
+  "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+  "solver_sha256_from": "run/024-liu2025/production_576x72_limitedLinear/ledger.json",
+  "mesh": "576 x 72 = 41472 cells, 5 degree wedge, R = 2.4 mm, L = 1.25 m",
+  "scheme": "Gauss limitedLinear 1 (species advection); 2 ms, 60 s",
+  "window_cm": [
+   30.0,
+   50.0
+  ],
+  "mole_fraction": "x = c R T / p with the frozen-carrier T and p of 0/",
+  "cup_mean_weight": "u_x r (axisymmetric flow-weighted mean over the section)",
+  "equilibrium": "p_eq = 10**min(phases) of the case table at the wall-row temperature, x_eq = p_eq / p",
+  "wall_inventory_PbI2_mol": 2.399730326203183e-09,
+  "tracked_profile_wall_I_mol": 4.799460652406355e-09,
+  "inventory_ratio_2PbI2_over_I": 1.0000000000000022,
+  "read_sha256": {
+   "0/T": "300949fcd97407987c35b3d2067d637238655e21e75f259d2bc1472a9f6456dc",
+   "0/p": "70580e7da82e7e006be8d95458524bc6102a79ae5afba493ff301f1d66818211",
+   "0/U": "a132e1f6a99a9d1e5c965ab0e53d294bf73e9122309f8adc2466365743a246fd",
+   "60/c_PbI2_g": "0162de86915c2588e4b7eb012ae9994afbb0bc71a0e1df96fa236fa2f019255f",
+   "60/mDep_PbI2_s": "135857f63574d6b64ce5bb9e4ba68f0bf3e76a1ae6866e7a98b37cc167cdd8cc",
+   "run/024-liu2025/work/prepared/tables/baseline/pv_PbI2_phases.csv": "52abefff2100d206d7da35fc81866476106f51be58cedee4f72ca09eb398814f"
+  },
+  "npz_sha256": "d0b6b0f1cb1f887621e6ade601fd5d7ef5181dac382ebcee827542d90797e5b8"
+ },
+ "upwind_L4": {
+  "case": "PbI2_SS_Q1_baseline__grid864x108",
+  "case_directory_at_collection": "/home/jan/lesto-submission-followup/cases/PbI2_SS_Q1_baseline__grid864x108",
+  "tracked_profile": "run/024-liu2025/scheme_mesh_study/upwind_L4/profiles/PbI2_SS_Q1_baseline",
+  "solver_sha256": "16fd804e593f39ed7d25f42ea3459d9d8de196c3456b7d3f5702c54a83219a58",
+  "solver_sha256_from": "run/024-liu2025/scheme_mesh_study/upwind_L4/summary.json",
+  "mesh": "864 x 108 = 93312 cells, 5 degree wedge, R = 2.4 mm, L = 1.25 m",
+  "scheme": "Gauss upwind (species advection); 2 ms, 60 s",
+  "window_cm": [
+   30.0,
+   50.0
+  ],
+  "mole_fraction": "x = c R T / p with the frozen-carrier T and p of 0/",
+  "cup_mean_weight": "u_x r (axisymmetric flow-weighted mean over the section)",
+  "equilibrium": "p_eq = 10**min(phases) of the case table at the wall-row temperature, x_eq = p_eq / p",
+  "wall_inventory_PbI2_mol": 2.3997876210847756e-09,
+  "tracked_profile_wall_I_mol": 4.799575242169544e-09,
+  "inventory_ratio_2PbI2_over_I": 1.0000000000000016,
+  "read_sha256": {
+   "0/T": "12f16d36d4503eec6e2d7b189aa911b8c10987ae084efacc29386e3860abc55e",
+   "0/p": "46a14bb38c5072cd599508444a0767b094b6babd294f5bd7c7af8ab90d0141f3",
+   "0/U": "0618ee35ea2d6fdd9a551059e80392df141033cf00f355cbd6a05b4264ed66ae",
+   "60/c_PbI2_g": "fd2638da2c593a071de581a3dff2f475acb879eb91c2801fd45f256af1116ca0",
+   "60/mDep_PbI2_s": "b6d254ae3f4c45fe35a278e0d567ad10adebc8b4a93379a20b7e654dce65c55b",
+   "run/024-liu2025/work/prepared/tables/baseline/pv_PbI2_phases.csv": "52abefff2100d206d7da35fc81866476106f51be58cedee4f72ca09eb398814f"
+  },
+  "npz_sha256": "ce0dd57878293522e66e8d1710d32143682b1bf57e7e489f0e9f5defff450c26"
+ }
+}

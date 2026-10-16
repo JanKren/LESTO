@@ -19,6 +19,7 @@ import numpy as np
 import matplotlib
 
 matplotlib.use("Agg")
+import matplotlib.colors  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
@@ -287,9 +288,80 @@ def temperatures():
     used("temperature_profiles", *files, note="Wall temperatures digitised from Liu et al. (2025), as in the manuscript; source region of the computations (manuscript Sec. 4.1).")
 
 
+def model_sketch():
+    """The column coloured by its wall temperature, and one wall cell with the two resistances in series."""
+    from matplotlib.patches import Rectangle
+    f = REPO / "thermochemistry" / "benchmarks" / "liu2025" / "digitized" / "PbI2_SS_temperature.csv"
+    d = read_csv(f)
+    xs, Ts = 100 * d["x_m"], d["T_K"] - 273.15
+    fig = plt.figure(figsize=(2.75, 1.72), layout="constrained")
+    g = fig.add_gridspec(2, 1, height_ratios=[1, 1.25])
+    a, b = fig.add_subplot(g[0]), fig.add_subplot(g[1])
+    L, H, W = 125, 1.0, .5
+    xx = np.linspace(0, L, 400)
+    TT = np.interp(xx, xs, Ts, left=Ts[0], right=Ts[-1])
+    for y0 in (H, -H - W):
+        im = a.imshow(TT[None, :], extent=(0, L, y0, y0 + W), aspect="auto", cmap="inferno", vmin=0, vmax=900)
+    a.add_patch(Rectangle((0, -H), L, 2 * H, fc="#f4f4f4", ec="none"))
+    for y0 in (.25 * H, -.75 * H):
+        a.add_patch(Rectangle((9, y0), 1.5, .5 * H, fc=ORANGE, ec="none"))
+    a.annotate("", (-1, 0), (-16, 0), arrowprops=dict(arrowstyle="-|>", lw=1, color=INK))
+    a.text(-16, -.4, "He", fontsize=7, va="top", color=INK)
+    a.text(10, 1.95, "source", fontsize=7, ha="center", color=INK)
+    a.text(L / 2, -2.6, f"1.25 m column, wall {10 * round(Ts.max() / 10):.0f} °C → {10 * round(Ts.min() / 10):.0f} °C",
+           fontsize=7, ha="center", color=MUTED)
+    a.set(xlim=(-18, L + 4), ylim=(-3.1, 2.4)); a.axis("off")
+    b.set(xlim=(0, 1), ylim=(0, 1)); b.axis("off")
+    b.add_patch(Rectangle((0, .84), 1, .14, fc="#555555", ec="none")); b.text(.02, .91, "wall", color="white", fontsize=7, va="center")
+    b.add_patch(Rectangle((0, .76), 1, .08, fc="#56B4E9", ec="none")); b.text(.02, .80, "deposit", fontsize=6.5, va="center")
+    b.add_patch(Rectangle((0, .0), 1, .76, fc="#f4f4f4", ec="none"))
+    b.plot(.62, .14, "o", color=INK, ms=3.5); b.text(.66, .14, "gas in the cell", fontsize=7, va="center", color=INK)
+    def zig(y0, y1, n):
+        ys = np.linspace(y0, y1, 2 * n + 1)
+        b.plot(.62 + .03 * np.r_[0, np.tile([1, -1], n - 1), 1, 0], ys, color=PURPLE, lw=1)
+    for y0, y1 in ((.14, .2), (.42, .48), (.66, .76)):
+        b.plot([.62, .62], [y0, y1], color=PURPLE, lw=1)
+    zig(.2, .42, 4); zig(.48, .66, 3)
+    b.text(.56, .31, "diffusion to the wall", fontsize=7, ha="right", va="center", color=PURPLE)
+    b.text(.56, .57, "surface kinetics (HKS)", fontsize=7, ha="right", va="center", color=PURPLE)
+    b.text(.68, .71, r"$p_{\mathrm{eq}}(T_w)$", fontsize=7, va="center", color=INK)
+    save(fig, "model_sketch")
+    used("model_sketch", f, note="Wall temperature of the pure PbI2 steel column digitised from Liu et al. (2025); release region x = 9-10.5 cm, r = 0.25R-0.75R (manuscript Sec. 4.1); wall law of manuscript Eqs. (4)-(5), Fig. 2.")
+
+
+def field():
+    """Saturation ratio of PbI2(g) in the pure PbI2 steel column at 60 s (manuscript Fig. deposition_field)."""
+    f = MS / "data" / "fields" / "pbi2_field_production.npz"
+    d = np.load(f)
+    x, r, w, eq = d["x_cm"], d["r_mm"], d["window"], d["mole_eq_wall"]
+    S = d["mole_window"] / eq[w]
+    T = d["wall_T_K"] - 273.15
+    lo, hi = 33, 48
+    fig, (a, b) = plt.subplots(2, 1, figsize=(3.05, 1.8), layout="constrained", sharex=True,
+                               gridspec_kw={"height_ratios": [1, 1.25]})
+    im = a.pcolormesh(x[w], r, S, norm=matplotlib.colors.LogNorm(1 / 3, 10), cmap="RdBu_r",
+                      shading="nearest", rasterized=True)
+    a.grid(False); a.set_ylabel("r [mm]"); a.set_ylim(0, 2.4)
+    a.text(lo + .2, 2.25, "wall", fontsize=7, color="white", va="top"); a.text(lo + .2, .12, "axis", fontsize=7, color="white")
+    bar = fig.colorbar(im, ax=a, pad=.01, aspect=10, extend="both")
+    bar.set_ticks([1 / 3, 1, 3, 10], labels=["1/3", "1", "3", "10"]); bar.set_label("saturation", fontsize=7)
+    top = a.secondary_xaxis("top", functions=(lambda v: np.interp(v, x, T), lambda t: np.interp(t, T[::-1], x[::-1])))
+    top.set_ticks([350, 300, 250, 200, 150], labels=["350 °C", "300", "250", "200", "150 °C"])
+    b.semilogy(x, d["mole_axis"] / eq, color=ORANGE, label="axis")
+    b.semilogy(x, d["mole_wall_row"] / eq, color=BLUE, ls="--", label="next to the wall")
+    b.set_ylim(.1, 20); b.set_xlim(lo, hi)
+    b.set_xlabel("position [cm]"); b.set_ylabel("saturation")
+    for text, y, colour in (("tube axis", 5, ORANGE), ("next to the wall", .5, BLUE)):
+        b.text(44.6, y, text, color=colour, fontsize=6.8, ha="right", va="center")
+    save(fig, "field")
+    used("field", f, MS / "data" / "fields" / "provenance.json",
+         note="PbI2(g) saturation ratio S = x/x_eq(T_w) in the pure PbI2 steel column at 60 s, production run (41,472 cells, limitedLinear; manuscript Sec. 4.2, Fig. deposition_field).")
+
+
 def main():
     FIG.mkdir(exist_ok=True)
-    for f in (temperatures, graetz, damkohler, sensitivity, lobresco, liu, silica, thermodynamics):
+    for f in (temperatures, model_sketch, graetz, damkohler, field, sensitivity, lobresco, liu, silica,
+              thermodynamics):
         f()
     (HERE / "figure_sources.json").write_text(json.dumps(
         {"generated_by": "make_figures.py", "figures": SOURCES}, indent=1) + "\n")

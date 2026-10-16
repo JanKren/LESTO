@@ -24,7 +24,7 @@ Page 05. Model, part 2: chemistry with GEMS3K
 
 Page 06. Built step by step: 24 test cases
 
-(1.5 min) The code was built as a ladder of test cases in the repository. Each case is based on the one before and changes one thing: first the helium flow and species transport, Bojan Ničeno's groundwork, then the wall laws, the second iodide, the gas chemistry, the metal vapour, and finally the two experimental studies, 023 for Lobresco and 024 for Liu. Every case has a short readme and one command that reruns it and reports whether its check passes. This is also how we would hand cases to partners.
+(1 min) The code was built as a ladder of test cases in the repository. Each case is based on the one before and changes one thing: first the helium flow and species transport, Bojan Ničeno's groundwork, then the wall laws, the second iodide, the gas chemistry, the metal vapour, and finally the two experimental studies, 023 for Lobresco and 024 for Liu. Every case has a short readme and one command that reruns it and reports whether its check passes. This is also how we would hand cases to partners.
 
 Page 07. Verified: wall law and conservation
 
@@ -32,48 +32,52 @@ Page 07. Verified: wall law and conservation
 
 Page 08. Deposition is limited by diffusion
 
-(2.5 min) Which of the two resistances controls deposition? We varied only the accommodation coefficient, which sets the surface kinetics, over six decades in a test channel. At small Damköhler number the wall flux equals Da: kinetics decide. At large Da it levels off at the diffusion limit of the channel, pi squared over four, and in between it follows the two resistances in series. The column experiments, with accommodation 1, 0.1 or 0.01, lie on the plateau or at its edge: transport to the wall is the bottleneck. For modelling partners this is useful: an uncertain sticking coefficient matters little here, while the diffusivity, the wall temperature and the vapour pressure matter a lot. The onset of deposition does not move at all, because saturation fixes it.
+(1.5 min) Which of the two resistances controls deposition? We varied only the accommodation coefficient, which sets the surface kinetics, over six decades in a test channel. At small Damköhler number the wall flux equals Da: kinetics decide. At large Da it levels off at the diffusion limit of the channel, pi squared over four, and in between it follows the two resistances in series. The column experiments, with accommodation 1, 0.1 or 0.01, lie on the plateau or at its edge: transport to the wall is the bottleneck. For modelling partners this is useful: an uncertain sticking coefficient matters little here, while the diffusivity, the wall temperature and the vapour pressure matter a lot. The onset of deposition does not move at all, because saturation fixes it.
 
-Page 09. What matters for the deposit
+Page 09. Inside the column: the wall stays saturated
+
+(1.5 min) The same result, seen inside the pure PbI2 column. The colour is the saturation of the vapour: its amount divided by the equilibrium amount at the local wall temperature. Upstream the gas is unsaturated and nothing deposits. The deposit starts exactly where the mean reaches saturation. From there on, the gas next to the wall stays at equilibrium, within one percent, while the centre of the tube becomes more and more supersaturated, about two times on the axis. A finer upwind run gives the same picture. The wall takes everything diffusion brings, so diffusion sets the rate. The supersaturated core is also where real aerosols could nucleate; the model does not represent that, and it is on the list of open points. The ripples come from the digitised wall temperature.
+
+Page 10. What matters for the deposit
 
 (2 min) A structured set of input variations, each compared with its own baseline. Diffusivity and the flow reference conditions shift the profiles by ten to seventeen percent. Shifting the silica temperature curve by about four centimetres moves the deposits almost completely, so the temperature input and its coordinate dominate. The thermodynamic data decide the chemistry, on the next slides. By contrast, accommodation changes the profiles by at most about five percent and moving the source region by 1.5 centimetres changes almost nothing. The figure shows the diffusivity and accommodation variations repeated with the production numerical scheme; total deposits change by less than 0.02 percent in all of them, only the shape moves.
 
-Page 10. Lobresco et al.: onset within 18 K
+Page 11. Lobresco et al.: onset within 18 K
 
 (2 min) On the five single-compound experiments of Lobresco and co-workers, run without any adjustment, our onset temperatures deviate by 18 kelvin RMS from the measurements; the two models of that paper by 35 kelvin each. Two caveats keep this a promising but conditional result. The peaks of our profiles sit one to four centimetres upstream of the measured ones. And our carrier, vapour-pressure data and source treatment differ from those of the published models, so we cannot yet say the improvement comes from the wall law. For the 5 mL per minute case the onset is taken on the main deposit; from the inlet the rule picks a small upstream deposit.
 
-Page 11. Liu et al.: the steel columns
+Page 12. Liu et al.: the steel columns
 
 (2 min) In the steel columns the model reproduces the deposit positions. For pure PbI2 the computed peak is at 36 centimetres and 366.5 degrees, against 368 plus or minus 18 measured. For iodine evaporated from LBE the measurement shows two bands; the model gives both, the upstream one as PbI2 and the downstream one as BiI3. The small deposit near 42 centimetres in the measurement is not reproduced. The runs cover 60 seconds at the mean release rate of the three-hour experiment; the time history of the release is not known.
 
-Page 12. Liu et al.: the silica column
+Page 13. Liu et al.: the silica column
 
 (1.5 min) In the silica column the computed bands lie four to five centimetres downstream of the measured ones. The paper prints the temperatures of the two peaks; on the digitised temperature curve these temperatures occur 4.1 to 4.65 centimetres away from the printed positions. Shifting the curve by that amount moves the computed bands onto the measured ones; the overlap rises from 6 to about 75 percent. We present this as an inconsistency of the published input, not as a fit; the original thermocouple table and scan coordinates would resolve it.
 
-Page 13. Thermodynamic data decide the iodide
+Page 14. Thermodynamic data decide the iodide
 
 (1.5 min) The partition between PbI2 and BiI3 is controlled by the thermodynamic input, not by the transport. The plus 29 kilojoules per mole branch is a surrogate perturbation of the uncertain BiI gas data, not a second qualified dataset; it turns a BiI3-dominated deposit into a PbI2-dominated one. The dashed lines are the published split. This is a sensitivity, not an uncertainty interval. For the task it means that qualified thermodynamic records for the Bi-I system are as important as the transport model, and a natural point of collaboration.
 
-Page 14. D38: the coupled tool and what it offers
+Page 15. D38: the coupled tool and what it offers
 
 (2 min) Deliverable D38, due at month 24, describes the coupled GEMS and CFD code; the draft is written. In a production case GEMS3K was called in every cell and step, about half a billion calls without a failure, and the deposit profiles agree with the reference to two parts in ten thousand. What can we offer? The cases with their measured inputs could serve as common reference cases for the comparative CFD approach, and the runs could provide reference or training data for reduced-order models. These are offers to discuss, not commitments.
 
-Page 15. What the model does not yet cover
+Page 16. What the model does not yet cover
 
 (1.5 min) Honest limits. The experiments do not publish the release history, the flow reference conditions or the coordinate origin, so these are assumptions. Next to the source the vapour is not dilute, which the frozen-carrier model assumes. The carrier is frozen, so buoyancy is not represented; with Richardson numbers up to about one this may matter locally if the column was horizontal, which we do not know. Aerosol formation is outside the model. Numerically, only one case was refined to the finest mesh with the production scheme, and no formal grid-convergence index is claimed.
 
-Page 16. Where partners could help
+Page 17. Where partners could help
 
 (2 min) An invitation rather than a list of demands. The largest gains would come from data: measured temperature tables with their coordinates, the release history, repeat measurements that give the experimental scatter, and series at different flow rates, which test the diffusion-limited prediction directly. On the thermodynamic side, qualified Bi-I records, BiI(g) above all, would remove the largest chemical uncertainty. And comparative calculations on the same cases with other codes, or reduced-order models trained or tested on these runs, would show what is model-dependent.
 
-Page 17. Next steps
+Page 18. Next steps
 
 (1 min) The methods paper is nearly ready for submission, D38 is drafted, and the cases are in a repository from which every result can be rerun. Next we want more validation cases with measured inputs, and, ideally, common reference cases with the partners of the task. Thank you.
 
-Page 19. Backup: spatial and iteration accuracy
+Page 20. Backup: spatial and iteration accuracy
 
 Backup. The production scheme is a bounded limited-linear advection on 41,472 cells. Upwind advection, used in the original sensitivity campaign, differs from it by 7.7 to 20.8 percent at equal mesh in the steel case of the scheme study. Refining to 93,312 cells changes that case by 1.98 percent with the production scheme; with upwind, four cases change by 2.13 to 7.30 percent. Time step and iteration errors are much smaller.
 
-Page 20. Backup: omitted effects, bounded
+Page 21. Backup: omitted effects, bounded
 
 Backup. Estimates from the digitised wall temperatures and the 101,325 Pa outlet pressure. Richardson numbers of order 0.1 to 1 do not show that buoyancy is negligible: in a horizontal column secondary flow may matter locally where the temperature falls fastest. Soret diffusion is small compared with the diffusivity variations tested.

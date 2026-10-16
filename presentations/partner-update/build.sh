@@ -9,7 +9,7 @@
 # XDG_CACHE_HOME (default /tmp/lesto-beamer-cache).
 set -euo pipefail
 cd -- "$(dirname -- "$0")"
-PAGES=20
+PAGES=21
 mkdir -p build
 if [[ "${1:-}" == "--refresh" ]]; then
     MPLCONFIGDIR="${MPLCONFIGDIR:-/tmp/lesto-matplotlib}" python3 make_figures.py
