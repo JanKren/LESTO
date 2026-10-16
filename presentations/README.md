@@ -2,6 +2,7 @@
 
 - **Report for Bojan:** `case-ladder-report/lesto-case-ladder-report.pdf`
 - **Case-ladder deck:** `case-ladder/lesto-case-ladder.pdf`
+- **Partner update (LESTO Task 3.4, about 30 min):** `partner-update/lesto-partner-update.pdf`
 - **Group meeting, 15 October 2026:** `group-meeting-2026-10-15/group-meeting-2026-10-15.pdf`
 
 Each folder retains its editable LaTeX source and required figures and theme
