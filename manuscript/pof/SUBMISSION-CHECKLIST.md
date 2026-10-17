@@ -6,7 +6,7 @@ Target confirmed by Jan: **Physics of Fluids**, submission target **18 October 2
 
 - Revised the abstract to 237 words; distinguished verified wall discretization from conditional experimental agreement. Explicitly identified the main-deposit onset convention in the abstract.
 - Qualified diffusion-control claims throughout the introduction, sensitivity discussion and conclusions: current support is a tube-scale estimate and upwind sensitivities. Review-A/B remain outstanding; no new simulation results were inferred.
-- Separated tube radius `R_t` from universal gas constant `R`; standardized common American spellings; corrected the four-part evidence framework and placed Supplementary Material before acknowledgments.
+- Separated tube radius `R_t` from universal gas constant `R`; standardized common American spellings (reversed on 17 October: British throughout); corrected the four-part evidence framework and placed Supplementary Material before acknowledgments.
 - Compiled and visually reviewed all 25 pages. No overfull boxes or unresolved references. BibTeX reports the existing REVTeX internal `jnrlst` control warning.
 - Independent arithmetic checks passed: 19 production cases, 27 scheme/mesh differences, three corrector checks, ten Lobresco onset calculations. Full provenance checking is **blocked**: `manuscript/data/graetz/criteria.log` is absent. Every other input listed in `generated/results.json` is present and matches its recorded hash. Recover the original log from the workstation; do not regenerate a substitute and change the expected hash simply to pass the check.
 - `alt-text.txt` provides draft descriptions for all seven main figures and the supplementary figure. Table accessibility and journal submission fields still need final review.
@@ -71,7 +71,7 @@ both read on 13 October 2026. Re-check them before submitting.
 | Figures: format, fonts | **done** | Vector PDF, one embedded subset font (DejaVuSans, CID TrueType) per figure; no unembedded fonts. |
 | Figures: size and minimum 8 pt | **done** (14 Oct) | Section 5. |
 | AI-use disclosure | **decision** | Section 7. |
-| American spelling | **decision** | Text uses British spelling (modelling, vapour, digitised). AIP copy-editing normally standardises; decide whether to convert first. |
+| Spelling | **done** | British throughout (authors' decision, 17 October 2026; the American conversion of 15 October was reversed). AIP copy-editing may standardise to American. |
 
 ## 2. What was changed in shared files (affects the arXiv build too)
 

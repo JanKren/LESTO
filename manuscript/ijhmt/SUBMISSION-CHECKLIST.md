@@ -53,11 +53,11 @@ allows exactly that one there and none in the draft.  The draft patches
 | Requirement | Status | Notes |
 |---|---|---|
 | Class | **done** | Submission: `lesto-ijhmt-elsarticle.tex`, `elsarticle` `preprint,12pt`, numbered references `elsarticle-num` (`numbers,sort&compress`).  Working draft until then: `lesto-ijhmt.tex` (arxiv.sty, line numbers). |
-| Title | **done** | The PoF title (American "modeling"); the body uses British spelling (decision below). |
+| Title | **done** | The PoF title, in British spelling ("modelling") like the body. |
 | Abstract <= 250 words, no references | **done** | 250 words, shared with PoF.  A third-party summary suggests "about 200 words" *(unverified)*; the official snippet says 250. |
 | Highlights, 3-5 bullets, <= 85 characters each | **done** (check) | `highlights.txt`, uploaded as a separate file; 76-85 characters. |
 | Keywords | **done** (check the maximum, usually 1-7) | 7 keywords in the `keyword` environment. |
-| Nomenclature | **done** | Customary in IJHMT; list after the keywords.  Only $R$ carries two meanings (see below). |
+| Nomenclature | **done** | Customary in IJHMT; list after the keywords.  No symbol carries two meanings. |
 | Graphical abstract | **decision** | Encouraged, optional *(unverified)*.  Candidates: the Damköhler sweep panel (a) or the geometry schematic. |
 | CRediT authorship statement | **placeholder** | 14 CRediT roles; not assigned here. |
 | Declaration of competing interest | **placeholder** | Elsevier's standard wording inside the placeholder. |
@@ -77,10 +77,16 @@ allows exactly that one there and none in the draft.  The draft patches
   $\kappa$ ($\mu$ stays the viscosity) and the Graetz Péclet number
   $\mathrm{Pe}_R=U_bR/D$ (Pe stays diameter-based, Re Sc), in
   `sections/05-verification.tex`, the supplement and the generated full
-  Graetz table.  $R$ remains both the gas constant and the tube radius;
-  the text says which is meant where both appear.
-- **Spelling**: British in the body, American in the title.  Elsevier
-  copy-editing accepts either if consistent; decide.
+  Graetz table.  The tube radius is $R_t$ throughout (Sec. 4 since
+  15 October, Sec. 5 and the supplement since 17 October); $R$ is only the
+  gas constant.
+- **Spelling**: British throughout (authors' decision, 17 October 2026),
+  including the title, keywords, nomenclature, highlights and cover
+  letter: -ise forms (discretisation, normalised, digitised), vapour,
+  centre, modelling.  The 15 October edits had converted part of the text
+  to American; that was reversed.  Elsevier accepts either if consistent.
+  Package keys stay as the classes define them (`organization=` in
+  `\affiliation`).
 - **Framing**: the introduction already presents the column as a laminar
   heated-tube mass-transfer problem.  For IJHMT the Damköhler sweep and the
   Graetz-Robin verification are the heat/mass-transfer core; reviewers

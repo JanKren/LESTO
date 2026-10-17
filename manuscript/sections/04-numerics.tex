@@ -19,7 +19,7 @@ and inlet rates are multiplied by $5/360=1/72$ for the wedge.
 \begin{figure*}[tb]
 \centering
 \includegraphics{experiment_schematic.pdf}
-\caption{(a) Computational column, coloured by the digitized wall
+\caption{(a) Computational column, coloured by the digitised wall
 temperature of the pure PbI$_2$ steel experiment, with the prescribed
 release region, the boundary conditions of \cref{sec:geometry} and the
 extent of the computed PbI$_2$ deposit (1 cm bins holding at least 1\%
@@ -60,7 +60,7 @@ the baseline diffusivity, the Schmidt number is 2.0--11.3 between 400
 and 1173 K, and the diameter-based P\'eclet number $\mathrm{Pe}=\mathrm{Re}\,\mathrm{Sc}$
 is 5.9--17.4 at 100 mL/min and 2.6--7.8 at 45 mL/min. Axial diffusion
 is therefore not negligible next to advection, and the fixed zero
-inlet value permits a diffusive loss of vapor through the inlet; it is
+inlet value permits a diffusive loss of vapour through the inlet; it is
 included in the outward transport of the material ledger
 (\cref{eq:balance}). The flow-stop cases replace both end conditions by
 zero normal species flux (supplementary material, Sec.~S1).
@@ -102,7 +102,7 @@ and gas temperature falling linearly from 1000 to 350 K, a constant
 $D=10^{-4}\units{m^2\,s^{-1}}$ and a 2 s PbI$_2$ release at mid-height.
 In \DaRuns{} runs the accommodation coefficient of the PbI$_2$ wall
 law is varied over six decades, which moves Da, defined by
-\cref{eq:damkohler} with the half-height $h=2.4$ mm in place of $R$,
+\cref{eq:damkohler} with the half-height $h=2.4$ mm in place of $R_t$,
 from $\DaLow$ to $\DaHigh$ at the onset temperature. The normalised wall
 flux $\hat J=Jh/[D(\bar c-c_{\rm eq})]$, with $\bar c$ the
 cross-section mean, equals Da within \DaKinDev\% for
@@ -166,7 +166,7 @@ $S=\FieldUpWallSMax$ in the wall cell and a slightly stronger core
 supersaturation (\FieldUpCupSMax{} flow-weighted, \FieldUpAxisSMax{} on
 the axis). The interface therefore holds the gas next to the
 wall at equilibrium, and the deposition rate is set by how fast radial
-diffusion delivers the supersaturated core vapor. The core
+diffusion delivers the supersaturated core vapour. The core
 supersaturation is also where homogeneous nucleation, which the model
 omits, could start (\cref{sec:limitations}).
 \begin{figure*}[tbp]
@@ -179,12 +179,12 @@ mole fraction at the local wall temperature (top axis); the radius is
 stretched. (b) $S$ on the axis, flow-weighted over the section and in
 the wall cell. (c) Wall deposit per axial cell. (d) Radial profiles at
 the dotted stations of (a). The ripples along $x$ follow the slope
-changes of the digitized wall temperature, to which the exponential
+changes of the digitised wall temperature, to which the exponential
 equilibrium pressure is sensitive.}
 \label{fig:field}
 \end{figure*}
 
-Two omitted effects can be bounded with the same inputs, the digitized
+Two omitted effects can be bounded with the same inputs, the digitised
 wall profiles and the 101,325 Pa outlet pressure. The first is
 buoyancy. Neither experimental paper states the column orientation. For
 developed laminar flow with a linearly varying wall temperature, the
@@ -237,7 +237,7 @@ within a case. The baseline time
 step is 2 ms. Wall exchange is assembled implicitly with nonnegative
 source and sink coefficients and shared inventory bounds. Configured
 species correctors and active-bound guards reconcile the final gas
-solution with the realized wall transfer. Gas re-speciation then
+solution with the realised wall transfer. Gas re-speciation then
 redistributes species under the local element constraints. The
 sequence is first order in time; a conservative equilibrium projection
 alone does not remove splitting or transport error. The baseline

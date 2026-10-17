@@ -10,7 +10,7 @@ Dear Editor,
 
 We submit the manuscript "Competition between radial diffusion and
 interfacial exchange in thermal-gradient deposition columns: conservative
-modeling of iodine transport" by Jan Kren and Bojan Ničeno (Paul Scherrer
+modelling of iodine transport" by Jan Kren and Bojan Ničeno (Paul Scherrer
 Institute) for consideration as a research paper in the *International
 Journal of Heat and Mass Transfer*.
 
