@@ -57,7 +57,7 @@ allows exactly that one there and none in the draft.  The draft patches
 | Abstract <= 250 words, no references | **done** | 250 words, shared with PoF.  A third-party summary suggests "about 200 words" *(unverified)*; the official snippet says 250. |
 | Highlights, 3-5 bullets, <= 85 characters each | **done** (check) | `highlights.txt`, uploaded as a separate file; 76-85 characters. |
 | Keywords | **done** (check the maximum, usually 1-7) | 7 keywords in the `keyword` environment. |
-| Nomenclature | **done** | Customary in IJHMT; list after the keywords.  Two symbols carry two meanings in the shared text (see below). |
+| Nomenclature | **done** | Customary in IJHMT; list after the keywords.  Only $R$ carries two meanings (see below). |
 | Graphical abstract | **decision** | Encouraged, optional *(unverified)*.  Candidates: the Damköhler sweep panel (a) or the geometry schematic. |
 | CRediT authorship statement | **placeholder** | 14 CRediT roles; not assigned here. |
 | Declaration of competing interest | **placeholder** | Elsevier's standard wording inside the placeholder. |
@@ -73,13 +73,12 @@ allows exactly that one there and none in the draft.  The draft patches
 
 ## Shared-text issues that IJHMT readers will notice (decision)
 
-- **Symbol clashes**, now visible in the nomenclature: $\mu$ is the
-  viscosity in Sec. 4.2 and the Graetz decay rate in Sec. 5; Pe is
-  diameter-based (Re Sc) in Sec. 4.1 and $U_bR/D$ in Sec. 5; $R$ is the gas
-  constant and the tube radius (stated in the text).  Renaming the decay
-  rate (e.g. $\lambda$, but $\lambda_k$ is taken; $\kappa$ is free) and
-  the Graetz Pe ($\mathrm{Pe}_R$) would remove the first two; it changes
-  shared sections and the arXiv/PoF builds.
+- **Symbols**: resolved on 16 October 2026.  The Graetz decay rate is now
+  $\kappa$ ($\mu$ stays the viscosity) and the Graetz Péclet number
+  $\mathrm{Pe}_R=U_bR/D$ (Pe stays diameter-based, Re Sc), in
+  `sections/05-verification.tex`, the supplement and the generated full
+  Graetz table.  $R$ remains both the gas constant and the tube radius;
+  the text says which is meant where both appear.
 - **Spelling**: British in the body, American in the title.  Elsevier
   copy-editing accepts either if consistent; decide.
 - **Framing**: the introduction already presents the column as a laminar

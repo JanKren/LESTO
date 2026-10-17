@@ -329,7 +329,7 @@ def main():
     full_rows = [[r['scheme'], r['outlet'], f"{r['Bi']:g}", r['law'], '/'.join(map(str, r['levels'])), f"{r['p']:.4f}",
                   tex_sci(r['ext_rel_error'], 2), tex_sci(r['gci_fine_pct'], 2)] for r in graetz['triplets']]
     table(generated / 'graetz-full-table.tex', 'lllllrrr',
-          ['Scheme', 'Outlet', 'Bi', 'Wall law', '$N_r$', '$p$', r'$\mu_{\rm ext}/\mu_{\rm ref}-1$', r'GCI (\%)'],
+          ['Scheme', 'Outlet', 'Bi', 'Wall law', '$N_r$', '$p$', r'$\kappa_{\rm ext}/\kappa_{\rm ref}-1$', r'GCI (\%)'],
           full_rows)
     figures = HERE / 'figures'; figures.mkdir(exist_ok=True)
     legacy = json.loads((FULL / 'analysis.json').read_text())   # 18,432 cells, upwind

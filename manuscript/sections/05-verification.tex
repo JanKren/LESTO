@@ -13,10 +13,10 @@ extended Graetz problem with a Robin wall condition
 axial diffusion included, and a constant first-order wall uptake
 $-\rho D\,\partial Y/\partial r=\rho k_wY$ at $r=R$. Far from the inlet
 and the outlet every cross-sectional measure decays as
-$\exp(-\mu x)$, and the decay rate depends only on the P\'eclet number
-$\mathrm{Pe}=U_bR/D$ and the Biot number $\mathrm{Bi}=k_wR/D$, the
+$\exp(-\kappa x)$, and the decay rate depends only on the P\'eclet number
+$\mathrm{Pe}_R=U_bR/D$ and the Biot number $\mathrm{Bi}=k_wR/D$, the
 analogue of the wall Damk\"ohler number of \cref{eq:damkohler}. The
-reference $\mu R$ for $\mathrm{Pe}=5$ and $\mathrm{Bi}=1$ and 50 is the
+reference $\kappa R$ for $\mathrm{Pe}_R=5$ and $\mathrm{Bi}=1$ and 50 is the
 smallest positive eigenvalue of the radial problem, computed by a power
 series in extended precision, by shooting and by Chebyshev
 collocation; the three agree within a relative $\GraetzBound$.
@@ -28,18 +28,18 @@ meshes are 2$^\circ$ wedges with exactly axisymmetric cell metrics and
 $N_r=32$, 64, 128 and 256 uniform radial cells, $\Delta x=2\Delta r$, and
 the parabolic carrier enters through exact face fluxes. Steady states
 are obtained by implicit Euler steps with a very large time step, and
-$\mu$ is fitted to the computed gas line density in a window chosen from
+$\kappa$ is fitted to the computed gas line density in a window chosen from
 the spectrum. Two wall laws are compared: the half-cell series law and
 the kinetic law applied directly to the cell-centre value (no half-cell
 resistance), which is the form of a volumetric first-cell sink. Every
-fitted $\mu$ equals the decay rate of the developed discrete mode of
+fitted $\kappa$ equals the decay rate of the developed discrete mode of
 the documented scheme within $\GraetzMuH$, and moving the fit window or
 changing the outlet condition changes it by less than $10^{-7}$, so the
 differences below are discretisation errors. All \GraetzCriteria{}
 acceptance criteria of the study pass (records, provenance and
 regeneration: Sec.~S7 of the supplementary material).
 
-\Cref{tab:graetz} gives the relative error of $\mu$ on each mesh, the
+\Cref{tab:graetz} gives the relative error of $\kappa$ on each mesh, the
 observed order and the grid convergence index GCI$_{\rm fine}$ of Celik
 et al.\ \cite{Celik2008procedure} on $N_r=64/128/256$. The half-cell law
 converges at order \GraetzOrderHalfMin--\GraetzOrderHalfMax{} with
@@ -54,8 +54,8 @@ On the coarsest mesh the cell-centre law errs by 1--2\% in the decay
 rate, the half-cell law by at most $10^{-4}$.
 \begin{table*}[tb]
 \centering
-\caption{Graetz--Robin verification ($\mathrm{Pe}=5$): relative error
-$\mu/\mu_{\rm ref}-1$ of the fitted decay rate on $N_r$ radial cells,
+\caption{Graetz--Robin verification ($\mathrm{Pe}_R=5$): relative error
+$\kappa/\kappa_{\rm ref}-1$ of the fitted decay rate on $N_r$ radial cells,
 observed order $p$ and GCI$_{\rm fine}$ \cite{Celik2008procedure} on
 $N_r=64/128/256$, Gauss linear advection, zero-gradient outlet.
 Half-cell series: \cref{eq:halfcell}; cell-centre value: kinetic law
