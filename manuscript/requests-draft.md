@@ -157,8 +157,8 @@ and wall deposition in thermosublimatography columns, coupled to GEMS3K for
 the gas-phase speciation. I have reconstructed three of the experiments of
 Liu et al. (2025): PbI2_SS, LBE-I_SS_II and LBE-I_SiO2_I. In the steel
 columns the model reproduces the main deposition zones; the silica case
-still disagrees (see A.1). A manuscript for Physics of Fluids
-is nearly ready. All inputs so far come from the published figures, so the
+still disagrees (see A.1). A manuscript for the International
+Journal of Heat and Mass Transfer is nearly ready. All inputs so far come from the published figures, so the
 comparison is limited by what I could digitise. I would like to ask whether
 you could help with two things.
 

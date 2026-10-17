@@ -1718,7 +1718,7 @@
     "manuscript/data/graetz/provenance.json": "e8664654efd15b56c6c67d55e26dab078deca9f6047280d6a1dc09d1167215f7",
     "manuscript/data/graetz/reference.json": "0f5676f177ad1fcf713874d66337f766b6abd0e179c688368d32bd01378f1694",
     "manuscript/data/graetz/table.md": "64110706e8d58f76f99134f1283f18bc6acdef7ccb413e14a6b6a402db334a97",
-    "manuscript/prepare_results.py": "e2112484caf9c544c089a99b75c251e412a768b29260dbe993d18941e4ba4bfa",
+    "manuscript/prepare_results.py": "68137d30f92ce587c1b45ac4ab9bcd82981b8cc7f4334fbf9a60e1b555b77d1c",
     "run/023-lobresco2026/cases/coarse/T106_300/case.json": "6916fb1ffd523a43f44b44cd00e7ed99ceef2d82dbadc90f72c6d92227a501d4",
     "run/023-lobresco2026/cases/coarse/T106_300/final_profiles/PbI2_g_gamma.dat": "408c7abf67ea140cad2db50e19717b319cecedd02a718e91ca8b10eaff494d3c",
     "run/023-lobresco2026/cases/coarse/T106_300/final_profiles/PbI2_g_native.dat": "0e12ed0945dc95d6eaf8e02ee81aededf49c4211e40996c806e90b0df5960935",

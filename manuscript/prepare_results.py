@@ -51,7 +51,7 @@ SHORT = ['Pure PbI2', 'Steel Q2, 0.1%', 'Steel Q2, 1%', 'Steel Q2, 1%, shifted B
 STUDY_BASES = {'pure': 'PbI2_SS_Q1_baseline', 'steel': 'LBE-I_SS_II_Q2_shift29k_sat0.01'}
 CELLS = {1: 8192, 2: 18432, 3: 41472, 4: 93312}
 RATIO = 1.5
-# Final figure width in inches.  The PoF reprint text width is 396 pt = 5.48 in; every figure is drawn at
+# Final figure width in inches (chosen for a 396 pt = 5.48 in text width); every figure is drawn at
 # its printed size and included without scaling, so the font sizes below are the printed sizes.
 WIDTH = 5.4
 SPECIES_TEX = {'PbI2': r'PbI$_2$', 'BiI3': r'BiI$_3$'}

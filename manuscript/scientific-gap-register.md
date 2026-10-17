@@ -39,7 +39,7 @@ validation as complete. No additional CFD simulations were executed.
 | Experimental coordinates | Two incompatible silica curve-to-label mappings | Obtain original T(x), scan coordinates and their common physical origin. Retain both hypotheses until registration is independently established. |
 | Release and cooling history | Assumed three-hour mean rate; 60 s source runs and fixed-temperature flow-stop diagnostics | Obtain time-dependent release or independent source constraints and T(x,t)/flow histories through shutdown. Full predictive validation needs these or defensible bounds on their effect. |
 | Controller and source geometry | Nominal controller convention; incomplete boat geometry | Confirm calibration reference, actual volumetric/mass flow, boat cross-section and axial location. Do not infer boat-flow effects from shifting an empty-tube source. |
-| Submission scope and declarations | Working two-author draft with a Physics of Fluids layout and checklist; nothing submitted | Coauthors must accept the methods/sensitivity scope, scientific evidence and author/funding/declaration details and confirm the intended journal. |
+| Submission scope and declarations | Working two-author draft for the International Journal of Heat and Mass Transfer (`ijhmt/`, checklist there); nothing submitted | Coauthors must accept the methods/sensitivity scope, scientific evidence and author/funding/declaration details for IJHMT, the only target journal since 17 October 2026. |
 
 The observation-width analysis partly characterises the spatial gap; it does
 not close it. The tested thermodynamic effect is numerically persistent; it

@@ -412,9 +412,6 @@ def main():
     for latex_log in [HERE / 'build/main.log', HERE / 'build/supplementary.log']:
         log = latex_log.read_text()
         assert not re.search(r'undefined|Overfull|LaTeX Error|^!', log, re.MULTILINE), ('LaTeX issue', latex_log)
-    for pof_log in [HERE / 'pof/build/lesto-pof.log', HERE / 'pof/build/supplementary.log']:
-        pof_text = pof_log.read_text()
-        assert not re.search(r'undefined|^Overfull|LaTeX Error|^!', pof_text, re.MULTILINE | re.IGNORECASE), pof_log
     # IJHMT working draft (arxiv.sty, line numbers) and its supplement: clean.
     for ijhmt_log in [HERE / 'ijhmt/build/lesto-ijhmt.log', HERE / 'ijhmt/build/supplementary.log']:
         assert not re.search(r'undefined|^Overfull|LaTeX Error|^!', ijhmt_log.read_text(),
@@ -463,7 +460,6 @@ def main():
         'bibliography_warnings': 0, 'draft_placeholders': 0,
         'pdf_sha256': hashlib.sha256(pdf.read_bytes()).hexdigest(),
         'checker_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        'pof_overfull_latex_boxes': 0, 'pof_undefined_latex_references': 0,
         'ijhmt_overfull_latex_boxes': 0, 'ijhmt_undefined_latex_references': 0,
         'ijhmt_elsarticle_class_page1_overfull_boxes': len(elsarticle_overfull),
         'scope': 'Saved-results and manuscript consistency checks; not new CFD runs or experimental validation.'}

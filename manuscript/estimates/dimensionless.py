@@ -1,4 +1,4 @@
-"""Dimensionless numbers for the LESTO PoF framing paragraph.
+"""Dimensionless numbers for the LESTO manuscript framing paragraph.
 
 Inputs (all stated in the manuscript):
   diameters 4.8 mm (steel), 5.0 mm (silica)                Sec. 2, Tab. 1

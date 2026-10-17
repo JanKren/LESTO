@@ -3,8 +3,11 @@
 Created 16 October 2026, when IJHMT replaced Physics of Fluids as the
 target journal (reason: the paper's content is laminar internal mass
 transfer with a nonlinear wall law, the readership that will use it, and
-a "larger fish than NED").  Nothing has been submitted.  `../pof/` is kept
-as a fallback; both builds share `../sections/`, including the abstract
+a "larger fish than NED").  Nothing has been submitted.  On 17 October
+2026 the authors made IJHMT the only target: the Physics of Fluids version
+(`manuscript/pof/`) was removed; it stays in the git history (last at
+commit `bbceaf7`).  The IJHMT builds and the arXiv build (`../main.tex`)
+share `../sections/`, including the journal abstract
 (`abstract-journal.tex`) and the data statement
 (`data-availability-journal.tex`).
 
@@ -39,7 +42,7 @@ and font size each removed) and is invisible in the PDF; the checker
 allows exactly that one there and none in the draft.  The draft patches
 `lineno` so that lines around amsmath displays are numbered.
 
-## Blockers (as for PoF)
+## Blockers
 
 | # | Item |
 |---|---|
@@ -53,8 +56,8 @@ allows exactly that one there and none in the draft.  The draft patches
 | Requirement | Status | Notes |
 |---|---|---|
 | Class | **done** | Submission: `lesto-ijhmt-elsarticle.tex`, `elsarticle` `preprint,12pt`, numbered references `elsarticle-num` (`numbers,sort&compress`).  Working draft until then: `lesto-ijhmt.tex` (arxiv.sty, line numbers). |
-| Title | **done** | The PoF title, in British spelling ("modelling") like the body. |
-| Abstract <= 250 words, no references | **done** | 250 words, shared with PoF.  A third-party summary suggests "about 200 words" *(unverified)*; the official snippet says 250. |
+| Title | **done** | Transport framing (decided at the 15 October sign-off), in British spelling ("modelling") like the body. |
+| Abstract <= 250 words, no references | **done** | 250 words.  A third-party summary suggests "about 200 words" *(unverified)*; the official snippet says 250. |
 | Highlights, 3-5 bullets, <= 85 characters each | **done** (check) | `highlights.txt`, uploaded as a separate file; 76-85 characters. |
 | Keywords | **done** (check the maximum, usually 1-7) | 7 keywords in the `keyword` environment. |
 | Nomenclature | **done** | Customary in IJHMT; list after the keywords.  No symbol carries two meanings. |
@@ -65,11 +68,30 @@ allows exactly that one there and none in the draft.  The draft patches
 | Funding, acknowledgements | **placeholder** | Grant numbers to be confirmed (EU LESTO). |
 | Data availability | **placeholder (B2)** | Shared statement. |
 | Supplementary material | **done** | `lesto-ijhmt-supplementary.pdf` (the shared supplement), uploaded separately. |
-| Cover letter | **done** (draft) | `cover-letter.md`; IJHMT accepts one (PoF does not). |
+| Cover letter | **done** (draft) | `cover-letter.md`; IJHMT accepts one. |
 | ORCID iDs | **placeholder** | Entered in the submission system. |
 | Suggested reviewers | **decision** | None proposed here. |
 | Review model | note | Single-anonymised *(unverified)*: names stay on the manuscript. |
 | Open access | **decision** | Hybrid; Elsevier quotes the article charge at submission.  Check whether PSI or the EU grant (Horizon open-access obligation) covers it; an arXiv copy gives green open access either way. |
+
+## Carried over from the Physics of Fluids checklist
+
+Items of the removed `pof/SUBMISSION-CHECKLIST.md` that still apply:
+
+- **Alt text** for the nine figures and the supplementary figure is not
+  written; Elsevier asks for it at submission.
+- **Affiliation string (decision)**: "Paul Scherrer Institute, 5232
+  Villigen PSI, Switzerland"; check PSI's preferred form (centre or
+  laboratory name).
+- **AI disclosure**: substantial AI-assisted drafting and revision must be
+  described accurately in the Elsevier declaration; do not describe it as
+  proofreading only.
+- **Claims**: diffusion-control statements are qualified (tube-scale
+  estimate and upwind sensitivities); the review-A/B studies listed in
+  `../scientific-gap-register.md` are still outstanding.
+- **Review package**: `../lesto-iodine-review.zip` predates the change of
+  journal and still contains the PoF build; rebuild it
+  (`../package_review.py`) only after final approval.
 
 ## Shared-text issues that IJHMT readers will notice (decision)
 

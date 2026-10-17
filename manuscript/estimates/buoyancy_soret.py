@@ -1,4 +1,4 @@
-"""Buoyancy and thermal-diffusion bounds for the PoF discussion.
+"""Buoyancy and thermal-diffusion bounds for the manuscript discussion.
 
 Inputs (case inputs, App. A / Sec. 4.1): helium perfect gas, M=4.0026e-3,
 Cp=5193, Sutherland As=1.4683e-6, Ts=83.40 (OpenFOAM modified Eucken

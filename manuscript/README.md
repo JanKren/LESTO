@@ -90,9 +90,10 @@ Run `python3 manuscript/package_review.py` to rebuild the review ZIP.
   builds the working draft (arxiv.sty with line numbers); `--elsarticle`
   the Elsevier copy for submission.  Highlights, cover letter and
   `SUBMISSION-CHECKLIST.md` are in the folder.
-- `pof/`: Physics of Fluids (REVTeX) version, kept as a fallback;
-  `bash manuscript/pof/build.sh`.  The journal abstract and data statement
-  are shared by both (`sections/*-journal.tex`).
+  The journal abstract and data statement are `sections/*-journal.tex`.
+  IJHMT is the only target journal (17 October 2026); the earlier Physics
+  of Fluids version was removed and stays in the git history (commit
+  `bbceaf7`).
 - `prepare_results.py`: results-to-manuscript pipeline.
 - `check_results.py`: independent profile arithmetic, input hashes and TeX checks.
 - `package_review.py`: portable review archive and its SHA-256 manifest.
