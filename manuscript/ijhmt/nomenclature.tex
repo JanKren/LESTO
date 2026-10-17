@@ -1,0 +1,87 @@
+% IJHMT nomenclature, shared by lesto-ijhmt.tex (arxiv.sty draft) and
+% lesto-ijhmt-elsarticle.tex.
+% Nomenclature list: symbol column 8.5em, group headings in bold.
+\newenvironment{longnomenclature}
+  {\begin{list}{}{\setlength{\labelwidth}{8em}\setlength{\leftmargin}{8.5em}%
+    \setlength{\labelsep}{0.5em}\setlength{\itemsep}{0pt}%
+    \setlength{\parsep}{0pt}\renewcommand{\makelabel}[1]{##1\hfil}}}
+  {\end{list}}
+\newcommand{\nomgroup}[1]{\item[\textbf{#1}]\mbox{}}
+
+\section*{Nomenclature}
+\label{sec:nomenclature}
+{\small
+\begin{longnomenclature}
+\nomgroup{Latin symbols}
+\item[$A_f$] wall face area, m$^2$
+\item[$a_{\rm Pb}$, $a_{\rm Bi}$] activities of Pb and Bi in LBE
+\item[$b_k$] concentration of element $k$, mol\,m$^{-3}$
+\item[$C_e$, $s_i$] multipliers of the HKS conductance
+\item[$c$, $\bar c$, $c_{\rm eq}$] vapour concentration, its cross-section
+  mean and its equilibrium value (channel), mol\,m$^{-3}$
+\item[$D_i$] molecular diffusivity of gas $i$, m$^2$\,s$^{-1}$
+\item[$d$] tube diameter, m
+\item[$d_f$] distance from cell centre to wall face, m
+\item[$G_i$] HKS conductance, s\,m$^{-1}$
+\item[$G_{i,f}^{\rm eff}$] effective (kinetic and half-cell diffusion)
+  conductance, s\,m$^{-1}$
+\item[$G^\circ$] standard Gibbs energy, J\,mol$^{-1}$
+\item[$h$] channel half-height, m
+\item[$J$] wall molar flux in the channel, mol\,m$^{-2}$\,s$^{-1}$
+\item[$j_i$] wall mass flux, positive from condensate to gas,
+  kg\,m$^{-2}$\,s$^{-1}$
+\item[$K_{f,i}$] formation equilibrium constant of gas $i$
+\item[$K_r$] equilibrium constant of the BiI reaction
+\item[$k_w$] first-order wall uptake velocity, m\,s$^{-1}$
+\item[$M_i$] molar mass, kg\,mol$^{-1}$
+\item[$m_i$] source mass of compound $i$, kg
+\item[$\dot m$] helium mass flow, kg\,s$^{-1}$
+\item[$N_k$] molar inventory of element $k$, mol
+\item[$N_r$] number of radial cells
+\item[$p$] pressure, Pa
+\item[$p_i$] partial pressure of gas $i$, Pa
+\item[$p_{{\rm eq},i}$] equilibrium pressure over the condensate, Pa
+\item[$p^\circ$] standard pressure, $10^5$\,Pa
+\item[$p_h$] source pressure, Pa
+\item[$q_{1,i}$, $q_{2,k}$] source rates of models Q1 and Q2,
+  mol\,s$^{-1}$
+\item[$q_{\rm He}$] helium molar flow, mol\,s$^{-1}$
+\item[$R$] gas constant, J\,mol$^{-1}$\,K$^{-1}$; tube radius, m
+\item[$R_k$] balance residue of element $k$, mol
+\item[$r$, $x$] radial and axial coordinates, m
+\item[$S_i^{\rm rel}$, $S_i^{\rm wall}$] release and wall sources,
+  kg\,m$^{-3}$\,s$^{-1}$
+\item[$T$] temperature, K
+\item[$T_h$] source-furnace temperature, K
+\item[$t$] time, s
+\item[$U_b$] bulk velocity, m\,s$^{-1}$
+\item[$\vect{u}$] carrier velocity, m\,s$^{-1}$
+\item[$Y_i$] mass of gas $i$ per unit carrier mass
+\nomgroup{Greek symbols}
+\item[$\alpha_i$] accommodation coefficient
+\item[$\beta$] metal saturation of source model Q2
+\item[$\kappa$] axial decay rate of the Graetz problem, m$^{-1}$
+\item[$\lambda_k$] dimensionless element potential
+\item[$\mu$] dynamic viscosity, Pa\,s
+\item[$\nu_{ki}$] atoms of element $k$ in gas $i$
+\item[$\rho$] carrier density, kg\,m$^{-3}$
+\item[$\tau_{\rm exp}$] duration of the experiment, s
+\item[$\chi_i$] $\rho RT/M_i$, Pa
+\nomgroup{Dimensionless numbers}
+\item[Bi] Biot number, $k_wR/D$
+\item[$\mathrm{Da}_i$] wall Damk\"ohler number, \cref{eq:damkohler}
+\item[Gr] Grashof number
+\item[$\hat J$] normalised wall flux, $Jh/[D(\bar c-c_{\rm eq})]$
+\item[Pe] P\'eclet number, $\mathrm{Re\,Sc}$ (diameter based)
+\item[$\mathrm{Pe}_R$] radius-based P\'eclet number of the Graetz problem,
+  $U_bR/D$
+\item[Re] Reynolds number, $4\dot m/(\pi d\mu)$
+\item[Sc] Schmidt number
+\nomgroup{Subscripts}
+\item[$c$] cell centre
+\item[$f$] wall face
+\item[$i$] gas species
+\item[$k$] element (Pb, Bi, I)
+\item[$w$] wall
+\end{longnomenclature}
+}

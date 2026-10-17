@@ -46,34 +46,7 @@ transport}
 \date{\today}
 
 \begin{abstract}
-We present an OpenFOAM finite-volume model of vapor transport in
-laminar thermal-gradient columns: nine Pb--Bi--I gases in a frozen
-helium carrier, with element-conserving gas equilibrium and shared wall
-inventories.
-Reversible iodide exchange follows a Hertz--Knudsen--Schrage law in
-series with the near-wall diffusive resistance; on a Graetz--Robin
-problem this face flux converges at second order, a cell-center sink at
-first order. In 79 simulations the largest raw element-balance
-residue is $1.41\times10^{-12}$ of supplied material.
-Halving the time step or adding correctors changes iodine profiles by
-at most 0.323\%. First-order upwind advection differs from
-a bounded limited-linear scheme by up to 20.8\% at equal mesh.
-Refining from 41,472 to 93,312 cells changes profiles by
-\SteelUpThree--\UpFourOthersMax\% (upwind, four cases) and 1.98\%
-(bounded, one case), with inconsistent observed orders. A wall
-Damk\"ohler sweep reproduces the kinetic and diffusion
-limits and shows that radial diffusion, not interfacial
-kinetics, limits wall exchange in the production cases; with the
-bounded scheme, accommodation changes alter iodine profiles by at most
-\PSAlphaTwoMax\%, diffusivity changes by up to \PSDMax\%.
-A $+29\units{kJ\,mol^{-1}}$ shift in the BiI gas Gibbs energy changes
-the BiI$_3$ share of deposited iodide iodine from 94.58\% to 2.01\%. Without tuning, the wall
-law gives deposition-onset temperatures of five PbI$_2$ experiments
-with an RMS deviation of 18 K, against 35 K for two published models;
-because carrier, vapor-pressure and source assumptions differ and
-computed peaks lie 1--4 cm upstream, this promising result does not yet
-isolate the wall treatment. The results support a conservative method,
-not independent predictive validation.
+\input{../sections/abstract-journal}
 \end{abstract}
 
 \maketitle
@@ -110,27 +83,7 @@ confirm that they apply to this work.}
 \textbf{Bojan Ni\v{c}eno}: \confirm{CRediT roles}.
 
 \section*{Data Availability}
-The solver, the benchmark preparation scripts and the data that support
-the findings of this study are openly available in the LESTO repository
-at \url{https://github.com/JanKren/LESTO},
-\confirm{archived release or DOI, and that the branch holding these
-files is public}. These files comprise the completed baseline,
-follow-up, production, scheme and mesh, and iteration-check metrics,
-the Graetz--Robin verification records, saved axial profiles,
-generated tables,
-figure-generation code and SHA-256 provenance records. The experimental
-curves were digitized from Liu et al.\ \cite{Liu2025chemical}; they
-reconstruct published figures, are not author-supplied measurements,
-and are adapted under the source paper's CC BY 4.0 license. The
-measured profiles, wall temperatures and model curves of Lobresco et
-al.\ \cite{Lobresco2026assessment} were digitized in the same way and
-are adapted under that paper's CC BY 4.0 license; the case set-up and
-final profiles of our comparison runs are included. Some
-thermodynamic coefficient files are external inputs that are not
-redistributed; their local identifiers and the provenance of the derived
-tables are recorded with the benchmark. Reproducing the CFD calculations
-from the coefficients requires access to those inputs, whereas
-regenerating the figures from the saved results does not.
+\input{../sections/data-availability-journal}
 
 
 \bibliography{../references}

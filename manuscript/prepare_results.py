@@ -10,6 +10,8 @@ import sys
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.colors
+import matplotlib.ticker
 from matplotlib.patches import Rectangle
 import numpy as np
 
@@ -38,6 +40,8 @@ LOB_RUN = REPO / 'run/023-lobresco2026'
 GRAETZ = HERE / 'data/graetz'
 # Damkoehler sweep of the half-cell channel (case 016): tracked summary records of the 13 + 5 runs.
 DAMK = HERE / 'data/damkohler'
+# Gas-phase PbI2 field of the pure PbI2 column at 60 s (upwind 93,312-cell run): tracked record, data/fields.
+FIELDS = HERE / 'data/fields'
 # Production-scheme sensitivities: D and accommodation variants of two baselines, 41,472 cells, limitedLinear.
 PSENS = REPO / 'run/024-liu2025/production_sensitivities'
 LOB_CASES = ['T106_6', 'T106_60', 'T106_300', 'T5_60', 'T540_60']
@@ -51,6 +55,12 @@ RATIO = 1.5
 # its printed size and included without scaling, so the font sizes below are the printed sizes.
 WIDTH = 5.4
 SPECIES_TEX = {'PbI2': r'PbI$_2$', 'BiI3': r'BiI$_3$'}
+# One palette for every figure (Okabe-Ito, colour-blind safe): variants and cases take CYCLE in order; this
+# work is black, published measurements are grey (filled scans, grey markers), the release region is orange.
+CYCLE = ['#0072B2', '#E69F00', '#009E73', '#CC79A7', '#56B4E9', '#D55E00']
+SPECIES_COLOUR = {'PbI2': '#0072B2', 'BiI3': '#CC79A7'}
+MEASURED = '.82'; MEASURED_LINE = '.45'
+SOURCE = '#E69F00'; DEPOSIT = '#56B4E9'; GAS = '#f4f4f4'; RESIST = '#B2182B'
 
 
 def read_csv(path):
@@ -253,6 +263,35 @@ def damkohler_study():
             'max_relative_closure': max(r['max_relative_closure'] for r in runs + refined)}
 
 
+def field_study():
+    """Saturation ratio S = x / x_eq(T_w) of PbI2(g) in the pure PbI2 steel column at 60 s (data/fields): the
+    production run, and the upwind 93,312-cell run as a scheme and mesh cross-check."""
+    provenance = json.loads((FIELDS / 'provenance.json').read_text())
+    out = {}
+    for name in ('production', 'upwind_L4'):
+        path = FIELDS / f'pbi2_field_{name}.npz'
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance[name]['npz_sha256']
+        d = np.load(path)
+        x, eq, deposit = d['x_cm'], d['mole_eq_wall'], d['wall_mol_per_m']
+        zone = np.flatnonzero(deposit >= 0.01 * deposit.max()); zone = slice(zone[0], zone[-1] + 1)
+        S = {k: d['mole_' + k][zone] / eq[zone] for k in ('wall_row', 'cup', 'axis')}
+        first = int(np.flatnonzero(d['mole_cup'] / eq >= 1)[0])
+        station = lambda xs: int(np.argmin(abs(x - xs)))
+        out[name] = {
+            'case': provenance[name]['case'], 'mesh': provenance[name]['mesh'], 'scheme': provenance[name]['scheme'],
+            'zone_cm': [float(x[zone][0]), float(x[zone][-1])],
+            'zone_wall_T_C': [float(d['wall_T_K'][zone][0] - 273.15), float(d['wall_T_K'][zone][-1] - 273.15)],
+            'zone_deposit_fraction': float(deposit[zone].sum() / deposit.sum()),
+            'S_wall_cell': [float(S['wall_row'].min()), float(S['wall_row'].max())],
+            'S_flow_weighted': [float(S['cup'].min()), float(S['cup'].max())],
+            'S_axis_max': float(S['axis'].max()),
+            'first_saturated_cm': float(x[first]), 'first_deposit_cm': float(x[np.flatnonzero(deposit > 0)[0]]),
+            'wall_over_axis': {xs: float(d['mole_wall_row'][station(xs)] / d['mole_axis'][station(xs)])
+                               for xs in (38, 40, 42)},
+            'inventory_ratio': provenance[name]['inventory_ratio_2PbI2_over_I']}
+    return out
+
+
 def production_sensitivities(follow):
     """D and accommodation variants with the production scheme, next to the upwind follow-up values."""
     rows = read_csv(PSENS / 'comparison.csv')
@@ -290,7 +329,7 @@ def main():
     full_rows = [[r['scheme'], r['outlet'], f"{r['Bi']:g}", r['law'], '/'.join(map(str, r['levels'])), f"{r['p']:.4f}",
                   tex_sci(r['ext_rel_error'], 2), tex_sci(r['gci_fine_pct'], 2)] for r in graetz['triplets']]
     table(generated / 'graetz-full-table.tex', 'lllllrrr',
-          ['Scheme', 'Outlet', 'Bi', 'Wall law', '$N_r$', '$p$', r'$\mu_{\rm ext}/\mu_{\rm ref}-1$', r'GCI (\%)'],
+          ['Scheme', 'Outlet', 'Bi', 'Wall law', '$N_r$', '$p$', r'$\kappa_{\rm ext}/\kappa_{\rm ref}-1$', r'GCI (\%)'],
           full_rows)
     figures = HERE / 'figures'; figures.mkdir(exist_ok=True)
     legacy = json.loads((FULL / 'analysis.json').read_text())   # 18,432 cells, upwind
@@ -433,6 +472,8 @@ def main():
             f"{r['upwind_I_L1_pct']:.2f}", cm(r['I_centroid_shift_cm']), cm(r['upwind_I_centroid_shift_cm'])]
            for i, r in enumerate(ps_rows)], midrules=(4,))
     damk = damkohler_study()
+    field = field_study()
+    fp, fu = field['production'], field['upwind_L4']
     q1_labels = {'PbI2_SS': r'Pure PbI$_2$, steel', 'LBE-I_SS_II': 'LBE, steel', 'LBE-I_SiO2_I': 'LBE, silica'}
     table(generated / 'peaks-table.tex', 'llrrrrrrr',
           ['Case', 'Species', r'$x_{\rm exp}$', r'$x_{\rm bin}$', r'$x_{3}$', r'$T_{\rm exp}$',
@@ -615,7 +656,16 @@ def main():
         'DaOnset': f"{damk['onset_K'][0]:.0f}", 'DaOnsetSpread': f"{damk['onset_K'][1] - damk['onset_K'][0]:.1f}",
         'DaProfOne': f"{100 * damk['profile_L1_alpha_0.1']:.1f}", 'DaProfTwo': f"{100 * damk['profile_L1_alpha_0.01']:.0f}",
         'DaFluxDeficit': f"{100 * damk['flux_deficit_alpha_0.01']:.0f}",
-        'DaRefine': f"{100 * damk['refinement_max_rel_change']:.2f}"})
+        'DaRefine': f"{100 * damk['refinement_max_rel_change']:.2f}",
+        'FieldZoneLow': f"{fp['zone_cm'][0]:.1f}", 'FieldZoneHigh': f"{fp['zone_cm'][1]:.1f}",
+        'FieldZoneTHigh': f"{fp['zone_wall_T_C'][0]:.0f}", 'FieldZoneTLow': f"{fp['zone_wall_T_C'][1]:.0f}",
+        'FieldZoneShare': f"{100 * fp['zone_deposit_fraction']:.1f}",
+        'FieldWallSMax': f"{fp['S_wall_cell'][1]:.3f}",
+        'FieldCupSMin': f"{fp['S_flow_weighted'][0]:.2f}", 'FieldCupSMax': f"{fp['S_flow_weighted'][1]:.2f}",
+        'FieldAxisSMax': f"{fp['S_axis_max']:.2f}",
+        'FieldRatioForty': f"{fp['wall_over_axis'][40]:.2f}",
+        'FieldUpWallSMax': f"{fu['S_wall_cell'][1]:.3f}", 'FieldUpCupSMax': f"{fu['S_flow_weighted'][1]:.2f}",
+        'FieldUpAxisSMax': f"{fu['S_axis_max']:.2f}"})
     for r, tag in zip(lob_rows, 'ABCDE'):   # model minus experiment onset, in LOB_CASES order
         macros['LobDiff' + tag] = sign(r['ours_minus_exp_K'])
     (generated / 'numbers.tex').write_text('% Generated from saved completed reports.\n' + ''.join(
@@ -626,7 +676,7 @@ def main():
             'iteration_check_iodine_L1_pct': iteration_l1, 'production_max_raw_residue': production_residue,
             'sensitivity': sensitivity, 'alignment': alignment, 'integrity_60s_followup': integrity,
             'lobresco2026': {'rows': lob_rows, 'summary': lob_summary}, 'graetz_robin': graetz,
-            'damkohler_sweep': damk, 'production_sensitivities': psens,
+            'damkohler_sweep': damk, 'deposition_field': field, 'production_sensitivities': psens,
             'baseline_trace_mole_fraction_upper_bound': original['max_trace_mole_fraction_upper_bound'],
             'legacy_18432_upwind_q1_peaks': legacy['q1_peaks'],
             'baseline_max_negative_I_over_supplied_I': original['max_negative_I_over_supplied_I'],
@@ -638,25 +688,115 @@ def main():
     plt.rcParams.update({'font.size': 9, 'axes.titlesize': 9, 'axes.labelsize': 9, 'xtick.labelsize': 8,
                          'ytick.labelsize': 8, 'legend.fontsize': 8, 'legend.title_fontsize': 8,
                          'axes.spines.top': False, 'axes.spines.right': False, 'lines.linewidth': 1.2,
-                         'font.family': 'DejaVu Sans', 'pdf.fonttype': 42, 'ps.fonttype': 42})
+                         'font.family': 'DejaVu Sans', 'pdf.fonttype': 42, 'ps.fonttype': 42,
+                         'axes.prop_cycle': matplotlib.cycler(color=CYCLE)})
     def save(fig, name):
         fig.savefig(figures / (name + '.pdf'), metadata={'CreationDate': None, 'ModDate': None})
         fig.savefig(figures / (name + '.png'), dpi=200); plt.close(fig)
-    fig, ax = plt.subplots(figsize=(WIDTH, 1.9), layout='constrained')
-    ax.add_patch(Rectangle((0, .45), 1.25, .16, facecolor='.93', edgecolor='black'))
-    ax.add_patch(Rectangle((.09, .46), .015, .14, facecolor='#d89026', edgecolor='black'))
-    ax.annotate('Helium', (.02, .53), xytext=(-.14, .53), arrowprops={'arrowstyle': '->'}, va='center')
-    ax.annotate('Prescribed release region;\nboat obstruction omitted', (.0975, .59), xytext=(.36, .9),
-                arrowprops={'arrowstyle': '->'}, ha='center')
-    ax.annotate('1.25 m computational column', (0, .17), xytext=(.625, .17), ha='center')
-    ax.annotate('', (0, .32), (1.25, .32), arrowprops={'arrowstyle': '<->'})
-    ax.text(.625, -.17, 'Inner diameter: 4.8 mm (steel), 5.0 mm (silica); 5° wedge; not to scale', ha='center')
-    ax.set(xlim=(-.18, 1.3), ylim=(-.3, 1.1)); ax.axis('off'); save(fig, 'experiment_schematic')
+    # ---- Fig. 1: the column coloured by its wall temperature (pure PbI2, steel), and one wall cell -------------
+    rows_T = read_csv(BENCH / 'digitized/PbI2_SS_temperature.csv')
+    xs = np.array([100 * float(v['x_m']) for v in rows_T]); Ts = np.array([float(v['T_K']) - 273.15 for v in rows_T])
+    fig = plt.figure(figsize=(WIDTH, 2.6), layout='constrained')
+    grid = fig.add_gridspec(1, 2, width_ratios=[2.3, 1])
+    ax, cell = fig.add_subplot(grid[0]), fig.add_subplot(grid[1])
+    length, rad, wall = 125, 1.0, .45                    # drawn units; the radius is not to scale
+    xx = np.linspace(0, length, 600); TT = np.interp(xx, xs, Ts, left=Ts[0], right=Ts[-1])
+    for y0 in (rad, -rad - wall):
+        im = ax.imshow(TT[None, :], extent=(0, length, y0, y0 + wall), aspect='auto', cmap='inferno', vmin=0, vmax=900)
+    ax.add_patch(Rectangle((0, -rad), length, 2 * rad, fc=GAS, ec='none'))
+    ax.plot([0, length], [0, 0], color='.45', lw=.6, ls=(0, (5, 3)))
+    ax.text(length - 1, .12, 'axis', color='.35', fontsize=7, ha='right')
+    for y0 in (.25 * rad, -.75 * rad):                   # release cells, x = 9-10.5 cm, r = 0.25R-0.75R
+        ax.add_patch(Rectangle((9, y0), 1.5, .5 * rad, fc=SOURCE, ec='none'))
+    dep = PROD / 'profiles/PbI2_SS_Q1_baseline'
+    xd, wall_I = curve(dep)                              # deposit extent: bins holding >= 1 % of the peak
+    on = xd[wall_I >= 0.01 * wall_I.max()]
+    for y0 in (rad - .14, -rad):
+        ax.add_patch(Rectangle((on.min() - .5, y0), on.max() - on.min() + 1, .14, fc=DEPOSIT, ec='none'))
+    ax.annotate('', (-1, 0), (-14, 0), arrowprops=dict(arrowstyle='-|>', lw=1.1))
+    ax.annotate('', (length + 14, 0), (length + 1, 0), arrowprops=dict(arrowstyle='-|>', lw=1.1))
+    ax.text(-14, -.35, 'He', ha='left', va='top', fontsize=8)
+    small = dict(fontsize=7.5, va='top')
+    ax.text(0, -rad - wall - .35, 'inlet: prescribed $\\dot m$,\n$Y_i=0$', ha='left', **small)
+    ax.text(length, -rad - wall - .35, 'outlet: $p=101{,}325$ Pa,\nzero gradient', ha='right', **small)
+    ax.annotate('release, $x=9$–10.5 cm,\n$r=0.25R$–$0.75R$', (9.75, rad + wall), xytext=(2, 3.05),
+                arrowprops=dict(arrowstyle='-', lw=.6, shrinkB=0), **small)
+    ax.annotate('wall deposit\n(pure PbI$_2$)', ((on.min() + on.max()) / 2, rad + wall), xytext=(64, 3.05),
+                arrowprops=dict(arrowstyle='-', lw=.6, shrinkB=0), **small)
+    ax.set(xlim=(-16, length + 16), ylim=(-3.1, 3.1)); ax.axis('off')
+    for v in (0, 25, 50, 75, 100, 125):
+        ax.text(v, -rad - wall - 1.55, f'{v}', ha='center', fontsize=7, color='.35')
+    ax.text(length + 6, -rad - wall - 1.55, 'x (cm)', ha='left', fontsize=7, color='.35')
+    bar = fig.colorbar(im, ax=ax, location='bottom', shrink=.6, pad=0, aspect=30)
+    bar.set_label('Wall temperature (°C); radius not to scale', fontsize=7.5); bar.ax.tick_params(labelsize=7)
+    ax.set_title('(a) Column, axisymmetric 5° wedge', loc='left')
+    cell.set(xlim=(0, 1), ylim=(0, 1)); cell.axis('off'); cell.set_title('(b) Wall cell', loc='left')
+    cell.add_patch(Rectangle((0, .86), 1, .1, fc='.35', ec='none'))
+    cell.text(.03, .91, 'wall, $T_w$', color='white', fontsize=7.5, va='center')
+    cell.add_patch(Rectangle((0, .80), 1, .06, fc=DEPOSIT, ec='none'))
+    cell.text(.03, .83, 'condensed inventory', fontsize=7, va='center')
+    cell.plot([0, 1], [.80, .80], color='black', lw=.8)
+    cell.add_patch(Rectangle((0, .12), 1, .68, fc=GAS, ec='none'))
+    cell.plot(.72, .3, 'o', color='black', ms=3.5)
+    cell.text(.70, .26, '$p_{i,c}=\\chi_{i,c}Y_{i,c}$', fontsize=7.5, ha='right', va='top')
+    cell.annotate('', (.9, .80), (.9, .3), arrowprops=dict(arrowstyle='<->', lw=.6))
+    cell.text(.93, .55, '$d_f$', fontsize=8, va='center')
+    def zigzag(y0, y1, n):
+        ys = np.linspace(y0, y1, 2 * n + 1)
+        cell.plot(.72 + .03 * np.r_[0, np.tile([1, -1], n - 1), 1, 0], ys, color=RESIST, lw=1)
+    for y0, y1 in [(.3, .36), (.54, .6), (.74, .80)]:
+        cell.plot([.72, .72], [y0, y1], color=RESIST, lw=1)
+    zigzag(.36, .54, 6); zigzag(.6, .74, 4)
+    cell.text(.66, .45, 'diffusion\n$\\chi_{i,c}d_f/(\\rho D_i)$', color=RESIST, fontsize=7.5, ha='right', va='center')
+    cell.text(.66, .67, 'kinetic $1/G_i$', color=RESIST, fontsize=7.5, ha='right', va='center')
+    cell.text(.04, .775, '$p_{{\\rm eq},i}(T_w)$', fontsize=7.5, ha='left', va='top')
+    cell.text(.02, .05, '$j_i=G^{\\rm eff}_{i}\\,[p_{{\\rm eq},i}-p_{i,c}]$', fontsize=8)
+    save(fig, 'experiment_schematic')
+    # ---- saturation ratio of PbI2(g) in the pure PbI2 column at 60 s (data/fields, production run) ------------
+    d = np.load(FIELDS / 'pbi2_field_production.npz')
+    x, r, window, eq = d['x_cm'], d['r_mm'], d['window'], d['mole_eq_wall']
+    S = d['mole_window'] / eq[window]; xw = x[window]; T = d['wall_T_K'] - 273.15
+    lo, hi = 33, 48
+    fig = plt.figure(figsize=(WIDTH, 4.9), layout='constrained')
+    grid = fig.add_gridspec(3, 2, height_ratios=[1.0, 1.1, 0.75], width_ratios=[3.0, 1])
+    a = fig.add_subplot(grid[0, 0]); b = fig.add_subplot(grid[1, 0], sharex=a); c = fig.add_subplot(grid[2, 0], sharex=a)
+    e = fig.add_subplot(grid[0:2, 1])
+    im = a.pcolormesh(xw, r, S, norm=matplotlib.colors.LogNorm(1 / 3, 10), cmap='RdBu_r', shading='nearest',
+                      rasterized=True)
+    a.set(ylabel='r (mm)', ylim=(0, r[-1] + .5 * (r[1] - r[0]))); a.tick_params(labelbottom=False)
+    a.text(.995, .93, '(a) $S=x/x_{\\rm eq}(T_w)$', transform=a.transAxes, ha='right', va='top', fontsize=8,
+           bbox=dict(fc='white', ec='none', alpha=.8, pad=1))
+    a.text(lo + .2, 2.3, 'wall', va='top', fontsize=8, color='white'); a.text(lo + .2, .1, 'axis', fontsize=8, color='white')
+    bar = fig.colorbar(im, ax=a, location='right', pad=.01, extend='both', aspect=12)
+    bar.set_ticks([1 / 3, 1, 3, 10], labels=['1/3', '1', '3', '10'])
+    top = a.secondary_xaxis('top', functions=(lambda v: np.interp(v, x, T), lambda t: np.interp(t, T[::-1], x[::-1])))
+    top.set_xlabel('Wall temperature (°C)', fontsize=8); top.set_ticks([400, 350, 300, 250, 200, 150])
+    stations = [(38, CYCLE[0]), (42, CYCLE[2]), (46, CYCLE[3])]
+    for xs, colour in stations:
+        a.axvline(xs, color=colour, lw=.9, ls=':')
+    b.semilogy(x, d['mole_axis'] / eq, color=CYCLE[5], label='axis')
+    b.semilogy(x, d['mole_cup'] / eq, color='black', label='flow-weighted mean')
+    b.semilogy(x, d['mole_wall_row'] / eq, color=CYCLE[0], ls='--', label='wall cell')
+    b.axhline(1, color='.6', lw=.6)
+    b.set(ylim=(.1, 30), ylabel='$S$'); b.legend(loc='upper left', frameon=False); b.tick_params(labelbottom=False)
+    b.text(.99, .05, '(b)', transform=b.transAxes, ha='right')
+    deposit = d['wall_mol_per_m']
+    c.fill_between(x, 100 * deposit / deposit.sum(), step='mid', color='.45', lw=0)
+    c.set(xlim=(lo, hi), xlabel='Position (cm)', ylabel=f'% per {10 * (x[1] - x[0]):.2f} mm')
+    c.text(.99, .85, '(c) PbI$_2$ deposit', transform=c.transAxes, ha='right')
+    for xs, colour in stations:
+        i = int(np.argmin(abs(xw - xs)))
+        e.plot(S[:, i], r / (r[-1] + .5 * (r[1] - r[0])), color=colour, label=f'{xs} cm\n{T[window][i]:.0f} °C')
+    e.axvline(1, color='.6', lw=.6)
+    e.set(xscale='log', xlabel='$S$', ylabel='r / R', ylim=(0, 1), xlim=(.9, 5), title='(d) Radial')
+    e.set_xticks([1, 2, 4], labels=['1', '2', '4']); e.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+    e.legend(frameon=False, loc='lower left', fontsize=7)
+    save(fig, 'deposition_field')
     fig, ax = plt.subplots(figsize=(4.2, 2.7), layout='constrained')
     for name, label in [('PbI2_SS', r'Pure PbI$_2$, steel'), ('LBE-I_SS_II', 'LBE, steel'), ('LBE-I_SiO2_I', 'LBE, silica')]:
         r = read_csv(BENCH / 'digitized' / (name + '_temperature.csv'))
         ax.plot([100 * float(v['x_m']) for v in r], [float(v['T_K']) - 273.15 for v in r], label=label)
-    ax.axvspan(9, 10.5, alpha=.15, color='#d89026', label='Source region')
+    ax.axvspan(9, 10.5, alpha=.25, color=SOURCE, lw=0, label='Source region')
     ax.set(xlabel='Published column coordinate (cm)', ylabel='Temperature (°C)', xlim=(0, 80)); ax.legend()
     save(fig, 'temperature_profiles')
     fig, axes = plt.subplots(3, 1, figsize=(WIDTH, 6.6), layout='constrained')
@@ -664,10 +804,10 @@ def main():
             'LBE-I_SiO2_I_Q1_baseline'], [r'Pure PbI$_2$, steel', 'LBE, steel', 'LBE, silica'], [(30, 43), (39, 65), (40, 68)]):
         folder = PROD / 'profiles' / base
         x, model, observed = scan(folder)
-        ax.fill_between(x, observed, color='.8', step='mid', label='Published scan')
+        ax.fill_between(x, observed, color=MEASURED, step='mid', label='Published scan')
         ax.plot(x, model, color='black', label='Modelled total I')
         _, total = curve(folder)
-        for species, atoms, color in [('PbI2_g', 2, '#007b9e'), ('BiI3_g', 3, '#974b9f')]:
+        for species, atoms, color in [('PbI2_g', 2, SPECIES_COLOUR['PbI2']), ('BiI3_g', 3, SPECIES_COLOUR['BiI3'])]:
             xp, amount = curve(folder, species)
             y = (100 - (0 if base.startswith('PbI2') else 6.6 if '_SS_' in base else 7)) * atoms * amount / total.sum()
             ax.plot(xp, y, color=color, linestyle='--', label=SPECIES_TEX[species.replace('_g', '')])
@@ -685,7 +825,7 @@ def main():
                 x, y, obs = scan_from_profile(study_folder(key, level, scheme), experiment)
                 ax.plot(x, y, color=colors[level], linestyle=styles[level], lw=1.5 if level == 4 else 1.2,
                         label=f'{CELLS[level]:,} cells')
-            ax.fill_between(x, obs, color='.85', step='mid', label='Published scan', zorder=0)
+            ax.fill_between(x, obs, color=MEASURED, step='mid', label='Published scan', zorder=0)
             ax.set(title=f"{title}; {scheme_names[scheme]}", xlim=limits, xlabel='Position (cm)')
             if col == 0:
                 ax.set_ylabel('I per bin (% of scan)')
@@ -728,14 +868,14 @@ def main():
         for suffix, label in [('', 'Original inputs'), ('curveShiftPbI2', r'Curve $-$4.10 cm'), ('curveShiftBiI3', r'Curve $-$4.65 cm')]:
             folder = PROD / 'profiles' / (base + '__' + suffix if suffix else base)
             x, y, obs = scan(folder, normalise=True); ax.plot(x, y, label=label)
-        ax.fill_between(x, obs, color='.85', step='mid', label='Published scan', zorder=0)
+        ax.fill_between(x, obs, color=MEASURED, step='mid', label='Published scan', zorder=0)
         ax.set(title=mode + ('; 0.1% saturation' if mode == 'Q2' else ''), xlim=(40, 68),
                xlabel='Position (cm)', ylabel='I per bin (% of scan)')
     fig.legend(*axes[1].get_legend_handles_labels(), loc='outside lower center', ncol=2)
     save(fig, 'silica_alignment')
     shown = [r for r in sensitivity if r['category'] in ['transport', 'kinetics', 'source_geometry', 'flow_reference', 'shutdown']]
     fig, ax = plt.subplots(figsize=(4.6, 2.3), layout='constrained')
-    ax.barh([r['label'] for r in shown], [r['max_L1_pct'] for r in shown], color='#2878a6')
+    ax.barh([r['label'] for r in shown], [r['max_L1_pct'] for r in shown], color=CYCLE[0])
     ax.invert_yaxis(); ax.set(xlabel='Maximum iodine profile change $E_{L1}$ (%)')
     save(fig, 'physical_sensitivity')
     fig, axes = plt.subplots(3, 2, figsize=(WIDTH, 6.9), layout='constrained')
@@ -745,10 +885,10 @@ def main():
         xe, ye = r['experiment']
         x, deposit = r['x_m'], r['deposit_mol_per_m']
         scale = 1e4   # mol/m to umol/cm
-        ax.plot(100 * xe, scale * ye, 'o-', color='#1f5fa8', ms=3, lw=.8, label='Measured (digitised)')
+        ax.plot(100 * xe, scale * ye, 'o-', color=MEASURED_LINE, mfc=MEASURED, ms=3, lw=.8, label='Measured (digitised)')
         ax.step(100 * x, scale * deposit, where='mid', color='black', lw=1.3, label='This work (deposit)')
-        for kind, color, label in [('temperature_based', '#2a9d3c', 'Temperature-based model'),
-                                   ('vapour_pressure_based', '#e07b00', 'Vapour-pressure model')]:
+        for kind, color, label in [('temperature_based', CYCLE[2], 'Temperature-based model'),
+                                   ('vapour_pressure_based', CYCLE[5], 'Vapour-pressure model')]:
             m = read_csv(LOB_BENCH / 'digitized' / f'{name}_model_{kind}.csv')
             ax.plot([100 * float(v['x_m']) for v in m], [scale * float(v['n_mol_per_m']) for v in m],
                     color=color, lw=1.0, label=label)
@@ -785,13 +925,15 @@ def main():
     input_files += list((LOB_RUN / 'inputs').glob('*.csv'))
     input_files += [GRAETZ / name for name in ['reference.json', 'fits.json', 'table.md', 'criteria.log', 'provenance.json']]
     input_files += [DAMK / name for name in ['sweep_summary.json', 'damkohler_sweep.csv', 'provenance.json']]
+    input_files += [FIELDS / name for name in ['pbi2_field_production.npz', 'pbi2_field_upwind_L4.npz',
+                                               'provenance.json', 'collect.py']]
     input_files += [PSENS / 'comparison.csv', PSENS / 'ledger.json'] + list((PSENS / 'profiles').rglob('*.dat'))
     data['input_sha256'] = {str(p.relative_to(REPO)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(input_files)}
     dump(generated / 'results.json', data)
     dump(generated / 'artifact_sha256.json', {str(p.relative_to(HERE)): hashlib.sha256(p.read_bytes()).hexdigest()
         for directory in [generated, figures] for p in sorted(directory.iterdir())
         if p.is_file() and p.name != 'artifact_sha256.json'})
-    print('Generated 8 figures, 9 tables and numerical provenance for 15 baseline + 64 follow-up cases, '
+    print('Generated 9 figures, 9 tables and numerical provenance for 15 baseline + 64 follow-up cases, '
           '19 production cases, the scheme/mesh study, the iteration check and the Lobresco comparison.')
 
 

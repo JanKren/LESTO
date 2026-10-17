@@ -309,6 +309,46 @@ def check_production_sensitivities(follow):
     return len(rows_)
 
 
+def check_fields(generated):
+    """PbI2 fields of the pure PbI2 column (data/fields): each record against the tracked wall profile of the same
+    run, and the manuscript numbers recomputed from the npz without the helper of prepare_results."""
+    root = HERE / 'data/fields'
+    provenance = json.loads((root / 'provenance.json').read_text())
+    m = macro_values()
+    cells = 0
+    for name, prefix in [('production', 'Field'), ('upwind_L4', 'FieldUp')]:
+        record = provenance[name]
+        assert record['solver_sha256'] == generated['solver_sha256'], (name, 'field solver differs')
+        path = root / f'pbi2_field_{name}.npz'
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == record['npz_sha256'], name
+        d = np.load(path)
+        tracked = REPO / record['tracked_profile'] / 'element_I_native.dat'
+        wall_I = float(re.search(r'# inventory gas \S+ wall (\S+)', tracked.read_text()).group(1))
+        dx = (d['x_cm'][1] - d['x_cm'][0]) / 100
+        assert abs(2 * d['wall_mol_per_m'].sum() * dx / wall_I - 1) < 1e-12, (name, 'deposit differs from profile')
+        # the same 1 cm bins as the tracked profile; a wall face straddling a bin edge is split by overlap length,
+        # as in axialProfiles.H
+        data = rows(tracked)
+        lo, hi = d['x_cm'] / 100 - dx / 2, d['x_cm'] / 100 + dx / 2
+        overlap = lambda r: np.clip(np.minimum(hi, r['x_hi']) - np.maximum(lo, r['x_lo']), 0, None)
+        binned = np.array([2 * (d['wall_mol_per_m'] * overlap(r)).sum() for r in data])
+        reference = np.array([r['wall'] * (r['x_hi'] - r['x_lo']) for r in data])
+        assert np.abs(binned - reference).sum() / reference.sum() < 1e-12, (name, 'binned deposit differs')
+        S = lambda key: d[key] / d['mole_eq_wall']
+        zone = np.flatnonzero(d['wall_mol_per_m'] >= 0.01 * d['wall_mol_per_m'].max())
+        z = slice(zone[0], zone[-1] + 1)
+        assert m[prefix + 'WallSMax'] == f"{S('mole_wall_row')[z].max():.3f}", name
+        assert m[prefix + 'CupSMax'] == f"{S('mole_cup')[z].max():.2f}", name
+        assert m[prefix + 'AxisSMax'] == f"{S('mole_axis')[z].max():.2f}", name
+        if name == 'production':
+            assert m['FieldCupSMin'] == f"{S('mole_cup')[z].min():.2f}"
+            assert m['FieldZoneLow'] == f"{d['x_cm'][zone[0]]:.1f}" and m['FieldZoneHigh'] == f"{d['x_cm'][zone[-1]]:.1f}"
+        assert np.flatnonzero(S('mole_cup') >= 1)[0] == np.flatnonzero(d['wall_mol_per_m'] > 0)[0], (name, 'onset')
+        assert np.all(S('mole_wall_row')[z] >= 1) and np.all(S('mole_axis')[z] >= S('mole_cup')[z]), name
+        cells += int(d['mole_window'].size)
+    return cells
+
+
 def main():
     full = REPO / 'run/024-liu2025/full_analysis'
     follow = REPO / 'run/024-liu2025/followup_results'
@@ -359,6 +399,7 @@ def main():
     graetz = check_graetz(generated)
     damkohler = check_damkohler(generated)
     psens = check_production_sensitivities(result)
+    fields = check_fields(generated)
     source = '\n'.join(p.read_text() for p in [HERE / 'main.tex', HERE / 'supplementary.tex',
                                                *sorted((HERE / 'sections').glob('*.tex'))])
     from assess_resolution import evaluate
@@ -374,6 +415,22 @@ def main():
     for pof_log in [HERE / 'pof/build/lesto-pof.log', HERE / 'pof/build/supplementary.log']:
         pof_text = pof_log.read_text()
         assert not re.search(r'undefined|^Overfull|LaTeX Error|^!', pof_text, re.MULTILINE | re.IGNORECASE), pof_log
+    # IJHMT working draft (arxiv.sty, line numbers) and its supplement: clean.
+    for ijhmt_log in [HERE / 'ijhmt/build/lesto-ijhmt.log', HERE / 'ijhmt/build/supplementary.log']:
+        assert not re.search(r'undefined|^Overfull|LaTeX Error|^!', ijhmt_log.read_text(),
+                             re.MULTILINE | re.IGNORECASE), ijhmt_log
+    # IJHMT Elsevier wrapper (build.sh --elsarticle), checked when built: one
+    # 2.6 pt overfull box while page 1 is shipped out is a quirk of the class
+    # (present without our content, invisible in the PDF); nothing else.
+    elsarticle_log = HERE / 'ijhmt/build/lesto-ijhmt-elsarticle.log'
+    elsarticle_overfull = []
+    if elsarticle_log.exists():
+        text = elsarticle_log.read_text()
+        elsarticle_overfull = re.findall(r'^Overfull .*$', text, re.MULTILINE)
+        assert len(elsarticle_overfull) <= 1 and all(
+            re.match(r'Overfull \\hbox \([0-3]\.\d+pt too wide\) has occurred while \\output is active', o)
+            for o in elsarticle_overfull), ('IJHMT elsarticle overfull', elsarticle_overfull)
+        assert not re.search(r'undefined|LaTeX Error|^!', text, re.MULTILINE | re.IGNORECASE), elsarticle_log
     for blg in [HERE / 'build/main.blg', HERE / 'build/supplementary.blg']:
         bibliography = blg.read_text()
         assert 'Warning' not in bibliography and 'error' not in bibliography.lower(), ('Bibliography issue', blg)
@@ -397,7 +454,7 @@ def main():
         'iteration_check_cases_recomputed': iteration, 'upwind_L4_cases_recomputed': upwind_l4,
         'lobresco_onsets_recomputed': lobresco,
         'graetz_triplets_recomputed': graetz, 'damkohler_runs_checked': damkohler,
-        'production_scheme_sensitivities_recomputed': psens, 'supplement_pdf_pages': supplement_pages,
+        'production_scheme_sensitivities_recomputed': psens, 'field_cells_checked': fields, 'supplement_pdf_pages': supplement_pages,
         'supplement_pdf_sha256': hashlib.sha256(supplement.read_bytes()).hexdigest(),
         'resolution_aggregation_comparisons': len(resolution['aggregation']),
         'thermodynamic_resolution_pairs': len(resolution['thermodynamic_resolution']),
@@ -407,6 +464,8 @@ def main():
         'pdf_sha256': hashlib.sha256(pdf.read_bytes()).hexdigest(),
         'checker_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         'pof_overfull_latex_boxes': 0, 'pof_undefined_latex_references': 0,
+        'ijhmt_overfull_latex_boxes': 0, 'ijhmt_undefined_latex_references': 0,
+        'ijhmt_elsarticle_class_page1_overfull_boxes': len(elsarticle_overfull),
         'scope': 'Saved-results and manuscript consistency checks; not new CFD runs or experimental validation.'}
     (HERE / 'review-checks.json').write_text(json.dumps(checks, indent=2) + '\n')
     print(json.dumps(checks, indent=2))

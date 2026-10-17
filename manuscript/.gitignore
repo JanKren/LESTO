@@ -11,3 +11,6 @@
 main.pdf
 build/
 *.xdv
+# IJHMT Elsevier builds (build.sh --elsarticle, --print): rebuilt at submission
+ijhmt/lesto-ijhmt-print.pdf
+ijhmt/lesto-ijhmt-elsarticle.pdf

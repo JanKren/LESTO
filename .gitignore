@@ -15,3 +15,6 @@ applications/rhoFixedFlowFoam/tests/work/
 /thermochemistry/benchmarks/liu2025/carrierTool/lnInclude/
 # Local scratch (plot packages, one-off scripts)
 /tmp/
+# Raw simulation cases of tracked results: only the README is tracked
+/archive/*
+!/archive/README.md

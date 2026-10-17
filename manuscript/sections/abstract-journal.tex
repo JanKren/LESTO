@@ -1,0 +1,30 @@
+% Journal abstract (<= 250 words), shared by pof/lesto-pof.tex and
+% ijhmt/lesto-ijhmt.tex.  Recount after any edit.
+We present an OpenFOAM finite-volume model of vapor transport in
+laminar thermal-gradient columns: nine Pb--Bi--I gases in a frozen
+helium carrier, with element-conserving gas equilibrium and shared wall
+inventories.
+Reversible iodide exchange follows a Hertz--Knudsen--Schrage law in
+series with the near-wall diffusive resistance; on a Graetz--Robin
+problem this face flux converges at second order, a cell-center sink at
+first order. In 79 simulations the largest raw element-balance
+residue is $1.41\times10^{-12}$ of supplied material.
+Halving the time step or adding correctors changes iodine profiles by
+at most 0.323\%. First-order upwind advection differs from
+a bounded limited-linear scheme by up to 20.8\% at equal mesh.
+Refining from 41,472 to 93,312 cells changes profiles by
+\SteelUpThree--\UpFourOthersMax\% (upwind, four cases) and 1.98\%
+(bounded, one case), with inconsistent observed orders. A wall
+Damk\"ohler sweep reproduces the kinetic and diffusion
+limits and shows that radial diffusion, not interfacial
+kinetics, limits wall exchange in the production cases; with the
+bounded scheme, accommodation changes alter iodine profiles by at most
+\PSAlphaTwoMax\%, diffusivity changes by up to \PSDMax\%.
+A $+29\units{kJ\,mol^{-1}}$ shift in the BiI gas Gibbs energy changes
+the BiI$_3$ share of deposited iodide iodine from 94.58\% to 2.01\%. Without tuning, the wall
+law gives deposition-onset temperatures of five PbI$_2$ experiments
+with an RMS deviation of 18 K, against 35 K for two published models;
+because carrier, vapor-pressure and source assumptions differ and
+computed peaks lie 1--4 cm upstream, this promising result does not yet
+isolate the wall treatment. The results support a conservative method,
+not independent predictive validation.

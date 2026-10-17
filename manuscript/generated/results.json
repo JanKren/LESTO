@@ -1045,6 +1045,70 @@
     "refinement_max_rel_change": 0.0010682518038613864,
     "max_relative_closure": 3.912269831292547e-16
   },
+  "deposition_field": {
+    "production": {
+      "case": "PbI2_SS_Q1_baseline",
+      "mesh": "576 x 72 = 41472 cells, 5 degree wedge, R = 2.4 mm, L = 1.25 m",
+      "scheme": "Gauss limitedLinear 1 (species advection); 2 ms, 60 s",
+      "zone_cm": [
+        35.69878472222222,
+        41.77517361111111
+      ],
+      "zone_wall_T_C": [
+        371.95873564041483,
+        265.7554786217819
+      ],
+      "zone_deposit_fraction": 0.995997901932675,
+      "S_wall_cell": [
+        1.000740723961739,
+        1.0091969840853532
+      ],
+      "S_flow_weighted": [
+        1.0516187059044977,
+        1.6356544130146118
+      ],
+      "S_axis_max": 2.0339936267671033,
+      "first_saturated_cm": 35.69878472222222,
+      "first_deposit_cm": 35.69878472222222,
+      "wall_over_axis": {
+        "38": 0.7400347062106395,
+        "40": 0.6423327664225805,
+        "42": 0.4969800508023639
+      },
+      "inventory_ratio": 1.0000000000000022
+    },
+    "upwind_L4": {
+      "case": "PbI2_SS_Q1_baseline__grid864x108",
+      "mesh": "864 x 108 = 93312 cells, 5 degree wedge, R = 2.4 mm, L = 1.25 m",
+      "scheme": "Gauss upwind (species advection); 2 ms, 60 s",
+      "zone_cm": [
+        35.66261574074074,
+        41.88368055555556
+      ],
+      "zone_wall_T_C": [
+        372.30360179574814,
+        262.3347602260277
+      ],
+      "zone_deposit_fraction": 0.9960361071924615,
+      "S_wall_cell": [
+        1.00041879783737,
+        1.0076971009725935
+      ],
+      "S_flow_weighted": [
+        1.0352003988417608,
+        1.7741733884828854
+      ],
+      "S_axis_max": 2.2613079499252757,
+      "first_saturated_cm": 35.66261574074074,
+      "first_deposit_cm": 35.66261574074074,
+      "wall_over_axis": {
+        "38": 0.7232182196318279,
+        "40": 0.603944803355838,
+        "42": 0.48258616866382187
+      },
+      "inventory_ratio": 1.0000000000000016
+    }
+  },
   "production_sensitivities": [
     {
       "case": "LBE-I_SS_II_Q2_baseline_sat0.01__D0.0002",
@@ -1451,6 +1515,19 @@
     "DaProfTwo": "14",
     "DaFluxDeficit": "20",
     "DaRefine": "0.11",
+    "FieldZoneLow": "35.7",
+    "FieldZoneHigh": "41.8",
+    "FieldZoneTHigh": "372",
+    "FieldZoneTLow": "266",
+    "FieldZoneShare": "99.6",
+    "FieldWallSMax": "1.009",
+    "FieldCupSMin": "1.05",
+    "FieldCupSMax": "1.64",
+    "FieldAxisSMax": "2.03",
+    "FieldRatioForty": "0.64",
+    "FieldUpWallSMax": "1.008",
+    "FieldUpCupSMax": "1.77",
+    "FieldUpAxisSMax": "2.26",
     "LobDiffA": "+26",
     "LobDiffB": "+19",
     "LobDiffC": "+16",
@@ -1632,12 +1709,16 @@
     "manuscript/data/damkohler/damkohler_sweep.csv": "c1dffe565d5b79ebf77f052a5020cb8693048ba1d38e8e8dfdfe97cce9ba0306",
     "manuscript/data/damkohler/provenance.json": "adff62da20223a6ec84ba673b8d9e157c926f3675876392bbba73571139f2865",
     "manuscript/data/damkohler/sweep_summary.json": "92a7c7b624eedb749886936a7b0222b00298784f8231ae703ebe891b97da1187",
+    "manuscript/data/fields/collect.py": "6b69fad39792f60322106a5c1a3a619b727770a596b91a271048be2c465dc785",
+    "manuscript/data/fields/pbi2_field_production.npz": "d0b6b0f1cb1f887621e6ade601fd5d7ef5181dac382ebcee827542d90797e5b8",
+    "manuscript/data/fields/pbi2_field_upwind_L4.npz": "ce0dd57878293522e66e8d1710d32143682b1bf57e7e489f0e9f5defff450c26",
+    "manuscript/data/fields/provenance.json": "366cbfbbe70af4a0da40ad4dd05c51a4b7eb0dec03e6db4dc97a336fcbd94afb",
     "manuscript/data/graetz/criteria.log": "947a626393ce1d891b21a689dd7fd83ead6c3b21b46c2f028081dd1fc0e48f04",
     "manuscript/data/graetz/fits.json": "802d01f262ecec4f83c94cefcc791d577b42c4e0d6d5f7c3ad56aef04082c49d",
     "manuscript/data/graetz/provenance.json": "e8664654efd15b56c6c67d55e26dab078deca9f6047280d6a1dc09d1167215f7",
     "manuscript/data/graetz/reference.json": "0f5676f177ad1fcf713874d66337f766b6abd0e179c688368d32bd01378f1694",
     "manuscript/data/graetz/table.md": "64110706e8d58f76f99134f1283f18bc6acdef7ccb413e14a6b6a402db334a97",
-    "manuscript/prepare_results.py": "fdc62f8e160c8da6d951d1b7c5762ce7655f2af8f10b832c25489f0fe665ae19",
+    "manuscript/prepare_results.py": "e2112484caf9c544c089a99b75c251e412a768b29260dbe993d18941e4ba4bfa",
     "run/023-lobresco2026/cases/coarse/T106_300/case.json": "6916fb1ffd523a43f44b44cd00e7ed99ceef2d82dbadc90f72c6d92227a501d4",
     "run/023-lobresco2026/cases/coarse/T106_300/final_profiles/PbI2_g_gamma.dat": "408c7abf67ea140cad2db50e19717b319cecedd02a718e91ca8b10eaff494d3c",
     "run/023-lobresco2026/cases/coarse/T106_300/final_profiles/PbI2_g_native.dat": "0e12ed0945dc95d6eaf8e02ee81aededf49c4211e40996c806e90b0df5960935",

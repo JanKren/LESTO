@@ -1,0 +1,83 @@
+CFD-GEMS3K modelling of iodine transport and deposition - presenter notes
+Jan Kren, LESTO Task 3.4 partner update, 15 October 2026
+Main part: about 30 minutes (minute budget in brackets); pages after the backup divider are not presented by default.
+
+Page 01. CFD-GEMS3K modelling of iodine transport and deposition (title)
+
+(0.5 min) Progress of the PSI part of Task 3.4: a CFD model of iodine transport and deposition, coupled to the GEMS3K chemical-equilibrium code, tested against thermal-gradient column experiments. The solver groundwork, the carrier-flow and species-transport cases, is Bojan Ničeno's; he is also co-author of the manuscript.
+
+Page 02. From column experiments to the reactor hall
+
+(2 min) The task goal is the source term: how much iodine and other fission products leave the coolant and where they go in the reactor hall. Before a model is trusted in a reactor geometry, it has to reproduce a controlled experiment. Thermal-gradient columns, also called thermochromatography or thermosublimatography, are exactly that: a known helium flow carries the evaporated compounds along a falling wall temperature and the deposit is scanned along the tube. Within the task, PSI couples CFD with GEMS chemistry; SCK CEN follows a comparative approach with HSC Chemistry and Fluent; CIRTEN works on reduced-order models. The second half of the talk says what we can offer to these approaches.
+
+Page 03. Two sets of published column experiments
+
+(2 min) Liu et al. measured three configurations we can rebuild: pure PbI2 in steel and iodine-containing LBE in steel and silica; a fourth, BiI3 in silica, has no published temperature profile and is not run. The source sits in a hot furnace and helium carries the vapour down a falling temperature. Lobresco et al. published five single-compound PbI2 experiments with flows from 5 to 540 mL per minute; their digitised data are CC BY 4.0. All our inputs come from the published figures; the source release history, the flow reference conditions and the coordinate origin are not published and are assumptions.
+
+Page 04. Model, part 1: transport and wall exchange
+
+(2 min) The carrier is laminar, the Reynolds number is about 0.7 to 3, so the helium flow is computed once with the measured wall temperature and then frozen. The vapours are traces in it. At the wall, condensation and evaporation follow the Hertz-Knudsen-Schrage law, driven by the difference between the gas partial pressure and the equilibrium vapour pressure at the wall temperature. The important detail: the solver does not apply that law at the cell centre but puts it in series with the diffusion resistance between the cell centre and the wall. Deposited material stays on the wall as an inventory and can evaporate again when conditions change.
+
+Page 05. Model, part 2: chemistry with GEMS3K
+
+(2 min) Nine gases cover lead, bismuth and iodine. After each transport step the gas in every cell is brought to equilibrium at its current element amounts, so speciation follows temperature along the column, while the number of lead, bismuth and iodine atoms stays exactly what transport delivered. GEMS3K is PSI's Gibbs-energy minimisation kernel; it is linked statically into the OpenFOAM executable through a plain C bridge. It can supply the equilibrium vapour pressures of the wall law and the gas standard states for the speciation. An element ledger books every transfer between gas, wall and outlet.
+
+Page 06. Built step by step: 24 test cases
+
+(1 min) The code was built as a ladder of test cases in the repository. Each case is based on the one before and changes one thing: first the helium flow and species transport, Bojan Ničeno's groundwork, then the wall laws, the second iodide, the gas chemistry, the metal vapour, and finally the two experimental studies, 023 for Lobresco and 024 for Liu. Every case has a short readme and one command that reruns it and reports whether its check passes. This is also how we would hand cases to partners.
+
+Page 07. Verified: wall law and conservation
+
+(2 min) Two kinds of checks. First, the wall law against a problem with a known answer: developed laminar pipe flow with uptake at the wall, the extended Graetz problem with a Robin wall condition. The decay rate of the gas along the pipe is known to twelve digits. Our half-cell law converges at second order; applying the same kinetic law at the cell centre, as a simple first-cell sink would, is only first order and about a hundred times less accurate on the same mesh. Second, conservation: in all production runs, the worst element residue is about one part in a trillion of the supplied material. Note: this verifies the numerics, not the physics.
+
+Page 08. Deposition is limited by diffusion
+
+(1.5 min) Which of the two resistances controls deposition? We varied only the accommodation coefficient, which sets the surface kinetics, over six decades in a test channel. At small Damköhler number the wall flux equals Da: kinetics decide. At large Da it levels off at the diffusion limit of the channel, pi squared over four, and in between it follows the two resistances in series. The column experiments, with accommodation 1, 0.1 or 0.01, lie on the plateau or at its edge: transport to the wall is the bottleneck. For modelling partners this is useful: an uncertain sticking coefficient matters little here, while the diffusivity, the wall temperature and the vapour pressure matter a lot. The onset of deposition does not move at all, because saturation fixes it.
+
+Page 09. Inside the column: the wall stays saturated
+
+(1.5 min) The same result, seen inside the pure PbI2 column. The colour is the saturation of the vapour: its amount divided by the equilibrium amount at the local wall temperature. Upstream the gas is unsaturated and nothing deposits. The deposit starts exactly where the mean reaches saturation. From there on, the gas next to the wall stays at equilibrium, within one percent, while the centre of the tube becomes more and more supersaturated, about two times on the axis. A finer upwind run gives the same picture. The wall takes everything diffusion brings, so diffusion sets the rate. The supersaturated core is also where real aerosols could nucleate; the model does not represent that, and it is on the list of open points. The ripples come from the digitised wall temperature.
+
+Page 10. What matters for the deposit
+
+(2 min) A structured set of input variations, each compared with its own baseline. Diffusivity and the flow reference conditions shift the profiles by ten to seventeen percent. Shifting the silica temperature curve by about four centimetres moves the deposits almost completely, so the temperature input and its coordinate dominate. The thermodynamic data decide the chemistry, on the next slides. By contrast, accommodation changes the profiles by at most about five percent and moving the source region by 1.5 centimetres changes almost nothing. The figure shows the diffusivity and accommodation variations repeated with the production numerical scheme; total deposits change by less than 0.02 percent in all of them, only the shape moves.
+
+Page 11. Lobresco et al.: onset within 18 K
+
+(2 min) On the five single-compound experiments of Lobresco and co-workers, run without any adjustment, our onset temperatures deviate by 18 kelvin RMS from the measurements; the two models of that paper by 35 kelvin each. Two caveats keep this a promising but conditional result. The peaks of our profiles sit one to four centimetres upstream of the measured ones. And our carrier, vapour-pressure data and source treatment differ from those of the published models, so we cannot yet say the improvement comes from the wall law. For the 5 mL per minute case the onset is taken on the main deposit; from the inlet the rule picks a small upstream deposit.
+
+Page 12. Liu et al.: the steel columns
+
+(2 min) In the steel columns the model reproduces the deposit positions. For pure PbI2 the computed peak is at 36 centimetres and 366.5 degrees, against 368 plus or minus 18 measured. For iodine evaporated from LBE the measurement shows two bands; the model gives both, the upstream one as PbI2 and the downstream one as BiI3. The small deposit near 42 centimetres in the measurement is not reproduced. The runs cover 60 seconds at the mean release rate of the three-hour experiment; the time history of the release is not known.
+
+Page 13. Liu et al.: the silica column
+
+(1.5 min) In the silica column the computed bands lie four to five centimetres downstream of the measured ones. The paper prints the temperatures of the two peaks; on the digitised temperature curve these temperatures occur 4.1 to 4.65 centimetres away from the printed positions. Shifting the curve by that amount moves the computed bands onto the measured ones; the overlap rises from 6 to about 75 percent. We present this as an inconsistency of the published input, not as a fit; the original thermocouple table and scan coordinates would resolve it.
+
+Page 14. Thermodynamic data decide the iodide
+
+(1.5 min) The partition between PbI2 and BiI3 is controlled by the thermodynamic input, not by the transport. The plus 29 kilojoules per mole branch is a surrogate perturbation of the uncertain BiI gas data, not a second qualified dataset; it turns a BiI3-dominated deposit into a PbI2-dominated one. The dashed lines are the published split. This is a sensitivity, not an uncertainty interval. For the task it means that qualified thermodynamic records for the Bi-I system are as important as the transport model, and a natural point of collaboration.
+
+Page 15. D38: the coupled tool and what it offers
+
+(2 min) Deliverable D38, due at month 24, describes the coupled GEMS and CFD code; the draft is written. In a production case GEMS3K was called in every cell and step, about half a billion calls without a failure, and the deposit profiles agree with the reference to two parts in ten thousand. What can we offer? The cases with their measured inputs could serve as common reference cases for the comparative CFD approach, and the runs could provide reference or training data for reduced-order models. These are offers to discuss, not commitments.
+
+Page 16. What the model does not yet cover
+
+(1.5 min) Honest limits. The experiments do not publish the release history, the flow reference conditions or the coordinate origin, so these are assumptions. Next to the source the vapour is not dilute, which the frozen-carrier model assumes. The carrier is frozen, so buoyancy is not represented; with Richardson numbers up to about one this may matter locally if the column was horizontal, which we do not know. Aerosol formation is outside the model. Numerically, only one case was refined to the finest mesh with the production scheme, and no formal grid-convergence index is claimed.
+
+Page 17. Where partners could help
+
+(2 min) An invitation rather than a list of demands. The largest gains would come from data: measured temperature tables with their coordinates, the release history, repeat measurements that give the experimental scatter, and series at different flow rates, which test the diffusion-limited prediction directly. On the thermodynamic side, qualified Bi-I records, BiI(g) above all, would remove the largest chemical uncertainty. And comparative calculations on the same cases with other codes, or reduced-order models trained or tested on these runs, would show what is model-dependent.
+
+Page 18. Next steps
+
+(1 min) The methods paper is nearly ready for submission, D38 is drafted, and the cases are in a repository from which every result can be rerun. Next we want more validation cases with measured inputs, and, ideally, common reference cases with the partners of the task. Thank you.
+
+Page 20. Backup: spatial and iteration accuracy
+
+Backup. The production scheme is a bounded limited-linear advection on 41,472 cells. Upwind advection, used in the original sensitivity campaign, differs from it by 7.7 to 20.8 percent at equal mesh in the steel case of the scheme study. Refining to 93,312 cells changes that case by 1.98 percent with the production scheme; with upwind, four cases change by 2.13 to 7.30 percent. Time step and iteration errors are much smaller.
+
+Page 21. Backup: omitted effects, bounded
+
+Backup. Estimates from the digitised wall temperatures and the 101,325 Pa outlet pressure. Richardson numbers of order 0.1 to 1 do not show that buoyancy is negligible: in a horizontal column secondary flow may matter locally where the temperature falls fastest. Soret diffusion is small compared with the diffusivity variations tested.
